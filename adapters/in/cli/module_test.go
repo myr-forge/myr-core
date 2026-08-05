@@ -69,6 +69,27 @@ func TestRunModuleList_NominalCase(t *testing.T) {
 	}
 }
 
+/// @brief  Mode dégradé : voir TestRunModelList_BlockchainUnreachable_WithDrafts_ShowsWarningAndTable,
+///         même comportement pour runModuleList
+/// @input  service retournant ([]*model.Model3D{{ID: "mod-local1"}}, model.ErrBlockchainUnreachable)
+/// @expect Pas d'erreur ; sortie contient "Avertissement" et l'id du module brouillon
+func TestRunModuleList_BlockchainUnreachable_WithDrafts_ShowsWarningAndTable(t *testing.T) {
+	svc := &mockModelSvc{listModules: func(string) ([]*model.Model3D, error) {
+		return []*model.Model3D{{ID: "mod-local1", Status: model.ModuleDraft}}, model.ErrBlockchainUnreachable
+	}}
+	var buf bytes.Buffer
+	if err := runModuleList(&buf, svc, ""); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, "Avertissement") {
+		t.Fatalf("avertissement explicite attendu, got: %q", out)
+	}
+	if !strings.Contains(out, "mod-local1") {
+		t.Fatalf("module brouillon attendu dans le tableau, got: %q", out)
+	}
+}
+
 /// @brief  runModuleInterfaces affiche les interfaces exposées (non connectées en interne)
 /// @input  GetModuleInterfaces retourne 1 interface
 /// @expect Sortie contient l'id de l'interface

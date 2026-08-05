@@ -93,7 +93,11 @@ var moduleGetCmd = &cobra.Command{
 func runModuleList(w io.Writer, svc model.ModelService, channelID string) error {
 	modules, err := svc.ListModules(channelID)
 	if err != nil {
-		return err
+		if !model.IsDegradedListErr(err) || len(modules) == 0 {
+			return err
+		}
+		// Mode dégradé : voir runModelList / REST listGraph pour l'explication.
+		fmt.Fprintf(w, "Avertissement : %s (%v)\n\n", model.DegradedListWarning, err)
 	}
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(tw, "ID\tNOM\tSTATUT\tINSTANCES\tLIAISONS")

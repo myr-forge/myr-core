@@ -207,6 +207,12 @@ func (s *Service) Get(id, channelID string) (*Model3D, error) {
 }
 
 // List retourne les brouillons locaux (DraftStore) suivis des assets de la blockchain.
+//
+// Mode dégradé : si la blockchain est configurée mais que ListModelRecords échoue (panne
+// d'infrastructure), les brouillons locaux déjà récupérés sont quand même retournés — mais
+// accompagnés de l'erreur d'origine (non nil), pour que l'appelant sache explicitement que le
+// résultat est partiel et le signale à son tour plutôt que de le présenter comme une liste
+// complète. IsDegradedListErr(err) permet de distinguer ce cas d'un échec total.
 func (s *Service) List(channelID string) ([]*Model3D, error) {
 	var drafts []*Model3D
 	if s.draftStore != nil {
@@ -220,7 +226,7 @@ func (s *Service) List(channelID string) ([]*Model3D, error) {
 	}
 	onChain, err := s.blockchain.ListModelRecords(channelID)
 	if err != nil {
-		return nil, err
+		return drafts, err
 	}
 	return append(drafts, onChain...), nil
 }
@@ -627,18 +633,18 @@ func (s *Service) GetModule(id string) (*Model3D, error) {
 	return s.Get(id, "")
 }
 
+// ListModules filtre List() aux seuls modules. Même mode dégradé que List() : si err n'est
+// pas nil mais que all contient des brouillons locaux, ils sont filtrés et retournés avec
+// l'erreur d'origine — voir IsDegradedListErr.
 func (s *Service) ListModules(channelID string) ([]*Model3D, error) {
 	all, err := s.List(channelID)
-	if err != nil {
-		return nil, err
-	}
 	var modules []*Model3D
 	for _, m := range all {
 		if m.IsModule() {
 			modules = append(modules, m)
 		}
 	}
-	return modules, nil
+	return modules, err
 }
 
 func (s *Service) AddAssemblyToModule(moduleID, connID string) error {

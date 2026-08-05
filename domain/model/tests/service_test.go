@@ -18,6 +18,9 @@ import (
 
 type mockBC struct {
 	records map[string]*model.Model3D
+	// listErr, si non nil, est retourné par ListModelRecords — simule une panne
+	// d'infrastructure (voir TestModelList_BlockchainUnreachable_DegradedReturnsDrafts).
+	listErr error
 }
 
 func newMockBC() *mockBC {
@@ -38,6 +41,9 @@ func (m *mockBC) GetModelRecord(id, _ string) (*model.Model3D, error) {
 }
 
 func (m *mockBC) ListModelRecords(channelID string) ([]*model.Model3D, error) {
+	if m.listErr != nil {
+		return nil, m.listErr
+	}
 	var list []*model.Model3D
 	for _, mod := range m.records {
 		if channelID == "" || mod.ChannelID == channelID {
@@ -471,6 +477,49 @@ func TestModelList(t *testing.T) {
 	}
 	if len(ch1only) != 1 {
 		t.Errorf("got %d modèles pour ch1, want 1", len(ch1only))
+	}
+}
+
+// / @brief  Mode dégradé : quand la blockchain est configurée mais injoignable, List
+// /         retourne quand même les brouillons locaux, accompagnés de l'erreur d'origine
+// /         (non nil) pour que l'appelant sache explicitement que le résultat est partiel
+// / @input  mockBC.listErr = model.ErrBlockchainUnreachable, DraftStore avec 1 brouillon local
+// / @expect List retourne le brouillon local ET une erreur non nil ; IsDegradedListErr(err) == true
+func TestModelList_BlockchainUnreachable_DegradedReturnsDrafts(t *testing.T) {
+	bc := newMockBC()
+	bc.listErr = fmt.Errorf("fabric ListModelRecords evaluate : %w", model.ErrBlockchainUnreachable)
+	draftStore := newMockDraftStore()
+	svc := model.NewService(bc, &mockFS{}).WithDraftStore(draftStore)
+
+	draftStore.drafts["local1"] = &model.Model3D{ID: "local1", Name: "brouillon local", ChannelID: "ch1", Status: model.ModuleDraft}
+
+	all, err := svc.List("ch1")
+	if err == nil {
+		t.Fatal("erreur attendue (panne blockchain), obtenu nil")
+	}
+	if !model.IsDegradedListErr(err) {
+		t.Errorf("IsDegradedListErr(err) = false, want true (err=%v)", err)
+	}
+	if len(all) != 1 || all[0].ID != "local1" {
+		t.Errorf("brouillon local attendu dans le résultat malgré l'erreur, obtenu %v", all)
+	}
+}
+
+// / @brief  Sans brouillon local disponible, une panne blockchain reste un échec total
+// /         (rien à renvoyer) — le mode dégradé ne masque pas une liste vraiment vide
+// / @input  mockBC.listErr = model.ErrBlockchainUnreachable, DraftStore vide
+// / @expect List retourne (nil, err) — pas de faux mode dégradé sans données
+func TestModelList_BlockchainUnreachable_NoDrafts_ReturnsError(t *testing.T) {
+	bc := newMockBC()
+	bc.listErr = model.ErrBlockchainUnreachable
+	svc := model.NewService(bc, &mockFS{}).WithDraftStore(newMockDraftStore())
+
+	all, err := svc.List("ch1")
+	if !errors.Is(err, model.ErrBlockchainUnreachable) {
+		t.Errorf("erreur attendue ErrBlockchainUnreachable, obtenu %v", err)
+	}
+	if len(all) != 0 {
+		t.Errorf("aucun résultat attendu, obtenu %v", all)
 	}
 }
 
@@ -1056,6 +1105,31 @@ func TestModule_ListNilStore_ReturnsNil(t *testing.T) {
 	}
 	if list != nil {
 		t.Error("attendu nil")
+	}
+}
+
+// / @brief  Mode dégradé : ListModules filtre les brouillons locaux aux seuls modules et
+// /         propage l'erreur de panne blockchain, comme List (voir
+// /         TestModelList_BlockchainUnreachable_DegradedReturnsDrafts)
+// / @input  Un module créé en brouillon local (CreateModule), puis mockBC.listErr configuré
+// / @expect ListModules retourne le module brouillon ET IsDegradedListErr(err) == true
+func TestModule_ListModules_BlockchainUnreachable_DegradedReturnsDraftModules(t *testing.T) {
+	bc := newMockBC()
+	svc := model.NewService(bc, &mockFS{}).WithDraftStore(newMockDraftStore())
+
+	p, err := svc.CreateModule(model.ModuleRequest{Name: "Drone v1", ChannelID: "ch1"})
+	if err != nil {
+		t.Fatalf("CreateModule: %v", err)
+	}
+
+	bc.listErr = model.ErrBlockchainUnreachable
+
+	list, err := svc.ListModules("ch1")
+	if !model.IsDegradedListErr(err) {
+		t.Errorf("IsDegradedListErr(err) = false, want true (err=%v)", err)
+	}
+	if len(list) != 1 || list[0].ID != p.ID {
+		t.Errorf("module brouillon attendu dans le résultat malgré l'erreur, obtenu %v", list)
 	}
 }
 

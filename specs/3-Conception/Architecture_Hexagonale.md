@@ -25,6 +25,7 @@ Le domaine utilise un **vocabulaire neutre** — ni les noms de champs, ni les n
 | `NodeRole{"validator","sequencer"}` | `"peer"`, `"orderer"` | `NodeTypePeer`, `NodeTypeOrderer` |
 | `NetworkProfile.ChannelName` | Fabric channel name | `FabricChannel` |
 | `ErrBlockchainUnavailable` | gateway non configuré | `ErrFabricUnavailable` |
+| `ErrBlockchainUnreachable` | gateway configuré mais pairs injoignables (panne réseau/infra) | `ErrFabricUnreachable` |
 | `NetworkProfile.NodeEndpoint` | peer endpoint host:port | `PeerEndpoint`, `GatewayPeer` |
 | `NetworkProfile.ContractName` | chaincode name | `ChaincodeName` |
 
@@ -238,6 +239,8 @@ done
 | Admin (permission `admin`) | `requireRole(rbac.PermAdmin)` | `GET/DELETE /api/admin/sessions` |
 
 > Le token de session est un jeton opaque (`X-Myr-Token`) vérifié par `requireAuth`, pas un JWT décodé côté handler. La permission est vérifiée via `domain/role.RoleService.HasPermission`, pas par une comparaison de chaîne de rôle codée en dur.
+
+> Toute erreur du service domaine chaînant `ErrBlockchainUnavailable` ou `ErrBlockchainUnreachable` (voir §1.1) est traduite par le handler REST en HTTP 503 plutôt qu'en 500 générique — ces deux cas signalent une panne transitoire de l'infrastructure blockchain, pas une erreur de données de la requête.
 
 ---
 

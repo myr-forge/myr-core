@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -570,6 +571,56 @@ func TestComponents_GET_ServiceError(t *testing.T) {
 	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components", "")
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("got %d, want 500", w.Code)
+	}
+}
+
+/// @brief  Vérifie que GET /api/components retourne 503 (pas 500) quand la blockchain
+///         est configurée mais injoignable (panne de pairs Fabric), pour que le frontend
+///         affiche le message "blockchain indisponible" au lieu d'une erreur générique
+/// @input  GET /api/components, mockSvc.list retourne une erreur enveloppant
+///         model.ErrBlockchainUnreachable
+/// @expect HTTP 503
+func TestComponents_GET_BlockchainUnreachable_Returns503(t *testing.T) {
+	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
+		return nil, fmt.Errorf("fabric ListModelRecords evaluate : %w", model.ErrBlockchainUnreachable)
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components", "")
+	if w.Code != http.StatusServiceUnavailable {
+		t.Errorf("got %d, want 503", w.Code)
+	}
+}
+
+/// @brief  Mode dégradé : si des brouillons locaux existent malgré la panne blockchain,
+///         GET /api/components les renvoie avec HTTP 200 (pas 503) et signale explicitement
+///         le mode dégradé au client (degraded:true, warning) plutôt que de faire comme
+///         si la liste était complète
+/// @input  GET /api/components, mockSvc.list retourne (drafts non vides, err enveloppant
+///         model.ErrBlockchainUnreachable)
+/// @expect HTTP 200 ; body.degraded == true ; body.warning non vide ; body.components contient
+///         le brouillon local
+func TestComponents_GET_BlockchainUnreachable_WithDrafts_Returns200Degraded(t *testing.T) {
+	draft := &model.Model3D{ID: "local1", Name: "Brouillon local", Category: model.CategoryBase}
+	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
+		return []*model.Model3D{draft}, fmt.Errorf("fabric ListModelRecords evaluate : %w", model.ErrBlockchainUnreachable)
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components", "")
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	var resp struct {
+		Components []map[string]any `json:"components"`
+		Degraded   bool              `json:"degraded"`
+		Warning    string            `json:"warning"`
+	}
+	decodeJSON(t, w, &resp)
+	if !resp.Degraded {
+		t.Error("degraded: got false, want true")
+	}
+	if resp.Warning == "" {
+		t.Error("warning: attendu non vide en mode dégradé")
+	}
+	if len(resp.Components) != 1 || resp.Components[0]["id"] != "local1" {
+		t.Errorf("brouillon local attendu dans components, got %v", resp.Components)
 	}
 }
 
@@ -1256,6 +1307,37 @@ func TestModules_GET_WithItems(t *testing.T) {
 	decodeJSON(t, w, &resp)
 	if resp.Total != 2 {
 		t.Errorf("total: got %d, want 2", resp.Total)
+	}
+}
+
+/// @brief  Mode dégradé pour GET /api/modules : mêmes attentes que pour /api/components
+///         (voir TestComponents_GET_BlockchainUnreachable_WithDrafts_Returns200Degraded)
+/// @input  GET /api/modules, mockSvc.listModules retourne (module brouillon, err enveloppant
+///         model.ErrBlockchainUnreachable)
+/// @expect HTTP 200 ; body["degraded"] == true ; body["warning"] non vide
+func TestModules_GET_BlockchainUnreachable_WithDrafts_Returns200Degraded(t *testing.T) {
+	draftModule := &model.Model3D{ID: "mod-local1", Name: "Module brouillon", Status: model.ModuleDraft}
+	svc := &mockSvc{listModules: func(string) ([]*model.Model3D, error) {
+		return []*model.Model3D{draftModule}, fmt.Errorf("fabric ListModelRecords evaluate : %w", model.ErrBlockchainUnreachable)
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/modules", "")
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	var resp struct {
+		Items    []map[string]any `json:"items"`
+		Degraded bool              `json:"degraded"`
+		Warning  string            `json:"warning"`
+	}
+	decodeJSON(t, w, &resp)
+	if !resp.Degraded {
+		t.Error("degraded: got false, want true")
+	}
+	if resp.Warning == "" {
+		t.Error("warning: attendu non vide en mode dégradé")
+	}
+	if len(resp.Items) != 1 || resp.Items[0]["id"] != "mod-local1" {
+		t.Errorf("module brouillon attendu dans items, got %v", resp.Items)
 	}
 }
 

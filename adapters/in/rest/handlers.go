@@ -362,6 +362,11 @@ type graphResponse struct {
 	Components  []componentDTO  `json:"components"`
 	Connections []connectionDTO `json:"connections"`
 	Total       int             `json:"total"`
+	// Degraded et Warning ne sont présents que si la blockchain était injoignable au
+	// moment de la requête : la réponse ne contient alors que les brouillons locaux
+	// (non soumis), pas les assets on-chain — voir listGraph.
+	Degraded bool   `json:"degraded,omitempty"`
+	Warning  string `json:"warning,omitempty"`
 }
 
 type statusResponse struct {
@@ -454,9 +459,17 @@ func (h *Handler) listGraph(w http.ResponseWriter, r *http.Request) {
 	}
 
 	all, err := h.svcFor(r).List(h.channelFor(r))
+	degraded := false
 	if err != nil {
-		internalErr(w, err)
-		return
+		if !model.IsDegradedListErr(err) || len(all) == 0 {
+			internalErr(w, err)
+			return
+		}
+		// Mode dégradé : la blockchain est injoignable mais des brouillons locaux
+		// existent — on les renvoie quand même, en le signalant explicitement au
+		// client plutôt que de faire comme si la liste était complète.
+		degraded = true
+		log.Printf("liste dégradée (brouillons locaux uniquement) : %v", err)
 	}
 
 	// Filtrer
@@ -513,7 +526,12 @@ func (h *Handler) listGraph(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	jsonOK(w, graphResponse{Components: dtos, Connections: connDTOs, Total: total})
+	resp := graphResponse{Components: dtos, Connections: connDTOs, Total: total}
+	if degraded {
+		resp.Degraded = true
+		resp.Warning = model.DegradedListWarning
+	}
+	jsonOK(w, resp)
 }
 
 // assetHasAnyTag retourne true si l'asset possède au moins un des tags (comparaison insensible à la casse).
@@ -1182,9 +1200,15 @@ func (h *Handler) handleModules(w http.ResponseWriter, r *http.Request) {
 			limit = l
 		}
 		all, err := h.svcFor(r).ListModules(h.channelFor(r))
+		degraded := false
 		if err != nil {
-			internalErr(w, err)
-			return
+			if !model.IsDegradedListErr(err) || len(all) == 0 {
+				internalErr(w, err)
+				return
+			}
+			// Mode dégradé : voir listGraph pour l'explication.
+			degraded = true
+			log.Printf("liste dégradée (brouillons locaux uniquement) : %v", err)
 		}
 		var filtered []*model.Model3D
 		for _, p := range all {
@@ -1202,7 +1226,12 @@ func (h *Handler) handleModules(w http.ResponseWriter, r *http.Request) {
 		for _, p := range filtered {
 			dtos = append(dtos, h.toModuleDTO(p))
 		}
-		jsonOK(w, map[string]any{"items": dtos, "total": total})
+		resp := map[string]any{"items": dtos, "total": total}
+		if degraded {
+			resp["degraded"] = true
+			resp["warning"] = model.DegradedListWarning
+		}
+		jsonOK(w, resp)
 	case http.MethodPost:
 		var req struct {
 			Name        string `json:"name"`
@@ -1891,11 +1920,12 @@ func jsonError(w http.ResponseWriter, msg string, code int) {
 }
 
 // internalErr logue l'erreur complète côté serveur et renvoie un message générique au client.
-// Distingue l'indisponibilité de la blockchain (503, transitoire — pas une erreur de
-// données) des autres échecs du service domaine (500).
+// Distingue l'indisponibilité de la blockchain — non configurée (ErrBlockchainUnavailable) ou
+// injoignable (ErrBlockchainUnreachable), toutes deux transitoires et non des erreurs de
+// données — des autres échecs du service domaine (500).
 func internalErr(w http.ResponseWriter, err error) {
 	log.Printf("erreur interne : %v", err)
-	if errors.Is(err, model.ErrBlockchainUnavailable) {
+	if errors.Is(err, model.ErrBlockchainUnavailable) || errors.Is(err, model.ErrBlockchainUnreachable) {
 		jsonError(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}

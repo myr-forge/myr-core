@@ -11,6 +11,9 @@ import (
 	"testing"
 
 	"myr-core/domain/model"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // ── Stubs ─────────────────────────────────────────────────────────────────────
@@ -449,6 +452,28 @@ func TestFabricBlockchain_ListModelRecords_EvaluateError(t *testing.T) {
 
 	if _, err := bc.ListModelRecords("ch3"); !errors.Is(err, expectedErr) {
 		t.Errorf("erreur attendue %v, obtenu %v", expectedErr, err)
+	}
+}
+
+// / @brief  Vérifie qu'une erreur gRPC "aucun pair disponible" (FailedPrecondition, message
+// /         "no peers available...") est classée comme model.ErrBlockchainUnreachable — pour
+// /         que la couche REST la distingue d'une erreur générique et réponde 503 (pas 500)
+// / @input  stubContract dont evaluateFn retourne status.Error(codes.FailedPrecondition,
+// /         "no peers available to evaluate chaincode myrcc in channel sandbox")
+// / @expect errors.Is(err, model.ErrBlockchainUnreachable) est vrai
+func TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable(t *testing.T) {
+	grpcErr := status.Error(codes.FailedPrecondition, "no peers available to evaluate chaincode myrcc in channel sandbox")
+	stub := &stubContract{
+		evaluateFn: func(_ string, _ ...string) ([]byte, error) { return nil, grpcErr },
+	}
+	bc := fabric.NewFabricBlockchain(&stubGateway{contract: stub})
+
+	_, err := bc.ListModelRecords("sandbox")
+	if !errors.Is(err, model.ErrBlockchainUnreachable) {
+		t.Errorf("erreur attendue model.ErrBlockchainUnreachable, obtenu %v", err)
+	}
+	if !errors.Is(err, grpcErr) {
+		t.Errorf("l'erreur gRPC d'origine devrait rester dans la chaîne : obtenu %v", err)
 	}
 }
 

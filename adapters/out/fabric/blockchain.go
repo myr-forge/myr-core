@@ -5,8 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"myr-core/domain/model"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var validID = regexp.MustCompile(`^[a-zA-Z0-9_\-\.]{1,128}$`)
@@ -16,6 +20,24 @@ func validateID(v, label string) error {
 		return fmt.Errorf("%s invalide : caractères non autorisés ou longueur hors limites", label)
 	}
 	return nil
+}
+
+// wrapGatewayErr classe l'erreur d'un appel Evaluate/Submit au gateway Fabric : si le code
+// gRPC indique que l'infrastructure est injoignable (transport indisponible, ou aucun pair
+// disponible pour évaluer/endosser le chaincode), l'erreur est chaînée à
+// model.ErrBlockchainUnreachable (503 côté REST via internalErr) plutôt que remontée telle
+// quelle (500 générique) — voir spécification Architecture_Hexagonale.md §1.1.
+func wrapGatewayErr(op string, err error) error {
+	if err == nil {
+		return nil
+	}
+	st, ok := status.FromError(err)
+	unreachable := ok && (st.Code() == codes.Unavailable ||
+		(st.Code() == codes.FailedPrecondition && strings.Contains(st.Message(), "no peers available")))
+	if unreachable {
+		return fmt.Errorf("fabric %s : %w: %w", op, model.ErrBlockchainUnreachable, err)
+	}
+	return fmt.Errorf("fabric %s : %w", op, err)
 }
 
 var _ model.BlockchainPort = (*FabricBlockchain)(nil)
@@ -42,7 +64,7 @@ func (f *FabricBlockchain) StoreModelRecord(m *model.Model3D) error {
 		return fmt.Errorf("fabric StoreModelRecord marshal : %w", err)
 	}
 	if _, err := f.gc.ContractFor(m.ChannelID).SubmitTransaction("StoreModel", string(data)); err != nil {
-		return fmt.Errorf("fabric StoreModelRecord submit : %w", err)
+		return wrapGatewayErr("StoreModelRecord submit", err)
 	}
 	return nil
 }
@@ -55,7 +77,7 @@ func (f *FabricBlockchain) GetModelRecord(id, channelID string) (*model.Model3D,
 	}
 	result, err := f.gc.ContractFor(channelID).EvaluateTransaction("GetModel", id)
 	if err != nil {
-		return nil, fmt.Errorf("fabric GetModelRecord evaluate : %w", err)
+		return nil, wrapGatewayErr("GetModelRecord evaluate", err)
 	}
 	var m model.Model3D
 	if err := json.Unmarshal(result, &m); err != nil {
@@ -71,7 +93,7 @@ func (f *FabricBlockchain) ListModelRecords(channelID string) ([]*model.Model3D,
 	}
 	result, err := f.gc.ContractFor(channelID).EvaluateTransaction("ListModels", channelID)
 	if err != nil {
-		return nil, fmt.Errorf("fabric ListModelRecords evaluate : %w", err)
+		return nil, wrapGatewayErr("ListModelRecords evaluate", err)
 	}
 	var list []*model.Model3D
 	if err := json.Unmarshal(result, &list); err != nil {
@@ -88,7 +110,7 @@ func (f *FabricBlockchain) VerifyIntegrity(id, hash, channelID string) (bool, er
 	}
 	result, err := f.gc.ContractFor(channelID).EvaluateTransaction("VerifyModel", id, hash)
 	if err != nil {
-		return false, fmt.Errorf("fabric VerifyIntegrity evaluate : %w", err)
+		return false, wrapGatewayErr("VerifyIntegrity evaluate", err)
 	}
 	return string(result) == "true", nil
 }

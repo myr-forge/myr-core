@@ -132,7 +132,13 @@ Example:
 func runModelList(w io.Writer, svc model.ModelService, channelID string) error {
 	models, err := svc.List(channelID)
 	if err != nil {
-		return err
+		if !model.IsDegradedListErr(err) || len(models) == 0 {
+			return err
+		}
+		// Mode dégradé : la blockchain est injoignable mais des brouillons locaux
+		// existent — on les affiche quand même, en le signalant explicitement
+		// plutôt que de faire comme si la liste était complète (voir REST listGraph).
+		fmt.Fprintf(w, "Avertissement : %s (%v)\n\n", model.DegradedListWarning, err)
 	}
 	return printModelTable(w, models)
 }

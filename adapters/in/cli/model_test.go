@@ -141,6 +141,43 @@ func TestRunModelList_Empty(t *testing.T) {
 	}
 }
 
+/// @brief  Mode dégradé : quand le service retourne des brouillons locaux accompagnés
+///         d'une erreur ErrBlockchainUnreachable, runModelList affiche quand même le
+///         tableau, précédé d'un avertissement explicite — pas une erreur cobra silencieuse
+///         qui masquerait les brouillons disponibles
+/// @input  service retournant ([]*model.Model3D{{ID: "local1"}}, model.ErrBlockchainUnreachable)
+/// @expect Pas d'erreur retournée ; la sortie contient "Avertissement", le message de
+///         dégradation et l'ID du brouillon
+func TestRunModelList_BlockchainUnreachable_WithDrafts_ShowsWarningAndTable(t *testing.T) {
+	svc := &mockModelSvc{list: func(string) ([]*model.Model3D, error) {
+		return []*model.Model3D{{ID: "local1", Name: "Brouillon local"}}, model.ErrBlockchainUnreachable
+	}}
+	var buf bytes.Buffer
+	if err := runModelList(&buf, svc, ""); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, "Avertissement") || !strings.Contains(out, model.DegradedListWarning) {
+		t.Fatalf("avertissement explicite attendu, got: %q", out)
+	}
+	if !strings.Contains(out, "local1") {
+		t.Fatalf("brouillon local attendu dans le tableau, got: %q", out)
+	}
+}
+
+/// @brief  Sans brouillon local disponible, runModelList propage l'erreur telle quelle
+///         (pas de faux mode dégradé sur une liste vraiment vide)
+/// @input  service retournant (nil, model.ErrBlockchainUnreachable)
+/// @expect L'erreur est retournée
+func TestRunModelList_BlockchainUnreachable_NoDrafts_Rejected(t *testing.T) {
+	svc := &mockModelSvc{list: func(string) ([]*model.Model3D, error) { return nil, model.ErrBlockchainUnreachable }}
+	var buf bytes.Buffer
+	err := runModelList(&buf, svc, "")
+	if !errors.Is(err, model.ErrBlockchainUnreachable) {
+		t.Fatalf("expected ErrBlockchainUnreachable, got %v", err)
+	}
+}
+
 /// @brief  runModelVerify affiche OK quand l'intégrité est vérifiée
 /// @input  service retournant true
 /// @expect Sortie contient "OK"
