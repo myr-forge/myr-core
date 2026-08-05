@@ -43,9 +43,9 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 ## Pré-conditions
 
 - Le serveur Myr est démarré et joignable
-- La blockchain est accessible
 - Pour un visiteur : aucune authentification requise (lecture publique, EF17)
 - Pour un utilisateur authentifié : token de session opaque valide dans l'en-tête `X-Myr-Token`
+- La blockchain accessible n'est requise que pour obtenir la liste complète (assets on-chain inclus) — voir Flux alternatif « Mode dégradé » pour le cas où seuls des brouillons locaux peuvent être retournés
 
 ## Scénario
 
@@ -76,10 +76,17 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 1. Le client fournit un ou plusieurs critères mis à jour
 2. Une nouvelle requête `GET /api/components` est émise avec les critères mis à jour
 
-### Flux erreur — Blockchain indisponible
+### Flux alternatif — Mode dégradé (blockchain injoignable, brouillons locaux disponibles)
 
-1. `blockchain.ListModelRecords()` retourne une erreur
-2. Le handler renvoie HTTP 500 avec `{ "error": "..." }`
+1. `blockchain.ListModelRecords()` échoue (panne réseau ou nœuds indisponibles — pas une absence de configuration)
+2. Le service dispose malgré tout de brouillons locaux non soumis (`DraftStore`) pour le canal demandé
+3. Le service retourne ces brouillons accompagnés de l'erreur d'origine plutôt que de ne rien retourner — il ne masque jamais silencieusement une liste partielle
+4. Le handler distingue ce cas d'un échec total et renvoie `HTTP 200 { components: [...brouillons], connections: [...], total: N, degraded: true, warning: "..." }` — le client sait explicitement que la liste est incomplète (composants on-chain absents) plutôt que de la croire complète
+
+### Flux erreur — Blockchain indisponible, aucune donnée locale
+
+1. `blockchain.ListModelRecords()` échoue et aucun brouillon local n'est disponible pour ce canal
+2. Le handler renvoie HTTP 503 avec `{ "error": "..." }` (panne transitoire de l'infrastructure, à distinguer d'une erreur de données — voir `specs/3-Conception/Architecture_Hexagonale.md` §1.1)
 
 ### Flux erreur — Écriture non authentifiée
 
@@ -88,7 +95,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 
 ## Post-conditions
 
-- La liste des composants correspondant aux critères est retournée au client
+- La liste des composants correspondant aux critères est retournée au client — complète si la blockchain a répondu, limitée aux brouillons locaux sinon (mode dégradé signalé explicitement, jamais silencieux)
 - Les connexions entre les composants retournés sont incluses
 - L'état du système est inchangé (lecture seule)
 
@@ -111,9 +118,17 @@ else Utilisateur authentifié
 end
 
 REST -> Service : svcFor(r).List(channelID)
+Service -> Local : DraftStore.ListDrafts(channelID)
+Local --> Service : []*Model3D (brouillons locaux)
 Service -> Fabric : ListModelRecords(channelID)
-Fabric --> Service : []*Model3D
-Service --> REST : []*Model3D
+
+alt Fabric répond
+    Fabric --> Service : []*Model3D (assets on-chain)
+    Service --> REST : brouillons + assets on-chain, err=nil
+else Fabric injoignable
+    Fabric --> Service : erreur (nœuds indisponibles)
+    Service --> REST : brouillons locaux seuls (peut être vide), err=ErrBlockchainUnreachable
+end
 
 loop Pour chaque asset
     REST -> REST : filtrer (catégorie, texte, owner, tags…)\nexclure IsModule()
@@ -131,12 +146,14 @@ Service --> REST : []*Connection
 
 REST -> REST : garder connexions entre assets chargés
 
-alt Résultats trouvés
+alt Résultats trouvés (Fabric a répondu)
     REST --> Browser : 200 { components: [...], connections: [...], total: N }
-else Aucun résultat
+else Aucun résultat (Fabric a répondu, filtre vide)
     REST --> Browser : 200 { components: [], connections: [], total: 0 }
-else Erreur blockchain
-    REST --> Browser : 500 { error: "..." }
+else Mode dégradé (Fabric injoignable, brouillons locaux disponibles)
+    REST --> Browser : 200 { components: [...brouillons], connections: [...], total: N,\ndegraded: true, warning: "..." }
+else Erreur blockchain (Fabric injoignable, aucune donnée locale)
+    REST --> Browser : 503 { error: "..." }
 end
 
 @enduml
@@ -189,4 +206,4 @@ mux.HandleFunc("/api/components", func(w http.ResponseWriter, r *http.Request) {
 
 **Connexions :** Seules les connexions dont `From` ET `To` font partie des assets filtrés sont incluses dans la réponse — évite les connexions orphelines côté client.
 
-**Commande CLI équivalente (alias limité) :** `myr model list [--channel <id>]` appelle la même méthode `List(channelID)` que `GET /api/components` avant filtrage. Le filtrage par critère (`q`, `categories`, `owner_id`, `parent_id`, `hash`, `tags`) est effectué aujourd'hui dans le handler REST (`adapters/in/rest/`), pas dans `ModelService` — il n'existe donc pas de méthode de filtre serveur réutilisable directement par le CLI. Une commande `myr model search --filter <critère>` est documentée comme cible ouverte : elle devra reproduire côté adaptateur CLI la même logique de filtrage que `listGraph`, sans changement de domaine requis (voir `specs/3-Conception/DC_CLI_Model.md` § 6 point 2). En l'absence de cette commande, `myr model search` reste un simple alias de `myr model list`.
+**Commande CLI équivalente (alias limité) :** `myr model list [--channel <id>]` appelle la même méthode `List(channelID)` que `GET /api/components` avant filtrage. Le filtrage par critère (`q`, `categories`, `owner_id`, `parent_id`, `hash`, `tags`) est effectué aujourd'hui dans le handler REST (`adapters/in/rest/`), pas dans `ModelService` — il n'existe donc pas de méthode de filtre serveur réutilisable directement par le CLI. Une commande `myr model search --filter <critère>` est documentée comme cible ouverte : elle devra reproduire côté adaptateur CLI la même logique de filtrage que `listGraph`, sans changement de domaine requis (voir `specs/3-Conception/DC_CLI_Model.md` § 6 point 2). En l'absence de cette commande, `myr model search` reste un simple alias de `myr model list`. En mode dégradé, `myr model list` affiche le même avertissement explicite que la réponse REST (`degraded`/`warning`), suivi du tableau des brouillons locaux disponibles.
