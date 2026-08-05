@@ -101,8 +101,16 @@ definitions:
         items:
           $ref: '#/definitions/adapters_in_rest.connectionDTO'
         type: array
+      degraded:
+        description: |-
+          Degraded et Warning ne sont présents que si la blockchain était injoignable au
+          moment de la requête : la réponse ne contient alors que les brouillons locaux
+          (non soumis), pas les assets on-chain — voir listGraph.
+        type: boolean
       total:
         type: integer
+      warning:
+        type: string
     type: object
   adapters_in_rest.moduleDTO:
     properties:
@@ -603,10 +611,9 @@ paths:
       description: Crée un asset (catégorie par défaut "base"). Le fichier CAO 3D
         est optionnel (champ "file", ou "stl" pour rétrocompatibilité) ; une miniature
         base64 peut être fournie directement ou est dérivée de l'og:image du premier
-        lien si aucun fichier n'est envoyé. Par défaut le composant est engagé immédiatement
-        sur la blockchain (une transaction, "status":"submitted"). Si "draft" vaut
-        true, il est stocké localement ("status":"draft", aucune transaction) — voir
-        POST /components/{id}/submit pour l'engager ensuite.
+        lien si aucun fichier n'est envoyé. Le composant est toujours créé en brouillon
+        local ("status":"draft", aucune transaction blockchain) — voir POST /components/{id}/submit
+        pour l'engager explicitement sur la blockchain.
       parameters:
       - description: nom du composant (max 256 caractères)
         in: formData
@@ -653,11 +660,6 @@ paths:
         in: formData
         name: thumbnail
         type: string
-      - description: 'true : crée en brouillon local, sans transaction blockchain
-          (défaut: false)'
-        in: formData
-        name: draft
-        type: boolean
       produces:
       - application/json
       responses:
@@ -667,12 +669,6 @@ paths:
             $ref: '#/definitions/adapters_in_rest.componentDTO'
         "400":
           description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "503":
-          description: blockchain indisponible (composant non-brouillon uniquement)
           schema:
             additionalProperties:
               type: string
@@ -1164,6 +1160,12 @@ paths:
             items:
               $ref: '#/definitions/myr-core_domain_identity.AccountRequest'
             type: array
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "503":
           description: Service Unavailable
           schema:
