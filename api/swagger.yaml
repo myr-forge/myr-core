@@ -901,9 +901,11 @@ paths:
       - components
   /components/{id}/thumbnail/regenerate:
     post:
-      description: Redérive la miniature depuis l'og:image du premier lien externe
-        enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D
-        sans lien n'a pas de source régénérable côté serveur.
+      description: 'Redérive la miniature depuis l''og:image du premier lien externe
+        enregistré (Links). Échoue si l''asset n''a aucun lien externe — un modèle
+        3D sans lien n''a pas de source régénérable côté serveur. Répond { "thumbnail":
+        "<dataURL>" } — jamais le DTO complet de l''asset (composant ou module), qu''il
+        faut requêter séparément si besoin d''autre chose que la miniature.'
       parameters:
       - description: identifiant de l'asset (composant ou module)
         in: path
@@ -919,14 +921,15 @@ paths:
             additionalProperties:
               type: string
             type: object
-        "400":
-          description: Bad Request
+        "500":
+          description: aucun lien externe, échec réseau/timeout ou og:image introuvable
+            — un seul code pour ces trois cas
           schema:
             additionalProperties:
               type: string
             type: object
-        "500":
-          description: Internal Server Error
+        "503":
+          description: blockchain indisponible (asset non local et non joignable)
           schema:
             additionalProperties:
               type: string
@@ -936,6 +939,7 @@ paths:
       summary: Régénérer la miniature d'un asset depuis son lien source
       tags:
       - components
+      - modules
   /components/{id}/tree:
     get:
       description: Tous les ancêtres (via parent_id) et descendants (parcours en largeur)
@@ -2223,20 +2227,13 @@ paths:
       - modules
   /modules/{id}/thumbnail/regenerate:
     post:
-      consumes:
-      - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
+      description: 'Redérive la miniature depuis l''og:image du premier lien externe
+        enregistré (Links). Échoue si l''asset n''a aucun lien externe — un modèle
+        3D sans lien n''a pas de source régénérable côté serveur. Répond { "thumbnail":
+        "<dataURL>" } — jamais le DTO complet de l''asset (composant ou module), qu''il
+        faut requêter séparément si besoin d''autre chose que la miniature.'
       parameters:
-      - description: identifiant du module
+      - description: identifiant de l'asset (composant ou module)
         in: path
         name: id
         required: true
@@ -2247,29 +2244,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: aucun lien externe, échec réseau/timeout ou og:image introuvable
+            — un seul code pour ces trois cas
           schema:
             additionalProperties:
               type: string
             type: object
-        "404":
-          description: Not Found
+        "503":
+          description: blockchain indisponible (asset non local et non joignable)
           schema:
             additionalProperties:
               type: string
             type: object
       security:
       - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
+      summary: Régénérer la miniature d'un asset depuis son lien source
       tags:
+      - components
       - modules
   /networks:
     get:

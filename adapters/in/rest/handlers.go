@@ -120,10 +120,11 @@ type Handler struct {
 	authLimiter *ipRateLimiter
 
 	// Phase 2 : multi-réseau
-	bcRouter         blockchainRouter     // nil en mode legacy (réseau unique)
+	bcRouter         blockchainRouter      // nil en mode legacy (réseau unique)
 	fileStore        model.FileStoragePort // stockage local
 	connStore        model.ConnectionStore // pour svcFor
-	defaultNetworkID string               // réseau actif par défaut au démarrage
+	ogImageFetcher   model.OGImageFetcher  // pour svcFor
+	defaultNetworkID string                // réseau actif par défaut au démarrage
 
 	fabricConnected bool   // vrai si le gateway Fabric a démarré correctement
 	buildDate       string // injecté via ldflags à la compilation
@@ -187,6 +188,12 @@ func (h *Handler) WithConnStore(cs model.ConnectionStore) *Handler {
 // WithDraftStore attache le store de brouillons pour svcFor (composants créés draft:true).
 func (h *Handler) WithDraftStore(ds model.DraftStore) *Handler {
 	h.draftStore = ds
+	return h
+}
+
+// WithOGImageFetcher attache la source de régénération de miniature (og:image) pour svcFor.
+func (h *Handler) WithOGImageFetcher(f model.OGImageFetcher) *Handler {
+	h.ogImageFetcher = f
 	return h
 }
 
@@ -261,6 +268,9 @@ func (h *Handler) svcFor(r *http.Request) model.ModelService {
 	svc := model.NewService(bc, h.fileStore)
 	if h.connStore != nil {
 		svc = svc.WithConnStore(h.connStore)
+	}
+	if h.ogImageFetcher != nil {
+		svc = svc.WithOGImageFetcher(h.ogImageFetcher)
 	}
 	return svc.WithThumbStore(h.thumbStore).WithIfaceStore(h.ifaceStore).WithDraftStore(h.draftStore)
 }
@@ -745,15 +755,17 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 // modèle 3D est produit par le client GUI, pas par myr) — voir ModelService.RegenerateThumbnail.
 //
 //	@Summary		Régénérer la miniature d'un asset depuis son lien source
-//	@Description	Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur.
+//	@Description	Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur. Répond { "thumbnail": "<dataURL>" } — jamais le DTO complet de l'asset (composant ou module), qu'il faut requêter séparément si besoin d'autre chose que la miniature.
 //	@Tags			components
+//	@Tags			modules
 //	@Produce		json
 //	@Param			id	path		string	true	"identifiant de l'asset (composant ou module)"
 //	@Success		200	{object}	map[string]string
-//	@Failure		400	{object}	map[string]string
-//	@Failure		500	{object}	map[string]string
+//	@Failure		500	{object}	map[string]string	"aucun lien externe, échec réseau/timeout ou og:image introuvable — un seul code pour ces trois cas"
+//	@Failure		503	{object}	map[string]string	"blockchain indisponible (asset non local et non joignable)"
 //	@Security		MyrToken
 //	@Router			/components/{id}/thumbnail/regenerate [post]
+//	@Router			/modules/{id}/thumbnail/regenerate [post]
 func (h *Handler) regenerateThumbnail(w http.ResponseWriter, r *http.Request, id string) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
@@ -1287,7 +1299,6 @@ func (h *Handler) handleModules(w http.ResponseWriter, r *http.Request) {
 //	@Router			/modules/{id}/assemblies/{connID} [delete]
 //	@Router			/modules/{id}/thumbnail [get]
 //	@Router			/modules/{id}/thumbnail [post]
-//	@Router			/modules/{id}/thumbnail/regenerate [post]
 //	@Router			/modules/{id}/instances [get]
 //	@Router			/modules/{id}/instances [post]
 //	@Router			/modules/{id}/instances/{instanceId} [delete]

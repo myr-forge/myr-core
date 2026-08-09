@@ -179,6 +179,7 @@ func main() {
 		WithFileStore(fileStore).
 		WithConnStore(store).
 		WithDraftStore(store).
+		WithOGImageFetcher(webimage.New()).
 		WithDefaultNetwork(defaultNetworkID).
 		WithFabricConnected(fabricConnected).
 		WithBuildDate(BuildDate).

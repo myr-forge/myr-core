@@ -769,12 +769,13 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur.",
+                "description": "Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur. Répond { \"thumbnail\": \"\u003cdataURL\u003e\" } — jamais le DTO complet de l'asset (composant ou module), qu'il faut requêter séparément si besoin d'autre chose que la miniature.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "components"
+                    "components",
+                    "modules"
                 ],
                 "summary": "Régénérer la miniature d'un asset depuis son lien source",
                 "parameters": [
@@ -796,8 +797,8 @@
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "aucun lien externe, échec réseau/timeout ou og:image introuvable — un seul code pour ces trois cas",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -805,8 +806,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "503": {
+                        "description": "blockchain indisponible (asset non local et non joignable)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2636,21 +2637,19 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur. Répond { \"thumbnail\": \"\u003cdataURL\u003e\" } — jamais le DTO complet de l'asset (composant ou module), qu'il faut requêter séparément si besoin d'autre chose que la miniature.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
+                    "components",
                     "modules"
                 ],
-                "summary": "Opérations sur un module et ses sous-ressources",
+                "summary": "Régénérer la miniature d'un asset depuis son lien source",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "identifiant du module",
+                        "description": "identifiant de l'asset (composant ou module)",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2660,20 +2659,14 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "aucun lien externe, échec réseau/timeout ou og:image introuvable — un seul code pour ces trois cas",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2681,8 +2674,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "503": {
+                        "description": "blockchain indisponible (asset non local et non joignable)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
