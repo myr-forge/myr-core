@@ -38,7 +38,9 @@ UC1 ..> UC5 : <<include>>
 
 Après création, un composant peut être reconfiguré par son propriétaire : modification du nom, de la description, de la licence ou des tags. Cette opération ne modifie pas le fichier 3D ni le hash — elle met à jour les métadonnées de l'asset.
 
-La mise à jour est soumise à la blockchain Fabric via `PUT /api/components/:id` → `service.UpdateAsset()` → `blockchain.StoreModelRecord()`. Chaque appel produit un nouveau bloc sur le ledger : l'historique des configurations est traçable.
+La mise à jour est soumise à la blockchain Fabric via `PATCH /api/components/:id` → `service.UpdateAsset()` → `blockchain.StoreModelRecord()`. Chaque appel produit un nouveau bloc sur le ledger : l'historique des configurations est traçable.
+
+Cette opération est généralisée à tout asset, y compris un module (voir UCMOD03) : le même service `UpdateAsset()`, les mêmes champs modifiables (`name`, `description`, `license_id`, `tags`, `links`) et la même vérification RM03 s'appliquent, seule la route change (`PATCH /api/modules/:id`).
 
 **Contrainte clé :** Si l'asset a un `ParentID` et que la nouvelle licence est modifiée, la compatibilité de licence avec le parent doit être re-vérifiée (RM03) — `UpdateAsset()` applique cette vérification au même titre que `AddFull()` à la création.
 
@@ -50,7 +52,7 @@ La mise à jour est soumise à la blockchain Fabric via `PUT /api/components/:id
 
 ## Scénario
 
-**Étape initiale :** `PUT /api/components/<uuid>` est appelée (ou l'équivalent CLI `myr model update`) avec un ou plusieurs champs à modifier
+**Étape initiale :** `PATCH /api/components/<uuid>` est appelée (ou l'équivalent CLI `myr model update`) avec un ou plusieurs champs à modifier
 
 ### Flux nominal — Configuration réussie
 
@@ -105,7 +107,7 @@ participant "REST Handler\n(adapters/in/rest/)" as REST
 participant "Model Service\n(domain/model/)" as ModelSvc
 database "Fabric\n(adapters/out/fabric/)" as Fabric
 
-Browser -> REST : PUT /api/components/<uuid>\n{ name?, description?, license_id?, tags?, links? }
+Browser -> REST : PATCH /api/components/<uuid>\n{ name?, description?, license_id?, tags?, links? }
 REST -> REST : validateFields(name, description longueur)
 
 alt Champ invalide
@@ -187,7 +189,7 @@ note "Asset parent → Asset dérivé\nC = Commercial  NC = Non-Commercial" as N
 
 ## Notes d'implémentation
 
-**Route existante :** `PUT /api/components/:id` → `handler.updateAsset()` → `service.UpdateAsset()` → `fabric.StoreModelRecord()`.
+**Route existante :** `PATCH /api/components/:id` → `handler.patchComponent()` → `service.UpdateAsset()` → `fabric.StoreModelRecord()`.
 
 **Commande CLI équivalente :** `myr model update <id> --description <texte> --license <id> --tags <a,b>` (voir `specs/3-Conception/DC_CLI_Model.md` § 5), appelant la même méthode `service.UpdateAsset(UpdateRequest{...})` que le handler REST `updateAsset()`, avec le même comportement de patch partiel et la même vérification de compatibilité de licence (RM03).
 

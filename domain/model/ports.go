@@ -65,6 +65,15 @@ type DraftStore interface {
 	ListDrafts(channelID string) ([]*Model3D, error)
 }
 
+// RemovedAssetStore masque localement un asset déjà soumis à la blockchain
+// (composant ou module) sans jamais écrire sur le ledger — Fabric ne supporte
+// aucune suppression (RM06/RM08). Un asset masqué disparaît des listes
+// (List/ListModules) mais reste résolvable par identifiant direct (Get/GetModule).
+type RemovedAssetStore interface {
+	HideAsset(id string) error
+	IsHidden(id string) (bool, error)
+}
+
 // InterfaceStore gère les interfaces physiques des assets et le vocabulaire de référence.
 // Non requis par Fabric ou NoOpBlockchain — activé uniquement en mode GUI.
 type InterfaceStore interface {

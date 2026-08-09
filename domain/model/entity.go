@@ -198,6 +198,10 @@ type ModuleRequest struct {
 	OwnerID     string
 	ChannelID   string
 	LicenseID   string
+	// ParentID référence un module existant dont la composition (instances +
+	// liaisons internes) est dupliquée dans le nouveau brouillon — voir
+	// Service.CreateModule. Vide pour un module créé de zéro.
+	ParentID string
 }
 
 // ── interne ───────────────────────────────────────────────────────────────────

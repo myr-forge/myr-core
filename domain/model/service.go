@@ -15,11 +15,12 @@ import (
 type Service struct {
 	blockchain     BlockchainPort // nullable — nil si Fabric indisponible (voir ErrBlockchainUnavailable)
 	fileStorage    FileStoragePort
-	connStore      ConnectionStore // optionnel — nil hors mode GUI
-	thumbStore     ThumbnailStore  // optionnel — nil hors mode GUI
-	ifaceStore     InterfaceStore  // optionnel — nil hors mode GUI
-	draftStore     DraftStore      // optionnel — requis uniquement pour AddRequest.Draft / Submit
-	ogImageFetcher OGImageFetcher  // optionnel — nil si non câblé (pas d'accès réseau depuis les tests domaine)
+	connStore      ConnectionStore   // optionnel — nil hors mode GUI
+	thumbStore     ThumbnailStore    // optionnel — nil hors mode GUI
+	ifaceStore     InterfaceStore    // optionnel — nil hors mode GUI
+	draftStore     DraftStore        // optionnel — requis uniquement pour AddRequest.Draft / Submit
+	ogImageFetcher OGImageFetcher    // optionnel — nil si non câblé (pas d'accès réseau depuis les tests domaine)
+	removedStore   RemovedAssetStore // optionnel — masquage local d'un asset déjà soumis (RM08)
 }
 
 func NewService(bc BlockchainPort, fs FileStoragePort) *Service {
@@ -56,6 +57,13 @@ func (s *Service) WithDraftStore(ds DraftStore) *Service {
 // WithOGImageFetcher attache la source de régénération de miniature depuis un lien web.
 func (s *Service) WithOGImageFetcher(f OGImageFetcher) *Service {
 	s.ogImageFetcher = f
+	return s
+}
+
+// WithRemovedStore attache le registre de masquage local (RM08) — requis pour
+// que Remove() puisse masquer un asset déjà soumis au lieu d'échouer.
+func (s *Service) WithRemovedStore(rs RemovedAssetStore) *Service {
+	s.removedStore = rs
 	return s
 }
 
@@ -220,15 +228,31 @@ func (s *Service) List(channelID string) ([]*Model3D, error) {
 	}
 	if s.blockchain == nil {
 		if len(drafts) > 0 {
-			return drafts, nil
+			return s.filterHidden(drafts), nil
 		}
 		return nil, ErrBlockchainUnavailable
 	}
 	onChain, err := s.blockchain.ListModelRecords(channelID)
 	if err != nil {
-		return drafts, err
+		return s.filterHidden(drafts), err
 	}
-	return append(drafts, onChain...), nil
+	return s.filterHidden(append(drafts, onChain...)), nil
+}
+
+// filterHidden retire de assets tout ID masqué localement (RM08) — un asset
+// masqué reste résolvable via Get()/GetModule(), seules les listes l'excluent.
+func (s *Service) filterHidden(assets []*Model3D) []*Model3D {
+	if s.removedStore == nil || len(assets) == 0 {
+		return assets
+	}
+	filtered := assets[:0]
+	for _, m := range assets {
+		hidden, _ := s.removedStore.IsHidden(m.ID)
+		if !hidden {
+			filtered = append(filtered, m)
+		}
+	}
+	return filtered
 }
 
 // Verify vérifie l'intégrité d'un modèle sur le canal indiqué.
@@ -577,6 +601,11 @@ func (s *Service) removeConnectionsFor(id string) {
 	}
 }
 
+// Remove supprime un asset (composant ou module). Un brouillon est réellement
+// retiré du stockage local. Un asset déjà soumis à la blockchain ne peut
+// jamais en être retiré (RM06/RM08, Fabric ne supporte aucune suppression) :
+// il est seulement masqué localement (RemovedAssetStore.HideAsset) — il
+// disparaît de List()/ListModules() mais reste résolvable par Get()/GetModule().
 func (s *Service) Remove(id string) error {
 	if s.draftStore != nil {
 		if _, err := s.draftStore.GetDraft(id); err == nil {
@@ -584,20 +613,17 @@ func (s *Service) Remove(id string) error {
 			return s.draftStore.RemoveDraft(id)
 		}
 	}
+	if s.removedStore == nil {
+		return fmt.Errorf("suppression non supportée : registre de masquage non configuré")
+	}
 	if s.blockchain == nil {
 		return ErrBlockchainUnavailable
 	}
-	s.removeConnectionsFor(id)
-	// Fabric ne supporte pas la suppression — on délègue à l'adapter
-	// qui peut retourner ErrNotSupported si besoin.
-	// #incoherence — ErrNotSupported n'existe nulle part dans domain/model
-	// malgré ce commentaire et UCAM05.md — voir specs/roadmap_dev.md § Écarts
-	// — revue de code, E4.
-	type remover interface{ RemoveModelRecord(id string) error }
-	if r, ok := s.blockchain.(remover); ok {
-		return r.RemoveModelRecord(id)
+	if _, err := s.blockchain.GetModelRecord(id, ""); err != nil {
+		return fmt.Errorf("asset introuvable: %w", err)
 	}
-	return fmt.Errorf("suppression non supportée par cet adapter blockchain")
+	s.removeConnectionsFor(id)
+	return s.removedStore.HideAsset(id)
 }
 
 // applyAssetPatch applique sur m les champs non-vides d'un UpdateRequest.
@@ -635,16 +661,37 @@ func (s *Service) UpdateAsset(req UpdateRequest) (*Model3D, error) {
 // ── Modules ───────────────────────────────────────────────────────────────────
 
 // CreateModule crée un module en brouillon (RM16) : aucune transaction
-// blockchain avant SubmitModule.
+// blockchain avant SubmitModule. Si req.ParentID référence un module existant
+// (RM03 vérifiée si une licence est proposée), sa composition — instances et
+// liaisons internes — est dupliquée dans le nouveau brouillon, pour reprendre
+// un travail déjà soumis sans le reconstruire manuellement (voir
+// copyModuleComposition). Le module parent, déjà soumis, n'est jamais modifié.
 func (s *Service) CreateModule(req ModuleRequest) (*Model3D, error) {
 	if s.draftStore == nil {
 		return nil, fmt.Errorf("stockage de brouillons non configuré")
 	}
+
+	var parent *Model3D
+	if req.ParentID != "" {
+		p, _, err := s.getAsset(req.ParentID, req.ChannelID)
+		if err != nil {
+			return nil, fmt.Errorf("module parent introuvable: %w", err)
+		}
+		parent = p
+		if req.LicenseID != "" && parent.LicenseID != "" {
+			check := CheckLicenseCompatibility(parent.LicenseID, req.LicenseID)
+			if !check.Compatible {
+				return nil, fmt.Errorf("incompatibilité de licence : %s", check.Reason)
+			}
+		}
+	}
+
 	m := &Model3D{
 		ID:                 generateID(),
 		Name:               req.Name,
 		Description:        req.Description,
 		OwnerID:            req.OwnerID,
+		ParentID:           req.ParentID,
 		ChannelID:          req.ChannelID,
 		LicenseID:          req.LicenseID,
 		Status:             ModuleDraft,
@@ -653,10 +700,82 @@ func (s *Service) CreateModule(req ModuleRequest) (*Model3D, error) {
 		WorkspaceInstances: []WorkspaceInstance{},
 		ModuleVersions:     []ModuleVersion{},
 	}
+
+	if parent != nil && parent.IsModule() {
+		if err := s.copyModuleComposition(parent, m); err != nil {
+			return nil, fmt.Errorf("copie de la composition du module parent: %w", err)
+		}
+	}
+
 	if err := s.draftStore.SaveDraft(m); err != nil {
 		return nil, fmt.Errorf("saving draft: %w", err)
 	}
 	return m, nil
+}
+
+// copyModuleComposition clone les WorkspaceInstances et les Liaisons internes
+// (Assemblies) de parent dans dst — nouveaux identifiants d'instance et de
+// connexion pour ne jamais entrer en collision avec ceux du parent. Les
+// interfaces référencées (FromIfaceID/ToIfaceID) restent celles de l'asset
+// sous-jacent (AssetInterface est indexée par AssetID, pas par instance) ;
+// seuls FromInstanceID/ToInstanceID sont remappés vers les nouvelles instances.
+func (s *Service) copyModuleComposition(parent, dst *Model3D) error {
+	instanceIDMap := make(map[string]string, len(parent.WorkspaceInstances))
+	for _, inst := range parent.WorkspaceInstances {
+		newID := generateID()
+		instanceIDMap[inst.ID] = newID
+		dst.WorkspaceInstances = append(dst.WorkspaceInstances, WorkspaceInstance{
+			ID: newID, AssetID: inst.AssetID, X: inst.X, Y: inst.Y,
+		})
+	}
+	if len(parent.Assemblies) == 0 {
+		return nil
+	}
+	if s.connStore == nil {
+		return fmt.Errorf("connection store non configuré")
+	}
+	parentConnIDs := make(map[string]bool, len(parent.Assemblies))
+	for _, id := range parent.Assemblies {
+		parentConnIDs[id] = true
+	}
+	allConns, err := s.connStore.ListConnections()
+	if err != nil {
+		return err
+	}
+	for _, c := range allConns {
+		if !parentConnIDs[c.ID] {
+			continue
+		}
+		clone := &Connection{
+			ID:              generateID(),
+			From:            c.From,
+			To:              c.To,
+			Label:           c.Label,
+			FromIfaceID:     c.FromIfaceID,
+			ToIfaceID:       c.ToIfaceID,
+			FromInstanceID:  remapInstanceID(instanceIDMap, c.FromInstanceID),
+			ToInstanceID:    remapInstanceID(instanceIDMap, c.ToInstanceID),
+			FastenerAssetID: c.FastenerAssetID,
+		}
+		if err := s.connStore.SaveConnection(clone); err != nil {
+			return err
+		}
+		dst.Assemblies = append(dst.Assemblies, clone.ID)
+	}
+	return nil
+}
+
+// remapInstanceID retourne l'ID d'instance clonée correspondant à instanceID,
+// ou instanceID inchangé s'il ne référence aucune instance clonée (connexion
+// directe entre assets, sans WorkspaceInstance).
+func remapInstanceID(instanceIDMap map[string]string, instanceID string) string {
+	if instanceID == "" {
+		return ""
+	}
+	if remapped, ok := instanceIDMap[instanceID]; ok {
+		return remapped
+	}
+	return instanceID
 }
 
 func (s *Service) GetModule(id string) (*Model3D, error) {

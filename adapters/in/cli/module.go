@@ -46,6 +46,7 @@ var moduleCreateCmd = &cobra.Command{
 		description, _ := cmd.Flags().GetString("description")
 		ownerID, _ := cmd.Flags().GetString("owner-id")
 		licenseID, _ := cmd.Flags().GetString("license")
+		parentID, _ := cmd.Flags().GetString("parent-id")
 
 		return runModuleCreate(cmd.OutOrStdout(), modelSvc, model.ModuleRequest{
 			Name:        name,
@@ -53,6 +54,7 @@ var moduleCreateCmd = &cobra.Command{
 			OwnerID:     ownerID,
 			ChannelID:   channelID,
 			LicenseID:   licenseID,
+			ParentID:    parentID,
 		})
 	},
 }
@@ -233,6 +235,7 @@ func init() {
 	moduleCreateCmd.Flags().String("description", "", "Description du module")
 	moduleCreateCmd.Flags().String("owner-id", "", "ID de l'identité propriétaire")
 	moduleCreateCmd.Flags().String("license", "", "ID de licence dans le catalogue")
+	moduleCreateCmd.Flags().String("parent-id", "", "ID d'un module existant à dériver — sa composition (instances, liaisons) est dupliquée dans le nouveau brouillon")
 	moduleCreateCmd.MarkFlagRequired("name")
 
 	moduleListCmd.Flags().String("channel", "", "ID du canal")

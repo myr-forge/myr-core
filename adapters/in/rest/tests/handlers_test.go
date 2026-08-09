@@ -58,9 +58,9 @@ type mockSvc struct {
 	updateInstancePosition   func(moduleID, instanceID string, x, y float64) (*model.Model3D, error)
 	listLicenses             func() []*model.License
 	getLicense               func(id string) (*model.License, error)
-	checkLicenseCompat        func(parentID, proposedID string) *model.LicenseCheck
-	checkModuleLicenseCompat  func(componentIDs []string, proposedID string) *model.LicenseCheck
-	connectVirtualToPhysical  func(virtualIfaceID, physicalIfaceID string, popupValues model.AssetInterface, fromInstanceID, toInstanceID string) (*model.Connection, error)
+	checkLicenseCompat       func(parentID, proposedID string) *model.LicenseCheck
+	checkModuleLicenseCompat func(componentIDs []string, proposedID string) *model.LicenseCheck
+	connectVirtualToPhysical func(virtualIfaceID, physicalIfaceID string, popupValues model.AssetInterface, fromInstanceID, toInstanceID string) (*model.Connection, error)
 }
 
 func (m *mockSvc) AddFull(req model.AddRequest) (*model.Model3D, error) {
@@ -470,7 +470,9 @@ func TestComponents_GET_Empty(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("got %d, want 200", w.Code)
 	}
-	var resp struct{ Total int `json:"total"` }
+	var resp struct {
+		Total int `json:"total"`
+	}
 	decodeJSON(t, w, &resp)
 	if resp.Total != 0 {
 		t.Errorf("total: got %d, want 0", resp.Total)
@@ -488,7 +490,9 @@ func TestComponents_GET_ExcludesModules(t *testing.T) {
 		}, nil
 	}}
 	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components", "")
-	var resp struct{ Total int `json:"total"` }
+	var resp struct {
+		Total int `json:"total"`
+	}
 	decodeJSON(t, w, &resp)
 	if resp.Total != 1 {
 		t.Errorf("total: got %d, want 1 (modules exclus)", resp.Total)
@@ -510,7 +514,9 @@ func TestComponents_GET_FilterByQuery(t *testing.T) {
 	mux := newTestMux(t, svc)
 	r.Header.Set("X-Myr-Token", loginToken(t, mux))
 	mux.ServeHTTP(w, r)
-	var resp struct{ Total int `json:"total"` }
+	var resp struct {
+		Total int `json:"total"`
+	}
 	decodeJSON(t, w, &resp)
 	if resp.Total != 1 {
 		t.Errorf("filter q=vis: got %d, want 1", resp.Total)
@@ -532,7 +538,9 @@ func TestComponents_GET_FilterByCategory(t *testing.T) {
 	mux := newTestMux(t, svc)
 	r.Header.Set("X-Myr-Token", loginToken(t, mux))
 	mux.ServeHTTP(w, r)
-	var resp struct{ Total int `json:"total"` }
+	var resp struct {
+		Total int `json:"total"`
+	}
 	decodeJSON(t, w, &resp)
 	if resp.Total != 1 {
 		t.Errorf("filter categories=base: got %d, want 1", resp.Total)
@@ -554,7 +562,9 @@ func TestComponents_GET_FilterByTag(t *testing.T) {
 	mux := newTestMux(t, svc)
 	r.Header.Set("X-Myr-Token", loginToken(t, mux))
 	mux.ServeHTTP(w, r)
-	var resp struct{ Total int `json:"total"` }
+	var resp struct {
+		Total int `json:"total"`
+	}
 	decodeJSON(t, w, &resp)
 	if resp.Total != 1 {
 		t.Errorf("filter tags=métal: got %d, want 1", resp.Total)
@@ -609,8 +619,8 @@ func TestComponents_GET_BlockchainUnreachable_WithDrafts_Returns200Degraded(t *t
 	}
 	var resp struct {
 		Components []map[string]any `json:"components"`
-		Degraded   bool              `json:"degraded"`
-		Warning    string            `json:"warning"`
+		Degraded   bool             `json:"degraded"`
+		Warning    string           `json:"warning"`
 	}
 	decodeJSON(t, w, &resp)
 	if !resp.Degraded {
@@ -813,7 +823,9 @@ func TestComponents_POST_WithSTLFile(t *testing.T) {
 	if capturedReq.OwnerID != "user1" {
 		t.Errorf("OwnerID: got %q, want user1", capturedReq.OwnerID)
 	}
-	var dto struct{ ID string `json:"id"` }
+	var dto struct {
+		ID string `json:"id"`
+	}
 	decodeJSON(t, w, &dto)
 	if dto.ID != "c1" {
 		t.Errorf("ID: got %q, want c1", dto.ID)
@@ -914,6 +926,164 @@ func TestComponents_POST_WithThumbnail(t *testing.T) {
 	}
 	if thumbSaved != thumb {
 		t.Errorf("thumbnail non sauvegardée: got %q", thumbSaved)
+	}
+}
+
+// ── /api/components/batch ────────────────────────────────────────────────────
+
+func buildMultipartFormMultiFile(t *testing.T, fields map[string]string, fileField string, files map[string][]byte) (*bytes.Buffer, string) {
+	t.Helper()
+	body := &bytes.Buffer{}
+	w := multipart.NewWriter(body)
+	for k, v := range fields {
+		if err := w.WriteField(k, v); err != nil {
+			t.Fatalf("WriteField %q: %v", k, err)
+		}
+	}
+	for filename, content := range files {
+		part, err := w.CreateFormFile(fileField, filename)
+		if err != nil {
+			t.Fatalf("CreateFormFile %q: %v", filename, err)
+		}
+		part.Write(content)
+	}
+	w.Close()
+	return body, w.FormDataContentType()
+}
+
+/// @brief  Vérifie que POST /api/components/batch crée un composant par fichier et partage les champs communs
+/// @input  POST /api/components/batch, 2 fichiers sous "files", owner_id partagé, mockSvc.addFull réussit toujours
+/// @expect HTTP 200, 2 résultats avec "component" renseigné, succeeded=2, failed=0, OwnerID partagé sur chaque appel
+func TestComponentsBatch_POST_AllSucceed(t *testing.T) {
+	var capturedReqs []model.AddRequest
+	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
+		capturedReqs = append(capturedReqs, req)
+		return &model.Model3D{ID: "c-" + req.Name, Name: req.Name, CreatedAt: time.Now()}, nil
+	}}
+
+	body, ct := buildMultipartFormMultiFile(t,
+		map[string]string{"owner_id": "user1"},
+		"files",
+		map[string][]byte{
+			"vis.stl":   []byte("solid vis\nendsolid vis\n"),
+			"ecrou.stl": []byte("solid ecrou\nendsolid ecrou\n"),
+		})
+
+	req := httptest.NewRequest(http.MethodPost, "/api/components/batch", body)
+	req.Header.Set("Content-Type", ct)
+	w := httptest.NewRecorder()
+	mux := newTestMux(t, svc)
+	req.Header.Set("X-Myr-Token", loginToken(t, mux))
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	var resp struct {
+		Results []struct {
+			Filename  string          `json:"filename"`
+			Component json.RawMessage `json:"component"`
+			Error     string          `json:"error"`
+		} `json:"results"`
+		Succeeded int `json:"succeeded"`
+		Failed    int `json:"failed"`
+	}
+	decodeJSON(t, w, &resp)
+	if resp.Succeeded != 2 || resp.Failed != 0 {
+		t.Errorf("succeeded/failed: got %d/%d, want 2/0", resp.Succeeded, resp.Failed)
+	}
+	if len(resp.Results) != 2 {
+		t.Fatalf("results: got %d, want 2", len(resp.Results))
+	}
+	for _, r := range resp.Results {
+		if r.Component == nil {
+			t.Errorf("résultat %q: component attendu non nul", r.Filename)
+		}
+	}
+	if len(capturedReqs) != 2 {
+		t.Fatalf("AddFull appelé %d fois, want 2", len(capturedReqs))
+	}
+	for _, r := range capturedReqs {
+		if r.OwnerID != "user1" {
+			t.Errorf("OwnerID: got %q, want user1 (champ partagé)", r.OwnerID)
+		}
+		if r.Name == "" {
+			t.Error("Name doit être dérivé du nom de fichier")
+		}
+	}
+}
+
+/// @brief  Vérifie que POST /api/components/batch n'est pas tout-ou-rien : un échec sur un fichier n'empêche pas les autres de réussir
+/// @input  POST /api/components/batch, 2 fichiers, mockSvc.addFull échoue pour "mauvais.stl" uniquement
+/// @expect HTTP 200, succeeded=1, failed=1, le résultat en échec porte un message d'erreur non vide
+func TestComponentsBatch_POST_PartialFailure(t *testing.T) {
+	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
+		if req.Name == "mauvais" {
+			return nil, errors.New("hash invalide")
+		}
+		return &model.Model3D{ID: "c-" + req.Name, Name: req.Name, CreatedAt: time.Now()}, nil
+	}}
+
+	body, ct := buildMultipartFormMultiFile(t, nil, "files", map[string][]byte{
+		"bon.stl":     []byte("solid bon\nendsolid bon\n"),
+		"mauvais.stl": []byte("solid mauvais\nendsolid mauvais\n"),
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/api/components/batch", body)
+	req.Header.Set("Content-Type", ct)
+	w := httptest.NewRecorder()
+	mux := newTestMux(t, svc)
+	req.Header.Set("X-Myr-Token", loginToken(t, mux))
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	var resp struct {
+		Succeeded int `json:"succeeded"`
+		Failed    int `json:"failed"`
+		Results   []struct {
+			Filename string `json:"filename"`
+			Error    string `json:"error"`
+		} `json:"results"`
+	}
+	decodeJSON(t, w, &resp)
+	if resp.Succeeded != 1 || resp.Failed != 1 {
+		t.Errorf("succeeded/failed: got %d/%d, want 1/1", resp.Succeeded, resp.Failed)
+	}
+	var errFound bool
+	for _, r := range resp.Results {
+		if r.Filename == "mauvais.stl" {
+			errFound = r.Error != ""
+		}
+	}
+	if !errFound {
+		t.Error("le résultat pour mauvais.stl doit porter un message d'erreur")
+	}
+}
+
+/// @brief  Vérifie que POST /api/components/batch sans aucun fichier retourne 400
+/// @input  POST /api/components/batch, champ "files" absent
+/// @expect HTTP 400
+func TestComponentsBatch_POST_NoFiles_Rejected(t *testing.T) {
+	body, ct := buildMultipartFormMultiFile(t, map[string]string{"owner_id": "user1"}, "files", nil)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/components/batch", body)
+	req.Header.Set("Content-Type", ct)
+	w := httptest.NewRecorder()
+	mux := newTestMux(t, &mockSvc{})
+	req.Header.Set("X-Myr-Token", loginToken(t, mux))
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("got %d, want 400 (body: %s)", w.Code, w.Body.String())
+	}
+}
+
+func TestComponentsBatch_MethodNotAllowed(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/components/batch", "")
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Errorf("got %d, want 405", w.Code)
 	}
 }
 
@@ -1203,7 +1373,9 @@ func TestComponent_GET_Found(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("got %d, want 200", w.Code)
 	}
-	var dto struct{ ID string `json:"id"` }
+	var dto struct {
+		ID string `json:"id"`
+	}
 	decodeJSON(t, w, &dto)
 	if dto.ID != "abc" {
 		t.Errorf("ID: got %q, want %q", dto.ID, "abc")
@@ -1426,10 +1598,40 @@ func TestModules_GET_WithItems(t *testing.T) {
 		}, nil
 	}}
 	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/modules", "")
-	var resp struct{ Total int `json:"total"` }
+	var resp struct {
+		Total int `json:"total"`
+	}
 	decodeJSON(t, w, &resp)
 	if resp.Total != 2 {
 		t.Errorf("total: got %d, want 2", resp.Total)
+	}
+}
+
+/// @brief  Vérifie que GET /api/modules?owner_id=&status= filtre côté handler comme listGraph pour /api/components
+/// @input  GET /api/modules?owner_id=u1&status=draft, mockSvc.listModules retourne 3 modules (propriétaires/statuts variés)
+/// @expect Seul le module appartenant à u1 en statut draft est retourné
+func TestModules_GET_FiltersByOwnerAndStatus(t *testing.T) {
+	svc := &mockSvc{listModules: func(string) ([]*model.Model3D, error) {
+		return []*model.Model3D{
+			{ID: "m1", OwnerID: "u1", Status: model.ModuleDraft},
+			{ID: "m2", OwnerID: "u1", Status: model.ModuleSubmitted},
+			{ID: "m3", OwnerID: "u2", Status: model.ModuleDraft},
+		}, nil
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/modules?owner_id=u1&status=draft", "")
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	var resp struct {
+		Items []struct {
+			ID string `json:"id"`
+		} `json:"items"`
+		Total int `json:"total"`
+	}
+	decodeJSON(t, w, &resp)
+	if resp.Total != 1 || len(resp.Items) != 1 || resp.Items[0].ID != "m1" {
+		t.Errorf("attendu 1 module (m1), got %+v", resp)
 	}
 }
 
@@ -1449,8 +1651,8 @@ func TestModules_GET_BlockchainUnreachable_WithDrafts_Returns200Degraded(t *test
 	}
 	var resp struct {
 		Items    []map[string]any `json:"items"`
-		Degraded bool              `json:"degraded"`
-		Warning  string            `json:"warning"`
+		Degraded bool             `json:"degraded"`
+		Warning  string           `json:"warning"`
 	}
 	decodeJSON(t, w, &resp)
 	if !resp.Degraded {
@@ -1493,7 +1695,9 @@ func TestModule_GET_Found(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("got %d, want 200", w.Code)
 	}
-	var dto struct{ ID string `json:"id"` }
+	var dto struct {
+		ID string `json:"id"`
+	}
 	decodeJSON(t, w, &dto)
 	if dto.ID != "m1" {
 		t.Errorf("ID: got %q, want %q", dto.ID, "m1")
@@ -1514,6 +1718,31 @@ func TestModule_DELETE(t *testing.T) {
 	w := do(t, newTestMux(t, &mockSvc{}), http.MethodDelete, "/api/modules/m1", "")
 	if w.Code != http.StatusNoContent {
 		t.Errorf("got %d, want 204", w.Code)
+	}
+}
+
+/// @brief  Vérifie que PATCH /api/modules/{id} modifie les métadonnées via le même UpdateAsset que les composants
+/// @input  PATCH /api/modules/m1, body {"name":"Chassis v2"}
+/// @expect HTTP 200, UpdateAsset appelé avec ID="m1" et Name="Chassis v2"
+func TestModule_PATCH_OK(t *testing.T) {
+	var captured model.UpdateRequest
+	svc := &mockSvc{updateAsset: func(req model.UpdateRequest) (*model.Model3D, error) {
+		captured = req
+		return &model.Model3D{ID: req.ID, Name: req.Name}, nil
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodPatch, "/api/modules/m1", `{"name":"Chassis v2"}`)
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	if captured.ID != "m1" || captured.Name != "Chassis v2" {
+		t.Errorf("UpdateRequest: got %+v", captured)
+	}
+}
+
+func TestModule_PATCH_BadJSON(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPatch, "/api/modules/m1", "{bad")
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("got %d, want 400", w.Code)
 	}
 }
 
@@ -1813,7 +2042,9 @@ func TestPing_OK(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("got %d, want 200", w.Code)
 	}
-	var resp struct{ Ok bool `json:"ok"` }
+	var resp struct {
+		Ok bool `json:"ok"`
+	}
 	decodeJSON(t, w, &resp)
 	if !resp.Ok {
 		t.Error("attendu ok=true")
@@ -1838,7 +2069,9 @@ func TestListGraph_FilterByParentID(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("got %d, want 200", w.Code)
 	}
-	var resp struct{ Total int `json:"total"` }
+	var resp struct {
+		Total int `json:"total"`
+	}
 	decodeJSON(t, w, &resp)
 	if resp.Total != 2 {
 		t.Errorf("filter parent_id=parent1: got %d, want 2", resp.Total)

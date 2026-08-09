@@ -462,6 +462,71 @@ func TestDraft_Persistence(t *testing.T) {
 	}
 }
 
+// ── HideAsset / IsHidden (RemovedAssetStore, RM08) ────────────────────────────
+
+// / @brief  Vérifie que HideAsset marque un ID comme masqué et qu'IsHidden le reflète
+// / @input  Base vide, HideAsset("a1")
+// / @expect IsHidden("a1") retourne true, sans erreur
+func TestHideAsset_And_IsHidden(t *testing.T) {
+	db, _ := tmpDB(t)
+	if err := db.HideAsset("a1"); err != nil {
+		t.Fatalf("HideAsset: %v", err)
+	}
+	hidden, err := db.IsHidden("a1")
+	if err != nil {
+		t.Fatalf("IsHidden: %v", err)
+	}
+	if !hidden {
+		t.Fatal("expected a1 to be hidden")
+	}
+}
+
+// / @brief  Vérifie qu'un ID jamais masqué retourne false, sans erreur
+// / @input  Base vide
+// / @expect IsHidden("jamais-masque") retourne false, sans erreur
+func TestIsHidden_NeverHidden_ReturnsFalse(t *testing.T) {
+	db, _ := tmpDB(t)
+	hidden, err := db.IsHidden("jamais-masque")
+	if err != nil {
+		t.Fatalf("IsHidden: %v", err)
+	}
+	if hidden {
+		t.Fatal("expected jamais-masque to not be hidden")
+	}
+}
+
+// / @brief  Vérifie que HideAsset est idempotent — masquer deux fois le même ID ne provoque pas d'erreur
+// / @input  HideAsset("a1") appelé deux fois
+// / @expect Aucune erreur, IsHidden("a1") retourne toujours true
+func TestHideAsset_Idempotent(t *testing.T) {
+	db, _ := tmpDB(t)
+	_ = db.HideAsset("a1")
+	if err := db.HideAsset("a1"); err != nil {
+		t.Fatalf("second HideAsset: %v", err)
+	}
+	hidden, _ := db.IsHidden("a1")
+	if !hidden {
+		t.Fatal("expected a1 to remain hidden")
+	}
+}
+
+// / @brief  Vérifie que le masquage est relu correctement après rechargement du fichier
+// / @input  HideAsset("a1"), rechargement via un nouveau JSONBlockchain sur le même chemin
+// / @expect IsHidden("a1") retourne true sur la nouvelle instance
+func TestHideAsset_Persistence(t *testing.T) {
+	db, path := tmpDB(t)
+	_ = db.HideAsset("a1")
+
+	db2 := localstorage.NewJSONBlockchain(path)
+	hidden, err := db2.IsHidden("a1")
+	if err != nil {
+		t.Fatalf("IsHidden: %v", err)
+	}
+	if !hidden {
+		t.Fatal("masquage non persisté après rechargement")
+	}
+}
+
 // ── SaveConnection / ListConnections / UpdateConnection / RemoveConnection ────
 
 func newConn(id, from, to string) *model.Connection {

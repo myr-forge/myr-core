@@ -31,7 +31,8 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 | EF13                                             | Faire évoluer un composant (amélioration, dérivation, extension)     | UCCE04, UCCE05            |
 | EF14                                             | Ajouter une interface à un composant existant                          | UCCE06                    |
 | EF15                                             | Vérifier l'unicité d'un composant (anti-plagiat SHA-256 + SCM > 50 %) | UCCE01                    |
-| EF16                                             | Vérifier la compatibilité de licence lors d'une dérivation           | UCCE04, UCMOD06           |
+| EF16                                             | Vérifier la compatibilité de licence lors d'une dérivation           | UCCE04, UCMOD01, UCMOD06  |
+| EF60                                             | Supprimer un composant (masquage local des listes, ledger jamais modifié) | UCCE07                |
 | **Composants — Lecture**                        |                                                                         |                           |
 | EF17                                             | Rechercher et filtrer les composants disponibles sur le réseau         | UCCL01                    |
 | **Composition (instances)**                       |                                                                         |                           |
@@ -44,10 +45,13 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 | EF24                                             | Retirer une instance de composant d'un module (avec cascade des connexions) | UCAM08                    |
 | EF25                                             | Garantir un slot virtuel disponible sur chaque asset                    | UCAM03                    |
 | **Modules**                                      |                                                                         |                           |
-| EF26                                             | Assembler plusieurs composants en module (état draft)                  | UCMOD01                   |
+| EF26                                             | Assembler plusieurs composants en module (état draft), y compris par dérivation d'un module existant (composition dupliquée depuis un `parent_id`) | UCMOD01 |
 | EF27                                             | Soumettre un module à la blockchain (ModuleVersion immuable)           | UCMOD06                   |
-| EF28                                             | Ajouter un module existant à l'espace de travail                       | UCMOD02, UCMOD03, UCMOD05 |
+| EF28                                             | Ajouter un module existant à l'espace de travail                       | UCMOD02 — #incoherence : cette ligne référençait aussi UCMOD03 et UCMOD05 ; UCMOD03 ne couvre pas cet EF (il documente la modification des métadonnées d'un module, sans rapport avec l'ajout d'un module existant comme instance) et UCMOD05 ne correspond à aucun fichier existant dans `specs/1-Expression/UCMOD-Module/` ni `specs/2-Analyse/UCMOD-Module/` — origine de ces deux références à clarifier avant de les retirer définitivement |
 | EF29                                             | Visualiser la composition d'un module                                   | UCMOD04                   |
+| EF61                                             | Modifier les métadonnées d'un module (nom, description, licence, tags, liens) | UCMOD03            |
+| EF62                                             | Supprimer un module (masquage local des listes, ledger jamais modifié) | UCMOD08                   |
+| EF63                                             | Lister ses modules en brouillon, filtrés par propriétaire et par statut | UCMOD07                   |
 | **Propriété Intellectuelle et Rémunération** |                                                                         |                           |
 | EF30                                             | Commander un module complet (fabrication ou achat en stock)             | UCPI01                    |
 | EF31                                             | Distribuer automatiquement les commissions aux auteurs à la livraison  | UCPI02, UCAUT01           |

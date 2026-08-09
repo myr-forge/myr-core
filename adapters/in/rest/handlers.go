@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -108,16 +109,17 @@ type blockchainRouter interface {
 }
 
 type Handler struct {
-	modelSvc    model.ModelService
-	thumbStore  model.ThumbnailStore
-	ifaceStore  model.InterfaceStore
-	draftStore  model.DraftStore
-	identitySvc identity.IdentityService
-	networkSvc  network.NetworkService
-	roleSvc     rbac.RoleService
-	sessions    sessionBackend
-	netInfo     NetworkInfo
-	authLimiter *ipRateLimiter
+	modelSvc     model.ModelService
+	thumbStore   model.ThumbnailStore
+	ifaceStore   model.InterfaceStore
+	draftStore   model.DraftStore
+	removedStore model.RemovedAssetStore
+	identitySvc  identity.IdentityService
+	networkSvc   network.NetworkService
+	roleSvc      rbac.RoleService
+	sessions     sessionBackend
+	netInfo      NetworkInfo
+	authLimiter  *ipRateLimiter
 
 	// Phase 2 : multi-réseau
 	bcRouter         blockchainRouter      // nil en mode legacy (réseau unique)
@@ -188,6 +190,12 @@ func (h *Handler) WithConnStore(cs model.ConnectionStore) *Handler {
 // WithDraftStore attache le store de brouillons pour svcFor (composants créés draft:true).
 func (h *Handler) WithDraftStore(ds model.DraftStore) *Handler {
 	h.draftStore = ds
+	return h
+}
+
+// WithRemovedStore attache le registre de masquage local (RM08) pour svcFor.
+func (h *Handler) WithRemovedStore(rs model.RemovedAssetStore) *Handler {
+	h.removedStore = rs
 	return h
 }
 
@@ -272,7 +280,7 @@ func (h *Handler) svcFor(r *http.Request) model.ModelService {
 	if h.ogImageFetcher != nil {
 		svc = svc.WithOGImageFetcher(h.ogImageFetcher)
 	}
-	return svc.WithThumbStore(h.thumbStore).WithIfaceStore(h.ifaceStore).WithDraftStore(h.draftStore)
+	return svc.WithThumbStore(h.thumbStore).WithIfaceStore(h.ifaceStore).WithDraftStore(h.draftStore).WithRemovedStore(h.removedStore)
 }
 
 // channelFor retourne le canal actif de la session, ou le canal par défaut du réseau.
@@ -336,18 +344,18 @@ func (h *Handler) requireRole(perm rbac.Permission, next http.HandlerFunc) http.
 // ── DTOs ─────────────────────────────────────────────────────────────────────
 
 type componentDTO struct {
-	ID          string             `json:"id"`
-	Name        string             `json:"name"`
-	Description string             `json:"description,omitempty"`
-	Category    model.Category     `json:"category"`
-	OwnerID     string             `json:"owner_id"`
-	ParentID    string             `json:"parent_id,omitempty"`
-	BlockID     string             `json:"block_id,omitempty"`
-	Hash        string             `json:"hash,omitempty"`
-	LicenseID   string             `json:"license_id,omitempty"`
-	Tags        []string           `json:"tags"`
-	Links       []string           `json:"links,omitempty"`
-	Thumbnail   string             `json:"thumbnail,omitempty"`
+	ID          string         `json:"id"`
+	Name        string         `json:"name"`
+	Description string         `json:"description,omitempty"`
+	Category    model.Category `json:"category"`
+	OwnerID     string         `json:"owner_id"`
+	ParentID    string         `json:"parent_id,omitempty"`
+	BlockID     string         `json:"block_id,omitempty"`
+	Hash        string         `json:"hash,omitempty"`
+	LicenseID   string         `json:"license_id,omitempty"`
+	Tags        []string       `json:"tags"`
+	Links       []string       `json:"links,omitempty"`
+	Thumbnail   string         `json:"thumbnail,omitempty"`
 	// Status vaut "draft" (créé via draft:true, pas encore engagé sur la blockchain
 	// — voir POST /components/{id}/submit) ou "submitted" (comportement nominal,
 	// immédiat). Vide pour un composant créé avant l'introduction du brouillon.
@@ -446,7 +454,7 @@ func (h *Handler) listGraph(w http.ResponseWriter, r *http.Request) {
 	ownerID := strings.TrimSpace(r.URL.Query().Get("owner_id"))
 	parentID := strings.TrimSpace(r.URL.Query().Get("parent_id"))
 	hashFilter := strings.TrimSpace(r.URL.Query().Get("hash")) // hash SHA-256 exact
-	tagsParam := r.URL.Query().Get("tags") // "tag1,tag2" — match si l'asset possède au moins un
+	tagsParam := r.URL.Query().Get("tags")                     // "tag1,tag2" — match si l'asset possède au moins un
 	limit := 200
 	if l, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && l > 0 && l <= 1000 {
 		limit = l
@@ -651,7 +659,32 @@ func (h *Handler) createAsset(w http.ResponseWriter, r *http.Request) {
 	if _, _, err := r.FormFile("file"); err != nil {
 		fileField = "stl"
 	}
-	if file, header, err := r.FormFile(fileField); err == nil {
+	file, header, ferr := r.FormFile(fileField)
+	if ferr != nil {
+		file, header = nil, nil
+	}
+
+	m, err := h.createOneComponent(r, req, file, header)
+	if err != nil {
+		internalErr(w, err)
+		return
+	}
+
+	// Miniature base64 envoyée par le frontend (Three.js renderer STL), sinon
+	// dérivée de l'og:image du premier lien si aucun n'est fourni.
+	h.applyThumbnailFallback(r, m.ID, r.FormValue("thumbnail"), req.Links)
+
+	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
+	w.WriteHeader(http.StatusCreated)
+	jsonOK(w, toComponentDTO(m, thumb))
+}
+
+// createOneComponent crée un composant à partir d'un gabarit AddRequest (Name
+// déjà renseigné) et d'un fichier CAO optionnel (nil si aucun fichier).
+// Réutilisée par createAsset (un fichier) et createComponentsBatch (plusieurs
+// fichiers, un composant par fichier — règle 28, ne pas dupliquer cette logique).
+func (h *Handler) createOneComponent(r *http.Request, req model.AddRequest, file multipart.File, header *multipart.FileHeader) (*model.Model3D, error) {
+	if file != nil {
 		defer file.Close()
 		ext := filepath.Ext(header.Filename)
 		if ext == "" {
@@ -659,49 +692,144 @@ func (h *Handler) createAsset(w http.ResponseWriter, r *http.Request) {
 		}
 		tmp, err := os.CreateTemp("", "myr-model-*"+ext)
 		if err != nil {
-			internalErr(w, err)
-			return
+			return nil, err
 		}
 		defer os.Remove(tmp.Name())
-
-		buf := make([]byte, header.Size)
 		tmp.Close()
 
 		// Réécrire proprement
 		if f2, err := os.Create(tmp.Name()); err == nil {
 			defer f2.Close()
-			buf = make([]byte, 32*1024)
+			buf := make([]byte, 32*1024)
 			for {
-				n, err := file.Read(buf)
+				n, readErr := file.Read(buf)
 				if n > 0 {
 					f2.Write(buf[:n])
 				}
-				if err != nil {
+				if readErr != nil {
 					break
 				}
 			}
 		}
 		req.FilePath = tmp.Name()
-		_ = buf
 	}
+	return h.svcFor(r).AddFull(req)
+}
 
-	m, err := h.svcFor(r).AddFull(req)
-	if err != nil {
-		internalErr(w, err)
+// applyThumbnailFallback sauvegarde thumb (data URL fournie explicitement)
+// si non vide, sinon dérive la miniature de l'og:image du premier lien
+// externe si des liens sont fournis. Sans effet si ni l'un ni l'autre.
+func (h *Handler) applyThumbnailFallback(r *http.Request, assetID, thumb string, links []string) {
+	if thumb != "" {
+		_ = h.svcFor(r).SaveThumbnail(assetID, thumb)
+	} else if len(links) > 0 {
+		_, _ = h.svcFor(r).RegenerateThumbnail(assetID)
+	}
+}
+
+// createComponentsBatch crée plusieurs composants en un seul appel, un
+// fichier CAO par composant (UCCE01). Le nom de chaque composant est dérivé
+// du nom de fichier (sans extension). Les autres champs (owner_id,
+// channel_id, category, parent_id, license_id, tags) sont partagés par tous
+// les fichiers du lot. Aucune garantie transactionnelle : pas de BDD SQL, pas
+// de transaction inter-blockchain (règle 16) — chaque fichier réussit ou
+// échoue indépendamment.
+//
+//	@Summary		Créer plusieurs composants en un seul appel
+//	@Description	Multipart, champ répété "files" (un ou plusieurs fichiers CAO). Champs partagés par tous les fichiers du lot : owner_id, channel_id, category, parent_id, license_id, tags. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier. Aucune atomicité entre les fichiers d'un même lot : la réponse détaille un résultat par fichier.
+//	@Tags			components
+//	@Accept			multipart/form-data
+//	@Produce		json
+//	@Param			files		formData	file	true	"un ou plusieurs fichiers CAO 3D"
+//	@Param			owner_id	formData	string	false	"propriétaire, partagé par tous les fichiers"
+//	@Param			channel_id	formData	string	false	"canal cible (défaut: canal de la session)"
+//	@Param			category	formData	string	false	"catégorie, partagée par tous les fichiers (défaut: base)"
+//	@Param			parent_id	formData	string	false	"asset parent, partagé par tous les fichiers"
+//	@Param			license_id	formData	string	false	"licence, partagée par tous les fichiers"
+//	@Param			tags		formData	string	false	"tags séparés par virgule, partagés par tous les fichiers"
+//	@Success		200	{object}	map[string]interface{}	"{results: [{filename, component} ou {filename, error}], succeeded, failed}"
+//	@Failure		400	{object}	map[string]string
+//	@Security		MyrToken
+//	@Router			/components/batch [post]
+func (h *Handler) createComponentsBatch(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		jsonError(w, "parsing form: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	var files []*multipart.FileHeader
+	if r.MultipartForm != nil {
+		files = r.MultipartForm.File["files"]
+	}
+	if len(files) == 0 {
+		jsonError(w, "au moins un fichier est requis dans le champ 'files'", http.StatusBadRequest)
 		return
 	}
 
-	// Miniature base64 envoyée par le frontend (Three.js renderer STL)
-	if thumb := r.FormValue("thumbnail"); thumb != "" {
-		_ = h.svcFor(r).SaveThumbnail(m.ID, thumb)
-	} else if len(req.Links) > 0 {
-		// Pas de fichier 3D : dériver la miniature de l'og:image du premier lien
-		_, _ = h.svcFor(r).RegenerateThumbnail(m.ID)
+	ownerID := strings.TrimSpace(r.FormValue("owner_id"))
+	channelID := strings.TrimSpace(r.FormValue("channel_id"))
+	if ownerID != "" && !validFieldID.MatchString(ownerID) {
+		jsonError(w, "owner_id invalide", http.StatusBadRequest)
+		return
+	}
+	if channelID != "" && !validFieldID.MatchString(channelID) {
+		jsonError(w, "channel_id invalide", http.StatusBadRequest)
+		return
+	}
+	if channelID == "" {
+		channelID = h.channelFor(r)
 	}
 
-	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-	w.WriteHeader(http.StatusCreated)
-	jsonOK(w, toComponentDTO(m, thumb))
+	shared := model.AddRequest{
+		Category:  model.Category(r.FormValue("category")),
+		OwnerID:   ownerID,
+		ParentID:  strings.TrimSpace(r.FormValue("parent_id")),
+		ChannelID: channelID,
+		LicenseID: strings.TrimSpace(r.FormValue("license_id")),
+		Tags:      parseTags(r.FormValue("tags")),
+	}
+	if shared.Category == "" {
+		shared.Category = model.CategoryBase
+	}
+
+	type batchItemResult struct {
+		Filename  string        `json:"filename"`
+		Component *componentDTO `json:"component,omitempty"`
+		Error     string        `json:"error,omitempty"`
+	}
+	results := make([]batchItemResult, 0, len(files))
+	succeeded, failed := 0, 0
+
+	for _, header := range files {
+		name := strings.TrimSuffix(header.Filename, filepath.Ext(header.Filename))
+		if name == "" {
+			name = header.Filename
+		}
+		file, err := header.Open()
+		if err != nil {
+			results = append(results, batchItemResult{Filename: header.Filename, Error: err.Error()})
+			failed++
+			continue
+		}
+		req := shared
+		req.Name = name
+		m, err := h.createOneComponent(r, req, file, header)
+		if err != nil {
+			results = append(results, batchItemResult{Filename: header.Filename, Error: err.Error()})
+			failed++
+			continue
+		}
+		h.applyThumbnailFallback(r, m.ID, "", req.Links)
+		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
+		dto := toComponentDTO(m, thumb)
+		results = append(results, batchItemResult{Filename: header.Filename, Component: &dto})
+		succeeded++
+	}
+
+	jsonOK(w, map[string]any{
+		"results":   results,
+		"succeeded": succeeded,
+		"failed":    failed,
+	})
 }
 
 // ── /api/components/:id ──────────────────────────────────────────────────────────
@@ -710,6 +838,17 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 	rest := strings.TrimPrefix(r.URL.Path, "/api/components/")
 	if rest == "" {
 		http.NotFound(w, r)
+		return
+	}
+	// /api/components/batch — création de plusieurs composants en un seul appel.
+	// Traité ici (et non via un mux.HandleFunc séparé) pour ne jamais être
+	// confondu avec un identifiant d'asset par le routage /:id ci-dessous.
+	if rest == "batch" {
+		if r.Method != http.MethodPost {
+			http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
+			return
+		}
+		h.createComponentsBatch(w, r)
 		return
 	}
 	// Sous-route /:id/interfaces
@@ -869,6 +1008,24 @@ func (h *Handler) submitComponent(w http.ResponseWriter, r *http.Request, id str
 //	@Security		MyrToken
 //	@Router			/components/{id} [patch]
 func (h *Handler) patchComponent(w http.ResponseWriter, r *http.Request, id string) {
+	req, err := decodeUpdateRequest(r, id)
+	if err != nil {
+		jsonError(w, "JSON invalide: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	m, err := h.svcFor(r).UpdateAsset(req)
+	if err != nil {
+		internalErr(w, err)
+		return
+	}
+	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
+	jsonOK(w, toComponentDTO(m, thumb))
+}
+
+// decodeUpdateRequest décode le corps JSON partagé par PATCH /components/{id}
+// et PATCH /modules/{id} — mêmes champs modifiables (name, description,
+// license_id, tags, links) pour tout asset, composant ou module.
+func decodeUpdateRequest(r *http.Request, id string) (model.UpdateRequest, error) {
 	var body struct {
 		Name        string   `json:"name"`
 		Description string   `json:"description"`
@@ -877,19 +1034,40 @@ func (h *Handler) patchComponent(w http.ResponseWriter, r *http.Request, id stri
 		Links       []string `json:"links"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		return model.UpdateRequest{}, err
+	}
+	return model.UpdateRequest{
+		ID: id, Name: body.Name, Description: body.Description,
+		LicenseID: body.LicenseID, Tags: body.Tags, Links: body.Links,
+	}, nil
+}
+
+// patchModule modifie les métadonnées d'un module existant (champs partiels).
+//
+//	@Summary		Modifier les métadonnées d'un module
+//	@Description	Champs modifiables : name, description, license_id, tags, links (identiques à PATCH /components/{id}) — la composition (instances, liaisons) n'est pas modifiable par cette route, voir /modules/{id}/instances.
+//	@Tags			modules
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		string	true	"identifiant du module"
+//	@Param			body	body		object	true	"champs à modifier (name, description, license_id, tags, links)"
+//	@Success		200	{object}	moduleDTO
+//	@Failure		400	{object}	map[string]string
+//	@Failure		500	{object}	map[string]string
+//	@Security		MyrToken
+//	@Router			/modules/{id} [patch]
+func (h *Handler) patchModule(w http.ResponseWriter, r *http.Request, id string) {
+	req, err := decodeUpdateRequest(r, id)
+	if err != nil {
 		jsonError(w, "JSON invalide: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	m, err := h.svcFor(r).UpdateAsset(model.UpdateRequest{
-		ID: id, Name: body.Name, Description: body.Description,
-		LicenseID: body.LicenseID, Tags: body.Tags, Links: body.Links,
-	})
+	m, err := h.svcFor(r).UpdateAsset(req)
 	if err != nil {
 		internalErr(w, err)
 		return
 	}
-	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-	jsonOK(w, toComponentDTO(m, thumb))
+	jsonOK(w, h.toModuleDTO(m))
 }
 
 // getComponent renvoie le détail d'un composant.
@@ -915,7 +1093,7 @@ func (h *Handler) getComponent(w http.ResponseWriter, r *http.Request, id string
 // deleteComponent supprime un composant du stockage local.
 //
 //	@Summary		Supprimer un composant
-//	@Description	Suppression locale uniquement — la blockchain Fabric ne supporte pas la suppression (règle 9) ; un composant déjà soumis reste sur le ledger.
+//	@Description	Un brouillon est réellement retiré du stockage local. Un composant déjà soumis est masqué localement — il disparaît de GET /components mais reste consultable via GET /components/{id} — la blockchain Fabric ne supporte aucune suppression (règle 9) et son enregistrement n'est jamais modifié.
 //	@Tags			components
 //	@Param			id	path	string	true	"identifiant du composant"
 //	@Success		204	"pas de contenu"
@@ -1142,15 +1320,15 @@ func (h *Handler) handleAssemblyLinks(w http.ResponseWriter, r *http.Request) {
 // ── /api/virtual-connect ─────────────────────────────────────────────────────
 
 type virtualConnectRequest struct {
-	VirtualIfaceID   string  `json:"virtual_iface_id"`
-	PhysicalIfaceID  string  `json:"physical_iface_id"`
-	Name             string  `json:"name,omitempty"`
-	ValueMin         float64 `json:"value_min"`
-	ValueMax         float64 `json:"value_max"`
-	IsRange          bool    `json:"is_range"`
-	Unit             string  `json:"unit,omitempty"`
-	FromInstanceID   string  `json:"from_instance_id,omitempty"`
-	ToInstanceID     string  `json:"to_instance_id,omitempty"`
+	VirtualIfaceID  string  `json:"virtual_iface_id"`
+	PhysicalIfaceID string  `json:"physical_iface_id"`
+	Name            string  `json:"name,omitempty"`
+	ValueMin        float64 `json:"value_min"`
+	ValueMax        float64 `json:"value_max"`
+	IsRange         bool    `json:"is_range"`
+	Unit            string  `json:"unit,omitempty"`
+	FromInstanceID  string  `json:"from_instance_id,omitempty"`
+	ToInstanceID    string  `json:"to_instance_id,omitempty"`
 }
 
 // handleVirtualConnect relie une interface virtuelle à une interface physique.
@@ -1239,13 +1417,15 @@ func (h *Handler) toModuleDTO(m *model.Model3D) moduleDTO {
 // handleModules liste ou crée des modules.
 //
 //	@Summary		Lister ou créer des modules
-//	@Description	GET liste les modules (filtre texte "q", pagination "limit"). POST crée un module en brouillon (status "draft") — un module exige au moins un assemblage avant d'être soumis (règle 14).
+//	@Description	GET liste les modules (filtre texte "q", filtre "owner_id", filtre "status" — "draft" ou "submitted", pagination "limit"). POST crée un module en brouillon (status "draft") — un module exige au moins un assemblage avant d'être soumis (règle 14).
 //	@Tags			modules
 //	@Accept			json
 //	@Produce		json
-//	@Param			q		query		string	false	"recherche texte (nom, description) — GET uniquement"
-//	@Param			limit	query		int		false	"nombre maximum de résultats (défaut 200, max 1000) — GET uniquement"
-//	@Param			body	body		object	false	"name (requis), description, owner_id, channel_id, license_id — POST uniquement"
+//	@Param			q			query		string	false	"recherche texte (nom, description) — GET uniquement"
+//	@Param			owner_id	query		string	false	"filtre par propriétaire — GET uniquement"
+//	@Param			status		query		string	false	"filtre par statut : draft ou submitted — GET uniquement"
+//	@Param			limit		query		int		false	"nombre maximum de résultats (défaut 200, max 1000) — GET uniquement"
+//	@Param			body		body		object	false	"name (requis), description, owner_id, channel_id, license_id, parent_id — POST uniquement"
 //	@Success		200	{object}	map[string]interface{}	"GET : {items, total}"
 //	@Success		201	{object}	moduleDTO				"POST : module créé"
 //	@Failure		400	{object}	map[string]string
@@ -1256,6 +1436,8 @@ func (h *Handler) handleModules(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		q := strings.TrimSpace(strings.ToLower(r.URL.Query().Get("q")))
+		ownerID := strings.TrimSpace(r.URL.Query().Get("owner_id"))
+		status := strings.TrimSpace(r.URL.Query().Get("status"))
 		limit := 200
 		if l, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && l > 0 && l <= 1000 {
 			limit = l
@@ -1275,6 +1457,12 @@ func (h *Handler) handleModules(w http.ResponseWriter, r *http.Request) {
 		for _, p := range all {
 			if q != "" && !strings.Contains(strings.ToLower(p.Name), q) &&
 				!strings.Contains(strings.ToLower(p.Description), q) {
+				continue
+			}
+			if ownerID != "" && p.OwnerID != ownerID {
+				continue
+			}
+			if status != "" && string(p.Status) != status {
 				continue
 			}
 			filtered = append(filtered, p)
@@ -1300,6 +1488,7 @@ func (h *Handler) handleModules(w http.ResponseWriter, r *http.Request) {
 			OwnerID     string `json:"owner_id"`
 			ChannelID   string `json:"channel_id"`
 			LicenseID   string `json:"license_id"`
+			ParentID    string `json:"parent_id"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Name == "" {
 			jsonError(w, "le champ 'name' est requis", http.StatusBadRequest)
@@ -1311,6 +1500,7 @@ func (h *Handler) handleModules(w http.ResponseWriter, r *http.Request) {
 		p, err := h.svcFor(r).CreateModule(model.ModuleRequest{
 			Name: req.Name, Description: req.Description,
 			OwnerID: req.OwnerID, ChannelID: req.ChannelID, LicenseID: req.LicenseID,
+			ParentID: req.ParentID,
 		})
 		if err != nil {
 			internalErr(w, err)
@@ -1330,7 +1520,7 @@ func (h *Handler) handleModules(w http.ResponseWriter, r *http.Request) {
 // (api/swagger.json) partage donc les mêmes réponses génériques pour toutes.
 //
 //	@Summary		Opérations sur un module et ses sous-ressources
-//	@Description	GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).
+//	@Description	GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).
 //	@Tags			modules
 //	@Accept			json
 //	@Produce		json
@@ -1446,7 +1636,9 @@ func (h *Handler) handleModule(w http.ResponseWriter, r *http.Request) {
 			thumb, _ := h.thumbStore.GetThumbnail(id)
 			jsonOK(w, map[string]string{"thumbnail": thumb})
 		case http.MethodPost:
-			var body struct{ Thumbnail string `json:"thumbnail"` }
+			var body struct {
+				Thumbnail string `json:"thumbnail"`
+			}
 			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 				jsonError(w, "body JSON invalide", http.StatusBadRequest)
 				return
@@ -1530,7 +1722,9 @@ func (h *Handler) handleModule(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
 			return
 		}
-		var body struct{ Note string `json:"note"` }
+		var body struct {
+			Note string `json:"note"`
+		}
 		json.NewDecoder(r.Body).Decode(&body)
 		p, err := h.svcFor(r).SubmitModule(id, body.Note)
 		if err != nil {
@@ -1556,6 +1750,8 @@ func (h *Handler) handleModule(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		jsonOK(w, h.toModuleDTO(p))
+	case http.MethodPatch:
+		h.patchModule(w, r, id)
 	case http.MethodDelete:
 		if err := h.svcFor(r).RemoveModule(id); err != nil {
 			internalErr(w, err)
@@ -1584,7 +1780,9 @@ func (h *Handler) handleModuleAssemblies(w http.ResponseWriter, r *http.Request,
 		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
 		return
 	}
-	var body struct{ ConnectionID string `json:"connection_id"` }
+	var body struct {
+		ConnectionID string `json:"connection_id"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.ConnectionID == "" {
 		jsonError(w, "le champ 'connection_id' est requis", http.StatusBadRequest)
 		return
@@ -2082,7 +2280,7 @@ func (h *Handler) handleLicense(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var body struct {
-			ComponentLicenseIDs      []string `json:"component_license_ids"`
+			ComponentLicenseIDs     []string `json:"component_license_ids"`
 			ProposedModuleLicenseID string   `json:"proposed_module_license_id"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -2104,4 +2302,3 @@ func (h *Handler) handleLicense(w http.ResponseWriter, r *http.Request) {
 	}
 	jsonOK(w, l)
 }
-

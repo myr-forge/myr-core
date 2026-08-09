@@ -56,9 +56,9 @@ var BuildDate = "dev"
 var version = "dev"
 
 func main() {
-	addr        := flag.String("addr", "localhost:8765", "adresse d'écoute (ex: localhost:8765 ou 0.0.0.0:8080)")
-	dataDir     := flag.String("data", defaultDataDir(), "répertoire de données")
-	envFile     := flag.String("env-file", "", "fichier .env explicite (sinon auto-détecté)")
+	addr := flag.String("addr", "localhost:8765", "adresse d'écoute (ex: localhost:8765 ou 0.0.0.0:8080)")
+	dataDir := flag.String("data", defaultDataDir(), "répertoire de données")
+	envFile := flag.String("env-file", "", "fichier .env explicite (sinon auto-détecté)")
 	showVersion := flag.Bool("version", false, "affiche la version et quitte")
 	flag.Parse()
 
@@ -125,6 +125,7 @@ func main() {
 		WithThumbStore(store).
 		WithIfaceStore(store).
 		WithDraftStore(store).
+		WithRemovedStore(store).
 		WithOGImageFetcher(webimage.New())
 
 	walletDir := filepath.Join(*dataDir, "wallets")
@@ -179,6 +180,7 @@ func main() {
 		WithFileStore(fileStore).
 		WithConnStore(store).
 		WithDraftStore(store).
+		WithRemovedStore(store).
 		WithOGImageFetcher(webimage.New()).
 		WithDefaultNetwork(defaultNetworkID).
 		WithFabricConnected(fabricConnected).

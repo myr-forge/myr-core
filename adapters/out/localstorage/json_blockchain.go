@@ -20,10 +20,13 @@ type dbFile struct {
 	Interfaces  []*model.AssetInterface `json:"interfaces"`
 	Refs        *model.InterfaceRefs    `json:"refs"`
 	Drafts      []*model.Model3D        `json:"drafts"`
+	HiddenIDs   map[string]bool         `json:"hidden_ids"`
 }
 
+var _ model.RemovedAssetStore = (*JSONBlockchain)(nil)
+
 // JSONBlockchain persiste les données GUI locales (connexions, miniatures, interfaces, brouillons).
-// Il implémente ConnectionStore, ThumbnailStore, InterfaceStore et DraftStore.
+// Il implémente ConnectionStore, ThumbnailStore, InterfaceStore, DraftStore et RemovedAssetStore.
 type JSONBlockchain struct {
 	path string
 	mu   sync.RWMutex
@@ -55,6 +58,9 @@ func (j *JSONBlockchain) load() *dbFile {
 	}
 	if db.Drafts == nil {
 		db.Drafts = []*model.Model3D{}
+	}
+	if db.HiddenIDs == nil {
+		db.HiddenIDs = map[string]bool{}
 	}
 	// Refs : appliquer les valeurs par défaut si absentes ou sans catégories.
 	if db.Refs == nil || len(db.Refs.Categories) == 0 {
@@ -258,6 +264,23 @@ func (j *JSONBlockchain) ListDrafts(channelID string) ([]*model.Model3D, error) 
 		}
 	}
 	return result, nil
+}
+
+// ── model.RemovedAssetStore ──────────────────────────────────────────────────
+
+func (j *JSONBlockchain) HideAsset(id string) error {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	db := j.load()
+	db.HiddenIDs[id] = true
+	return j.save(db)
+}
+
+func (j *JSONBlockchain) IsHidden(id string) (bool, error) {
+	j.mu.RLock()
+	defer j.mu.RUnlock()
+	db := j.load()
+	return db.HiddenIDs[id], nil
 }
 
 func (j *JSONBlockchain) GetRefs() (*model.InterfaceRefs, error) {

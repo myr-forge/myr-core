@@ -272,6 +272,23 @@ func (s *mockDraftStore) ListDrafts(channelID string) ([]*model.Model3D, error) 
 	return list, nil
 }
 
+type mockRemovedStore struct {
+	hidden map[string]bool
+}
+
+func newMockRemovedStore() *mockRemovedStore {
+	return &mockRemovedStore{hidden: make(map[string]bool)}
+}
+
+func (s *mockRemovedStore) HideAsset(id string) error {
+	s.hidden[id] = true
+	return nil
+}
+
+func (s *mockRemovedStore) IsHidden(id string) (bool, error) {
+	return s.hidden[id], nil
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // Helpers
 // ══════════════════════════════════════════════════════════════════════════════
@@ -294,7 +311,8 @@ func newFullSvc(t *testing.T) *model.Service {
 		WithConnStore(newMockConnStore()).
 		WithThumbStore(newMockThumbStore()).
 		WithIfaceStore(newMockIfaceStore()).
-		WithDraftStore(newMockDraftStore())
+		WithDraftStore(newMockDraftStore()).
+		WithRemovedStore(newMockRemovedStore())
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -2514,5 +2532,218 @@ func TestRemove_Draft_RemovesLocally(t *testing.T) {
 	}
 	if _, err := svc.Get(m.ID, ""); err == nil {
 		t.Error("Get doit échouer après suppression du brouillon")
+	}
+}
+
+// / @brief  Remove masque localement un asset déjà soumis, sans jamais toucher au ledger (RM08)
+// / @input  Composant soumis via Submit (présent uniquement sur bc.records, plus en brouillon)
+// / @expect Remove réussit ; bc.records conserve l'enregistrement inchangé ; List() exclut l'asset ; Get() le retrouve toujours
+func TestRemove_Submitted_HidesLocally(t *testing.T) {
+	bc := newMockBC()
+	svc := model.NewService(bc, &mockFS{}).
+		WithDraftStore(newMockDraftStore()).
+		WithRemovedStore(newMockRemovedStore())
+
+	m, _ := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	submitted, err := svc.Submit(m.ID)
+	if err != nil {
+		t.Fatalf("Submit: %v", err)
+	}
+
+	if err := svc.Remove(submitted.ID); err != nil {
+		t.Fatalf("Remove: %v", err)
+	}
+
+	if _, ok := bc.records[submitted.ID]; !ok {
+		t.Error("le ledger ne doit jamais être modifié par Remove sur un asset déjà soumis")
+	}
+
+	list, err := svc.List("ch1")
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, item := range list {
+		if item.ID == submitted.ID {
+			t.Error("List() doit exclure un asset masqué")
+		}
+	}
+
+	got, err := svc.Get(submitted.ID, "")
+	if err != nil {
+		t.Fatalf("Get doit toujours résoudre un asset masqué : %v", err)
+	}
+	if got.ID != submitted.ID {
+		t.Errorf("Get: ID incorrect, got %q want %q", got.ID, submitted.ID)
+	}
+}
+
+// / @brief  Remove sur un ID introuvable (ni brouillon ni blockchain) est rejeté explicitement
+// / @input  Service complet, ID inconnu
+// / @expect Remove retourne une erreur — pas de masquage silencieux d'un ID qui n'existe pas
+func TestRemove_UnknownID_Rejected(t *testing.T) {
+	svc := newFullSvc(t)
+	if err := svc.Remove("inconnu"); err == nil {
+		t.Error("Remove sur un ID inexistant doit retourner une erreur")
+	}
+}
+
+// / @brief  RemoveModule délègue à Remove — comportement identique à un composant (masquage, RM08)
+// / @input  Module soumis via SubmitModule
+// / @expect RemoveModule réussit ; ListModules exclut le module ; GetModule le retrouve toujours ; ModuleVersions inchangées
+func TestRemoveModule_Submitted_HidesLocally(t *testing.T) {
+	bc := newMockBC()
+	svc := model.NewService(bc, &mockFS{}).
+		WithDraftStore(newMockDraftStore()).
+		WithConnStore(newMockConnStore()).
+		WithRemovedStore(newMockRemovedStore())
+
+	p, _ := svc.CreateModule(model.ModuleRequest{Name: "P1", ChannelID: "ch1", OwnerID: "o1"})
+	conn, _ := svc.AddConnection("a1", "a2", "lien")
+	svc.AddAssemblyToModule(p.ID, conn.ID)
+	submitted, err := svc.SubmitModule(p.ID, "v1")
+	if err != nil {
+		t.Fatalf("SubmitModule: %v", err)
+	}
+
+	if err := svc.RemoveModule(submitted.ID); err != nil {
+		t.Fatalf("RemoveModule: %v", err)
+	}
+
+	modules, err := svc.ListModules("ch1")
+	if err != nil {
+		t.Fatalf("ListModules: %v", err)
+	}
+	for _, item := range modules {
+		if item.ID == submitted.ID {
+			t.Error("ListModules() doit exclure un module masqué")
+		}
+	}
+
+	got, err := svc.GetModule(submitted.ID)
+	if err != nil {
+		t.Fatalf("GetModule doit toujours résoudre un module masqué : %v", err)
+	}
+	if len(got.ModuleVersions) != 1 {
+		t.Errorf("les ModuleVersion déjà ancrées ne doivent jamais être modifiées, got %d", len(got.ModuleVersions))
+	}
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Tests — CreateModule avec ParentID (dérivation, point 4 myr-web)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// / @brief  CreateModule avec parent_id copie la composition (instances + liaisons internes) du module parent
+// / @input  Module parent soumis, 2 instances liées par une liaison d'assemblage (AddAssemblyLink)
+// / @expect Le nouveau module a 2 WorkspaceInstances (nouveaux IDs) et 1 Assemblies (nouvelle Connection, instances remappées) ; le module parent reste inchangé
+func TestCreateModule_ParentID_CopiesComposition(t *testing.T) {
+	svc := newFullSvc(t)
+
+	parent, _ := svc.CreateModule(model.ModuleRequest{Name: "Chassis v1", ChannelID: "ch1", OwnerID: "o1"})
+	parent, _ = svc.AddAssetToWorkspace(parent.ID, "comp-a")
+	parent, _ = svc.AddAssetToWorkspace(parent.ID, "comp-b")
+	instA := parent.WorkspaceInstances[0].ID
+	instB := parent.WorkspaceInstances[1].ID
+
+	ifaceA := &model.AssetInterface{AssetID: "comp-a", Category: "MECA", Type: "Vis M3", Direction: model.IfaceOut}
+	ifaceB := &model.AssetInterface{AssetID: "comp-b", Category: "MECA", Type: "Vis M3", Direction: model.IfaceIn}
+	svc.AddInterface(ifaceA)
+	svc.AddInterface(ifaceB)
+	conn, err := svc.AddAssemblyLink(ifaceA.ID, ifaceB.ID, "fixation", instA, instB, "")
+	if err != nil {
+		t.Fatalf("AddAssemblyLink: %v", err)
+	}
+	if err := svc.AddAssemblyToModule(parent.ID, conn.ID); err != nil {
+		t.Fatalf("AddAssemblyToModule: %v", err)
+	}
+
+	submittedParent, err := svc.SubmitModule(parent.ID, "v1")
+	if err != nil {
+		t.Fatalf("SubmitModule: %v", err)
+	}
+
+	child, err := svc.CreateModule(model.ModuleRequest{
+		Name: "Chassis v2", ChannelID: "ch1", OwnerID: "o1", ParentID: submittedParent.ID,
+	})
+	if err != nil {
+		t.Fatalf("CreateModule dérivé: %v", err)
+	}
+
+	if child.ParentID != submittedParent.ID {
+		t.Errorf("ParentID: got %q, want %q", child.ParentID, submittedParent.ID)
+	}
+	if len(child.WorkspaceInstances) != 2 {
+		t.Fatalf("attendu 2 instances copiées, got %d", len(child.WorkspaceInstances))
+	}
+	for _, inst := range child.WorkspaceInstances {
+		if inst.ID == instA || inst.ID == instB {
+			t.Error("les instances clonées doivent avoir de nouveaux identifiants, distincts du parent")
+		}
+	}
+	if len(child.Assemblies) != 1 {
+		t.Fatalf("attendu 1 liaison copiée, got %d", len(child.Assemblies))
+	}
+	if child.Assemblies[0] == conn.ID {
+		t.Error("la connexion clonée doit avoir un nouvel identifiant, distinct du parent")
+	}
+
+	conns, _ := svc.ListConnections()
+	var clone *model.Connection
+	for _, c := range conns {
+		if c.ID == child.Assemblies[0] {
+			clone = c
+		}
+	}
+	if clone == nil {
+		t.Fatal("la connexion clonée doit être persistée dans le connStore")
+	}
+	remapped := false
+	for _, inst := range child.WorkspaceInstances {
+		if inst.ID == clone.FromInstanceID {
+			remapped = true
+		}
+	}
+	if !remapped {
+		t.Error("FromInstanceID de la connexion clonée doit référencer une instance du nouveau module, pas celle du parent")
+	}
+
+	// Le module parent, déjà soumis, n'est jamais modifié par la dérivation.
+	reloadedParent, _ := svc.GetModule(submittedParent.ID)
+	if len(reloadedParent.WorkspaceInstances) != 2 {
+		t.Errorf("le module parent ne doit pas être modifié par la dérivation, got %d instances", len(reloadedParent.WorkspaceInstances))
+	}
+}
+
+// / @brief  CreateModule avec parent_id et licence proposée incompatible est rejeté (RM03)
+// / @input  Module parent soumis sous licence "proprietary" (CompatibleWith limité à elle-même), nouvelle licence "cc0"
+// / @expect CreateModule retourne une erreur, aucun brouillon n'est créé
+func TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected(t *testing.T) {
+	svc := newFullSvc(t)
+
+	parent, _ := svc.CreateModule(model.ModuleRequest{
+		Name: "Chassis v1", ChannelID: "ch1", OwnerID: "o1", LicenseID: "proprietary",
+	})
+	conn, _ := svc.AddConnection("comp-a", "comp-b", "lien")
+	svc.AddAssemblyToModule(parent.ID, conn.ID)
+	submittedParent, err := svc.SubmitModule(parent.ID, "v1")
+	if err != nil {
+		t.Fatalf("SubmitModule: %v", err)
+	}
+
+	_, err = svc.CreateModule(model.ModuleRequest{
+		Name: "Chassis v2", ChannelID: "ch1", OwnerID: "o1",
+		ParentID: submittedParent.ID, LicenseID: "cc0",
+	})
+	if err == nil {
+		t.Fatal("CreateModule avec une licence incompatible au parent doit être rejeté (RM03)")
+	}
+}
+
+// / @brief  CreateModule avec un parent_id ne correspondant à aucun asset est rejeté
+// / @input  ParentID inconnu (ni brouillon, ni blockchain)
+// / @expect CreateModule retourne une erreur
+func TestCreateModule_ParentID_NotFound_Rejected(t *testing.T) {
+	svc := newFullSvc(t)
+	if _, err := svc.CreateModule(model.ModuleRequest{Name: "X", ChannelID: "ch1", ParentID: "inconnu"}); err == nil {
+		t.Error("CreateModule avec parent_id inexistant doit retourner une erreur")
 	}
 }

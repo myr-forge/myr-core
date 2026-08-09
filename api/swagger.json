@@ -429,6 +429,89 @@
                 }
             }
         },
+        "/components/batch": {
+            "post": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "Multipart, champ répété \"files\" (un ou plusieurs fichiers CAO). Champs partagés par tous les fichiers du lot : owner_id, channel_id, category, parent_id, license_id, tags. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier. Aucune atomicité entre les fichiers d'un même lot : la réponse détaille un résultat par fichier.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components"
+                ],
+                "summary": "Créer plusieurs composants en un seul appel",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "un ou plusieurs fichiers CAO 3D",
+                        "name": "files",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "propriétaire, partagé par tous les fichiers",
+                        "name": "owner_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "canal cible (défaut: canal de la session)",
+                        "name": "channel_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "catégorie, partagée par tous les fichiers (défaut: base)",
+                        "name": "category",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "asset parent, partagé par tous les fichiers",
+                        "name": "parent_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "licence, partagée par tous les fichiers",
+                        "name": "license_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "tags séparés par virgule, partagés par tous les fichiers",
+                        "name": "tags",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{results: [{filename, component} ou {filename, error}], succeeded, failed}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/components/{id}": {
             "get": {
                 "security": [
@@ -476,7 +559,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "Suppression locale uniquement — la blockchain Fabric ne supporte pas la suppression (règle 9) ; un composant déjà soumis reste sur le ledger.",
+                "description": "Un brouillon est réellement retiré du stockage local. Un composant déjà soumis est masqué localement — il disparaît de GET /components mais reste consultable via GET /components/{id} — la blockchain Fabric ne supporte aucune suppression (règle 9) et son enregistrement n'est jamais modifié.",
                 "tags": [
                     "components"
                 ],
@@ -1738,7 +1821,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET liste les modules (filtre texte \"q\", pagination \"limit\"). POST crée un module en brouillon (status \"draft\") — un module exige au moins un assemblage avant d'être soumis (règle 14).",
+                "description": "GET liste les modules (filtre texte \"q\", filtre \"owner_id\", filtre \"status\" — \"draft\" ou \"submitted\", pagination \"limit\"). POST crée un module en brouillon (status \"draft\") — un module exige au moins un assemblage avant d'être soumis (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -1757,13 +1840,25 @@
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "description": "filtre par propriétaire — GET uniquement",
+                        "name": "owner_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filtre par statut : draft ou submitted — GET uniquement",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "description": "nombre maximum de résultats (défaut 200, max 1000) — GET uniquement",
                         "name": "limit",
                         "in": "query"
                     },
                     {
-                        "description": "name (requis), description, owner_id, channel_id, license_id — POST uniquement",
+                        "description": "name (requis), description, owner_id, channel_id, license_id, parent_id — POST uniquement",
                         "name": "body",
                         "in": "body",
                         "schema": {
@@ -1802,7 +1897,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET liste les modules (filtre texte \"q\", pagination \"limit\"). POST crée un module en brouillon (status \"draft\") — un module exige au moins un assemblage avant d'être soumis (règle 14).",
+                "description": "GET liste les modules (filtre texte \"q\", filtre \"owner_id\", filtre \"status\" — \"draft\" ou \"submitted\", pagination \"limit\"). POST crée un module en brouillon (status \"draft\") — un module exige au moins un assemblage avant d'être soumis (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -1821,13 +1916,25 @@
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "description": "filtre par propriétaire — GET uniquement",
+                        "name": "owner_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filtre par statut : draft ou submitted — GET uniquement",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "description": "nombre maximum de résultats (défaut 200, max 1000) — GET uniquement",
                         "name": "limit",
                         "in": "query"
                     },
                     {
-                        "description": "name (requis), description, owner_id, channel_id, license_id — POST uniquement",
+                        "description": "name (requis), description, owner_id, channel_id, license_id, parent_id — POST uniquement",
                         "name": "body",
                         "in": "body",
                         "schema": {
@@ -1868,7 +1975,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -1930,7 +2037,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -1977,6 +2084,68 @@
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "Champs modifiables : name, description, license_id, tags, links (identiques à PATCH /components/{id}) — la composition (instances, liaisons) n'est pas modifiable par cette route, voir /modules/{id}/instances.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "modules"
+                ],
+                "summary": "Modifier les métadonnées d'un module",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant du module",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "champs à modifier (name, description, license_id, tags, links)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2048,7 +2217,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2112,7 +2281,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2176,7 +2345,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2238,7 +2407,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2302,7 +2471,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2364,7 +2533,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2428,7 +2597,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2492,7 +2661,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2556,7 +2725,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2618,7 +2787,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET/DELETE /api/modules/{id} : détail / suppression (brouillon uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
+                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
                 "consumes": [
                     "application/json"
                 ],

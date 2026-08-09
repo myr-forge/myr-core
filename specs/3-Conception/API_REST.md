@@ -71,16 +71,19 @@
 
 | Méthode | Route | Accès | Description |
 |---------|-------|-------|-------------|
-| GET | `/api/components` | Public (DC-D1-06) | Liste des composants (filtres: name, category, tags, channel) |
-| POST | `/api/components` | Contributor | Créer un composant (`AddFull`) |
+| GET | `/api/components` | Public (DC-D1-06) | Liste des composants (filtres: q, categories, owner_id, parent_id, hash, tags, channel, limit) |
+| POST | `/api/components` | Contributor | Créer un composant (`AddFull`), un fichier CAO par appel |
+| POST | `/api/components/batch` | Contributor | Créer plusieurs composants en un seul appel, un fichier CAO par composant (UCCE01, voir note ci-dessous) — sans garantie transactionnelle : chaque fichier réussit ou échoue indépendamment |
 | GET | `/api/components/{id}` | Auth | Détail d'un composant |
 | PATCH | `/api/components/{id}` | Contributor | Modifier (patch : name, description, tags, links, licenseID) — #incoherence la méthode documentée ici était PUT, mais le handler (`adapters/in/rest/handlers.go`, `patchComponent`) répond uniquement à PATCH ; corrigé pour refléter le comportement réel, à confirmer que PUT n'était pas l'intention initiale |
-| DELETE | `/api/components/{id}` | Contributor | Supprimer (local uniquement — Fabric immuable) |
+| DELETE | `/api/components/{id}` | Contributor | Supprimer (UCCE07) — brouillon retiré du stockage local ; composant déjà soumis masqué localement (disparaît des listes), son enregistrement blockchain n'est jamais modifié (RM08) |
 | GET | `/api/components/{id}/interfaces` | Auth | Interfaces physiques d'un composant |
 | GET | `/api/components/{id}/compatible` | Auth | Composants compatibles (type d'interface, catégorie, tag, sens — `DC_D8_Recherche.md` §2, UCREC02) |
 | GET | `/api/components/{id}/versions` | Auth | Arbre de versions / historique de dérivation (`DC_D8_Recherche.md` §3, UCREC03) |
 
 > **Accès visiteur (EF17, UCCL01) :** seule la liste (`GET /api/components`) est concernée par l'accès public — voir `DC_D1_Auth_Identity.md` DC-D1-06 et l'incohérence relevée avec `GET /api/modules` (§6 ci-dessous) qui reste `Auth`.
+
+> **`POST /api/components/batch` (UCCE01) :** multipart, champ répété `files` (un ou plusieurs fichiers CAO). Les autres champs (`owner_id`, `channel_id`, `category`, `parent_id`, `license_id`, `tags`) sont partagés par tous les fichiers du lot. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier dans ce contrat. La réponse liste un résultat par fichier (`{filename, component}` en cas de succès, `{filename, error}` en cas d'échec) : aucune atomicité n'est garantie entre les fichiers d'un même lot (pas de base relationnelle, pas de transaction inter-blockchain).
 
 ---
 
@@ -107,11 +110,11 @@
 
 | Méthode | Route | Accès | Description |
 |---------|-------|-------|-------------|
-| GET | `/api/modules` | Auth | Liste des modules |
-| POST | `/api/modules` | Contributor | Créer un module (draft) |
+| GET | `/api/modules` | Auth | Liste des modules (filtres : q, owner_id, status, channel, limit — UCMOD07) |
+| POST | `/api/modules` | Contributor | Créer un module (draft) ; `parent_id` optionnel pour dériver d'un module déjà soumis, avec copie de sa composition (UCMOD01) |
 | GET | `/api/modules/{id}` | Auth | Détail d'un module |
-| PUT | `/api/modules/{id}` | Contributor | Modifier un module (patch) — #incoherence aucune méthode de mise à jour n'est câblée pour cette route dans `handleModule` (`adapters/in/rest/handlers.go`) : seuls GET et DELETE y répondent aujourd'hui, PUT/PATCH renvoient 405 |
-| DELETE | `/api/modules/{id}` | Contributor | Supprimer un module (draft uniquement) |
+| PATCH | `/api/modules/{id}` | Contributor | Modifier les métadonnées (patch : name, description, tags, links, license_id — UCMOD03, mêmes champs que `PATCH /api/components/{id}`) |
+| DELETE | `/api/modules/{id}` | Contributor | Supprimer un module (UCMOD08) — brouillon retiré du stockage local ; module déjà soumis masqué localement (disparaît des listes), son enregistrement blockchain (y compris ses `ModuleVersion`) n'est jamais modifié (RM08) |
 | GET | `/api/modules/{id}/instances` | Auth | Instances d'un module |
 | POST | `/api/modules/{id}/instances` | Contributor | Ajouter un composant comme instance |
 | DELETE | `/api/modules/{id}/instances/{instanceId}` | Contributor | Retirer une instance (+ cascade connexions) |

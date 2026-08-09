@@ -34,9 +34,11 @@ UC1 ..> UC3 : <<include>>
 
 Le Concepteur compose un Module en assemblant plusieurs Composants ou Modules existants via leurs Interfaces physiques. Cette composition est un état local côté serveur — hors blockchain, modifiable librement par actions directes sur le module (`AddAssetToWorkspace`, `AddAssemblyLink`).
 
-Un Module nouvellement créé est toujours initialisé en état **draft** (RM16) : il existe localement mais n'est pas encore ancré sur la blockchain. Tant qu'il reste en état `draft`, le Concepteur peut ajouter, retirer ou reconfigurer des Liaisons (`Connection`) autant de fois que nécessaire.
+Un Module nouvellement créé est toujours initialisé en état **draft** (RM16) : il existe localement mais n'est pas encore ancré sur la blockchain. Tant qu'il reste en état `draft`, le Concepteur peut ajouter, retirer ou reconfigurer des Liaisons (`Connection`) autant de fois que nécessaire. Un nom par défaut lui est attribué à la création (`<identité du Concepteur>_<date>_<heure>`), modifiable ensuite (voir UCMOD03).
 
 La soumission à la blockchain est une étape distincte et explicite (UCMOD06). Elle crée une `ModuleVersion` immuable horodatée — snapshot figé et ancré, non modifiable après publication.
+
+Un Module peut aussi être créé à partir d'un Module déjà soumis, pour reprendre son travail sans reconstruire manuellement l'assemblage (voir flux alternatif « Dérivation d'un Module existant » ci-dessous).
 
 ## Pré-conditions
 
@@ -55,6 +57,21 @@ La soumission à la blockchain est une étape distincte et explicite (UCMOD06). 
 3. Des Liaisons sont créées entre Interfaces compatibles — le service vérifie la compatibilité (RM10/RM11 : catégorie + type + sens + plages de valeurs) et refuse toute liaison incompatible
 4. Le module est nommé et configuré (nom, description, licence) via `PUT /api/modules/:id`
 5. Le module est enregistré localement en état **draft**
+
+### Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+
+1. `POST /api/modules` est appelée avec `parent_id` renseigné, référençant un Module déjà soumis
+2. Si `license_id` est fourni : le service vérifie la compatibilité avec la licence du Module parent (RM03), comme pour un composant dérivé (UCCE02, UCCE04)
+3. Le nouveau Module est créé en état **draft** avec `ParentID` renseigné
+4. La composition complète du Module parent est dupliquée dans le nouveau brouillon : chaque `WorkspaceInstance` est clonée avec un nouvel identifiant d'instance, et chaque Liaison interne (`Assemblies`) est reconstruite entre les instances clonées correspondantes
+5. Le Concepteur retrouve immédiatement l'assemblage complet du Module parent, prêt à être modifié, sans avoir ajouté une seule instance ni recréé une seule Liaison manuellement
+
+### Flux erreur — Dérivation avec licence incompatible
+
+1. `parent_id` et `license_id` sont tous deux renseignés
+2. La licence proposée est incompatible avec celle du Module parent (RM03)
+3. Le système refuse la création : "Incompatibilité de licence : <raison>"
+4. Aucun Module n'est créé, aucune composition n'est dupliquée
 
 ### Flux alternatif — Liaison via interface virtuelle
 
@@ -82,6 +99,7 @@ La soumission à la blockchain est une étape distincte et explicite (UCMOD06). 
 - Les `WorkspaceInstances` ajoutées sont persistées
 - Le module n'est pas visible sur le réseau (soumission requise — UCMOD06)
 - Chaque asset instancié dispose d'au moins un slot virtuel (RM13)
+- En cas de dérivation (`ParentID` renseigné) : le nouveau module référence son Module parent, et sa composition initiale (instances + liaisons internes) est une copie indépendante de celle du parent — modifier le nouveau brouillon n'affecte jamais le Module parent déjà soumis
 
 ## Diagramme de séquence
 
@@ -132,10 +150,46 @@ REST --> Client : 200 moduleDTO (draft)
 @enduml
 ```
 
+### Diagramme de séquence — Dérivation d'un Module existant
+
+```plantuml
+@startuml
+participant "Client\n(CLI ou API REST)" as Client
+participant "REST Handler\n(adapters/in/rest/)" as REST
+participant "Model Service\n(domain/model/)" as Service
+database "LocalStorage\n(adapters/out/localstorage/)" as Local
+database "Fabric\n(adapters/out/fabric/)" as Fabric
+
+Client -> REST : POST /api/modules\n{name, parent_id, license_id?, ...}
+REST -> Service : CreateModule(ModuleRequest{ParentID, ...})
+Service -> Fabric : GetModelRecord(parentID)
+Fabric --> Service : *Model3D (module parent, submitted)
+
+alt license_id fourni et incompatible avec le parent (RM03)
+    Service --> REST : erreur "incompatibilité de licence"
+    REST --> Client : 422 Unprocessable Entity
+else Compatible ou licence non fournie
+    Service -> Service : Générer UUID (RM04)\nInitialiser Status=draft, ParentID
+    loop pour chaque WorkspaceInstance du parent
+        Service -> Service : Cloner l'instance (nouvel InstanceID)
+    end
+    loop pour chaque Liaison interne du parent (Assemblies)
+        Service -> Local : ListConnections() / SaveConnection(clone)
+        Local --> Service : nouvelle Connection (instances remappées)
+    end
+    Service -> Local : SaveDraft(m) — instances et Assemblies clonés
+    Local --> Service : OK
+    Service --> REST : *Model3D (draft, composition dupliquée)
+    REST --> Client : 201 moduleDTO
+end
+@enduml
+```
+
 ## Règles métier déclenchées
 
 | Règle | Description | Point d'application |
 |-------|-------------|---------------------|
+| **RM03** | Compatibilité de licence si `ParentID` et `LicenseID` sont renseignés à la création | `CreateModule()`, même vérification que `AddFull()` |
 | **RM04** | UUID généré par le système, jamais par le client | `generateID()` dans `CreateModule()` |
 | **RM10** | Vérification de compatibilité à chaque création de Liaison | `ifacesCompatible()` dans `AddAssemblyLink()` |
 | **RM11** | 5 critères : catégorie + tag (manquant E2) + type + sens + plages | `ifacesCompatible()` — tag absent du code |
@@ -151,12 +205,14 @@ REST --> Client : 200 moduleDTO (draft)
 ## Notes d'implémentation
 
 **Endpoints REST utilisés :**
-- `POST /api/modules` → crée le module (handlers.go:~1010)
+- `POST /api/modules` → crée le module, avec `parent_id` optionnel pour une dérivation (handlers.go:~1296)
 - `POST /api/modules/:id/instances` → ajoute un asset comme instance (handlers.go:~1127)
 - `POST /api/modules/:id/assemblies` → associe une Liaison au module (handlers.go:~1078)
-- `PUT /api/modules/:id` → met à jour nom/description/licence
+- `PATCH /api/modules/:id` → met à jour nom/description/licence (voir UCMOD03)
 
-**Commande CLI équivalente :** `myr module create --name <nom> --channel <id> [--owner-id <id>] [--description <texte>] [--license <id>]` appelle le même `CreateModule(ModuleRequest)` que `POST /api/modules`. L'ajout de composants comme instances et la création de liaisons se poursuivent avec `myr model instance add <moduleID> <assetID>` et `myr model link add` (mêmes méthodes `AddAssetToWorkspace` / `AddAssemblyLink`, mêmes vérifications RM10/RM11/RM13 côté service, quel que soit le canal). Voir `specs/3-Conception/DC_CLI_Model.md` § 3.6 et § 5. Ces commandes sont exécutées par l'administrateur du serveur via SSH, pour le compte du Concepteur (principe d'exécution distante).
+**Commande CLI équivalente :** `myr module create --name <nom> --channel <id> [--owner-id <id>] [--description <texte>] [--license <id>] [--parent-id <id>]` appelle le même `CreateModule(ModuleRequest)` que `POST /api/modules`. L'ajout de composants comme instances et la création de liaisons se poursuivent avec `myr model instance add <moduleID> <assetID>` et `myr model link add` (mêmes méthodes `AddAssetToWorkspace` / `AddAssemblyLink`, mêmes vérifications RM10/RM11/RM13 côté service, quel que soit le canal). Voir `specs/3-Conception/DC_CLI_Model.md` § 3.6 et § 5. Ces commandes sont exécutées par l'administrateur du serveur via SSH, pour le compte du Concepteur (principe d'exécution distante).
+
+**Dérivation (`parent_id`) — pourquoi une copie de composition et pas seulement une référence :** un simple lien de filiation (`ParentID` renseigné sans copie) documenterait la provenance mais laisserait le Concepteur reconstruire manuellement chaque instance et chaque Liaison — ce qui ne répond pas au besoin de reprendre un travail existant. `CreateModule()` clone donc `WorkspaceInstances` (nouveaux identifiants d'instance, pour ne jamais entrer en collision avec ceux du parent) et les Liaisons internes du parent (nouvelles `Connection`, mêmes attributs, instances remappées) dans le nouveau brouillon. Le Module parent, déjà soumis, n'est jamais modifié par cette opération — seule sa composition est lue.
 
 **Écart E2 à noter :** Le champ `Tag` est absent de `AssetInterface` dans `domain/model/entity.go`. La vérification RM11 ne comporte donc que 4 critères dans le code actuel (catégorie + type + sens + valeurs). Le champ `Tag` doit être ajouté pour la conformité complète à RM11.
 

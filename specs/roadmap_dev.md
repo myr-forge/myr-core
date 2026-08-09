@@ -93,14 +93,15 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 - [ ] Exposition REST : `network` reste partielle (create/update/activate/delete/test/addPeer absents) ; `channel` (org/node) sans route dédiée
 - [ ] UCCL01 — Lecture publique composants sans JWT *(actuellement bloqué par auth)*
 
-### Composants — Écriture UCCE01–06
+### Composants — Écriture UCCE01–07
 
-- [ ] UCCE01 — Ajouter un composant physique (import fichier 3D, hash SHA-256, métadonnées, soumission blockchain)
+- [ ] UCCE01 — Ajouter un composant physique (import fichier 3D, hash SHA-256, métadonnées, soumission blockchain) ; import par lot (`POST /api/components/batch`, plusieurs fichiers, sans garantie transactionnelle)
 - [ ] UCCE02 — Configurer un composant (éditer métadonnées)
 - [ ] UCCE03 — Ajouter un composant numérique (firmware, logiciel)
 - [ ] UCCE04 — Améliorer / dériver un composant (`ParentID` requis, vérification licence RM03)
 - [ ] UCCE05 — Ajouter une extension à un composant
 - [ ] UCCE06 — Ajouter une interface à un composant existant
+- [ ] UCCE07 — Supprimer un composant (masquage local si déjà soumis, ledger jamais modifié — RM08)
 - [ ] Correctif entité : catégorie `découpage` ajoutée *(RM02 — 8e type, bloque UCAM05)*
 - [ ] Correctif entité : champ `Tag` dans `AssetInterface` *(5e critère de compatibilité RM11)*
 
@@ -117,13 +118,17 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 - [ ] Liaisons incompatibles post-modification : passer à `Incompatible: true`, affichage rouge *(RM12)*
 - [ ] Seconde instance indépendante si module déjà dans l'atelier *(RM15)*
 
-### Modules — UCMOD01–06
+### Modules — UCMOD01–08
 
-- [ ] UCMOD01 — Créer un module en état `draft` (≥ 1 liaison requise) *(RM16, RM17)*
+> **Numérotation** — UCMOD05 est référencé par `Matrice_Tracabilite.md` (EF28) mais ne correspond à aucun fichier existant dans `specs/1-Expression/UCMOD-Module/` ni `specs/2-Analyse/UCMOD-Module/` — origine à clarifier avant de combler ou de retirer cette référence (voir annotation `#incoherence` posée sur la matrice). UCMOD07 et UCMOD08 sont des UC nouvellement ajoutés, sans lien avec ce gap.
+
+- [ ] UCMOD01 — Créer un module en état `draft` (≥ 1 liaison requise) *(RM16, RM17)* ; dérivation d'un module existant via `parent_id` avec copie de sa composition (instances + liaisons), sans reconstruction manuelle
 - [ ] UCMOD02 — Ajouter un module existant à l'atelier (nouvelle instance indépendante)
-- [ ] UCMOD03 — Lier un module via URL externe
+- [ ] UCMOD03 — Modifier les métadonnées d'un module (nom, description, licence, tags, liens — généralisation de UCCE02, y compris le renommage du nom auto-généré à la création)
 - [ ] UCMOD04 — Visualiser la composition d'un module (composants, liaisons, interfaces libres)
 - [ ] UCMOD06 — Soumettre un module à la blockchain (création `ModuleVersion` immuable horodatée, vérification licences) *(RM17, RM18, RM19)*
+- [ ] UCMOD07 — Lister ses modules en brouillon, filtrés par propriétaire et par statut (sélecteur d'atelier côté client)
+- [ ] UCMOD08 — Supprimer un module (masquage local si déjà soumis, ledger et `ModuleVersion` jamais modifiés — RM08, comportement identique à UCCE07)
 
 ### Recherche — base
 

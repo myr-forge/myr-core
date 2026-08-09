@@ -680,8 +680,10 @@ paths:
       - components
   /components/{id}:
     delete:
-      description: Suppression locale uniquement — la blockchain Fabric ne supporte
-        pas la suppression (règle 9) ; un composant déjà soumis reste sur le ledger.
+      description: Un brouillon est réellement retiré du stockage local. Un composant
+        déjà soumis est masqué localement — il disparaît de GET /components mais reste
+        consultable via GET /components/{id} — la blockchain Fabric ne supporte aucune
+        suppression (règle 9) et son enregistrement n'est jamais modifié.
       parameters:
       - description: identifiant du composant
         in: path
@@ -1000,6 +1002,66 @@ paths:
       tags:
       - components
       - modules
+  /components/batch:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 'Multipart, champ répété "files" (un ou plusieurs fichiers CAO).
+        Champs partagés par tous les fichiers du lot : owner_id, channel_id, category,
+        parent_id, license_id, tags. Le nom de chaque composant créé est dérivé du
+        nom de fichier (sans extension) — pas de nom distinct par fichier. Aucune
+        atomicité entre les fichiers d''un même lot : la réponse détaille un résultat
+        par fichier.'
+      parameters:
+      - description: un ou plusieurs fichiers CAO 3D
+        in: formData
+        name: files
+        required: true
+        type: file
+      - description: propriétaire, partagé par tous les fichiers
+        in: formData
+        name: owner_id
+        type: string
+      - description: 'canal cible (défaut: canal de la session)'
+        in: formData
+        name: channel_id
+        type: string
+      - description: 'catégorie, partagée par tous les fichiers (défaut: base)'
+        in: formData
+        name: category
+        type: string
+      - description: asset parent, partagé par tous les fichiers
+        in: formData
+        name: parent_id
+        type: string
+      - description: licence, partagée par tous les fichiers
+        in: formData
+        name: license_id
+        type: string
+      - description: tags séparés par virgule, partagés par tous les fichiers
+        in: formData
+        name: tags
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{results: [{filename, component} ou {filename, error}], succeeded,
+            failed}'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Créer plusieurs composants en un seul appel
+      tags:
+      - components
   /connections:
     post:
       consumes:
@@ -1542,20 +1604,29 @@ paths:
     get:
       consumes:
       - application/json
-      description: GET liste les modules (filtre texte "q", pagination "limit"). POST
-        crée un module en brouillon (status "draft") — un module exige au moins un
-        assemblage avant d'être soumis (règle 14).
+      description: GET liste les modules (filtre texte "q", filtre "owner_id", filtre
+        "status" — "draft" ou "submitted", pagination "limit"). POST crée un module
+        en brouillon (status "draft") — un module exige au moins un assemblage avant
+        d'être soumis (règle 14).
       parameters:
       - description: recherche texte (nom, description) — GET uniquement
         in: query
         name: q
         type: string
+      - description: filtre par propriétaire — GET uniquement
+        in: query
+        name: owner_id
+        type: string
+      - description: 'filtre par statut : draft ou submitted — GET uniquement'
+        in: query
+        name: status
+        type: string
       - description: nombre maximum de résultats (défaut 200, max 1000) — GET uniquement
         in: query
         name: limit
         type: integer
-      - description: name (requis), description, owner_id, channel_id, license_id
-          — POST uniquement
+      - description: name (requis), description, owner_id, channel_id, license_id,
+          parent_id — POST uniquement
         in: body
         name: body
         schema:
@@ -1586,20 +1657,29 @@ paths:
     post:
       consumes:
       - application/json
-      description: GET liste les modules (filtre texte "q", pagination "limit"). POST
-        crée un module en brouillon (status "draft") — un module exige au moins un
-        assemblage avant d'être soumis (règle 14).
+      description: GET liste les modules (filtre texte "q", filtre "owner_id", filtre
+        "status" — "draft" ou "submitted", pagination "limit"). POST crée un module
+        en brouillon (status "draft") — un module exige au moins un assemblage avant
+        d'être soumis (règle 14).
       parameters:
       - description: recherche texte (nom, description) — GET uniquement
         in: query
         name: q
         type: string
+      - description: filtre par propriétaire — GET uniquement
+        in: query
+        name: owner_id
+        type: string
+      - description: 'filtre par statut : draft ou submitted — GET uniquement'
+        in: query
+        name: status
+        type: string
       - description: nombre maximum de résultats (défaut 200, max 1000) — GET uniquement
         in: query
         name: limit
         type: integer
-      - description: name (requis), description, owner_id, channel_id, license_id
-          — POST uniquement
+      - description: name (requis), description, owner_id, channel_id, license_id,
+          parent_id — POST uniquement
         in: body
         name: body
         schema:
@@ -1631,8 +1711,10 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -1680,8 +1762,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -1726,6 +1810,48 @@ paths:
       summary: Opérations sur un module et ses sous-ressources
       tags:
       - modules
+    patch:
+      consumes:
+      - application/json
+      description: 'Champs modifiables : name, description, license_id, tags, links
+        (identiques à PATCH /components/{id}) — la composition (instances, liaisons)
+        n''est pas modifiable par cette route, voir /modules/{id}/instances.'
+      parameters:
+      - description: identifiant du module
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: champs à modifier (name, description, license_id, tags, links)
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/adapters_in_rest.moduleDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Modifier les métadonnées d'un module
+      tags:
+      - modules
   /modules/{id}/assemblies:
     post:
       consumes:
@@ -1764,8 +1890,10 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -1814,8 +1942,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -1864,8 +1994,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -1913,8 +2045,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -1963,8 +2097,10 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -2012,8 +2148,10 @@ paths:
     patch:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -2062,8 +2200,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -2112,8 +2252,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -2162,8 +2304,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
@@ -2211,8 +2355,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: 'GET/DELETE /api/modules/{id} : détail / suppression (brouillon
-        uniquement, règle 14). GET /api/modules/{id}/interfaces : interfaces exposées.
+      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
+        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
+        du stockage local, module déjà soumis masqué localement sans jamais modifier
+        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
         GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
         : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
         POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis

@@ -25,7 +25,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 |----|-------|------------|-----------|-------------|-----|
 | RM06 | **Immuabilité des transactions** | Toute soumission blockchain | Toujours | Une transaction soumise ne peut pas être modifiée ou annulée. Il n'existe aucune opération de suppression sur la blockchain | UCCE01, UCMOD06, UCPI07–09 |
 | RM07 | **Validation préalable obligatoire** | Avant toute soumission blockchain | Toujours | Toutes les données (métadonnées, licences, interfaces, UUID) sont validées côté serveur avant soumission. Une validation échouée ne génère aucune transaction | UCCE01, UCMOD06 |
-| RM08 | **Rejet de la suppression** | Tentative de suppression d'un asset blockchain | Toujours | La réponse `ErrNotSupported` est retournée. Aucune erreur non contrôlée (`panic`) ne doit se produire | — |
+| RM08 | **Masquage local, ledger jamais modifié** | Suppression d'un asset (composant ou module) par son propriétaire | Toujours | Aucune opération de suppression n'existe sur la blockchain : un asset déjà soumis y reste inscrit en permanence. Le système retire uniquement l'asset des listes retournées au demandeur (recherche, ateliers, catalogue) — sa consultation directe par identifiant reste possible. Aucune erreur non contrôlée (`panic`) ne doit se produire, qu'il s'agisse d'un brouillon (retiré du stockage local) ou d'un asset déjà soumis (masqué) | — |
 
 ---
 

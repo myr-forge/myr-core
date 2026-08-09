@@ -176,7 +176,7 @@ end
 | **RM02** | Catégorie `decoupage` obligatoire pour cette transformation | A implémenter (E1) |
 | **RM05** | `ParentID` obligatoire pour tout asset non-`base` | Implémenté dans `AddFull` (vérification licence) — à étendre pour `decoupage` |
 | **RM07** | Validation complète avant soumission blockchain | Implémenté (`SubmitModule` vérifie `len(Assemblies)`) |
-| **RM08** | Fabric ne supporte pas la suppression — le composant source reste | Implémenté (`ErrNotSupported`) |
+| **RM08** | Fabric ne supporte pas la suppression — le composant source reste, masquable localement sans jamais toucher au ledger (voir UCCE07) | Le composant source n'est de toute façon jamais supprimé par cette transformation — aucun appel à `Remove()` n'a lieu ici |
 | **RM13** | Slot virtuel garanti pour chaque sous-composant ajouté | Implémenté (`EnsureVirtualSlot` dans `AddAssetToWorkspace`) |
 | **RM17** | Au moins une liaison requise pour soumettre | Implémenté (`SubmitModule` vérifie `len(Assemblies) > 0`) |
 | **RM18** | `ModuleVersion` immuable créée à la soumission | Implémenté (hash SHA-256 + horodatage) |
