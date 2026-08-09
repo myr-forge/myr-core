@@ -149,6 +149,15 @@
 
 ---
 
+## 8bis. Traçabilité et intégrité du fichier source (RM38)
+
+| Méthode | Route | Accès | Description |
+|---------|-------|-------|-------------|
+| POST | `/api/components/{id}/verify` | Contributor | Vérifie la cohérence blockchain des métadonnées (si l'asset est soumis) puis, si l'asset porte un fichier ressource (`Hash` non vide), sa présence et son intégrité dans le stockage actif (adapter `out/` local, IPFS, ou autre) — même handler Go `verifyAsset`, partagé avec les modules. Répond toujours `200` avec un statut explicite : `{ "ok": true, "location": "<emplacement effectif>" }` en cas de succès (le champ `location` est omis pour un asset sans fichier ressource, ex. un module) ; `{ "ok": false, "reason": "file_missing" }` si le fichier est introuvable à son emplacement enregistré ; `{ "ok": false, "reason": "hash_mismatch", "location": "..." }` si le fichier est présent mais que son contenu ne correspond plus au hash enregistré ; `{ "ok": false, "reason": "blockchain_integrity_failed" }` si seule la cohérence blockchain échoue. Échoue en `503` uniquement si la blockchain est indisponible et l'asset n'est pas un brouillon local |
+| POST | `/api/modules/{id}/verify` | Contributor | Même comportement que ci-dessus, même handler Go `verifyAsset` |
+
+---
+
 ## 9. Infrastructure
 
 | Méthode | Route | Accès | Description |

@@ -861,6 +861,51 @@
                 }
             }
         },
+        "/components/{id}/verify": {
+            "post": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "Vérifie la cohérence blockchain des métadonnées puis, si l'asset porte un fichier ressource, sa présence et son intégrité dans le stockage actif. Répond toujours 200 avec un statut explicite (\"ok\", \"reason\", \"location\") — un résultat négatif est un résultat métier, pas une erreur de transport.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components",
+                    "modules"
+                ],
+                "summary": "Vérifier l'intégrité d'un asset et la localisation de son fichier source",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'asset (composant ou module)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "503": {
+                        "description": "blockchain indisponible",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/connections": {
             "post": {
                 "security": [
@@ -2676,6 +2721,51 @@
                     },
                     "503": {
                         "description": "blockchain indisponible (asset non local et non joignable)",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/modules/{id}/verify": {
+            "post": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "Vérifie la cohérence blockchain des métadonnées puis, si l'asset porte un fichier ressource, sa présence et son intégrité dans le stockage actif. Répond toujours 200 avec un statut explicite (\"ok\", \"reason\", \"location\") — un résultat négatif est un résultat métier, pas une erreur de transport.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components",
+                    "modules"
+                ],
+                "summary": "Vérifier l'intégrité d'un asset et la localisation de son fichier source",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'asset (composant ou module)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "503": {
+                        "description": "blockchain indisponible",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

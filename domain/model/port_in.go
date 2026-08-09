@@ -10,9 +10,14 @@ type ModelService interface {
 	// channelID="" utilise le canal actif de la session ou le canal par défaut.
 	Get(id, channelID string) (*Model3D, error)
 	List(channelID string) ([]*Model3D, error)
-	// Verify vérifie l'intégrité d'un modèle sur le canal indiqué.
+	// Verify vérifie l'intégrité d'un modèle sur le canal indiqué : cohérence
+	// blockchain (métadonnées) puis, si l'asset porte un fichier ressource,
+	// présence et intégrité de ce fichier dans le stockage actif (RM38).
 	// channelID="" utilise le canal actif de la session ou le canal par défaut.
-	Verify(id, channelID string) (bool, error)
+	// location est l'emplacement effectif du fichier (vide si l'asset n'a pas
+	// de fichier ressource, ex: un module). err vaut ErrFileSourceMissing ou
+	// ErrFileSourceHashMismatch si le fichier n'a pas pu être vérifié.
+	Verify(id, channelID string) (ok bool, location string, err error)
 
 	// Mode GUI — création enrichie. Toute création est un brouillon local
 	// (DraftStore) : aucune transaction blockchain avant Submit.

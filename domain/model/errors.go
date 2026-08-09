@@ -23,6 +23,16 @@ var ErrBlockchainUnreachable = errors.New("model: infrastructure blockchain injo
 // n'a aucun lien externe (Links) — seule source de miniature régénérable côté serveur.
 var ErrNoThumbnailSource = errors.New("model: aucun lien externe enregistré pour régénérer la miniature")
 
+// ErrFileSourceMissing est retournée par Service.Verify quand le fichier ressource
+// d'un asset est introuvable à son emplacement de stockage enregistré (RM38) —
+// à distinguer de ErrFileSourceHashMismatch, où le fichier existe mais a changé.
+var ErrFileSourceMissing = errors.New("model: fichier source introuvable à l'emplacement enregistré")
+
+// ErrFileSourceHashMismatch est retournée par Service.Verify quand le fichier
+// ressource d'un asset est présent mais que son contenu ne correspond plus au
+// hash enregistré (RM38) — corruption ou remplacement non autorisé.
+var ErrFileSourceHashMismatch = errors.New("model: le contenu du fichier source ne correspond plus au hash enregistré")
+
 // IsDegradedListErr indique si err signale que List/ListModules a échoué à joindre la
 // blockchain (ErrBlockchainUnavailable ou ErrBlockchainUnreachable) — dans ce cas la méthode
 // retourne quand même les brouillons locaux disponibles plutôt que rien. L'appelant (adapter

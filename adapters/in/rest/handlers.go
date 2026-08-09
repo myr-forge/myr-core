@@ -736,6 +736,12 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 		h.submitComponent(w, r, id)
 		return
 	}
+	// Sous-route /:id/verify — vérifie la localisation et l'intégrité du fichier source (RM38)
+	if strings.HasSuffix(rest, "/verify") {
+		id := strings.TrimSuffix(rest, "/verify")
+		h.verifyAsset(w, r, id)
+		return
+	}
 	id := rest
 	switch r.Method {
 	case http.MethodDelete:
@@ -777,6 +783,49 @@ func (h *Handler) regenerateThumbnail(w http.ResponseWriter, r *http.Request, id
 		return
 	}
 	jsonOK(w, map[string]string{"thumbnail": dataURL})
+}
+
+// verifyAsset vérifie l'intégrité d'un asset (composant ou module) : cohérence
+// blockchain des métadonnées, puis — si l'asset porte un fichier ressource —
+// présence et intégrité de ce fichier dans le stockage actif, quel que soit
+// l'adapter out/ (local, IPFS...) — voir ModelService.Verify, RM38.
+//
+//	@Summary		Vérifier l'intégrité d'un asset et la localisation de son fichier source
+//	@Description	Vérifie la cohérence blockchain des métadonnées puis, si l'asset porte un fichier ressource, sa présence et son intégrité dans le stockage actif. Répond toujours 200 avec un statut explicite ("ok", "reason", "location") — un résultat négatif est un résultat métier, pas une erreur de transport.
+//	@Tags			components
+//	@Tags			modules
+//	@Produce		json
+//	@Param			id	path		string	true	"identifiant de l'asset (composant ou module)"
+//	@Success		200	{object}	map[string]interface{}
+//	@Failure		503	{object}	map[string]string	"blockchain indisponible"
+//	@Security		MyrToken
+//	@Router			/components/{id}/verify [post]
+//	@Router			/modules/{id}/verify [post]
+func (h *Handler) verifyAsset(w http.ResponseWriter, r *http.Request, id string) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+	ok, location, err := h.svcFor(r).Verify(id, h.channelFor(r))
+	switch {
+	case errors.Is(err, model.ErrFileSourceMissing):
+		jsonOK(w, map[string]any{"ok": false, "reason": "file_missing"})
+		return
+	case errors.Is(err, model.ErrFileSourceHashMismatch):
+		jsonOK(w, map[string]any{"ok": false, "reason": "hash_mismatch", "location": location})
+		return
+	case err != nil:
+		internalErr(w, err)
+		return
+	}
+	resp := map[string]any{"ok": ok}
+	if location != "" {
+		resp["location"] = location
+	}
+	if !ok {
+		resp["reason"] = "blockchain_integrity_failed"
+	}
+	jsonOK(w, resp)
 }
 
 // submitComponent engage un composant créé en brouillon (draft:true) sur la blockchain.
@@ -1489,6 +1538,12 @@ func (h *Handler) handleModule(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		jsonOK(w, h.toModuleDTO(p))
+		return
+	}
+	// /api/modules/:id/verify — vérifie la localisation et l'intégrité du fichier source (RM38)
+	if strings.HasSuffix(rest, "/verify") {
+		id := strings.TrimSuffix(rest, "/verify")
+		h.verifyAsset(w, r, id)
 		return
 	}
 

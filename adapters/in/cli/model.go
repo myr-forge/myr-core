@@ -3,6 +3,7 @@ package cli
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -160,12 +161,23 @@ Examples:
 // ── verify ────────────────────────────────────────────────────────────────────
 
 func runModelVerify(w io.Writer, svc model.ModelService, id string) error {
-	ok, err := svc.Verify(id, "")
-	if err != nil {
+	ok, location, err := svc.Verify(id, "")
+	switch {
+	case errors.Is(err, model.ErrFileSourceMissing):
+		fmt.Fprintf(w, "KO  modèle %s : fichier source introuvable à l'emplacement enregistré\n", id)
+		return nil
+	case errors.Is(err, model.ErrFileSourceHashMismatch):
+		fmt.Fprintf(w, "KO  modèle %s : le fichier source (%s) ne correspond plus au hash enregistré\n", id, location)
+		return nil
+	case err != nil:
 		return err
 	}
 	if ok {
-		fmt.Fprintf(w, "OK  modèle %s : intégrité vérifiée\n", id)
+		if location != "" {
+			fmt.Fprintf(w, "OK  modèle %s : intégrité vérifiée (fichier source : %s)\n", id, location)
+		} else {
+			fmt.Fprintf(w, "OK  modèle %s : intégrité vérifiée\n", id)
+		}
 	} else {
 		fmt.Fprintf(w, "KO  modèle %s : intégrité compromise\n", id)
 	}
@@ -176,8 +188,10 @@ var modelVerifyCmd = &cobra.Command{
 	Use:   "verify <id>",
 	Short: "Verify the integrity of a model",
 	Long: `Recompute the hash of the file associated with the model and compare it
-to the hash recorded on the blockchain. Returns OK if the file has not
-been altered, KO if a divergence is detected.
+to the hash recorded on the blockchain, then locate its source file in the
+active file storage and confirm it is still present and unaltered. Returns
+OK if both checks pass, KO if a divergence or a missing source file is
+detected.
 
 Example:
   myr model verify abc123def456`,

@@ -7,7 +7,7 @@ type mockModelSvc struct {
 	add                             func(filePath, name, channelID, ownerID string, tags []string) (*model.Model3D, error)
 	get                             func(id, channelID string) (*model.Model3D, error)
 	list                            func(channelID string) ([]*model.Model3D, error)
-	verify                          func(id, channelID string) (bool, error)
+	verify                          func(id, channelID string) (bool, string, error)
 	addFull                         func(req model.AddRequest) (*model.Model3D, error)
 	submit                          func(assetID string) (*model.Model3D, error)
 	remove                          func(id string) error
@@ -66,11 +66,11 @@ func (m *mockModelSvc) List(channelID string) ([]*model.Model3D, error) {
 	}
 	return nil, nil
 }
-func (m *mockModelSvc) Verify(id, channelID string) (bool, error) {
+func (m *mockModelSvc) Verify(id, channelID string) (bool, string, error) {
 	if m.verify != nil {
 		return m.verify(id, channelID)
 	}
-	return true, nil
+	return true, "", nil
 }
 func (m *mockModelSvc) AddFull(req model.AddRequest) (*model.Model3D, error) {
 	if m.addFull != nil {

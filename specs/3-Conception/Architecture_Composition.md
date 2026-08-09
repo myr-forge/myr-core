@@ -451,6 +451,7 @@ interface FileStoragePort {
   + Upload(filePath string) : (hash string, err error)
   + Download(hash string, destPath string) : error
   + Delete(hash string) : error
+  + Verify(ref, expectedHash string) : (location string, ok bool, err error)
 }
 
 interface ConnectionStore {
@@ -487,7 +488,21 @@ note bottom of BlockchainPort
 end note
 
 note bottom of FileStoragePort
-  Implémenté par adapters/out/ipfs/
+  Implémenté par adapters/out/localstorage/
+  (LocalStorage, actif par défaut),
+  adapters/out/ipfs/ (IPFSStorage) et
+  adapters/out/fabric/ (ContentAddressedStorage).
+  Verify retrouve l'emplacement effectif d'un
+  fichier depuis ref (la référence de stockage
+  conservée dans Version.Hash) et recalcule son
+  hash de contenu pour le comparer à
+  expectedHash (Model3D.Hash) — chaque adapter
+  implémente sa propre stratégie de résolution
+  (chemin local, cat + hash sur un CID IPFS...).
+  location est vide uniquement si le fichier est
+  introuvable ; renseigné même en cas de
+  divergence de hash, pour distinguer les deux
+  cas (RM38, ENF32).
 end note
 
 note bottom of ConnectionStore

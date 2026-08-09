@@ -19,6 +19,14 @@ type FileStoragePort interface {
 	Upload(filePath string) (hash string, err error)
 	Download(hash string, destPath string) error
 	Delete(hash string) error
+	// Verify confirme que le fichier référencé par ref (la référence de stockage
+	// retournée par Upload, conservée dans Version.Hash) est toujours présent à
+	// son emplacement effectif et que son contenu correspond à expectedHash
+	// (Model3D.Hash, calculé par le domaine à l'upload). location est
+	// l'emplacement effectif du fichier — vide uniquement si le fichier est
+	// introuvable, renseigné même en cas de divergence de hash. Chaque adapter
+	// (local, IPFS...) implémente sa propre stratégie de résolution — voir RM38.
+	Verify(ref, expectedHash string) (location string, ok bool, err error)
 }
 
 // ConnectionStore gère les connexions d'assemblage entre assets.

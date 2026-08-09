@@ -24,7 +24,7 @@ type mockSvc struct {
 	submit                   func(assetID string) (*model.Model3D, error)
 	get                      func(id string) (*model.Model3D, error)
 	list                     func(channelID string) ([]*model.Model3D, error)
-	verify                   func(id string) (bool, error)
+	verify                   func(id string) (bool, string, error)
 	add                      func(filePath, name, channelID, ownerID string, tags []string) (*model.Model3D, error)
 	remove                   func(id string) error
 	updateAsset              func(req model.UpdateRequest) (*model.Model3D, error)
@@ -87,11 +87,11 @@ func (m *mockSvc) List(channelID string) ([]*model.Model3D, error) {
 	}
 	return nil, nil
 }
-func (m *mockSvc) Verify(id, _ string) (bool, error) {
+func (m *mockSvc) Verify(id, _ string) (bool, string, error) {
 	if m.verify != nil {
 		return m.verify(id)
 	}
-	return true, nil
+	return true, "", nil
 }
 func (m *mockSvc) Add(filePath, name, channelID, ownerID string, tags []string) (*model.Model3D, error) {
 	if m.add != nil {
@@ -982,6 +982,129 @@ func TestModules_RegenerateThumbnail_OK(t *testing.T) {
 /// @expect HTTP 405
 func TestComponents_RegenerateThumbnail_WrongMethod_Rejected(t *testing.T) {
 	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/components/c1/thumbnail/regenerate", "")
+
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("got %d, want 405 (body: %s)", w.Code, w.Body.String())
+	}
+}
+
+/// @brief  Vérifie que POST /api/components/{id}/verify renvoie ok=true et l'emplacement du fichier (RM38)
+/// @input  POST /api/components/c1/verify, Verify simulé retournant (true, "/data/models/c1.stl", nil)
+/// @expect HTTP 200, corps {"ok": true, "location": "/data/models/c1.stl"}
+func TestComponents_Verify_OK(t *testing.T) {
+	var gotID string
+	svc := &mockSvc{verify: func(id string) (bool, string, error) {
+		gotID = id
+		return true, "/data/models/c1.stl", nil
+	}}
+
+	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/verify", "")
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	if gotID != "c1" {
+		t.Errorf("Verify appelé avec %q, want c1", gotID)
+	}
+	var resp map[string]any
+	decodeJSON(t, w, &resp)
+	if resp["ok"] != true {
+		t.Errorf("ok: got %v", resp["ok"])
+	}
+	if resp["location"] != "/data/models/c1.stl" {
+		t.Errorf("location: got %v", resp["location"])
+	}
+}
+
+/// @brief  Vérifie que POST /api/components/{id}/verify distingue un fichier source introuvable (RM38)
+/// @input  POST /api/components/c1/verify, Verify simulé retournant model.ErrFileSourceMissing
+/// @expect HTTP 200, corps {"ok": false, "reason": "file_missing"} — un résultat métier, pas une erreur de transport
+func TestComponents_Verify_FileMissing(t *testing.T) {
+	svc := &mockSvc{verify: func(id string) (bool, string, error) {
+		return false, "", model.ErrFileSourceMissing
+	}}
+
+	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/verify", "")
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	var resp map[string]any
+	decodeJSON(t, w, &resp)
+	if resp["ok"] != false {
+		t.Errorf("ok: got %v", resp["ok"])
+	}
+	if resp["reason"] != "file_missing" {
+		t.Errorf("reason: got %v", resp["reason"])
+	}
+}
+
+/// @brief  Vérifie que POST /api/components/{id}/verify distingue un hash divergent, avec l'emplacement du fichier (RM38)
+/// @input  POST /api/components/c1/verify, Verify simulé retournant model.ErrFileSourceHashMismatch + un emplacement
+/// @expect HTTP 200, corps {"ok": false, "reason": "hash_mismatch", "location": "..."}
+func TestComponents_Verify_HashMismatch(t *testing.T) {
+	svc := &mockSvc{verify: func(id string) (bool, string, error) {
+		return false, "/data/models/c1.stl", model.ErrFileSourceHashMismatch
+	}}
+
+	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/verify", "")
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	var resp map[string]any
+	decodeJSON(t, w, &resp)
+	if resp["ok"] != false {
+		t.Errorf("ok: got %v", resp["ok"])
+	}
+	if resp["reason"] != "hash_mismatch" {
+		t.Errorf("reason: got %v", resp["reason"])
+	}
+	if resp["location"] != "/data/models/c1.stl" {
+		t.Errorf("location: got %v", resp["location"])
+	}
+}
+
+/// @brief  Vérifie que POST /api/components/{id}/verify propage l'indisponibilité blockchain en 503
+/// @input  POST /api/components/c1/verify, Verify simulé retournant model.ErrBlockchainUnavailable
+/// @expect HTTP 503
+func TestComponents_Verify_BlockchainUnavailable_Rejected(t *testing.T) {
+	svc := &mockSvc{verify: func(id string) (bool, string, error) {
+		return false, "", model.ErrBlockchainUnavailable
+	}}
+
+	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/verify", "")
+
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("got %d, want 503 (body: %s)", w.Code, w.Body.String())
+	}
+}
+
+/// @brief  Vérifie que POST /api/modules/{id}/verify délègue au même service que les composants (RM38)
+/// @input  POST /api/modules/m1/verify, Verify simulé retournant (true, "", nil)
+/// @expect HTTP 200, corps {"ok": true}, Verify appelé avec l'id du module
+func TestModules_Verify_OK(t *testing.T) {
+	var gotID string
+	svc := &mockSvc{verify: func(id string) (bool, string, error) {
+		gotID = id
+		return true, "", nil
+	}}
+
+	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/modules/m1/verify", "")
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	if gotID != "m1" {
+		t.Errorf("Verify appelé avec %q, want m1", gotID)
+	}
+}
+
+/// @brief  Vérifie que GET /api/components/{id}/verify est rejeté (action, pas une ressource lisible)
+/// @input  GET /api/components/c1/verify
+/// @expect HTTP 405
+func TestComponents_Verify_WrongMethod_Rejected(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/components/c1/verify", "")
 
 	if w.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("got %d, want 405 (body: %s)", w.Code, w.Body.String())

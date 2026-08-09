@@ -1,6 +1,8 @@
 package localstorage_test
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"myr-core/adapters/out/localstorage"
 	"os"
 	"path/filepath"
@@ -732,5 +734,80 @@ func TestLocalStorage_Upload_Then_Delete(t *testing.T) {
 	}
 	if _, err := os.Stat(dest); !os.IsNotExist(err) {
 		t.Fatal("file still exists after Delete")
+	}
+}
+
+// / @brief  Vérifie que Verify confirme l'intégrité d'un fichier dont le contenu correspond au hash attendu (RM38)
+// / @input  Fichier uploadé, hash SHA-256 attendu calculé sur le même contenu
+// / @expect location = chemin du fichier, ok = true, sans erreur
+func TestLocalStorage_Verify_OK(t *testing.T) {
+	ls, _ := tmpStorage(t)
+
+	src := filepath.Join(t.TempDir(), "model.glb")
+	content := []byte("fake-glb-data")
+	if err := os.WriteFile(src, content, 0644); err != nil {
+		t.Fatal(err)
+	}
+	ref, err := ls.Upload(src)
+	if err != nil {
+		t.Fatalf("Upload: %v", err)
+	}
+	sum := sha256.Sum256(content)
+	expectedHash := fmt.Sprintf("sha256:%x", sum)
+
+	location, ok, err := ls.Verify(ref, expectedHash)
+	if err != nil {
+		t.Fatalf("Verify: %v", err)
+	}
+	if !ok {
+		t.Error("expected ok=true for matching content")
+	}
+	if location != ref {
+		t.Errorf("expected location %q, got %q", ref, location)
+	}
+}
+
+// / @brief  Vérifie que Verify signale un fichier introuvable à l'emplacement enregistré (RM38)
+// / @input  ref pointant vers un chemin qui n'existe pas
+// / @expect location vide, ok = false, sans erreur (pas une panne — un résultat métier)
+func TestLocalStorage_Verify_FileMissing(t *testing.T) {
+	ls, dir := tmpStorage(t)
+
+	location, ok, err := ls.Verify(filepath.Join(dir, "gone.glb"), "sha256:whatever")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if ok {
+		t.Error("expected ok=false for missing file")
+	}
+	if location != "" {
+		t.Errorf("expected empty location, got %q", location)
+	}
+}
+
+// / @brief  Vérifie que Verify détecte une divergence de hash sur un fichier présent (RM38)
+// / @input  Fichier uploadé, hash attendu ne correspondant pas au contenu réel
+// / @expect location = chemin du fichier (présent), ok = false, sans erreur
+func TestLocalStorage_Verify_HashMismatch(t *testing.T) {
+	ls, _ := tmpStorage(t)
+
+	src := filepath.Join(t.TempDir(), "model.glb")
+	if err := os.WriteFile(src, []byte("original-content"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	ref, err := ls.Upload(src)
+	if err != nil {
+		t.Fatalf("Upload: %v", err)
+	}
+
+	location, ok, err := ls.Verify(ref, "sha256:0000000000000000000000000000000000000000000000000000000000000000")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if ok {
+		t.Error("expected ok=false for hash mismatch")
+	}
+	if location != ref {
+		t.Errorf("expected location %q (file still present), got %q", ref, location)
 	}
 }

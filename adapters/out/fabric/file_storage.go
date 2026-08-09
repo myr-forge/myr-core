@@ -87,3 +87,28 @@ func (s *ContentAddressedStorage) Delete(hash string) error {
 	}
 	return err
 }
+
+// Verify recalcule le hash SHA-256 du fichier stocké sous ref (le nom de
+// fichier est déjà son hash SHA-256 hex, stockage adressé par contenu) et le
+// compare à expectedHash (format "sha256:<hex>", voir domain/model.Service.hashFile).
+func (s *ContentAddressedStorage) Verify(ref, expectedHash string) (string, bool, error) {
+	if ref == "" {
+		return "", false, nil
+	}
+	path := filepath.Join(s.basePath, ref)
+	f, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", false, nil
+		}
+		return "", false, fmt.Errorf("verify open : %w", err)
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return path, false, fmt.Errorf("verify hash : %w", err)
+	}
+	sum := "sha256:" + hex.EncodeToString(h.Sum(nil))
+	return path, sum == expectedHash, nil
+}

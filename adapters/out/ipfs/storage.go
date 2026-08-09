@@ -6,6 +6,7 @@ package ipfs
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -119,4 +120,33 @@ func (s *IPFSStorage) Delete(cid string) error {
 		return fmt.Errorf("ipfs: daemon %d: %s", resp.StatusCode, b)
 	}
 	return nil
+}
+
+// Verify récupère le contenu identifié par le CID ref et recalcule son hash
+// SHA-256 pour le comparer à expectedHash (Model3D.Hash, calculé par le
+// domaine à l'upload — indépendant du CID, qui encode son propre multihash).
+// Un CID introuvable ou non épinglé sur ce nœud est traité comme un fichier
+// absent (ok=false, location="") plutôt qu'une erreur dure — RM38 distingue
+// ce cas d'une vraie panne du daemon.
+func (s *IPFSStorage) Verify(ref, expectedHash string) (string, bool, error) {
+	if ref == "" {
+		return "", false, nil
+	}
+	url := s.cfg.APIEndpoint + "/api/v0/cat?arg=" + ref
+	resp, err := s.client.Post(url, "", nil)
+	if err != nil {
+		return "", false, fmt.Errorf("ipfs: cat request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", false, nil
+	}
+
+	h := sha256.New()
+	if _, err := io.Copy(h, resp.Body); err != nil {
+		return ref, false, fmt.Errorf("ipfs: hash: %w", err)
+	}
+	sum := fmt.Sprintf("sha256:%x", h.Sum(nil))
+	return ref, sum == expectedHash, nil
 }

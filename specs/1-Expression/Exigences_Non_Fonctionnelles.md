@@ -44,6 +44,7 @@ Ce document structure les contraintes non-fonctionnelles du projet Myr selon les
 | ENF29 | Fiabilité | Anti-plagiat obligatoire | Tout asset de type `base` passe une vérification SHA-256 + similarité SCM > 50 % avant enregistrement — aucune exception possible | HAUTE |
 | ENF30 | Fiabilité | Intégrité en cas d'échec blockchain | Si une transaction blockchain échoue, l'état local (draft) est conservé intact — aucune perte de données côté serveur | HAUTE |
 | ENF31 | Fiabilité | Validation avant soumission | Toutes les données sont validées côté serveur avant soumission blockchain — les erreurs de validation ne génèrent pas de transaction partielle | HAUTE |
+| ENF32 | Fiabilité | Traçabilité et intégrité du fichier source | Pour tout asset possédant un fichier ressource, l'emplacement de stockage effectif et la correspondance de son hash sont vérifiables à la demande, quelle que soit la technologie de stockage sous-jacente (adapter `out/` local, IPFS, ou autre) ; toute divergence (fichier introuvable, hash différent) est signalée explicitement, jamais masquée silencieusement | HAUTE |
 
 
 
@@ -51,7 +52,7 @@ Ce document structure les contraintes non-fonctionnelles du projet Myr selon les
 
 | Priorité | Nombre | IDs |
 |-|--|--|
-| HAUTE | 18 | ENF01, ENF02, ENF05, ENF06, ENF08–ENF13, ENF18, ENF21, ENF23, ENF25–ENF26, ENF28–ENF31 |
+| HAUTE | 19 | ENF01, ENF02, ENF05, ENF06, ENF08–ENF13, ENF18, ENF21, ENF23, ENF25–ENF26, ENF28–ENF32 |
 | MOYENNE | 7 | ENF03, ENF07, ENF14–ENF16, ENF19, ENF27 |
 | BASSE | 2 | ENF17, ENF20 |
 
