@@ -536,6 +536,8 @@ D2 (réseau) → D1 (auth) → D4 (lecture) → D3 (écriture) → D5 (compositi
 | E4 | Anti-plagiat RM01 : comparaison avec assets existants absente | `domain/model/service.go` | RM01 |
 | E5 | Fork module soumis non contraint | `domain/model/service.go:461` | RM19 |
 | E6 | Entité chaincode `Model3D` incomplète (7 vs 20+ champs) | `chaincode/model/entity.go` | RM06 |
+| E8 | `Status`/soumission traités uniquement pour les modules — pas de méthode `ModelService` généralisant `SubmitModule` à tout `Model3D` (composant en brouillon) | `domain/model/entity.go`, `domain/model/service.go` | RM16, RM19 |
+| E9 | `AssetInterface` sans repère géométrique (position, orientation, réf. entité STEP d'origine) — nécessaire pour replacer une interface issue d'une décomposition automatique (UCAM09) dans un visualiseur 3D | `domain/model/entity.go` | RM39, RM40, RM41 |
 
 Ces écarts sont documentés ici à titre de référence — les use cases sont rédigés selon les specs (comportement cible), pas selon le code actuel.
 

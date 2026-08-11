@@ -99,5 +99,5 @@ end
 ## 4. Notes
 
 - La composition (§2) reste entièrement locale et mutable — aucune transaction Fabric n'est déclenchée avant `SubmitModule` (ADR-05). C'est ce qui garantit les exigences de temps de réponse UCAM (`< 200 ms` / `< 300 ms`, `Conception_intro.md` §6 ADR-02).
-- Une fois `submitted`, toute modification du module doit passer par un fork (RM19) — état de cette garde : `specs/roadmap_dev.md` § Écarts structurels — modèle & chaincode, E5. Ce diagramme ne représente pas le chemin de fork, qui reste à concevoir au niveau service.
+- Une fois `submitted`, toute modification du module doit passer par un fork (RM19) — état de cette garde : `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus, E5. Ce diagramme ne représente pas le chemin de fork, qui reste à concevoir au niveau service.
 - Le retrait en cascade (§2, dernier bloc) est la seule opération de composition qui modifie un état déjà persisté localement (les `Connection` liées) — elle reste néanmoins purement locale tant que le module n'est pas soumis.

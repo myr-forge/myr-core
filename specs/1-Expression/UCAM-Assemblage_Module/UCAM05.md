@@ -34,6 +34,8 @@ UC1 ..> UC3 : <<include>>
 
 Un composant existant peut être converti en module s'il est redécoupé en sous-systèmes indépendants. Cette opération correspond à la catégorie **découpage** dans la taxonomie des assets.
 
+Lorsque le fichier CAO du composant est un assemblage STEP/STP multi-pièces, ce découpage peut être précédé d'une analyse automatique qui propose sous-composants et connexions candidates à relire avant validation (voir UCAM09) — ce use case reste le chemin entièrement manuel, où le Concepteur désigne lui-même chaque sous-composant et configure chaque liaison.
+
 ## Pré-conditions
 
 - Être connecté au réseau

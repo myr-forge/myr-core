@@ -60,6 +60,9 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | RM17 | **Assemblage requis pour soumission (module uniquement)** | Appel de `SubmitModule` | Toujours | Le module doit contenir au moins une liaison entre composants. Si aucune liaison → soumission rejetée avec message explicite. Ne s'applique pas à un composant : sa soumission ne requiert aucun assemblage | UCMOD06 |
 | RM18 | **ModuleVersion immuable (module uniquement)** | Soumission réussie d'un module | Toujours | Une `ModuleVersion` est créée avec un hash de l'assemblage et un horodatage. Ce snapshot est immuable. Toute modification ultérieure exige la création d'une nouvelle version. Pour un composant, l'équivalent est une entrée `Versions[]` (déjà utilisée par UCCE02) — pas de `ModuleVersion` | UCMOD06 |
 | RM19 | **Fork d'un asset soumis** | Modification d'un asset soumis (composant ou module) | Toujours | Un asset soumis ne peut pas être modifié directement (immuabilité Fabric, règle 7). Une nouvelle version (fork) doit être créée en état `draft`, avec `ParentID` référençant l'asset d'origine | UCMOD06, UCCE06 |
+| RM39 | **Filiation d'un découpage** | Transformation d'un composant en module de catégorie `découpage`, manuelle (UCAM05) ou assistée par une proposition automatique (UCAM09) | Toujours | Les sous-composants créés et le module `découpage` référencent tous `ParentID` vers le composant d'origine (généralisation de RM05 à cette transformation). Le composant d'origine n'est ni supprimé ni modifié | UCAM05, UCAM09 |
+| RM40 | **Proposition de découpage non engageante** | Analyse d'un composant en vue d'un découpage automatique (UCAM09) | Toujours | L'analyse ne crée aucune entité persistée (sous-composant, module, interface, liaison) : elle retourne une proposition temporaire, valable uniquement pour sa relecture par le Concepteur. Rien n'existe côté serveur tant que la proposition n'a pas été validée explicitement | UCAM09 |
+| RM41 | **Compatibilité toujours vérifiée pour une connexion suggérée** | Validation d'une proposition de découpage dont une connexion candidate a été conservée (UCAM09) | Toujours | La connexion passe par le même contrôle de compatibilité qu'une liaison créée manuellement (RM10/RM11) — aucune dérogation pour une suggestion automatique. Si elle échoue, elle n'est pas créée et est rapportée en avertissement ; le score de confiance de la suggestion n'a aucun statut privilégié dans ce contrôle | UCAM09 |
 
 ---
 
@@ -128,6 +131,9 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | RM17 | Au moins un assemblage requis pour soumettre (module uniquement) | Modules |
 | RM18 | ModuleVersion immuable horodatée à la soumission (module uniquement) | Modules |
 | RM19 | Toute modification d'un asset soumis (composant ou module) crée un fork | Modules |
+| RM39 | Filiation par `ParentID` du composant d'origine pour tous les éléments d'un découpage (manuel ou assisté) | Modules |
+| RM40 | Une proposition de découpage automatique ne crée aucune entité tant qu'elle n'est pas validée | Modules |
+| RM41 | Connexion suggérée soumise au même contrôle de compatibilité qu'une liaison manuelle, sans dérogation | Modules |
 | RM20 | Identité = enrôlement CA — pas de compte email/mot de passe séparé | Compte |
 | RM21 | Rôle Lecteur par défaut à l'auto-enregistrement, sauf rôle explicite | Compte |
 | RM22 | Changement de rôle réservé à l'administrateur (`myr identity set-role`) | Compte |

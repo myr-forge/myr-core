@@ -80,10 +80,14 @@
 | GET | `/api/components/{id}/interfaces` | Auth | Interfaces physiques d'un composant |
 | GET | `/api/components/{id}/compatible` | Auth | Composants compatibles (type d'interface, catégorie, tag, sens — `DC_D8_Recherche.md` §2, UCREC02) |
 | GET | `/api/components/{id}/versions` | Auth | Arbre de versions / historique de dérivation (`DC_D8_Recherche.md` §3, UCREC03) |
+| POST | `/api/components/{id}/decompose/preview` | Contributor | Analyser le fichier STEP du composant, retourner une proposition de découpage (sous-pièces, connexions candidates) sous un `decomposition_id` temporaire — aucune entité créée (UCAM09, RM40) |
+| POST | `/api/components/{id}/decompose/commit` | Contributor | Matérialiser une proposition de découpage retenue (`decomposition_id`), éventuellement corrigée : sous-composants en draft, module `decoupage`, liaisons compatibles (UCAM09, RM39/RM41) |
 
 > **Accès visiteur (EF17, UCCL01) :** seule la liste (`GET /api/components`) est concernée par l'accès public — voir `DC_D1_Auth_Identity.md` DC-D1-06 et l'incohérence relevée avec `GET /api/modules` (§6 ci-dessous) qui reste `Auth`.
 
 > **`POST /api/components/batch` (UCCE01) :** multipart, champ répété `files` (un ou plusieurs fichiers CAO). Les autres champs (`owner_id`, `channel_id`, `category`, `parent_id`, `license_id`, `tags`) sont partagés par tous les fichiers du lot. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier dans ce contrat. La réponse liste un résultat par fichier (`{filename, component}` en cas de succès, `{filename, error}` en cas d'échec) : aucune atomicité n'est garantie entre les fichiers d'un même lot (pas de base relationnelle, pas de transaction inter-blockchain).
+
+> **`POST /api/components/{id}/decompose/preview` puis `.../commit` (UCAM09) :** deux appels distincts pour ne jamais engager un résultat non validé — voir `specs/1-Expression/UCAM-Assemblage_Module/UCAM09.md` pour le détail du scénario et de la forme des corps de requête/réponse (`parts`, `suggested_connections`, `decomposition_id`). `preview` reste une requête HTTP bloquante bornée par un budget de temps serveur (pas de job asynchrone à interroger) — voir `DC_CLI_Model.md` DC-CLIM-04 et §8 pour le point encore ouvert sur la technologie d'analyse STEP dont dépend le temps de traitement réel.
 
 ---
 

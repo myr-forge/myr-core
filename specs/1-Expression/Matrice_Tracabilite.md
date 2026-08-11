@@ -44,6 +44,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 | EF23                                             | Choisir un asset d'accroche (fastener) pour une liaison                 | UCAM07                    |
 | EF24                                             | Retirer une instance de composant d'un module (avec cascade des connexions) | UCAM08                    |
 | EF25                                             | Garantir un slot virtuel disponible sur chaque asset                    | UCAM03                    |
+| EF64                                             | Proposer un découpage automatique (sous-pièces + connexions candidates) d'un composant STEP en amont d'une transformation composant → module | UCAM09 |
 | **Modules**                                      |                                                                         |                           |
 | EF26                                             | Assembler plusieurs composants en module (état draft), y compris par dérivation d'un module existant (composition dupliquée depuis un `parent_id`) | UCMOD01 |
 | EF27                                             | Soumettre un module à la blockchain (ModuleVersion immuable)           | UCMOD06                   |

@@ -265,6 +265,7 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 | `ConsumerProfile` multi-adresses | — | Livraison à plusieurs adresses |
 | Taux de commission sur le canal `external_adapter` | UCAUT01, UCPI01 | Un partenaire industriel externe prélève probablement sa propre marge de fabrication en amont, hors du prix suivi par `AssetPrice` — reste à trancher si RM29/RM24 s'appliquent identiquement sur ce canal (voir `Conception_intro.md` ADR-09, point ouvert) |
 | Migration SQLite → PostgreSQL | — | Si scalabilité horizontale requise |
+| Décomposition assistée d'un composant STEP (sous-pièces + connexions candidates) | UCAM09 | Mis de côté pour l'instant, faute de solution technique validée : aucune librairie Go mature ne couvre à la fois le parsing STEP AP214/AP242 et la détection géométrique de contacts (voir `specs/3-Conception/DC_CLI_Model.md` §8, point ouvert). Nécessite un spike time-boxé avant toute reprise, ainsi que E1 (catégorie `decoupage`) et E9 (repère géométrique sur `AssetInterface`, `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus). Périmètre déjà réduit à une v1 « structure seule » (sous-pièces + filiation RM39, sans suggestion de connexions) si le développement reprend |
 
 ---
 

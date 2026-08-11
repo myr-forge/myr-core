@@ -150,6 +150,9 @@ package "Agrégat Asset (D3-D6)" {
     is_range : bool
     unit : string
     virtual : bool
+    anchor_position : vec3 <<à ajouter — E9>>
+    anchor_orientation : quat <<à ajouter — E9>>
+    anchor_source_ref : string <<à ajouter — E9,\nréf. entité STEP\nface/axe d'origine>>
   }
   class Connection <<JSON>> {
     id : uuid
@@ -285,6 +288,9 @@ Entité `Payment` implémentée (paiement manuel).
 | RM17 | `Model3D` (module) | `SubmitModule` → `len(Assemblies) > 0` requis |
 | RM18 | `ModuleVersion` | créée à `SubmitModule` — immuable, horodatée, hashée |
 | RM19 | `Model3D` (module) | `Status = submitted` → lecture seule — toute modification crée un fork |
+| RM39 | `Model3D` | Découpage (`Category = decoupage`, E1) → sous-composants créés et module englobant référencent tous `ParentID` = composant d'origine |
+| RM40 | — | `decompose preview` (UCAM09) ne persiste aucune entité — proposition temporaire seulement |
+| RM41 | `Connection` | Connexion issue d'une suggestion de découpage soumise aux mêmes critères RM10/RM11 qu'une liaison manuelle, sans dérogation |
 | RM21 | `MyrIdentity.Role` | rôle `reader` par défaut à l'auto-enregistrement, sauf rôle explicite |
 | RM22 | `myrSession.Role` (REST) | déterminé à la connexion depuis `MyrIdentity.Role` #incoherence — cette ligne décrit un écart de synchronisation (état de suivi : `specs/roadmap_dev.md` § Écarts Identité & Session, E1), pas la règle RM22 telle que formulée dans `Regles_Metier.md` (changement de rôle réservé à l'admin, effectif au prochain ré-enrôlement) ; à réconcilier |
 | RM25 | `Model3D.OwnerID` | transfert définitif et immuable sur Fabric |
@@ -300,3 +306,4 @@ Entité `Payment` implémentée (paiement manuel).
 - **Chiffrement des wallets** : décision de conception à trancher entre wallet chiffré au repos ou fichiers PEM en clair (`0600`) — voir `Securite.md`, `Conception_intro.md` ADR-03
 - **Peer** : entité infrastructure Fabric (peer endpoint) — pas modélisée côté applicatif
 - **Adresse de livraison** : UCPI01 mentionne une adresse dans le profil consommateur — entité `ConsumerProfile` absente
+- **Repère géométrique sur `AssetInterface`** (écart E9) : position, orientation et référence à l'entité STEP d'origine (face/axe), nécessaires pour replacer et re-projeter une interface générée par une décomposition automatique (UCAM09) dans un visualiseur 3D — absents du code actuel, à ajouter sur `AssetInterface` ou une structure associée avant toute implémentation d'UCAM09

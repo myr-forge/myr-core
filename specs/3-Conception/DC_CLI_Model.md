@@ -49,9 +49,12 @@ myr model
 │   ├── connect-virtual                 — relier un slot virtuel à une interface physique   UCAM03
 │   ├── remove <id>                     — supprimer une liaison
 │   └── list                            — visualiser les liaisons d'un module               UCAM02
-└── instance
-    ├── add <moduleID> <assetID>        — ajouter un composant existant comme instance d'un module UCMOD01, UCAM05
-    └── remove <moduleID> <instanceID>  — retirer une instance d'un module (cascade)        UCAM08
+├── instance
+│   ├── add <moduleID> <assetID>        — ajouter un composant existant comme instance d'un module UCMOD01, UCAM05
+│   └── remove <moduleID> <instanceID>  — retirer une instance d'un module (cascade)        UCAM08
+└── decompose
+    ├── preview <assetID>               — analyser un composant STEP, proposer un découpage UCAM09
+    └── commit <assetID> --from <id>    — matérialiser la proposition retenue               UCAM09
 
 myr module
 ├── create                              — créer un module (état draft)                     UCMOD01, UCAM05
@@ -128,7 +131,7 @@ Appellent `CreateModule(ModuleRequest{...})` et `SubmitModule(moduleID, note)`. 
 myr model submit <assetID>
 ```
 
-Équivalent CLI de UCCE01 (« Flux alternatif — Création en brouillon ») et de la précondition « composant en brouillon » d'UCCE06. Committe l'état courant du brouillon (interfaces incluses, `Model3D.Interfaces`) sur Fabric en une transaction et passe `Status` à `submitted`. **Écart de conception (E8, `specs/roadmap_dev.md` § Écarts structurels — modèle & chaincode) :** la méthode `ModelService` dédiée généralise la logique déjà utilisée par `SubmitModule` (qui, malgré son nom historique, ne fait qu'ancrer l'état courant d'un `Model3D` sur Fabric) plutôt que d'en écrire une seconde implémentation ; voir § 6 point 4. Sans argument requis au-delà de l'ID : contrairement à `myr module submit`, aucune vérification d'assemblage (RM17, module uniquement) ne s'applique à un composant.
+Équivalent CLI de UCCE01 (« Flux alternatif — Création en brouillon ») et de la précondition « composant en brouillon » d'UCCE06. Committe l'état courant du brouillon (interfaces incluses, `Model3D.Interfaces`) sur Fabric en une transaction et passe `Status` à `submitted`. **Écart de conception (E8, `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus) :** la méthode `ModelService` dédiée généralise la logique déjà utilisée par `SubmitModule` (qui, malgré son nom historique, ne fait qu'ancrer l'état courant d'un `Model3D` sur Fabric) plutôt que d'en écrire une seconde implémentation ; voir § 6 point 4. Sans argument requis au-delà de l'ID : contrairement à `myr module submit`, aucune vérification d'assemblage (RM17, module uniquement) ne s'applique à un composant.
 
 ### 3.7 `myr model to-module` (UCAM05 — transformation composant → module)
 
@@ -137,6 +140,15 @@ myr model to-module <assetID> --name <nom>
 ```
 
 Pas de méthode dédiée dans `ModelService` : la transformation (« découpage », `Category = decoupage`, cf. écart E1 dans `Architecture_Composition.md`) s'implémente comme `CreateModule` avec une référence au composant d'origine puis dépréciation de celui-ci. Documenté ici comme cible ouverte — voir § 6 point 1.
+
+### 3.8 `myr model decompose preview` / `commit` (UCAM09 — décomposition assistée d'un composant STEP)
+
+```
+myr model decompose preview <assetID>
+myr model decompose commit <assetID> --from <decomposition_id>
+```
+
+`preview` analyse le fichier STEP/STP du composant `<assetID>` et retourne, sous un `decomposition_id` temporaire, une proposition de sous-pièces et de connexions candidates — sans créer aucune entité (RM40). `commit` reprend cette proposition, éventuellement corrigée côté appelant (sous-pièces retirées/renommées, connexions rejetées), et matérialise sous-composants (draft), module de catégorie `decoupage` et liaisons compatibles (RM39/RM41). Comme `to-module` (§ 3.7), ce couple de commandes n'a pas encore de méthode `ModelService` dédiée — voir § 6 point 5.
 
 ---
 
@@ -172,6 +184,8 @@ Mêmes conventions que `DC_CLI_Admin.md` § 7 : succès sur stdout, erreurs sur 
 | `GetModuleInterfaces` | `myr module interfaces` | UCAM02 |
 | `AddAssetToWorkspace` / `RemoveAssetFromWorkspace` | `myr model instance add/remove` | UCMOD01, UCAM05 (add) · UCAM08 (remove) |
 | `ListLicenses` / `GetLicense` / `CheckLicenseCompatibility` / `CheckModuleLicenseCompatibility` | `myr model license list/get/check` | UCCE04, UCMOD06 |
+| (à concevoir — analyse STEP, aucune persistance) | `myr model decompose preview` | UCAM09, RM40 |
+| (à concevoir — s'appuie sur `CreateModule`/`AddAssetToWorkspace`/`AddAssemblyLink`) | `myr model decompose commit` | UCAM09, RM39, RM41 |
 
 Recherches et export (UCCL01, UCREC01–05) se combinent à partir de `List`, `Get`, `GetChildren`, `GetModuleInterfaces` côté service. Le point ouvert de savoir si `ModelService` doit exposer une méthode de filtre serveur dédiée (`Search(criteria)`), plutôt que de laisser le filtrage au client sur le résultat de `List`, est documenté en § 6 point 2 ; la commande `myr model search --filter <critère>` dépend de cette décision. Le détail des méthodes pour UCREC02–05 (`FindCompatibleAssets`, `GetLineage`, `FindModulesUsingComponent`, `ResolveBOM`) est conçu dans `DC_D8_Recherche.md`, pas ici.
 
@@ -184,7 +198,8 @@ Recherches et export (UCCL01, UCREC01–05) se combinent à partir de `List`, `G
 | 1 | `myr model to-module` (UCAM05) n'a pas de méthode `ModelService` dédiée — la transformation composant → module (catégorie `decoupage`, cf. écart E1 `Architecture_Composition.md`) reste à concevoir au niveau service avant d'être exposée en CLI comme en REST. | UCAM05 non exposable tant que E1 n'est pas résolu, quel que soit le canal (GUI, REST ou CLI) — ce n'est pas un écart spécifique au CLI. |
 | 2 | `ModelService` n'expose aucune méthode de filtre serveur (`Search(criteria)`) — `List(channelID)` retourne tout le canal, à charge du dépôt GUI externe de filtrer. Reste à trancher si le filtrage doit devenir un comportement serveur. | UCCL01 et UCREC01–05 : la commande `myr model search` ne peut être qu'un alias de `list` tant que cette décision n'est pas prise et le filtre remonté côté domaine. |
 | 3 | Tarification, commission, transfert de PI, clonage inter-réseau, écoconception (UCPI01/02/04/05/06/07/08/09/10/11) et automatisation (UCAUT01/02/04) n'ont aucun port domaine ni entité correspondante (`Price`, `Commission`, `Transfer`…absents de `domain/model` et `domain/payment`). Documentés dans les UC concernés comme commandes CLI de niveau 2 : le nom de commande est proposé, mais dépend d'abord de la conception du domaine (hors périmètre de ce document). | Pas d'implémentation CLI possible avant modélisation du domaine correspondant. |
-| 4 | `myr model submit` (§ 3.6bis) n'a pas de méthode `ModelService` dédiée : elle nécessite un changement domaine (voir `specs/roadmap_dev.md` § Écarts structurels — modèle & chaincode, E8) — ajouter `Status`/`Draft` à `AddRequest` et une méthode `Submit` généralisant `SubmitModule` à tout `Model3D`. | UCCE01 (flux brouillon) et UCCE06 (fork) dépendent de ce changement domaine, contrairement aux autres commandes de ce document qui n'exigent qu'un adaptateur CLI sur des méthodes `ModelService` déjà définies. |
+| 4 | `myr model submit` (§ 3.6bis) n'a pas de méthode `ModelService` dédiée : elle nécessite un changement domaine (voir `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus, E8) — ajouter `Status`/`Draft` à `AddRequest` et une méthode `Submit` généralisant `SubmitModule` à tout `Model3D`. | UCCE01 (flux brouillon) et UCCE06 (fork) dépendent de ce changement domaine, contrairement aux autres commandes de ce document qui n'exigent qu'un adaptateur CLI sur des méthodes `ModelService` déjà définies. |
+| 5 | `myr model decompose preview/commit` (UCAM09, § 3.8) n'a pas non plus de méthode `ModelService` dédiée — `preview` dépend en plus d'une analyse géométrique du fichier STEP (arbre d'assemblage, détection de contacts/coaxialité) et du repère géométrique à ajouter sur `AssetInterface` (écart E9, `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus). Orientation retenue pour la technologie d'analyse : une librairie Go native — mais aucune librairie mature ne couvre aujourd'hui à la fois le parsing STEP AP214/AP242 et la détection géométrique de contacts (voir § 8 ci-dessous, point ouvert). Mécanisme retenu pour `preview` : requête HTTP bloquante avec budget de temps serveur (pas de job asynchrone), cohérent avec le reste du contrat REST. | UCAM09 non exposable tant que E1 (catégorie `decoupage`), E9 (repère géométrique) et le choix concret de la librairie/l'approche de parsing (§ 8) ne sont pas tranchés. |
 
 ---
 
@@ -195,3 +210,15 @@ Recherches et export (UCCL01, UCREC01–05) se combinent à partir de `List`, `G
 | DC-CLIM-01 | Un seul groupe `myr model` porte composants, interfaces, liaisons et instances ; `myr module` reste séparé pour les opérations propres aux modules (création, soumission) | Miroir de la distinction domaine `Model3D` (composant/module unifié) vs. use cases (UCCE/UCAM d'un côté, UCMOD de l'autre) — évite un groupe `myr model` démesuré tout en gardant `model add/get/list/verify` stables (rétrocompatibilité de la commande existante) |
 | DC-CLIM-02 | Les commandes CLI n'ajoutent aucune vérification propre — elles délèguent entièrement au service domaine | Garantit que le comportement (RM01, RM03, RM09-11, RM13-15) est strictement identique quel que soit le canal (CLI ou REST), conformément au principe de parité fonctionnelle |
 | DC-CLIM-03 | Le CLI/API ne fait que des actions brutes et directes — les identifiants (interface, instance, asset) sont fournis explicitement en argument/flag, jamais par sélection interactive | `interface list` / `link list` permettent de retrouver les identifiants nécessaires avant d'agir ; toute ergonomie de sélection visuelle relève exclusivement d'un client externe (dépôt GUI) |
+| DC-CLIM-04 | `myr model decompose preview` (UCAM09, § 3.8) reste une requête bloquante avec un budget de temps serveur — pas de mécanisme job + polling | Cohérence avec le reste du contrat CLI/REST, qui n'a aucun autre pattern asynchrone ; à revoir si le temps de traitement réel sur de gros assemblages dépasse le budget en pratique, une fois la technologie d'analyse STEP choisie (§ 8) |
+
+---
+
+## 8. Point ouvert — technologie d'analyse STEP (UCAM09)
+
+Orientation retenue : une librairie **Go native**, cohérente avec le stack 100 % Go actuel (pas de dépendance cgo/binaire externe). Recherche effectuée sur l'écosystème disponible : aucune librairie Go mature ne couvre aujourd'hui les deux besoins d'UCAM09 :
+
+1. **Parsing de la structure d'assemblage** (fichier texte STEP Part 21 / schéma EXPRESS AP214-AP242 : occurrences de produit, transformations relatives) — écrire un parseur Go dédié à ce sous-ensemble du format est raisonnable (format texte documenté, pas de dépendance à un noyau géométrique).
+2. **Détection géométrique des contacts/coaxialités entre sous-pièces** (§2.2 de la proposition d'origine) — nécessite une représentation B-rep et des calculs de géométrie solide qu'aucune librairie Go connue ne fournit ; c'est typiquement le rôle d'un noyau CAO (OpenCASCADE et équivalents), aujourd'hui hors de la table des technologies autorisées.
+
+**Ce point reste ouvert** : soit un parseur Go maison se limite dans un premier temps à la structure d'assemblage et à une détection de contact approximative (recouvrement de boîtes englobantes plutôt qu'analyse de faces), avec un score de confiance revu à la baisse en conséquence ; soit le besoin de précision impose de revisiter l'option d'un noyau géométrique externe malgré le coût d'intégration. Décision à prendre avant toute implémentation (règle 20 CLAUDE.md) et à documenter ici une fois tranchée.

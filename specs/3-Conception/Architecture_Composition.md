@@ -535,7 +535,7 @@ end note
 
 ## 10. Écarts code → specs (renvoi)
 
-Le détail des écarts E1, E2, E4, E5, E6, E8 est centralisé dans `specs/roadmap_dev.md` § Écarts structurels — modèle & chaincode — ce document ne les duplique pas, il y renvoie depuis chaque section concernée (§2, §5, §6, §7 ci-dessus) pour garder une source unique.
+Le détail des écarts E1, E2, E4, E5, E6, E8, E9 est centralisé dans `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus — ce document ne les duplique pas, il y renvoie depuis chaque section concernée (§2, §5, §6, §7 ci-dessus) pour garder une source unique.
 
 ---
 
