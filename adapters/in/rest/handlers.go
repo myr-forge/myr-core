@@ -123,7 +123,7 @@ type Handler struct {
 
 	// Phase 2 : multi-réseau
 	bcRouter         blockchainRouter      // nil en mode legacy (réseau unique)
-	fileStore        model.FileStoragePort // stockage local
+	fileStore        model.FileStoragePort // toujours nil en pratique : myr-core ne persiste aucun fichier (RM42) — port conservé pour interchangeabilité future
 	connStore        model.ConnectionStore // pour svcFor
 	ogImageFetcher   model.OGImageFetcher  // pour svcFor
 	defaultNetworkID string                // réseau actif par défaut au démarrage
@@ -264,7 +264,7 @@ func (h *Handler) networkFor(r *http.Request) string {
 // En mode legacy (bcRouter non configuré ou networkID vide), retourne le modelSvc pré-wired.
 // En mode multi-réseau, crée une instance légère par requête avec le bon blockchain.
 func (h *Handler) svcFor(r *http.Request) model.ModelService {
-	if h.bcRouter == nil || h.fileStore == nil {
+	if h.bcRouter == nil {
 		return h.modelSvc
 	}
 	networkID := h.networkFor(r)
@@ -736,7 +736,7 @@ func (h *Handler) applyThumbnailFallback(r *http.Request, assetID, thumb string,
 // échoue indépendamment.
 //
 //	@Summary		Créer plusieurs composants en un seul appel
-//	@Description	Multipart, champ répété "files" (un ou plusieurs fichiers CAO). Champs partagés par tous les fichiers du lot : owner_id, channel_id, category, parent_id, license_id, tags. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier. Aucune atomicité entre les fichiers d'un même lot : la réponse détaille un résultat par fichier.
+//	@Description	Multipart, champ répété "files" (un ou plusieurs fichiers CAO). Champs partagés par tous les fichiers du lot : owner_id, channel_id, category, parent_id, license_id, tags. Champ répété optionnel "thumbnails" (une valeur par fichier, même ordre que "files", chaîne vide acceptée) — myr-core ne rend jamais lui-même un fichier 3D (voir § Séparation des dépôts), la miniature doit être rendue côté client et fournie ici. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier. Aucune atomicité entre les fichiers d'un même lot : la réponse détaille un résultat par fichier.
 //	@Tags			components
 //	@Accept			multipart/form-data
 //	@Produce		json
@@ -747,6 +747,7 @@ func (h *Handler) applyThumbnailFallback(r *http.Request, assetID, thumb string,
 //	@Param			parent_id	formData	string	false	"asset parent, partagé par tous les fichiers"
 //	@Param			license_id	formData	string	false	"licence, partagée par tous les fichiers"
 //	@Param			tags		formData	string	false	"tags séparés par virgule, partagés par tous les fichiers"
+//	@Param			thumbnails	formData	[]string	false	"miniatures (data URL base64), une valeur répétée par fichier, même ordre que 'files' — chaîne vide acceptée pour un fichier sans miniature rendue côté client"	collectionFormat(multi)
 //	@Success		200	{object}	map[string]interface{}	"{results: [{filename, component} ou {filename, error}], succeeded, failed}"
 //	@Failure		400	{object}	map[string]string
 //	@Security		MyrToken
@@ -799,7 +800,16 @@ func (h *Handler) createComponentsBatch(w http.ResponseWriter, r *http.Request) 
 	results := make([]batchItemResult, 0, len(files))
 	succeeded, failed := 0, 0
 
-	for _, header := range files {
+	// "thumbnails" : valeurs répétées, une par fichier, même ordre que "files"
+	// (rendu côté client — myr-core ne sait pas rendre un fichier 3D). Une
+	// entrée manquante ou vide ("") est acceptée pour un fichier sans
+	// miniature rendue et ne décale pas les index suivants.
+	var thumbnails []string
+	if r.MultipartForm != nil {
+		thumbnails = r.MultipartForm.Value["thumbnails"]
+	}
+
+	for i, header := range files {
 		name := strings.TrimSuffix(header.Filename, filepath.Ext(header.Filename))
 		if name == "" {
 			name = header.Filename
@@ -818,9 +828,13 @@ func (h *Handler) createComponentsBatch(w http.ResponseWriter, r *http.Request) 
 			failed++
 			continue
 		}
-		h.applyThumbnailFallback(r, m.ID, "", req.Links)
-		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-		dto := toComponentDTO(m, thumb)
+		var thumb string
+		if i < len(thumbnails) {
+			thumb = thumbnails[i]
+		}
+		h.applyThumbnailFallback(r, m.ID, thumb, req.Links)
+		savedThumb, _ := h.svcFor(r).GetThumbnail(m.ID)
+		dto := toComponentDTO(m, savedThumb)
 		results = append(results, batchItemResult{Filename: header.Filename, Component: &dto})
 		succeeded++
 	}
@@ -867,6 +881,12 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 	if strings.HasSuffix(rest, "/thumbnail/regenerate") {
 		id := strings.TrimSuffix(rest, "/thumbnail/regenerate")
 		h.regenerateThumbnail(w, r, id)
+		return
+	}
+	// Sous-route /:id/thumbnail — remplace la miniature (symétrique à /modules/{id}/thumbnail)
+	if strings.HasSuffix(rest, "/thumbnail") {
+		id := strings.TrimSuffix(rest, "/thumbnail")
+		h.saveComponentThumbnail(w, r, id)
 		return
 	}
 	// Sous-route /:id/submit — engage un composant brouillon sur la blockchain
@@ -922,6 +942,42 @@ func (h *Handler) regenerateThumbnail(w http.ResponseWriter, r *http.Request, id
 		return
 	}
 	jsonOK(w, map[string]string{"thumbnail": dataURL})
+}
+
+// saveComponentThumbnail remplace la miniature d'un composant, brouillon ou
+// déjà soumis — la miniature est un champ hors ledger (comme name/description,
+// voir patchComponent), modifiable même après soumission puisqu'elle ne touche
+// jamais le contenu blockchain déjà commité (règle 7). Symétrique à
+// POST /modules/{id}/thumbnail.
+//
+//	@Summary		Remplacer la miniature d'un composant
+//	@Description	Remplace la miniature d'un composant (brouillon ou déjà soumis) par la data URL fournie. Champ hors ledger — modifiable même après soumission, contrairement au contenu blockchain (règle 7).
+//	@Tags			components
+//	@Accept			json
+//	@Param			id		path	string	true	"identifiant du composant"
+//	@Param			body	body	object	true	"champ thumbnail requis (data URL base64)"
+//	@Success		204	"pas de contenu"
+//	@Failure		400	{object}	map[string]string
+//	@Failure		500	{object}	map[string]string
+//	@Security		MyrToken
+//	@Router			/components/{id}/thumbnail [post]
+func (h *Handler) saveComponentThumbnail(w http.ResponseWriter, r *http.Request, id string) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+	var body struct {
+		Thumbnail string `json:"thumbnail"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "body JSON invalide", http.StatusBadRequest)
+		return
+	}
+	if err := h.svcFor(r).SaveThumbnail(id, body.Thumbnail); err != nil {
+		internalErr(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // verifyAsset vérifie l'intégrité d'un asset (composant ou module) : cohérence

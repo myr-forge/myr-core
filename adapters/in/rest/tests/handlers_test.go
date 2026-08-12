@@ -951,6 +951,40 @@ func buildMultipartFormMultiFile(t *testing.T, fields map[string]string, fileFie
 	return body, w.FormDataContentType()
 }
 
+// batchFileItem associe un fichier à sa miniature pour buildMultipartFormBatchWithThumbnails —
+// une map ne conviendrait pas ici : l'ordre d'itération doit être déterministe pour que
+// "thumbnails[i]" corresponde bien à "files[i]" côté serveur (association par position).
+type batchFileItem struct {
+	Filename  string
+	Content   []byte
+	Thumbnail string
+}
+
+func buildMultipartFormBatchWithThumbnails(t *testing.T, fields map[string]string, items []batchFileItem) (*bytes.Buffer, string) {
+	t.Helper()
+	body := &bytes.Buffer{}
+	w := multipart.NewWriter(body)
+	for k, v := range fields {
+		if err := w.WriteField(k, v); err != nil {
+			t.Fatalf("WriteField %q: %v", k, err)
+		}
+	}
+	for _, it := range items {
+		part, err := w.CreateFormFile("files", it.Filename)
+		if err != nil {
+			t.Fatalf("CreateFormFile %q: %v", it.Filename, err)
+		}
+		part.Write(it.Content)
+	}
+	for _, it := range items {
+		if err := w.WriteField("thumbnails", it.Thumbnail); err != nil {
+			t.Fatalf("WriteField thumbnails: %v", err)
+		}
+	}
+	w.Close()
+	return body, w.FormDataContentType()
+}
+
 /// @brief  Vérifie que POST /api/components/batch crée un composant par fichier et partage les champs communs
 /// @input  POST /api/components/batch, 2 fichiers sous "files", owner_id partagé, mockSvc.addFull réussit toujours
 /// @expect HTTP 200, 2 résultats avec "component" renseigné, succeeded=2, failed=0, OwnerID partagé sur chaque appel
@@ -1010,6 +1044,45 @@ func TestComponentsBatch_POST_AllSucceed(t *testing.T) {
 		if r.Name == "" {
 			t.Error("Name doit être dérivé du nom de fichier")
 		}
+	}
+}
+
+/// @brief  Vérifie que POST /api/components/batch associe chaque miniature à son fichier par position (même ordre que "files"), pas par nom — myr-core ne rend jamais lui-même un fichier 3D, la miniature doit venir du client
+/// @input  POST /api/components/batch, 2 fichiers + 2 valeurs "thumbnails" dans le même ordre (la seconde vide, aucun lien externe)
+/// @expect HTTP 200, SaveThumbnail appelé pour le premier composant avec la data-URL fournie, jamais pour le second
+func TestComponentsBatch_POST_ThumbnailsMatchedByPosition(t *testing.T) {
+	saved := map[string]string{}
+	svc := &mockSvc{
+		addFull: func(req model.AddRequest) (*model.Model3D, error) {
+			return &model.Model3D{ID: "c-" + req.Name, Name: req.Name, CreatedAt: time.Now()}, nil
+		},
+		saveThumbnail: func(assetID, dataURL string) error {
+			saved[assetID] = dataURL
+			return nil
+		},
+	}
+
+	thumb := "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+	body, ct := buildMultipartFormBatchWithThumbnails(t, nil, []batchFileItem{
+		{Filename: "vis.stl", Content: []byte("solid vis\nendsolid vis\n"), Thumbnail: thumb},
+		{Filename: "ecrou.stl", Content: []byte("solid ecrou\nendsolid ecrou\n"), Thumbnail: ""},
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/api/components/batch", body)
+	req.Header.Set("Content-Type", ct)
+	w := httptest.NewRecorder()
+	mux := newTestMux(t, svc)
+	req.Header.Set("X-Myr-Token", loginToken(t, mux))
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	if saved["c-vis"] != thumb {
+		t.Errorf("miniature du premier fichier: got %q, want %q", saved["c-vis"], thumb)
+	}
+	if _, ok := saved["c-ecrou"]; ok {
+		t.Errorf("aucune miniature ne doit être sauvegardée pour le second fichier (valeur vide, aucun repli possible)")
 	}
 }
 
@@ -1152,6 +1225,64 @@ func TestModules_RegenerateThumbnail_OK(t *testing.T) {
 /// @expect HTTP 405
 func TestComponents_RegenerateThumbnail_WrongMethod_Rejected(t *testing.T) {
 	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/components/c1/thumbnail/regenerate", "")
+
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("got %d, want 405 (body: %s)", w.Code, w.Body.String())
+	}
+}
+
+/// @brief  Vérifie que POST /api/components/{id}/thumbnail remplace la miniature via SaveThumbnail et répond 204
+/// @input  POST /api/components/c1/thumbnail, corps {"thumbnail": dataURL}
+/// @expect HTTP 204, SaveThumbnail appelé avec l'id du composant et la data-URL exacte
+func TestComponents_SaveThumbnail_OK(t *testing.T) {
+	var gotID, gotDataURL string
+	svc := &mockSvc{saveThumbnail: func(assetID, dataURL string) error {
+		gotID, gotDataURL = assetID, dataURL
+		return nil
+	}}
+
+	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/thumbnail", `{"thumbnail":"data:image/png;base64,xyz"}`)
+
+	if w.Code != http.StatusNoContent {
+		t.Fatalf("got %d, want 204 (body: %s)", w.Code, w.Body.String())
+	}
+	if gotID != "c1" {
+		t.Errorf("SaveThumbnail appelé avec assetID %q, want c1", gotID)
+	}
+	if gotDataURL != "data:image/png;base64,xyz" {
+		t.Errorf("SaveThumbnail appelé avec dataURL %q", gotDataURL)
+	}
+}
+
+/// @brief  Vérifie que POST /api/components/{id}/thumbnail sur un composant déjà soumis fonctionne (champ hors ledger, règle 7)
+/// @input  POST /api/components/c1/thumbnail, SaveThumbnail simulé sans erreur
+/// @expect HTTP 204 — aucune vérification de statut draft/submitted n'est faite pour ce champ
+func TestComponents_SaveThumbnail_AfterSubmit_OK(t *testing.T) {
+	svc := &mockSvc{saveThumbnail: func(assetID, dataURL string) error { return nil }}
+
+	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/thumbnail", `{"thumbnail":"data:image/png;base64,xyz"}`)
+
+	if w.Code != http.StatusNoContent {
+		t.Fatalf("got %d, want 204 (body: %s)", w.Code, w.Body.String())
+	}
+}
+
+/// @brief  Vérifie que POST /api/components/{id}/thumbnail avec un JSON invalide est rejeté
+/// @input  POST /api/components/c1/thumbnail, corps non-JSON
+/// @expect HTTP 400
+func TestComponents_SaveThumbnail_InvalidJSON_Rejected(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/components/c1/thumbnail", `not json`)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("got %d, want 400 (body: %s)", w.Code, w.Body.String())
+	}
+}
+
+/// @brief  Vérifie que GET /api/components/{id}/thumbnail est rejeté (pas de lecture dédiée — la miniature est déjà dans le DTO du composant)
+/// @input  GET /api/components/c1/thumbnail
+/// @expect HTTP 405
+func TestComponents_SaveThumbnail_WrongMethod_Rejected(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/components/c1/thumbnail", "")
 
 	if w.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("got %d, want 405 (body: %s)", w.Code, w.Body.String())

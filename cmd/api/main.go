@@ -111,16 +111,13 @@ func main() {
 		}
 	}
 
-	// ── Stockage fichiers ─────────────────────────────────────────────────────
 	store := localstorage.NewJSONBlockchain(filepath.Join(*dataDir, "assets.json"))
 
-	modelsDir := filepath.Join(*dataDir, "models")
-	_ = os.MkdirAll(modelsDir, 0700)
-	var fileStore model.FileStoragePort = localstorage.NewLocalStorage(modelsDir)
-	log.Printf("✓ Stockage local → %s", modelsDir)
-
 	// ── Services domaine ──────────────────────────────────────────────────────
-	modelSvc := model.NewService(bc, fileStore).
+	// Aucun FileStoragePort câblé : myr-core ne conserve jamais le fichier 3D
+	// transmis, seule son empreinte SHA-256 est retenue (traçabilité RM01) —
+	// voir RM42 pour la vérification des emplacements externes déclarés.
+	modelSvc := model.NewService(bc, nil).
 		WithConnStore(store).
 		WithThumbStore(store).
 		WithIfaceStore(store).
@@ -177,7 +174,6 @@ func main() {
 		WithNetworkInfo(netInfo).
 		WithSessionPersistence(filepath.Join(*dataDir, "sessions.json")).
 		WithBlockchainRouter(pool).
-		WithFileStore(fileStore).
 		WithConnStore(store).
 		WithDraftStore(store).
 		WithRemovedStore(store).

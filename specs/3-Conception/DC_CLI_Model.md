@@ -24,6 +24,7 @@ myr model
 ├── get <id>                            — afficher un composant                            UCCL01
 ├── list                                — lister les composants                            UCCL01
 ├── verify <id>                         — vérifier l'intégrité
+├── location check <id>                 — vérifier l'accessibilité des emplacements externes UCCL03
 ├── update <id>                         — modifier les métadonnées                         UCCE02
 ├── remove <id>                         — retirer un composant
 ├── children <parentID>                 — lister les dérivés d'un composant                UCREC03
@@ -167,6 +168,7 @@ Mêmes conventions que `DC_CLI_Admin.md` § 7 : succès sur stdout, erreurs sur 
 | `Get` | `myr model get` | UCCL01, UCREC01 |
 | `List` | `myr model list` | UCCL01 |
 | `Verify` | `myr model verify` | — (intégrité, hors périmètre user) |
+| `CheckLocations` | `myr model location check` | UCCL03 |
 | `UpdateAsset` | `myr model update` | UCCE02 |
 | `Remove` | `myr model remove` | — |
 | `GetChildren` | `myr model children` | UCREC03, UCREC04 |

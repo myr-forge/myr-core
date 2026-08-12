@@ -1436,14 +1436,10 @@ func TestWorkspace_ThreeAssets_AllPresent(t *testing.T) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 func TestAddFull_WithFile_HashAndVersionCreated(t *testing.T) {
-	// Quand FilePath est fourni, AddFull doit calculer le hash, appeler Upload
-	// et créer une Version avec la référence de stockage.
-	uploadedPath := ""
-	fs := &mockFSFn{uploadFn: func(fp string) (string, error) {
-		uploadedPath = fp
-		return "store-ref-abc", nil
-	}}
-	svc := model.NewService(newMockBC(), fs)
+	// Quand FilePath est fourni, AddFull doit calculer le hash et créer une
+	// Version portant ce même hash — myr-core ne persiste jamais le fichier
+	// lui-même (RM42), il n'y a donc aucune référence de stockage à conserver.
+	svc := model.NewService(newMockBC(), nil).WithDraftStore(newMockDraftStore())
 
 	path := tempFile(t, "solid cube\nfacet normal 0 0 1\nouter loop\nendloop\nendfacet\nendsolid cube\n")
 	m, err := svc.AddFull(model.AddRequest{
@@ -1455,55 +1451,24 @@ func TestAddFull_WithFile_HashAndVersionCreated(t *testing.T) {
 	if err != nil {
 		t.Fatalf("AddFull: %v", err)
 	}
-	if uploadedPath != path {
-		t.Errorf("Upload appelé avec %q, attendu %q", uploadedPath, path)
-	}
 	if m.Hash == "" {
 		t.Error("Hash doit être calculé depuis le contenu du fichier")
 	}
 	if len(m.Versions) != 1 {
 		t.Fatalf("attendu 1 version, got %d", len(m.Versions))
 	}
-	if m.Versions[0].Hash != "store-ref-abc" {
-		t.Errorf("Version.Hash: got %q, want store-ref-abc", m.Versions[0].Hash)
+	if m.Versions[0].Hash != m.Hash {
+		t.Errorf("Version.Hash: got %q, want %q (même empreinte, aucun stockage propre)", m.Versions[0].Hash, m.Hash)
 	}
 	if m.Versions[0].Number != 1 {
 		t.Errorf("Version.Number: got %d, want 1", m.Versions[0].Number)
 	}
 }
 
-func TestAddFull_UploadFails_ReturnsError(t *testing.T) {
-	// Quand fileStorage.Upload échoue (ex: IPFS injoignable), AddFull doit
-	// propager l'erreur sans créer d'enregistrement blockchain.
-	bc := newMockBC()
-	fs := &mockFSFn{uploadFn: func(_ string) (string, error) {
-		return "", fmt.Errorf("ipfs: connexion refusée")
-	}}
-	svc := model.NewService(bc, fs)
-
-	path := tempFile(t, "solid test\nendsolid test\n")
-	_, err := svc.AddFull(model.AddRequest{
-		Name:      "Pièce",
-		ChannelID: "ch1",
-		FilePath:  path,
-	})
-	if err == nil {
-		t.Fatal("attendu une erreur quand Upload échoue")
-	}
-	if !strings.Contains(err.Error(), "ipfs") {
-		t.Errorf("message d'erreur attendu contenir 'ipfs', got: %v", err)
-	}
-	// Aucun enregistrement ne doit avoir été stocké sur la blockchain.
-	list, _ := bc.ListModelRecords("ch1")
-	if len(list) != 0 {
-		t.Errorf("blockchain ne doit pas contenir d'enregistrement en cas d'échec d'upload, got %d", len(list))
-	}
-}
-
 func TestAddFull_MissingFile_ReturnsError(t *testing.T) {
 	// Si le fichier pointé par FilePath n'existe pas, AddFull doit retourner
 	// une erreur de hash (lecture impossible).
-	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
+	svc := model.NewService(newMockBC(), nil).WithDraftStore(newMockDraftStore())
 
 	_, err := svc.AddFull(model.AddRequest{
 		Name:      "Fantôme",
@@ -1518,12 +1483,7 @@ func TestAddFull_MissingFile_ReturnsError(t *testing.T) {
 func TestAddFull_NoFile_NoVersionNoHash(t *testing.T) {
 	// Sans FilePath, le composant est créé sans hash ni version (composant
 	// de catalogue sans géométrie).
-	uploadCalled := false
-	fs := &mockFSFn{uploadFn: func(_ string) (string, error) {
-		uploadCalled = true
-		return "ref", nil
-	}}
-	svc := model.NewService(newMockBC(), fs)
+	svc := model.NewService(newMockBC(), nil).WithDraftStore(newMockDraftStore())
 
 	m, err := svc.AddFull(model.AddRequest{
 		Name:      "Vis M3 catalogue",
@@ -1532,9 +1492,6 @@ func TestAddFull_NoFile_NoVersionNoHash(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatalf("AddFull: %v", err)
-	}
-	if uploadCalled {
-		t.Error("Upload ne doit pas être appelé quand FilePath est vide")
 	}
 	if m.Hash != "" {
 		t.Errorf("Hash doit être vide sans fichier, got %q", m.Hash)

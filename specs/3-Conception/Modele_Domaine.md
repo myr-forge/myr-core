@@ -11,13 +11,12 @@ Le modèle de données de Myr est distribué sur trois supports de persistance a
 | Support | Adapter | Entités | Mutabilité |
 |---------|---------|---------|-----------|
 | Fichiers MSP locaux (non chiffrés) | `adapters/out/localstorage/` (wallets) | WalletEntry (PEM), MyrIdentity (attributs CA) | Mutable |
-| JSON files (`data/`, `~/.Myr/`) | `adapters/out/localstorage/` | Connection, AssetInterface (brouillon — tant que l'asset porteur n'est pas soumis, ADR-02), InterfaceRefs, NetworkProfile, Session (local CLI), AccountRequest, Role | Mutable |
-| HyperLedger Fabric | `adapters/out/fabric/` | Model3D (asset), AssetInterface (embarquée dans `Model3D.Interfaces` **à partir de la soumission** — ADR-02, `Conception_intro.md`), ModuleVersion (hash) | Immuable |
-| IPFS | `adapters/out/ipfs/` | Fichiers CAO (3D) — référencés par `Model3D.Hash` | Immuable (CID) |
+| JSON files (`data/`, `~/.Myr/`) | `adapters/out/localstorage/` | Connection, AssetInterface (brouillon — tant que l'asset porteur n'est pas soumis, ADR-02), InterfaceRefs, NetworkProfile, Session (local CLI), AccountRequest, Role, LocationCheck (statut de vérification par emplacement externe, RM42 — hors blockchain quel que soit l'état `draft`/`submitted` de l'asset porteur, voir §3) | Mutable |
+| HyperLedger Fabric | `adapters/out/fabric/` | Model3D (asset, dont `Locations` — URLs des emplacements externes déclarés — et `Hash`, seule empreinte du fichier ressource conservée, RM01/RM42), AssetInterface (embarquée dans `Model3D.Interfaces` **à partir de la soumission** — ADR-02, `Conception_intro.md`), ModuleVersion (hash) | Immuable |
 
 > La session REST (token opaque, `myrSession`) n'est pas un agrégat métier — c'est un détail d'implémentation de l'adaptateur `in/rest/`, en mémoire ou JSON/Redis selon la configuration. Voir `DC_D1_Auth_Identity.md`.
 
-Le modèle est organisé par **agrégats** (au sens DDD) plutôt que par schéma relationnel : chaque agrégat regroupe les objets dont le cycle de vie est solidaire (composition), et référence les autres agrégats uniquement par identifiant (UUID, pseudo, nom) — jamais par une contrainte d'intégrité référentielle appliquée par un moteur de base de données, puisqu'aucun des quatre supports du tableau ci-dessus n'en fournit une de façon transversale. Cette cohérence inter-agrégats est portée par le domaine (`domain/`), pas par le support de stockage.
+Le modèle est organisé par **agrégats** (au sens DDD) plutôt que par schéma relationnel : chaque agrégat regroupe les objets dont le cycle de vie est solidaire (composition), et référence les autres agrégats uniquement par identifiant (UUID, pseudo, nom) — jamais par une contrainte d'intégrité référentielle appliquée par un moteur de base de données, puisqu'aucun des trois supports du tableau ci-dessus n'en fournit une de façon transversale. Cette cohérence inter-agrégats est portée par le domaine (`domain/`), pas par le support de stockage.
 
 ---
 
@@ -129,7 +128,7 @@ package "Agrégat Asset (D3-D6)" {
     owner_id : string <<pseudo, non validé vs\nsession — écart sécurité>>
     license_id : string
     tags : json
-    links : json
+    locations : json <<[]string, URLs\nboutique/dépôt tiers>>
     created_at : timestamp
     status : enum(draft,submitted) <<tout asset — RM16/RM19\ngénéralisées ; module : toujours\ndraft à la création (RM16) ;\ncomposant : submitted par défaut,\ndraft si demandé explicitement>>
   }
@@ -253,6 +252,8 @@ Distinction Composant vs Module :
 
 > `Status` (`draft`/`submitted`) n'est plus un critère distinctif depuis la généralisation de RM16/RM19 — il s'applique aux deux types (voir §1, §2 et ADR-02 dans `Conception_intro.md`). Seuls `Hash`, `WorkspaceInstances` et `ModuleVersions` distinguent un composant d'un module.
 
+**Emplacements externes (`Model3D.Locations`) et leur statut de vérification (RM42) :** `Locations` est une liste d'URLs (boutique, dépôt de fichiers tiers…) déclarée par le Concepteur — elle suit le même cycle de vie que le reste des métadonnées de l'asset (mutable en brouillon, figée à la soumission, RM16/RM19). Le **statut de vérification** de chaque emplacement (accessible/inaccessible, date de dernière vérification) est une donnée d'un autre ordre : elle change à chaque vérification à la demande (UCCL03), y compris après soumission de l'asset porteur — l'embarquer dans `Model3D` obligerait chaque vérification à produire une transaction Fabric pour un simple constat d'accessibilité, ce qu'aucune règle métier n'exige. Ce statut vit donc dans une entité séparée, `LocationCheck` (`AssetID`, `URL`, `Status`, `CheckedAt`), tenue hors blockchain par un store dédié — même logique de séparation que `ThumbnailStore` pour les miniatures (§1, non diagrammé ici pour la même raison : ce n'est pas un agrégat métier mais un support de consultation dérivé). Une vérification de localisation ne constitue donc jamais une modification de l'asset au sens de RM19 et ne requiert pas de fork.
+
 ### Agrégat Paiement (D7)
 
 Entité `Payment` implémentée (paiement manuel).
@@ -295,6 +296,7 @@ Entité `Payment` implémentée (paiement manuel).
 | RM22 | `myrSession.Role` (REST) | déterminé à la connexion depuis `MyrIdentity.Role` #incoherence — cette ligne décrit un écart de synchronisation (état de suivi : `specs/roadmap_dev.md` § Écarts Identité & Session, E1), pas la règle RM22 telle que formulée dans `Regles_Metier.md` (changement de rôle réservé à l'admin, effectif au prochain ré-enrôlement) ; à réconcilier |
 | RM25 | `Model3D.OwnerID` | transfert définitif et immuable sur Fabric |
 | RM26 | `Model3D.ID` | UUID préservé lors du clonage inter-réseaux |
+| RM42 | `LocationCheck` | vérification d'accessibilité à la demande, un statut par emplacement externe — Myr ne conservant aucune copie du fichier ressource, cette vérification ne porte jamais sur son contenu |
 
 ---
 

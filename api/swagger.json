@@ -436,7 +436,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "Multipart, champ répété \"files\" (un ou plusieurs fichiers CAO). Champs partagés par tous les fichiers du lot : owner_id, channel_id, category, parent_id, license_id, tags. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier. Aucune atomicité entre les fichiers d'un même lot : la réponse détaille un résultat par fichier.",
+                "description": "Multipart, champ répété \"files\" (un ou plusieurs fichiers CAO). Champs partagés par tous les fichiers du lot : owner_id, channel_id, category, parent_id, license_id, tags. Champ répété optionnel \"thumbnails\" (une valeur par fichier, même ordre que \"files\", chaîne vide acceptée) — myr-core ne rend jamais lui-même un fichier 3D (voir § Séparation des dépôts), la miniature doit être rendue côté client et fournie ici. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier. Aucune atomicité entre les fichiers d'un même lot : la réponse détaille un résultat par fichier.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -489,6 +489,16 @@
                         "type": "string",
                         "description": "tags séparés par virgule, partagés par tous les fichiers",
                         "name": "tags",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "miniatures (data URL base64), une valeur répétée par fichier, même ordre que 'files' — chaîne vide acceptée pour un fichier sans miniature rendue côté client",
+                        "name": "thumbnails",
                         "in": "formData"
                     }
                 ],
@@ -835,6 +845,64 @@
                     },
                     "503": {
                         "description": "blockchain indisponible",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/components/{id}/thumbnail": {
+            "post": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "Remplace la miniature d'un composant (brouillon ou déjà soumis) par la data URL fournie. Champ hors ledger — modifiable même après soumission, contrairement au contenu blockchain (règle 7).",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components"
+                ],
+                "summary": "Remplacer la miniature d'un composant",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant du composant",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "champ thumbnail requis (data URL base64)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "pas de contenu"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

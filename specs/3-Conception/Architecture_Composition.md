@@ -488,21 +488,19 @@ note bottom of BlockchainPort
 end note
 
 note bottom of FileStoragePort
-  Implémenté par adapters/out/localstorage/
-  (LocalStorage, actif par défaut),
-  adapters/out/ipfs/ (IPFSStorage) et
-  adapters/out/fabric/ (ContentAddressedStorage).
-  Verify retrouve l'emplacement effectif d'un
-  fichier depuis ref (la référence de stockage
-  conservée dans Version.Hash) et recalcule son
-  hash de contenu pour le comparer à
-  expectedHash (Model3D.Hash) — chaque adapter
-  implémente sa propre stratégie de résolution
-  (chemin local, cat + hash sur un CID IPFS...).
-  location est vide uniquement si le fichier est
-  introuvable ; renseigné même en cas de
-  divergence de hash, pour distinguer les deux
-  cas (RM38, ENF32).
+  Aucun adapter câblé par défaut (RM42) : myr-core
+  ne conserve jamais de copie du fichier ressource,
+  seule son empreinte SHA-256 est retenue
+  (Model3D.Hash, RM01) — priorité à la traçabilité
+  (savoir où un composant/produit existe, voir
+  RM42/UCCL03) plutôt qu'à l'hébergement.
+  Le port reste défini pour l'interchangeabilité
+  technologique : adapters/out/localstorage/
+  (LocalStorage) et adapters/out/ipfs/ (IPFSStorage)
+  l'implémentent et restent disponibles pour un
+  câblage explicite futur, mais aucun n'est
+  instancié dans cmd/api/main.go ni cmd/cli/main.go
+  aujourd'hui.
 end note
 
 note bottom of ConnectionStore

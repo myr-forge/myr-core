@@ -8,8 +8,10 @@ import (
 )
 
 // handleHealth retourne l'état de chaque composant du serveur (fabric,
-// storage, sessions). Non authentifié — appelé par les load-balancers et
-// l'infra de monitoring.
+// sessions). Non authentifié — appelé par les load-balancers et l'infra de
+// monitoring. Aucun composant "storage" : myr-core ne conserve aucun fichier
+// 3D transmis (traçabilité par hash seule, RM01/RM42), il n'y a donc rien à
+// superviser sur ce plan.
 //
 //	@Summary	Health check
 //	@Tags		infra
@@ -36,14 +38,6 @@ func (h *Handler) handleHealth(w http.ResponseWriter, r *http.Request) {
 		components["fabric"] = componentStatus{Status: "ok"}
 	} else {
 		components["fabric"] = componentStatus{Status: "unavailable", Message: "non configuré"}
-		overall = "degraded"
-	}
-
-	// Stockage fichiers
-	if h.fileStore != nil {
-		components["storage"] = componentStatus{Status: "ok"}
-	} else {
-		components["storage"] = componentStatus{Status: "unavailable", Message: "non configuré"}
 		overall = "degraded"
 	}
 

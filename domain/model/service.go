@@ -113,16 +113,15 @@ func (s *Service) AddFull(req AddRequest) (*Model3D, error) {
 	}
 
 	if req.FilePath != "" {
+		// Le fichier n'est jamais conservé par myr-core : seul son empreinte SHA-256
+		// est retenue (traçabilité RM01/RM04) — voir RM42 pour la vérification des
+		// emplacements externes, seul mécanisme de localisation du fichier réel.
 		hash, err := s.hashFile(req.FilePath)
 		if err != nil {
 			return nil, fmt.Errorf("hashing file: %w", err)
 		}
-		storageRef, err := s.fileStorage.Upload(req.FilePath)
-		if err != nil {
-			return nil, fmt.Errorf("uploading file: %w", err)
-		}
 		m.Hash = hash
-		m.Versions = []Version{{Number: 1, Hash: storageRef, CreatedAt: time.Now()}}
+		m.Versions = []Version{{Number: 1, Hash: hash, CreatedAt: time.Now()}}
 	}
 
 	m.Status = ModuleDraft

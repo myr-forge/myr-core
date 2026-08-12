@@ -15,7 +15,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | RM03 | **Compatibilité de licence** | Soumission d'un asset avec `ParentID != ""` et `LicenseID != ""` | Toujours | La licence de l'asset dérivé doit être compatible avec celle du parent. Si incompatible → soumission rejetée | UCCE04, UCMOD06 |
 | RM04 | **UUID unique** | Enregistrement blockchain réussi | Toujours | Un UUID unique est généré et attribué à l'asset. Il est immuable et ne peut pas être modifié ultérieurement | UCCE01–06 |
 | RM05 | **ParentID obligatoire pour les dérivés** | Création d'un asset non-`base` | Catégorie ≠ `base` | L'asset dérivé doit référencer un `ParentID` valide. Un asset `base` n'a pas de parent | UCCE04, UCCE05 |
-| RM38 | **Traçabilité et vérifiabilité du fichier source** | Consultation d'un composant possédant un fichier ressource (`Hash` non vide) | Toujours | Le système sait, pour chaque fichier ressource, retrouver son emplacement de stockage effectif — quel que soit l'adapter `out/` actif (local, IPFS, ou toute autre technologie, principe d'interchangeabilité technologique) — et vérifier à la demande que le fichier y est toujours présent et que son contenu correspond toujours au hash enregistré. Une divergence (fichier introuvable ou hash différent) est signalée explicitement au demandeur, jamais masquée silencieusement | UCCL02 |
+| RM42 | **Traçabilité et alerte des emplacements externes** | Consultation d'un composant ou module portant un ou plusieurs emplacements externes (`Locations` non vide) | Toujours | Myr ne conserve jamais de copie du fichier ressource — priorité à la traçabilité (savoir où un composant ou produit existe) plutôt qu'à l'hébergement. Le système sait, à la demande, vérifier l'accessibilité de chaque emplacement externe déclaré (boutique, dépôt de fichiers tiers…) au moyen d'une requête sur son URL. Le résultat (accessible / inaccessible) et la date de vérification sont mis à jour individuellement pour chaque emplacement — jamais agrégés en un statut global qui masquerait lequel a échoué. Cette vérification porte uniquement sur l'accessibilité de l'emplacement, jamais sur le contenu qui y est exposé : Myr ne conservant aucune copie du fichier, `Model3D.Hash` (calculé une fois à la soumission, RM01) ne peut être recomparé qu'au contenu que le demandeur récupère lui-même depuis un emplacement — jamais automatiquement par Myr, qui n'a lui-même rien à comparer | UCCL03 |
 
 ---
 
@@ -116,7 +116,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | RM03 | Compatibilité de licence pour tout asset dérivé | Assets |
 | RM04 | UUID unique et immuable à l'enregistrement | Assets |
 | RM05 | ParentID obligatoire pour les assets non-`base` | Assets |
-| RM38 | Vérification à la demande de la présence et du hash du fichier source, quel que soit l'adapter de stockage | Assets |
+| RM42 | Aucune copie du fichier ressource conservée par Myr ; vérification à la demande de l'accessibilité de chaque emplacement externe, statut individuel par emplacement | Assets |
 | RM06 | Transactions blockchain immuables, pas de suppression | Blockchain |
 | RM07 | Validation complète avant toute soumission blockchain | Blockchain |
 | RM08 | ErrNotSupported retourné sur tentative de suppression | Blockchain |

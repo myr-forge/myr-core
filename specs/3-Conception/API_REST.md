@@ -75,7 +75,7 @@
 | POST | `/api/components` | Contributor | Créer un composant (`AddFull`), un fichier CAO par appel |
 | POST | `/api/components/batch` | Contributor | Créer plusieurs composants en un seul appel, un fichier CAO par composant (UCCE01, voir note ci-dessous) — sans garantie transactionnelle : chaque fichier réussit ou échoue indépendamment |
 | GET | `/api/components/{id}` | Auth | Détail d'un composant |
-| PATCH | `/api/components/{id}` | Contributor | Modifier (patch : name, description, tags, links, licenseID) — #incoherence la méthode documentée ici était PUT, mais le handler (`adapters/in/rest/handlers.go`, `patchComponent`) répond uniquement à PATCH ; corrigé pour refléter le comportement réel, à confirmer que PUT n'était pas l'intention initiale |
+| PATCH | `/api/components/{id}` | Contributor | Modifier (patch : name, description, tags, locations, licenseID) — #incoherence la méthode documentée ici était PUT, mais le handler (`adapters/in/rest/handlers.go`, `patchComponent`) répond uniquement à PATCH ; corrigé pour refléter le comportement réel, à confirmer que PUT n'était pas l'intention initiale |
 | DELETE | `/api/components/{id}` | Contributor | Supprimer (UCCE07) — brouillon retiré du stockage local ; composant déjà soumis masqué localement (disparaît des listes), son enregistrement blockchain n'est jamais modifié (RM08) |
 | GET | `/api/components/{id}/interfaces` | Auth | Interfaces physiques d'un composant |
 | GET | `/api/components/{id}/compatible` | Auth | Composants compatibles (type d'interface, catégorie, tag, sens — `DC_D8_Recherche.md` §2, UCREC02) |
@@ -85,7 +85,7 @@
 
 > **Accès visiteur (EF17, UCCL01) :** seule la liste (`GET /api/components`) est concernée par l'accès public — voir `DC_D1_Auth_Identity.md` DC-D1-06 et l'incohérence relevée avec `GET /api/modules` (§6 ci-dessous) qui reste `Auth`.
 
-> **`POST /api/components/batch` (UCCE01) :** multipart, champ répété `files` (un ou plusieurs fichiers CAO). Les autres champs (`owner_id`, `channel_id`, `category`, `parent_id`, `license_id`, `tags`) sont partagés par tous les fichiers du lot. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier dans ce contrat. La réponse liste un résultat par fichier (`{filename, component}` en cas de succès, `{filename, error}` en cas d'échec) : aucune atomicité n'est garantie entre les fichiers d'un même lot (pas de base relationnelle, pas de transaction inter-blockchain).
+> **`POST /api/components/batch` (UCCE01) :** multipart, champ répété `files` (un ou plusieurs fichiers CAO). Les autres champs (`owner_id`, `channel_id`, `category`, `parent_id`, `license_id`, `tags`) sont partagés par tous les fichiers du lot. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier dans ce contrat. La réponse liste un résultat par fichier (`{filename, component}` en cas de succès, `{filename, error}` en cas d'échec) : aucune atomicité n'est garantie entre les fichiers d'un même lot (pas de base relationnelle, pas de transaction inter-blockchain). Champ répété optionnel `thumbnails` : une valeur (data URL base64, chaîne vide acceptée) par fichier, associée par **position** — le i-ème `thumbnails` correspond au i-ème `files`, jamais par nom de fichier. `myr-core` ne rendant jamais lui-même un fichier 3D (§ Séparation des dépôts), c'est au client (`myr-web`) de rendre chaque fichier et de fournir sa miniature ici ; sans valeur à une position donnée, ce composant reste sans miniature (repli `og:image` uniquement si un `locations`/`links` est déclaré, RM42).
 
 > **`POST /api/components/{id}/decompose/preview` puis `.../commit` (UCAM09) :** deux appels distincts pour ne jamais engager un résultat non validé — voir `specs/1-Expression/UCAM-Assemblage_Module/UCAM09.md` pour le détail du scénario et de la forme des corps de requête/réponse (`parts`, `suggested_connections`, `decomposition_id`). `preview` reste une requête HTTP bloquante bornée par un budget de temps serveur (pas de job asynchrone à interroger) — voir `DC_CLI_Model.md` DC-CLIM-04 et §8 pour le point encore ouvert sur la technologie d'analyse STEP dont dépend le temps de traitement réel.
 
@@ -117,7 +117,7 @@
 | GET | `/api/modules` | Auth | Liste des modules (filtres : q, owner_id, status, channel, limit — UCMOD07) |
 | POST | `/api/modules` | Contributor | Créer un module (draft) ; `parent_id` optionnel pour dériver d'un module déjà soumis, avec copie de sa composition (UCMOD01) |
 | GET | `/api/modules/{id}` | Auth | Détail d'un module |
-| PATCH | `/api/modules/{id}` | Contributor | Modifier les métadonnées (patch : name, description, tags, links, license_id — UCMOD03, mêmes champs que `PATCH /api/components/{id}`) |
+| PATCH | `/api/modules/{id}` | Contributor | Modifier les métadonnées (patch : name, description, tags, locations, license_id — UCMOD03, mêmes champs que `PATCH /api/components/{id}`) |
 | DELETE | `/api/modules/{id}` | Contributor | Supprimer un module (UCMOD08) — brouillon retiré du stockage local ; module déjà soumis masqué localement (disparaît des listes), son enregistrement blockchain (y compris ses `ModuleVersion`) n'est jamais modifié (RM08) |
 | GET | `/api/modules/{id}/instances` | Auth | Instances d'un module |
 | POST | `/api/modules/{id}/instances` | Contributor | Ajouter un composant comme instance |
@@ -151,17 +151,28 @@
 | GET | `/api/components/{id}/thumbnail` | Auth | Récupérer la miniature — #incoherence idem, non routée ; la miniature est aujourd'hui exposée via le champ `thumbnail` de `componentDTO` (`GET /api/components`, `GET /api/components/{id}`) |
 | POST | `/api/modules/{id}/thumbnail` | Contributor | Sauvegarder la miniature d'un module (data URL base64) — implémentée, absente jusqu'ici de ce tableau |
 | GET | `/api/modules/{id}/thumbnail` | Auth | Récupérer la miniature d'un module — implémentée, absente jusqu'ici de ce tableau |
-| POST | `/api/components/{id}/thumbnail/regenerate` | Contributor | Redériver la miniature depuis la seule source durable accessible côté serveur : l'og:image du premier lien externe enregistré (`Links`) — un modèle 3D sans lien n'a pas de source régénérable côté serveur (le rendu 3D est produit par le client GUI, pas par `myr`, voir § Séparation des dépôts) ; répond `{ "thumbnail": "<dataURL>" }` (jamais le DTO complet de l'asset) ; échoue en 500 aussi bien pour l'absence de lien externe que pour un échec réseau, un timeout ou une balise `og:image` absente sur la page cible — ces cas ne sont distingués par aucun code ni champ d'erreur dédié, seul le texte du message diffère ; échoue en 503 si l'asset n'est ni un brouillon local ni joignable sur une blockchain configurée |
+| POST | `/api/components/{id}/thumbnail/regenerate` | Contributor | Redériver la miniature depuis la seule source durable accessible côté serveur : l'og:image du premier emplacement externe enregistré (`Locations`) — un modèle 3D sans emplacement n'a pas de source régénérable côté serveur (le rendu 3D est produit par le client GUI, pas par `myr`, voir § Séparation des dépôts) ; répond `{ "thumbnail": "<dataURL>" }` (jamais le DTO complet de l'asset) ; échoue en 500 aussi bien pour l'absence d'emplacement externe que pour un échec réseau, un timeout ou une balise `og:image` absente sur la page cible — ces cas ne sont distingués par aucun code ni champ d'erreur dédié, seul le texte du message diffère ; échoue en 503 si l'asset n'est ni un brouillon local ni joignable sur une blockchain configurée |
 | POST | `/api/modules/{id}/thumbnail/regenerate` | Contributor | Même comportement que ci-dessus, même handler Go `regenerateThumbnail` partagé entre composants et modules — répond aussi `{ "thumbnail": "<dataURL>" }`, jamais un `moduleDTO` — #remarque aucun test (unitaire ou intégration) ne couvre `adapters/out/webimage.Fetcher` (le scraping HTTP réel de la balise `og:image`) ; seuls des tests avec `OGImageFetcher`/service mockés existent (`domain/model/tests/`, `adapters/in/rest/tests/`, `adapters/in/cli/model_test.go`) — aucune preuve qu'un client ait déjà exercé ce chemin contre une vraie page web |
 
 ---
 
-## 8bis. Traçabilité et intégrité du fichier source (RM38)
+## 8bis. Vérification d'intégrité blockchain
+
+Myr ne conserve jamais de copie du fichier ressource transmis — seule son empreinte (`Model3D.Hash`) est retenue à la soumission (RM01). Il n'y a donc rien à relocaliser ni à revérifier dans un stockage propre à Myr ; `verify` ne porte que sur la cohérence des métadonnées inscrites sur la blockchain. Pour la traçabilité des emplacements où un composant ou produit existe réellement, voir §8ter (RM42).
 
 | Méthode | Route | Accès | Description |
 |---------|-------|-------|-------------|
-| POST | `/api/components/{id}/verify` | Contributor | Vérifie la cohérence blockchain des métadonnées (si l'asset est soumis) puis, si l'asset porte un fichier ressource (`Hash` non vide), sa présence et son intégrité dans le stockage actif (adapter `out/` local, IPFS, ou autre) — même handler Go `verifyAsset`, partagé avec les modules. Répond toujours `200` avec un statut explicite : `{ "ok": true, "location": "<emplacement effectif>" }` en cas de succès (le champ `location` est omis pour un asset sans fichier ressource, ex. un module) ; `{ "ok": false, "reason": "file_missing" }` si le fichier est introuvable à son emplacement enregistré ; `{ "ok": false, "reason": "hash_mismatch", "location": "..." }` si le fichier est présent mais que son contenu ne correspond plus au hash enregistré ; `{ "ok": false, "reason": "blockchain_integrity_failed" }` si seule la cohérence blockchain échoue. Échoue en `503` uniquement si la blockchain est indisponible et l'asset n'est pas un brouillon local |
+| POST | `/api/components/{id}/verify` | Contributor | Vérifie la cohérence blockchain des métadonnées d'un asset déjà soumis (aucune vérification requise pour un brouillon local, jamais encore ancré) — même handler Go `verifyAsset`, partagé avec les modules. Répond toujours `200` : `{ "ok": true }` en cas de succès, `{ "ok": false, "reason": "blockchain_integrity_failed" }` en cas d'échec. Échoue en `503` uniquement si la blockchain est indisponible et l'asset n'est pas un brouillon local |
 | POST | `/api/modules/{id}/verify` | Contributor | Même comportement que ci-dessus, même handler Go `verifyAsset` |
+
+---
+
+## 8ter. Traçabilité et alerte des emplacements externes (RM42)
+
+| Méthode | Route | Accès | Description |
+|---------|-------|-------|-------------|
+| POST | `/api/components/{id}/locations/check` | Contributor | Vérifie l'accessibilité de chaque emplacement externe enregistré (`Locations`) par une requête sur son URL — même handler Go `checkLocations`, partagé avec les modules. Met à jour le statut et la date de vérification de chaque emplacement (`LocationCheck`, hors blockchain — voir `Modele_Domaine.md` §3) sans jamais modifier `Model3D` lui-même, qu'il soit brouillon ou déjà soumis (RM19 non concerné). Répond toujours `200` avec le détail par emplacement : `{ "locations": [ { "url": "...", "status": "reachable"\|"unreachable", "checked_at": "..." } ] }` ; `{ "locations": [] }` si l'asset ne porte aucun emplacement externe. Ne vérifie que l'accessibilité de l'URL, jamais le contenu qui y est exposé — Myr ne conservant aucune copie du fichier ressource (§8bis), il n'a lui-même rien à comparer à `Model3D.Hash` |
+| POST | `/api/modules/{id}/locations/check` | Contributor | Même comportement que ci-dessus, même handler Go `checkLocations` |
 
 ---
 

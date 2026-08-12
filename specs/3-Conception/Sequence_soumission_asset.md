@@ -18,7 +18,6 @@ actor Client as C
 participant "adapter in\n(CLI ou REST)" as In
 participant "ModelService\n(domain/model)" as Svc
 participant "PlagiarismChecker\n(port out, contrat §6\nArchitecture_Composition.md)" as Plag
-participant "FileStoragePort\n(adapters/out/ipfs)" as FS
 participant "BlockchainPort\n(adapters/out/fabric)" as BC
 
 C -> In : myr model add <fichier>\nPOST /api/components
@@ -43,13 +42,12 @@ alt ParentID != "" && LicenseID != ""
   Svc -> Svc : CheckLicenseCompatibility\n(RM03)
 end
 
-Svc -> FS : Upload(filePath)
-FS --> Svc : hash (CID)
-
 note over Svc
-  Toutes les données (métadonnées,
-  licences, interfaces, UUID) validées
-  AVANT soumission (RM07)
+  Le fichier n'est jamais conservé par Myr — seul le hash
+  calculé plus haut est retenu (traçabilité RM01, voir RM42
+  pour les emplacements externes déclarés). Toutes les
+  données (métadonnées, licences, interfaces, UUID) sont
+  validées AVANT soumission (RM07)
 end note
 
 Svc -> BC : StoreModelRecord(Model3D{Status: submitted})
@@ -70,14 +68,11 @@ actor C as "Concepteur"
 participant "adapter in\n(CLI ou REST)" as In
 participant "ModelService\n(domain/model)" as Svc
 participant "InterfaceStore\n(adapters/out/localstorage)" as IS
-participant "FileStoragePort" as FS
 participant "BlockchainPort" as BC
 
 C -> In : myr model add <fichier> --draft\nPOST /api/components {draft:true}
 In -> Svc : AddFull(req AddRequest{Draft:true})
-Svc -> Svc : valider + hash (comme §2, sans anti-plagiat\ntant que Category != base soumis)
-Svc -> FS : Upload(filePath)
-FS --> Svc : hash
+Svc -> Svc : valider + hash (comme §2, sans anti-plagiat\ntant que Category != base soumis) —\nfichier jamais conservé (RM42)
 Svc --> In : *Model3D (Status: draft, BlockID: "")
 In --> C : composant créé en brouillon
 

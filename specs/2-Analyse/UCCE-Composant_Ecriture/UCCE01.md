@@ -23,7 +23,6 @@ rectangle "Application MYR" {
     usecase "Analyser similarité SCM" as UC3
     usecase "Vérifier compatibilité de licence" as UC4
     usecase "Enregistrer sur la blockchain" as UC5
-    usecase "Stocker le fichier 3D (IPFS)" as UC6
 }
 
 C --> UC1
@@ -31,7 +30,6 @@ UC1 ..> UC2 : <<include>>
 UC1 ..> UC3 : <<include>>
 UC1 ..> UC4 : <<extend>> (si ParentID)
 UC1 ..> UC5 : <<include>>
-UC1 ..> UC6 : <<include>>
 
 @enduml
 ```
@@ -66,11 +64,10 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 5. Le service calcule le SHA-256 du fichier : `sha256:<hex>`.
 6. **[Cible RM01]** Le service interroge Fabric (`ListModelRecords`) et compare le hash avec tous les assets existants.
 7. Si aucun doublon : le service analyse la similarité SCM (seuil 50%) avec les assets existants.
-8. Le service téléverse le fichier vers IPFS (`fileStorage.Upload(filePath)`) → retourne une référence de stockage.
-9. Le service construit le `Model3D` avec un UUID généré (`generateID()`), le hash, la référence IPFS.
-10. Le service soumet la transaction `StoreModel` sur Fabric (`blockchain.StoreModelRecord(m)`).
-11. Fabric valide la transaction et ancre le bloc.
-12. L'API retourne `201 Created` avec le `Model3D` JSON (ID, name, hash, blockID…).
+8. Le service construit le `Model3D` avec un UUID généré (`generateID()`) et le hash — le fichier transmis n'est jamais conservé par Myr, qui priorise la traçabilité (savoir où le composant existe, voir UCCL03) plutôt que l'hébergement.
+9. Le service soumet la transaction `StoreModel` sur Fabric (`blockchain.StoreModelRecord(m)`).
+10. Fabric valide la transaction et ancre le bloc.
+11. L'API retourne `201 Created` avec le `Model3D` JSON (ID, name, hash, blockID…).
 
 ### Flux alternatif — Import depuis un format CAO non natif (STL, STEP, OBJ)
 
@@ -217,11 +214,11 @@ end
 
 ## Notes d'implémentation
 
-**Route existante :** `POST /api/components` → `handler.createAsset()` → `service.AddFull()` → `fabric.StoreModelRecord()` + `ipfs.Upload()`.
+**Route existante :** `POST /api/components` → `handler.createAsset()` → `service.AddFull()` → `fabric.StoreModelRecord()`.
 
 **Commande CLI équivalente (existante, à étendre) :** `myr model add <file> --name <nom> --channel <id> --category base [--description <texte>] [--tags <a,b>] [--owner-id <id>] [--draft]` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.1). Aujourd'hui `adapters/in/cli/model.go` ne câble que `--name`/`--channel`/`--tags` via `modelSvc.Add()` — un sous-ensemble de `AddRequest`. Cible : basculer sur `modelSvc.AddFull(AddRequest{...})`, la même méthode que le handler REST `createAsset()`, pour exposer aussi `--category`, `--parent`, `--license` et `--draft` (RM16). Une fois câblée, la commande déclenche les mêmes règles (anti-plagiat RM01, compatibilité de licence RM03) que le flux REST — seul le canal de sortie change (texte terminal vs JSON HTTP). La soumission différée d'un composant en brouillon s'effectue via `myr model submit <id>` (§ 3.6bis).
 
-**Écart E4 (RM01 incomplet) :** `service.AddFull()` calcule le SHA-256 mais ne compare pas avec les assets existants. À implémenter : appel `blockchain.ListModelRecords(channelID)` suivi d'une comparaison de hashes avant `fileStorage.Upload()`.
+**Écart E4 (RM01 incomplet) :** `service.AddFull()` calcule le SHA-256 mais ne compare pas avec les assets existants. À implémenter : appel `blockchain.ListModelRecords(channelID)` suivi d'une comparaison de hashes avant l'enregistrement blockchain (`StoreModelRecord`).
 
 **Écart E1 (catégorie `decoupage` absente) :** `domain/model/entity.go` ne définit pas `CategoryDecoupage`. À ajouter : `CategoryDecoupage Category = "decoupage"`. Cette catégorie est la seule qui transforme un composant en module (UCAM05).
 
