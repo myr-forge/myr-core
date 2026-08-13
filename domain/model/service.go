@@ -134,14 +134,21 @@ func (s *Service) AddFull(req AddRequest) (*Model3D, error) {
 // Submit engage sur la blockchain un composant créé en brouillon (AddRequest.Draft) :
 // une seule transaction committe les métadonnées et les interfaces locales
 // (Model3D.Interfaces, depuis InterfaceStore), puis Status passe à submitted.
-// Généralise SubmitModule à tout Model3D, sans la vérification d'assemblage
-// (RM17, propre aux modules — voir DC_CLI_Model.md §3.6bis).
-func (s *Service) Submit(assetID string) (*Model3D, error) {
+// Point d'entrée unique pour tout Model3D (ADR-11, specs/3-Conception/Conception_intro.md) :
+// dès que l'asset a des Assemblies (IsModule()), délègue à SubmitModule (RM17,
+// création d'une ModuleVersion) — l'appelant (REST, CLI) n'a pas à savoir
+// laquelle des deux logiques invoquer (règle 28 : ne pas dupliquer ce
+// dispatch dans les adapters). note n'est utilisée que dans ce cas (ModuleVersion.Note) ;
+// ignorée pour un composant simple.
+func (s *Service) Submit(assetID, note string) (*Model3D, error) {
 	if s.draftStore == nil {
 		return nil, fmt.Errorf("stockage de brouillons non configuré")
 	}
 	if s.blockchain == nil {
 		return nil, ErrBlockchainUnavailable
+	}
+	if m, _, err := s.getAsset(assetID, ""); err == nil && m.IsModule() {
+		return s.SubmitModule(assetID, note)
 	}
 	m, err := s.draftStore.GetDraft(assetID)
 	if err != nil {

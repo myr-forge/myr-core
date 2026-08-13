@@ -101,12 +101,13 @@ func TestRunModelInterfaceRemove_NominalCase(t *testing.T) {
 	}
 }
 
-/// @brief  runModelInterfaceList affiche les interfaces d'un composant simple
-/// @input  ListInterfacesForAsset retourne 1 interface
-/// @expect Sortie contient l'id de l'interface, GetModule n'est pas nécessaire
+/// @brief  runModelInterfaceList affiche les interfaces directes d'un composant simple —
+///         GetModuleInterfaces gère ce cas comme le cas décomposé (ADR-11)
+/// @input  GetModuleInterfaces retourne 1 interface
+/// @expect Sortie contient l'id de l'interface
 func TestRunModelInterfaceList_Component_NominalCase(t *testing.T) {
 	svc := &mockModelSvc{
-		listInterfacesForAsset: func(assetID string) ([]*model.AssetInterface, error) {
+		getModuleInterfaces: func(assetID string) ([]*model.AssetInterface, error) {
 			return []*model.AssetInterface{{ID: "iface-1", AssetID: assetID, Category: "ELEC"}}, nil
 		},
 	}
@@ -119,13 +120,11 @@ func TestRunModelInterfaceList_Component_NominalCase(t *testing.T) {
 	}
 }
 
-/// @brief  runModelInterfaceList bascule sur GetModuleInterfaces quand l'asset est un module
-/// @input  ListInterfacesForAsset retourne une liste vide, GetModule réussit
-/// @expect GetModuleInterfaces est appelé et son résultat affiché
-func TestRunModelInterfaceList_Module_Fallback(t *testing.T) {
+/// @brief  runModelInterfaceList affiche les interfaces exposées d'un asset décomposé
+/// @input  GetModuleInterfaces retourne 1 interface exposée
+/// @expect Sortie contient l'id de l'interface
+func TestRunModelInterfaceList_DecomposedAsset(t *testing.T) {
 	svc := &mockModelSvc{
-		listInterfacesForAsset: func(string) ([]*model.AssetInterface, error) { return nil, nil },
-		getModule:              func(id string) (*model.Model3D, error) { return &model.Model3D{ID: id}, nil },
 		getModuleInterfaces: func(moduleID string) ([]*model.AssetInterface, error) {
 			return []*model.AssetInterface{{ID: "exposed-1"}}, nil
 		},

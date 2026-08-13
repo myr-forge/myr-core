@@ -343,6 +343,12 @@ func (h *Handler) requireRole(perm rbac.Permission, next http.HandlerFunc) http.
 
 // ── DTOs ─────────────────────────────────────────────────────────────────────
 
+// componentDTO est la ressource REST unique pour Model3D (ADR-11,
+// specs/3-Conception/Conception_intro.md) — qu'il porte un fichier ressource
+// (Hash), des instances (Instances), ou les deux à la fois. Instances,
+// Assemblies et ModuleVersions restent vides ([]) tant que l'asset n'a jamais
+// été décomposé ; le client dérive l'affichage « composant »/« produit » de
+// len(Instances) > 0, jamais stocké séparément.
 type componentDTO struct {
 	ID          string         `json:"id"`
 	Name        string         `json:"name"`
@@ -359,8 +365,11 @@ type componentDTO struct {
 	// Status vaut "draft" (créé via draft:true, pas encore engagé sur la blockchain
 	// — voir POST /components/{id}/submit) ou "submitted" (comportement nominal,
 	// immédiat). Vide pour un composant créé avant l'introduction du brouillon.
-	Status    model.ModuleStatus `json:"status,omitempty"`
-	CreatedAt time.Time          `json:"created_at"`
+	Status         model.ModuleStatus        `json:"status,omitempty"`
+	Assemblies     []string                  `json:"assemblies"`
+	Instances      []model.WorkspaceInstance `json:"instances"`
+	ModuleVersions []model.ModuleVersion     `json:"module_versions"`
+	CreatedAt      time.Time                 `json:"created_at"`
 }
 
 type connectionDTO struct {
@@ -401,21 +410,36 @@ func toComponentDTO(m *model.Model3D, thumbnail string) componentDTO {
 	if tags == nil {
 		tags = []string{}
 	}
+	assemblies := m.Assemblies
+	if assemblies == nil {
+		assemblies = []string{}
+	}
+	instances := m.WorkspaceInstances
+	if instances == nil {
+		instances = []model.WorkspaceInstance{}
+	}
+	versions := m.ModuleVersions
+	if versions == nil {
+		versions = []model.ModuleVersion{}
+	}
 	return componentDTO{
-		ID:          m.ID,
-		Name:        m.Name,
-		Description: m.Description,
-		Category:    m.Category,
-		OwnerID:     m.OwnerID,
-		ParentID:    m.ParentID,
-		BlockID:     m.BlockID,
-		Hash:        m.Hash,
-		LicenseID:   m.LicenseID,
-		Tags:        tags,
-		Links:       m.Links,
-		Thumbnail:   thumbnail,
-		Status:      m.Status,
-		CreatedAt:   m.CreatedAt,
+		ID:             m.ID,
+		Name:           m.Name,
+		Description:    m.Description,
+		Category:       m.Category,
+		OwnerID:        m.OwnerID,
+		ParentID:       m.ParentID,
+		BlockID:        m.BlockID,
+		Hash:           m.Hash,
+		LicenseID:      m.LicenseID,
+		Tags:           tags,
+		Links:          m.Links,
+		Thumbnail:      thumbnail,
+		Status:         m.Status,
+		Assemblies:     assemblies,
+		Instances:      instances,
+		ModuleVersions: versions,
+		CreatedAt:      m.CreatedAt,
 	}
 }
 
@@ -432,10 +456,11 @@ func (h *Handler) handleComponents(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// listGraph liste les composants (hors modules) avec filtres serveur.
+// listGraph liste tous les composants, décomposés (anciens "modules") ou non,
+// avec filtres serveur (ADR-11, specs/3-Conception/Conception_intro.md).
 //
 //	@Summary		Lister les composants
-//	@Description	Filtre côté serveur — ne renvoie qu'un sous-ensemble pour éviter de tout charger. Les modules sont exclus (voir /api/modules).
+//	@Description	Filtre côté serveur — ne renvoie qu'un sous-ensemble pour éviter de tout charger. Inclut tout Model3D, décomposé (instances non vide) ou non.
 //	@Tags			components
 //	@Produce		json
 //	@Param			q			query		string	false	"recherche texte (nom, description, tags)"
@@ -444,6 +469,7 @@ func (h *Handler) handleComponents(w http.ResponseWriter, r *http.Request) {
 //	@Param			parent_id	query		string	false	"filtre par asset parent"
 //	@Param			hash		query		string	false	"filtre par hash SHA-256 exact"
 //	@Param			tags		query		string	false	"tags séparés par virgule (correspondance sur au moins un tag)"
+//	@Param			status		query		string	false	"filtre par statut : draft ou submitted"
 //	@Param			limit		query		int		false	"nombre maximum de résultats (défaut 200, max 1000)"
 //	@Success		200	{object}	graphResponse
 //	@Failure		500	{object}	map[string]string
@@ -455,6 +481,7 @@ func (h *Handler) listGraph(w http.ResponseWriter, r *http.Request) {
 	parentID := strings.TrimSpace(r.URL.Query().Get("parent_id"))
 	hashFilter := strings.TrimSpace(r.URL.Query().Get("hash")) // hash SHA-256 exact
 	tagsParam := r.URL.Query().Get("tags")                     // "tag1,tag2" — match si l'asset possède au moins un
+	status := strings.TrimSpace(r.URL.Query().Get("status"))
 	limit := 200
 	if l, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && l > 0 && l <= 1000 {
 		limit = l
@@ -493,9 +520,6 @@ func (h *Handler) listGraph(w http.ResponseWriter, r *http.Request) {
 	// Filtrer
 	var filtered []*model.Model3D
 	for _, m := range all {
-		if m.IsModule() {
-			continue // les modules sont exposés via /api/modules, pas /api/components
-		}
 		if len(catSet) > 0 && !catSet[string(m.Category)] {
 			continue
 		}
@@ -509,6 +533,9 @@ func (h *Handler) listGraph(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		if hashFilter != "" && m.Hash != hashFilter {
+			continue
+		}
+		if status != "" && string(m.Status) != status {
 			continue
 		}
 		if len(filterTags) > 0 && !assetHasAnyTag(m, filterTags) {
@@ -883,13 +910,52 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 		h.regenerateThumbnail(w, r, id)
 		return
 	}
-	// Sous-route /:id/thumbnail — remplace la miniature (symétrique à /modules/{id}/thumbnail)
+	// Sous-route /:id/thumbnail — GET récupère, POST remplace la miniature
 	if strings.HasSuffix(rest, "/thumbnail") {
 		id := strings.TrimSuffix(rest, "/thumbnail")
-		h.saveComponentThumbnail(w, r, id)
+		switch r.Method {
+		case http.MethodGet:
+			thumb, _ := h.svcFor(r).GetThumbnail(id)
+			jsonOK(w, map[string]string{"thumbnail": thumb})
+		case http.MethodPost:
+			h.saveComponentThumbnail(w, r, id)
+		default:
+			http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
+		}
+		return
+	}
+	// Sous-route /:id/assemblies — GET liste les connexions internes, POST rattache
+	// une connexion existante (ADR-11, ex-/api/modules/{id}/assemblies)
+	if strings.HasSuffix(rest, "/assemblies") {
+		id := strings.TrimSuffix(rest, "/assemblies")
+		h.handleComponentAssemblies(w, r, id)
+		return
+	}
+	// Sous-route /:id/assemblies/:connID — détache une connexion (ADR-11)
+	if idx := strings.Index(rest, "/assemblies/"); idx != -1 {
+		id := rest[:idx]
+		connID := rest[idx+len("/assemblies/"):]
+		h.removeComponentAssembly(w, r, id, connID)
+		return
+	}
+	// Sous-route /:id/instances — GET liste les instances, POST en ajoute une
+	// (ADR-11, ex-/api/modules/{id}/instances) — applicable à n'importe quel id
+	// existant, y compris un composant qui n'a encore aucune instance.
+	if strings.HasSuffix(rest, "/instances") {
+		id := strings.TrimSuffix(rest, "/instances")
+		h.handleComponentInstances(w, r, id)
+		return
+	}
+	// Sous-route /:id/instances/:instanceID — retire ou repositionne une instance
+	if idx := strings.Index(rest, "/instances/"); idx != -1 {
+		id := rest[:idx]
+		instanceID := rest[idx+len("/instances/"):]
+		h.handleComponentInstance(w, r, id, instanceID)
 		return
 	}
 	// Sous-route /:id/submit — engage un composant brouillon sur la blockchain
+	// (route unique : dispatche en interne vers la logique historique de
+	// SubmitModule dès que l'asset a des instances — ADR-11)
 	if strings.HasSuffix(rest, "/submit") {
 		id := strings.TrimSuffix(rest, "/submit")
 		h.submitComponent(w, r, id)
@@ -914,23 +980,21 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// regenerateThumbnail redérive la miniature d'un asset (composant ou module) depuis
-// sa source durable — l'og:image du premier lien externe enregistré (Links). Sans
+// regenerateThumbnail redérive la miniature d'un asset depuis sa source
+// durable — l'og:image du premier lien externe enregistré (Links). Sans
 // lien externe, il n'existe pas de source régénérable côté serveur (le rendu d'un
 // modèle 3D est produit par le client GUI, pas par myr) — voir ModelService.RegenerateThumbnail.
 //
 //	@Summary		Régénérer la miniature d'un asset depuis son lien source
-//	@Description	Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur. Répond { "thumbnail": "<dataURL>" } — jamais le DTO complet de l'asset (composant ou module), qu'il faut requêter séparément si besoin d'autre chose que la miniature.
+//	@Description	Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur. Répond { "thumbnail": "<dataURL>" } — jamais le componentDTO complet, qu'il faut requêter séparément si besoin d'autre chose que la miniature.
 //	@Tags			components
-//	@Tags			modules
 //	@Produce		json
-//	@Param			id	path		string	true	"identifiant de l'asset (composant ou module)"
+//	@Param			id	path		string	true	"identifiant de l'asset"
 //	@Success		200	{object}	map[string]string
 //	@Failure		500	{object}	map[string]string	"aucun lien externe, échec réseau/timeout ou og:image introuvable — un seul code pour ces trois cas"
 //	@Failure		503	{object}	map[string]string	"blockchain indisponible (asset non local et non joignable)"
 //	@Security		MyrToken
 //	@Router			/components/{id}/thumbnail/regenerate [post]
-//	@Router			/modules/{id}/thumbnail/regenerate [post]
 func (h *Handler) regenerateThumbnail(w http.ResponseWriter, r *http.Request, id string) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
@@ -947,8 +1011,7 @@ func (h *Handler) regenerateThumbnail(w http.ResponseWriter, r *http.Request, id
 // saveComponentThumbnail remplace la miniature d'un composant, brouillon ou
 // déjà soumis — la miniature est un champ hors ledger (comme name/description,
 // voir patchComponent), modifiable même après soumission puisqu'elle ne touche
-// jamais le contenu blockchain déjà commité (règle 7). Symétrique à
-// POST /modules/{id}/thumbnail.
+// jamais le contenu blockchain déjà commité (règle 7).
 //
 //	@Summary		Remplacer la miniature d'un composant
 //	@Description	Remplace la miniature d'un composant (brouillon ou déjà soumis) par la data URL fournie. Champ hors ledger — modifiable même après soumission, contrairement au contenu blockchain (règle 7).
@@ -980,22 +1043,20 @@ func (h *Handler) saveComponentThumbnail(w http.ResponseWriter, r *http.Request,
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// verifyAsset vérifie l'intégrité d'un asset (composant ou module) : cohérence
-// blockchain des métadonnées, puis — si l'asset porte un fichier ressource —
-// présence et intégrité de ce fichier dans le stockage actif, quel que soit
-// l'adapter out/ (local, IPFS...) — voir ModelService.Verify, RM38.
+// verifyAsset vérifie l'intégrité d'un asset : cohérence blockchain des
+// métadonnées, puis — si l'asset porte un fichier ressource — présence et
+// intégrité de ce fichier dans le stockage actif, quel que soit l'adapter
+// out/ (local, IPFS...) — voir ModelService.Verify, RM38.
 //
 //	@Summary		Vérifier l'intégrité d'un asset et la localisation de son fichier source
 //	@Description	Vérifie la cohérence blockchain des métadonnées puis, si l'asset porte un fichier ressource, sa présence et son intégrité dans le stockage actif. Répond toujours 200 avec un statut explicite ("ok", "reason", "location") — un résultat négatif est un résultat métier, pas une erreur de transport.
 //	@Tags			components
-//	@Tags			modules
 //	@Produce		json
-//	@Param			id	path		string	true	"identifiant de l'asset (composant ou module)"
+//	@Param			id	path		string	true	"identifiant de l'asset"
 //	@Success		200	{object}	map[string]interface{}
 //	@Failure		503	{object}	map[string]string	"blockchain indisponible"
 //	@Security		MyrToken
 //	@Router			/components/{id}/verify [post]
-//	@Router			/modules/{id}/verify [post]
 func (h *Handler) verifyAsset(w http.ResponseWriter, r *http.Request, id string) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
@@ -1023,13 +1084,19 @@ func (h *Handler) verifyAsset(w http.ResponseWriter, r *http.Request, id string)
 	jsonOK(w, resp)
 }
 
-// submitComponent engage un composant créé en brouillon (draft:true) sur la blockchain.
+// submitComponent engage un asset créé en brouillon sur la blockchain — un
+// composant simple comme un asset décomposé (ADR-11, specs/3-Conception/Conception_intro.md) :
+// un seul point d'entrée, ModelService.Submit route en interne vers la
+// logique historique de SubmitModule (RM17, ModuleVersion) dès que l'asset a
+// des instances (IsModule()) — ce handler n'a pas à connaître cette distinction.
 //
 //	@Summary		Soumettre un composant en brouillon
-//	@Description	Committe en une transaction les métadonnées et les interfaces locales du composant, puis passe "status" à "submitted". Échoue si le composant n'est pas un brouillon local (déjà soumis, ou inexistant).
+//	@Description	Committe en une transaction les métadonnées et les interfaces locales du composant, puis passe "status" à "submitted". Pour un asset décomposé, vérifie qu'au moins un assemblage existe (RM17) et crée une ModuleVersion horodatée — le champ "note" optionnel du corps de la requête n'est utilisé que dans ce cas. Échoue si l'asset n'est pas un brouillon local (déjà soumis — sauf ré-soumission d'un asset décomposé pour une nouvelle version — ou inexistant).
 //	@Tags			components
+//	@Accept			json
 //	@Produce		json
-//	@Param			id	path		string	true	"identifiant du composant en brouillon"
+//	@Param			id		path	string	true	"identifiant du composant en brouillon"
+//	@Param			body	body	object	false	"note optionnelle, utilisée uniquement pour un asset décomposé (ModuleVersion.Note)"
 //	@Success		200	{object}	componentDTO
 //	@Failure		400	{object}	map[string]string
 //	@Failure		503	{object}	map[string]string	"blockchain indisponible"
@@ -1040,13 +1107,211 @@ func (h *Handler) submitComponent(w http.ResponseWriter, r *http.Request, id str
 		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
 		return
 	}
-	m, err := h.svcFor(r).Submit(id)
+	var body struct {
+		Note string `json:"note"`
+	}
+	_ = json.NewDecoder(r.Body).Decode(&body)
+	m, err := h.svcFor(r).Submit(id, body.Note)
 	if err != nil {
 		internalErr(w, err)
 		return
 	}
 	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
 	jsonOK(w, toComponentDTO(m, thumb))
+}
+
+// handleComponentAssemblies liste (GET) les connexions internes d'un asset
+// décomposé, ou rattache (POST) une connexion déjà créée à sa liste
+// d'assemblage — ex-/api/modules/{id}/connections (GET) et
+// /api/modules/{id}/assemblies (POST), fusionnés sous une seule route (ADR-11).
+//
+//	@Summary		Connexions internes d'un asset décomposé
+//	@Description	GET renvoie les connexions référencées par Assemblies (liste vide si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr model link add) à cette liste — brouillon local, sans effet blockchain avant soumission.
+//	@Tags			components
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		string	true	"identifiant de l'asset"
+//	@Param			body	body		object	false	"connection_id requis — POST uniquement"
+//	@Success		200	{object}	componentDTO
+//	@Failure		400	{object}	map[string]string
+//	@Security		MyrToken
+//	@Router			/components/{id}/assemblies [get]
+//	@Router			/components/{id}/assemblies [post]
+func (h *Handler) handleComponentAssemblies(w http.ResponseWriter, r *http.Request, id string) {
+	switch r.Method {
+	case http.MethodGet:
+		m, err := h.svcFor(r).Get(id, h.channelFor(r))
+		if err != nil {
+			jsonError(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		asmSet := map[string]bool{}
+		for _, aid := range m.Assemblies {
+			asmSet[aid] = true
+		}
+		all, _ := h.svcFor(r).ListConnections()
+		dtos := make([]connectionDTO, 0)
+		for _, c := range all {
+			if asmSet[c.ID] {
+				dtos = append(dtos, connectionDTO{
+					ID: c.ID, From: c.From, To: c.To, Label: c.Label,
+					FromIfaceID: c.FromIfaceID, ToIfaceID: c.ToIfaceID,
+					FromInstanceID: c.FromInstanceID, ToInstanceID: c.ToInstanceID,
+					FastenerAssetID: c.FastenerAssetID, Incompatible: c.Incompatible,
+				})
+			}
+		}
+		jsonOK(w, dtos)
+	case http.MethodPost:
+		var body struct {
+			ConnectionID string `json:"connection_id"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.ConnectionID == "" {
+			jsonError(w, "le champ 'connection_id' est requis", http.StatusBadRequest)
+			return
+		}
+		if err := h.svcFor(r).AddAssemblyToModule(id, body.ConnectionID); err != nil {
+			internalErr(w, err)
+			return
+		}
+		m, err := h.svcFor(r).Get(id, h.channelFor(r))
+		if err != nil {
+			internalErr(w, err)
+			return
+		}
+		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
+		jsonOK(w, toComponentDTO(m, thumb))
+	default:
+		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
+	}
+}
+
+// removeComponentAssembly détache une connexion de la liste d'assemblage d'un
+// asset — ex-DELETE /api/modules/{id}/assemblies/{connID} (ADR-11).
+//
+//	@Summary		Détacher une connexion d'un asset décomposé
+//	@Description	Retire connID de la liste Assemblies de l'asset — brouillon local, sans effet blockchain avant soumission. Ne supprime pas la connexion elle-même (voir DELETE /connections/{id}).
+//	@Tags			components
+//	@Produce		json
+//	@Param			id		path		string	true	"identifiant de l'asset"
+//	@Param			connID	path		string	true	"identifiant de la connexion à détacher"
+//	@Success		200	{object}	componentDTO
+//	@Failure		500	{object}	map[string]string
+//	@Security		MyrToken
+//	@Router			/components/{id}/assemblies/{connID} [delete]
+func (h *Handler) removeComponentAssembly(w http.ResponseWriter, r *http.Request, id, connID string) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+	if err := h.svcFor(r).RemoveAssemblyFromModule(id, connID); err != nil {
+		internalErr(w, err)
+		return
+	}
+	m, err := h.svcFor(r).Get(id, h.channelFor(r))
+	if err != nil {
+		internalErr(w, err)
+		return
+	}
+	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
+	jsonOK(w, toComponentDTO(m, thumb))
+}
+
+// handleComponentInstances liste (GET) ou ajoute (POST) une instance d'un
+// asset — ex-/api/modules/{id}/instances, applicable à n'importe quel id
+// existant (ADR-11), y compris un composant qui n'a encore aucune instance.
+//
+//	@Summary		Instances d'un asset
+//	@Description	GET renvoie la liste des instances (vide si l'asset n'a jamais été décomposé). POST ajoute un composant existant comme instance — brouillon local, sans effet blockchain avant soumission.
+//	@Tags			components
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		string	true	"identifiant de l'asset"
+//	@Param			body	body		object	false	"asset_id requis — POST uniquement"
+//	@Success		200	{array}		model.WorkspaceInstance
+//	@Success		200	{object}	componentDTO
+//	@Failure		400	{object}	map[string]string
+//	@Security		MyrToken
+//	@Router			/components/{id}/instances [get]
+//	@Router			/components/{id}/instances [post]
+func (h *Handler) handleComponentInstances(w http.ResponseWriter, r *http.Request, id string) {
+	switch r.Method {
+	case http.MethodGet:
+		m, err := h.svcFor(r).Get(id, h.channelFor(r))
+		if err != nil {
+			jsonError(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		instances := m.WorkspaceInstances
+		if instances == nil {
+			instances = []model.WorkspaceInstance{}
+		}
+		jsonOK(w, instances)
+	case http.MethodPost:
+		var body struct {
+			AssetID string `json:"asset_id"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.AssetID == "" {
+			jsonError(w, "le champ 'asset_id' est requis", http.StatusBadRequest)
+			return
+		}
+		m, err := h.svcFor(r).AddAssetToWorkspace(id, body.AssetID)
+		if err != nil {
+			internalErr(w, err)
+			return
+		}
+		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
+		jsonOK(w, toComponentDTO(m, thumb))
+	default:
+		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
+	}
+}
+
+// handleComponentInstance retire (DELETE) ou repositionne (PATCH) une
+// instance d'un asset — ex-/api/modules/{id}/instances/{instanceId} (ADR-11).
+//
+//	@Summary		Retirer ou repositionner une instance
+//	@Description	DELETE retire l'instance et ses connexions en cascade (RM14). PATCH met à jour sa position (x, y).
+//	@Tags			components
+//	@Accept			json
+//	@Produce		json
+//	@Param			id			path		string	true	"identifiant de l'asset"
+//	@Param			instanceId	path		string	true	"identifiant de l'instance"
+//	@Param			body		body		object	false	"x, y — PATCH uniquement"
+//	@Success		200	{object}	componentDTO
+//	@Failure		400	{object}	map[string]string
+//	@Security		MyrToken
+//	@Router			/components/{id}/instances/{instanceId} [delete]
+//	@Router			/components/{id}/instances/{instanceId} [patch]
+func (h *Handler) handleComponentInstance(w http.ResponseWriter, r *http.Request, id, instanceID string) {
+	switch r.Method {
+	case http.MethodDelete:
+		m, err := h.svcFor(r).RemoveAssetFromWorkspace(id, instanceID)
+		if err != nil {
+			internalErr(w, err)
+			return
+		}
+		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
+		jsonOK(w, toComponentDTO(m, thumb))
+	case http.MethodPatch:
+		var body struct {
+			X float64 `json:"x"`
+			Y float64 `json:"y"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			jsonError(w, "body JSON invalide", http.StatusBadRequest)
+			return
+		}
+		m, err := h.svcFor(r).UpdateInstancePosition(id, instanceID, body.X, body.Y)
+		if err != nil {
+			internalErr(w, err)
+			return
+		}
+		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
+		jsonOK(w, toComponentDTO(m, thumb))
+	default:
+		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
+	}
 }
 
 // patchComponent modifie un composant existant (champs partiels).
@@ -1096,34 +1361,6 @@ func decodeUpdateRequest(r *http.Request, id string) (model.UpdateRequest, error
 		ID: id, Name: body.Name, Description: body.Description,
 		LicenseID: body.LicenseID, Tags: body.Tags, Links: body.Links,
 	}, nil
-}
-
-// patchModule modifie les métadonnées d'un module existant (champs partiels).
-//
-//	@Summary		Modifier les métadonnées d'un module
-//	@Description	Champs modifiables : name, description, license_id, tags, links (identiques à PATCH /components/{id}) — la composition (instances, liaisons) n'est pas modifiable par cette route, voir /modules/{id}/instances.
-//	@Tags			modules
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		string	true	"identifiant du module"
-//	@Param			body	body		object	true	"champs à modifier (name, description, license_id, tags, links)"
-//	@Success		200	{object}	moduleDTO
-//	@Failure		400	{object}	map[string]string
-//	@Failure		500	{object}	map[string]string
-//	@Security		MyrToken
-//	@Router			/modules/{id} [patch]
-func (h *Handler) patchModule(w http.ResponseWriter, r *http.Request, id string) {
-	req, err := decodeUpdateRequest(r, id)
-	if err != nil {
-		jsonError(w, "JSON invalide: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-	m, err := h.svcFor(r).UpdateAsset(req)
-	if err != nil {
-		internalErr(w, err)
-		return
-	}
-	jsonOK(w, h.toModuleDTO(m))
 }
 
 // getComponent renvoie le détail d'un composant.
@@ -1432,429 +1669,6 @@ func (h *Handler) handleVirtualConnect(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ── /api/modules ────────────────────────────────────────────────────────────
-
-type moduleDTO struct {
-	ID                 string                    `json:"id"`
-	Name               string                    `json:"name"`
-	Description        string                    `json:"description,omitempty"`
-	OwnerID            string                    `json:"owner_id,omitempty"`
-	LicenseID          string                    `json:"license_id,omitempty"`
-	Status             model.ModuleStatus        `json:"status"`
-	Assemblies         []string                  `json:"assemblies"`
-	WorkspaceInstances []model.WorkspaceInstance `json:"instances"`
-	Versions           []model.ModuleVersion     `json:"versions"`
-	Thumbnail          string                    `json:"thumbnail,omitempty"`
-	CreatedAt          time.Time                 `json:"created_at"`
-}
-
-func (h *Handler) toModuleDTO(m *model.Model3D) moduleDTO {
-	assemblies := m.Assemblies
-	if assemblies == nil {
-		assemblies = []string{}
-	}
-	wsInsts := m.WorkspaceInstances
-	if wsInsts == nil {
-		wsInsts = []model.WorkspaceInstance{}
-	}
-	versions := m.ModuleVersions
-	if versions == nil {
-		versions = []model.ModuleVersion{}
-	}
-	thumb, _ := h.thumbStore.GetThumbnail(m.ID)
-	return moduleDTO{
-		ID: m.ID, Name: m.Name, Description: m.Description,
-		OwnerID: m.OwnerID, LicenseID: m.LicenseID, Status: m.Status,
-		Assemblies: assemblies, WorkspaceInstances: wsInsts, Versions: versions,
-		Thumbnail: thumb, CreatedAt: m.CreatedAt,
-	}
-}
-
-// handleModules liste ou crée des modules.
-//
-//	@Summary		Lister ou créer des modules
-//	@Description	GET liste les modules (filtre texte "q", filtre "owner_id", filtre "status" — "draft" ou "submitted", pagination "limit"). POST crée un module en brouillon (status "draft") — un module exige au moins un assemblage avant d'être soumis (règle 14).
-//	@Tags			modules
-//	@Accept			json
-//	@Produce		json
-//	@Param			q			query		string	false	"recherche texte (nom, description) — GET uniquement"
-//	@Param			owner_id	query		string	false	"filtre par propriétaire — GET uniquement"
-//	@Param			status		query		string	false	"filtre par statut : draft ou submitted — GET uniquement"
-//	@Param			limit		query		int		false	"nombre maximum de résultats (défaut 200, max 1000) — GET uniquement"
-//	@Param			body		body		object	false	"name (requis), description, owner_id, channel_id, license_id, parent_id — POST uniquement"
-//	@Success		200	{object}	map[string]interface{}	"GET : {items, total}"
-//	@Success		201	{object}	moduleDTO				"POST : module créé"
-//	@Failure		400	{object}	map[string]string
-//	@Security		MyrToken
-//	@Router			/modules [get]
-//	@Router			/modules [post]
-func (h *Handler) handleModules(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		q := strings.TrimSpace(strings.ToLower(r.URL.Query().Get("q")))
-		ownerID := strings.TrimSpace(r.URL.Query().Get("owner_id"))
-		status := strings.TrimSpace(r.URL.Query().Get("status"))
-		limit := 200
-		if l, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && l > 0 && l <= 1000 {
-			limit = l
-		}
-		all, err := h.svcFor(r).ListModules(h.channelFor(r))
-		degraded := false
-		if err != nil {
-			if !model.IsDegradedListErr(err) || len(all) == 0 {
-				internalErr(w, err)
-				return
-			}
-			// Mode dégradé : voir listGraph pour l'explication.
-			degraded = true
-			log.Printf("liste dégradée (brouillons locaux uniquement) : %v", err)
-		}
-		var filtered []*model.Model3D
-		for _, p := range all {
-			if q != "" && !strings.Contains(strings.ToLower(p.Name), q) &&
-				!strings.Contains(strings.ToLower(p.Description), q) {
-				continue
-			}
-			if ownerID != "" && p.OwnerID != ownerID {
-				continue
-			}
-			if status != "" && string(p.Status) != status {
-				continue
-			}
-			filtered = append(filtered, p)
-		}
-		total := len(filtered)
-		if limit < len(filtered) {
-			filtered = filtered[:limit]
-		}
-		dtos := make([]moduleDTO, 0, len(filtered))
-		for _, p := range filtered {
-			dtos = append(dtos, h.toModuleDTO(p))
-		}
-		resp := map[string]any{"items": dtos, "total": total}
-		if degraded {
-			resp["degraded"] = true
-			resp["warning"] = model.DegradedListWarning
-		}
-		jsonOK(w, resp)
-	case http.MethodPost:
-		var req struct {
-			Name        string `json:"name"`
-			Description string `json:"description"`
-			OwnerID     string `json:"owner_id"`
-			ChannelID   string `json:"channel_id"`
-			LicenseID   string `json:"license_id"`
-			ParentID    string `json:"parent_id"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Name == "" {
-			jsonError(w, "le champ 'name' est requis", http.StatusBadRequest)
-			return
-		}
-		if req.ChannelID == "" {
-			req.ChannelID = h.channelFor(r)
-		}
-		p, err := h.svcFor(r).CreateModule(model.ModuleRequest{
-			Name: req.Name, Description: req.Description,
-			OwnerID: req.OwnerID, ChannelID: req.ChannelID, LicenseID: req.LicenseID,
-			ParentID: req.ParentID,
-		})
-		if err != nil {
-			internalErr(w, err)
-			return
-		}
-		w.WriteHeader(http.StatusCreated)
-		jsonOK(w, h.toModuleDTO(p))
-	default:
-		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-	}
-}
-
-// handleModule route toutes les opérations sur un module identifié par :id
-// et ses sous-ressources. Un seul handler Go dessert plusieurs routes REST
-// distinctes (dispatch interne sur le suffixe du chemin) — voir le détail de
-// chaque sous-route dans la description ci-dessous ; la spec générée
-// (api/swagger.json) partage donc les mêmes réponses génériques pour toutes.
-//
-//	@Summary		Opérations sur un module et ses sous-ressources
-//	@Description	GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).
-//	@Tags			modules
-//	@Accept			json
-//	@Produce		json
-//	@Param			id	path		string	true	"identifiant du module"
-//	@Success		200	{object}	moduleDTO
-//	@Success		201	{object}	moduleDTO
-//	@Success		204	"pas de contenu (DELETE)"
-//	@Failure		400	{object}	map[string]string
-//	@Failure		404	{object}	map[string]string
-//	@Security		MyrToken
-//	@Router			/modules/{id} [get]
-//	@Router			/modules/{id} [delete]
-//	@Router			/modules/{id}/interfaces [get]
-//	@Router			/modules/{id}/connections [get]
-//	@Router			/modules/{id}/assemblies/{connID} [delete]
-//	@Router			/modules/{id}/thumbnail [get]
-//	@Router			/modules/{id}/thumbnail [post]
-//	@Router			/modules/{id}/instances [get]
-//	@Router			/modules/{id}/instances [post]
-//	@Router			/modules/{id}/instances/{instanceId} [delete]
-//	@Router			/modules/{id}/instances/{instanceId} [patch]
-//	@Router			/modules/{id}/submit [post]
-func (h *Handler) handleModule(w http.ResponseWriter, r *http.Request) {
-	rest := strings.TrimPrefix(r.URL.Path, "/api/modules/")
-	if rest == "" {
-		http.NotFound(w, r)
-		return
-	}
-
-	// /api/modules/:id/interfaces — interfaces exposées (non connectées en interne)
-	if strings.HasSuffix(rest, "/interfaces") {
-		id := strings.TrimSuffix(rest, "/interfaces")
-		ifaces, err := h.svcFor(r).GetModuleInterfaces(id)
-		if err != nil {
-			internalErr(w, err)
-			return
-		}
-		if ifaces == nil {
-			ifaces = []*model.AssetInterface{}
-		}
-		jsonOK(w, ifaces)
-		return
-	}
-
-	// /api/modules/:id/connections — connexions internes (assembly) du module
-	if strings.HasSuffix(rest, "/connections") && r.Method == http.MethodGet {
-		id := strings.TrimSuffix(rest, "/connections")
-		mod, err := h.svcFor(r).GetModule(id)
-		if err != nil {
-			jsonError(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		asmSet := map[string]bool{}
-		for _, aid := range mod.Assemblies {
-			asmSet[aid] = true
-		}
-		all, _ := h.svcFor(r).ListConnections()
-		var dtos []connectionDTO
-		for _, c := range all {
-			if asmSet[c.ID] {
-				dtos = append(dtos, connectionDTO{
-					ID: c.ID, From: c.From, To: c.To, Label: c.Label,
-					FromIfaceID: c.FromIfaceID, ToIfaceID: c.ToIfaceID,
-					FromInstanceID: c.FromInstanceID, ToInstanceID: c.ToInstanceID,
-					FastenerAssetID: c.FastenerAssetID, Incompatible: c.Incompatible,
-				})
-			}
-		}
-		if dtos == nil {
-			dtos = []connectionDTO{}
-		}
-		jsonOK(w, dtos)
-		return
-	}
-
-	// /api/modules/:id/assemblies
-	if strings.HasSuffix(rest, "/assemblies") {
-		id := strings.TrimSuffix(rest, "/assemblies")
-		h.handleModuleAssemblies(w, r, id)
-		return
-	}
-	// /api/modules/:id/assemblies/:connID
-	if idx := strings.Index(rest, "/assemblies/"); idx != -1 {
-		productID := rest[:idx]
-		connID := rest[idx+len("/assemblies/"):]
-		if r.Method != http.MethodDelete {
-			http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-			return
-		}
-		if err := h.svcFor(r).RemoveAssemblyFromModule(productID, connID); err != nil {
-			internalErr(w, err)
-			return
-		}
-		p, err := h.svcFor(r).GetModule(productID)
-		if err != nil {
-			internalErr(w, err)
-			return
-		}
-		jsonOK(w, h.toModuleDTO(p))
-		return
-	}
-	// /api/modules/:id/thumbnail/regenerate — redérive la miniature depuis le lien source
-	if strings.HasSuffix(rest, "/thumbnail/regenerate") {
-		id := strings.TrimSuffix(rest, "/thumbnail/regenerate")
-		h.regenerateThumbnail(w, r, id)
-		return
-	}
-	// /api/modules/:id/thumbnail
-	if strings.HasSuffix(rest, "/thumbnail") {
-		id := strings.TrimSuffix(rest, "/thumbnail")
-		switch r.Method {
-		case http.MethodGet:
-			thumb, _ := h.thumbStore.GetThumbnail(id)
-			jsonOK(w, map[string]string{"thumbnail": thumb})
-		case http.MethodPost:
-			var body struct {
-				Thumbnail string `json:"thumbnail"`
-			}
-			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-				jsonError(w, "body JSON invalide", http.StatusBadRequest)
-				return
-			}
-			if err := h.thumbStore.SaveThumbnail(id, body.Thumbnail); err != nil {
-				internalErr(w, err)
-				return
-			}
-			w.WriteHeader(http.StatusNoContent)
-		default:
-			http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-		}
-		return
-	}
-	// /api/modules/:id/instances — lister ou ajouter une instance d'un module
-	if strings.HasSuffix(rest, "/instances") {
-		id := strings.TrimSuffix(rest, "/instances")
-		switch r.Method {
-		case http.MethodGet:
-			p, err := h.svcFor(r).GetModule(id)
-			if err != nil {
-				jsonError(w, err.Error(), http.StatusNotFound)
-				return
-			}
-			jsonOK(w, h.toModuleDTO(p))
-		case http.MethodPost:
-			var body struct {
-				AssetID string `json:"asset_id"`
-			}
-			if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.AssetID == "" {
-				jsonError(w, "le champ 'asset_id' est requis", http.StatusBadRequest)
-				return
-			}
-			p, err := h.svcFor(r).AddAssetToWorkspace(id, body.AssetID)
-			if err != nil {
-				internalErr(w, err)
-				return
-			}
-			jsonOK(w, h.toModuleDTO(p))
-		default:
-			http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-		}
-		return
-	}
-	// /api/modules/:id/instances/:instanceID — retirer ou mettre à jour une instance d'un module
-	if idx := strings.Index(rest, "/instances/"); idx != -1 {
-		productID := rest[:idx]
-		instanceID := rest[idx+len("/instances/"):]
-		switch r.Method {
-		case http.MethodDelete:
-			p, err := h.svcFor(r).RemoveAssetFromWorkspace(productID, instanceID)
-			if err != nil {
-				internalErr(w, err)
-				return
-			}
-			jsonOK(w, h.toModuleDTO(p))
-		case http.MethodPatch:
-			var body struct {
-				X float64 `json:"x"`
-				Y float64 `json:"y"`
-			}
-			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-				jsonError(w, "body JSON invalide", http.StatusBadRequest)
-				return
-			}
-			p, err := h.svcFor(r).UpdateInstancePosition(productID, instanceID, body.X, body.Y)
-			if err != nil {
-				internalErr(w, err)
-				return
-			}
-			jsonOK(w, h.toModuleDTO(p))
-		default:
-			http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-		}
-		return
-	}
-	// /api/modules/:id/submit
-	if strings.HasSuffix(rest, "/submit") {
-		id := strings.TrimSuffix(rest, "/submit")
-		if r.Method != http.MethodPost {
-			http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-			return
-		}
-		var body struct {
-			Note string `json:"note"`
-		}
-		json.NewDecoder(r.Body).Decode(&body)
-		p, err := h.svcFor(r).SubmitModule(id, body.Note)
-		if err != nil {
-			internalErr(w, err)
-			return
-		}
-		jsonOK(w, h.toModuleDTO(p))
-		return
-	}
-	// /api/modules/:id/verify — vérifie la localisation et l'intégrité du fichier source (RM38)
-	if strings.HasSuffix(rest, "/verify") {
-		id := strings.TrimSuffix(rest, "/verify")
-		h.verifyAsset(w, r, id)
-		return
-	}
-
-	id := rest
-	switch r.Method {
-	case http.MethodGet:
-		p, err := h.svcFor(r).GetModule(id)
-		if err != nil {
-			jsonError(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		jsonOK(w, h.toModuleDTO(p))
-	case http.MethodPatch:
-		h.patchModule(w, r, id)
-	case http.MethodDelete:
-		if err := h.svcFor(r).RemoveModule(id); err != nil {
-			internalErr(w, err)
-			return
-		}
-		w.WriteHeader(http.StatusNoContent)
-	default:
-		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-	}
-}
-
-// handleModuleAssemblies ajoute une connexion existante à la liste d'assemblage d'un module.
-//
-//	@Summary	Ajouter un assemblage à un module
-//	@Tags		modules
-//	@Accept		json
-//	@Produce	json
-//	@Param		id		path		string	true	"identifiant du module"
-//	@Param		body	body		object	true	"connection_id requis"
-//	@Success	200	{object}	moduleDTO
-//	@Failure	400	{object}	map[string]string
-//	@Security	MyrToken
-//	@Router		/modules/{id}/assemblies [post]
-func (h *Handler) handleModuleAssemblies(w http.ResponseWriter, r *http.Request, productID string) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-		return
-	}
-	var body struct {
-		ConnectionID string `json:"connection_id"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.ConnectionID == "" {
-		jsonError(w, "le champ 'connection_id' est requis", http.StatusBadRequest)
-		return
-	}
-	if err := h.svcFor(r).AddAssemblyToModule(productID, body.ConnectionID); err != nil {
-		internalErr(w, err)
-		return
-	}
-	p, err := h.svcFor(r).GetModule(productID)
-	if err != nil {
-		internalErr(w, err)
-		return
-	}
-	jsonOK(w, h.toModuleDTO(p))
-}
-
 // ── /api/channels ────────────────────────────────────────────────────────────
 
 // handleChannels lit ou change le canal Fabric actif de la session.
@@ -1992,10 +1806,10 @@ func (h *Handler) handleStatus(w http.ResponseWriter, r *http.Request) {
 
 // ── /api/components/:id/interfaces ───────────────────────────────────────────────
 
-// handleComponentInterfaces liste ou ajoute les interfaces physiques d'un composant.
+// handleComponentInterfaces liste ou ajoute les interfaces d'un composant.
 //
 //	@Summary		Interfaces d'un composant
-//	@Description	Tant que l'asset porteur est en brouillon, les interfaces sont éditées librement en local et ne rejoignent la blockchain qu'à la soumission de l'asset (règle 27).
+//	@Description	GET renvoie les interfaces physiques directes si l'asset n'a aucune instance, ou les interfaces exposées (non connectées en interne) s'il en a (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l'asset porteur est en brouillon, les interfaces sont éditées librement en local et ne rejoignent la blockchain qu'à la soumission de l'asset (règle 27).
 //	@Tags			components
 //	@Accept			json
 //	@Produce		json
@@ -2011,7 +1825,7 @@ func (h *Handler) handleStatus(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleComponentInterfaces(w http.ResponseWriter, r *http.Request, assetID string) {
 	switch r.Method {
 	case http.MethodGet:
-		ifaces, err := h.svcFor(r).ListInterfacesForAsset(assetID)
+		ifaces, err := h.svcFor(r).GetModuleInterfaces(assetID)
 		if err != nil {
 			internalErr(w, err)
 			return

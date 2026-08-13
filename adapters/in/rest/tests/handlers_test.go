@@ -21,7 +21,7 @@ import (
 
 type mockSvc struct {
 	addFull                  func(req model.AddRequest) (*model.Model3D, error)
-	submit                   func(assetID string) (*model.Model3D, error)
+	submit                   func(assetID, note string) (*model.Model3D, error)
 	get                      func(id string) (*model.Model3D, error)
 	list                     func(channelID string) ([]*model.Model3D, error)
 	verify                   func(id string) (bool, string, error)
@@ -69,9 +69,9 @@ func (m *mockSvc) AddFull(req model.AddRequest) (*model.Model3D, error) {
 	}
 	return &model.Model3D{ID: "new", Name: req.Name, CreatedAt: time.Now()}, nil
 }
-func (m *mockSvc) Submit(assetID string) (*model.Model3D, error) {
+func (m *mockSvc) Submit(assetID, note string) (*model.Model3D, error) {
 	if m.submit != nil {
-		return m.submit(assetID)
+		return m.submit(assetID, note)
 	}
 	return &model.Model3D{ID: assetID, Status: model.ModuleSubmitted}, nil
 }
@@ -479,14 +479,15 @@ func TestComponents_GET_Empty(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que GET /api/components exclut les modules de la liste des composants
-/// @input  GET /api/components, mockSvc.list retourne 2 assets dont 1 module (status=ModuleDraft)
-/// @expect HTTP 200, total=1 (le module est exclu)
-func TestComponents_GET_ExcludesModules(t *testing.T) {
+/// @brief  Vérifie que GET /api/components inclut les assets décomposés (ADR-11 —
+///         Model3D est une ressource unique, plus de /api/modules séparé)
+/// @input  GET /api/components, mockSvc.list retourne 2 assets dont 1 décomposé (Assemblies non nil)
+/// @expect HTTP 200, total=2 (l'asset décomposé est inclus, pas exclu)
+func TestComponents_GET_IncludesDecomposedAssets(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{
 			{ID: "asset1", Name: "Asset"},
-			{ID: "mod1", Name: "Module", Status: model.ModuleDraft, Assemblies: []string{}},
+			{ID: "mod1", Name: "Décomposé", Status: model.ModuleDraft, Assemblies: []string{}},
 		}, nil
 	}}
 	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components", "")
@@ -494,8 +495,28 @@ func TestComponents_GET_ExcludesModules(t *testing.T) {
 		Total int `json:"total"`
 	}
 	decodeJSON(t, w, &resp)
+	if resp.Total != 2 {
+		t.Errorf("total: got %d, want 2 (ADR-11 : plus d'exclusion des assets décomposés)", resp.Total)
+	}
+}
+
+/// @brief  Vérifie que GET /api/components?status= filtre par statut (draft/submitted)
+/// @input  GET /api/components?status=draft, 2 assets de statuts différents
+/// @expect HTTP 200, total=1 (seul l'asset draft correspond)
+func TestComponents_GET_FilterByStatus(t *testing.T) {
+	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
+		return []*model.Model3D{
+			{ID: "a1", Status: model.ModuleDraft},
+			{ID: "a2", Status: model.ModuleSubmitted},
+		}, nil
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components?status=draft", "")
+	var resp struct {
+		Total int `json:"total"`
+	}
+	decodeJSON(t, w, &resp)
 	if resp.Total != 1 {
-		t.Errorf("total: got %d, want 1 (modules exclus)", resp.Total)
+		t.Errorf("total: got %d, want 1", resp.Total)
 	}
 }
 
@@ -700,7 +721,7 @@ func TestComponents_POST_Created(t *testing.T) {
 /// @expect HTTP 200, Submit appelé avec "comp1", status="submitted" dans la réponse
 func TestComponents_POST_Submit(t *testing.T) {
 	var gotID string
-	svc := &mockSvc{submit: func(assetID string) (*model.Model3D, error) {
+	svc := &mockSvc{submit: func(assetID, note string) (*model.Model3D, error) {
 		gotID = assetID
 		return &model.Model3D{ID: assetID, Name: "Vis", Status: model.ModuleSubmitted}, nil
 	}}
@@ -725,7 +746,7 @@ func TestComponents_POST_Submit(t *testing.T) {
 /// @input  mockSvc.submit retourne une erreur générique
 /// @expect HTTP != 200
 func TestComponents_POST_Submit_Error(t *testing.T) {
-	svc := &mockSvc{submit: func(assetID string) (*model.Model3D, error) {
+	svc := &mockSvc{submit: func(assetID, note string) (*model.Model3D, error) {
 		return nil, errors.New("brouillon introuvable")
 	}}
 	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/unknown/submit", "")
@@ -1278,11 +1299,33 @@ func TestComponents_SaveThumbnail_InvalidJSON_Rejected(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que GET /api/components/{id}/thumbnail est rejeté (pas de lecture dédiée — la miniature est déjà dans le DTO du composant)
-/// @input  GET /api/components/c1/thumbnail
+/// @brief  Vérifie que GET /api/components/{id}/thumbnail renvoie la miniature (ADR-11 —
+///         route désormais effectivement câblée, ex-#incoherence "route absente du routeur")
+/// @input  GET /api/components/c1/thumbnail, mockSvc.getThumbnail retourne une dataURL fixe
+/// @expect HTTP 200, {"thumbnail": "<dataURL>"}
+func TestComponents_GetThumbnail_OK(t *testing.T) {
+	svc := &mockSvc{getThumbnail: func(assetID string) (string, error) {
+		return "data:image/png;base64,xyz", nil
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components/c1/thumbnail", "")
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	var resp struct {
+		Thumbnail string `json:"thumbnail"`
+	}
+	decodeJSON(t, w, &resp)
+	if resp.Thumbnail != "data:image/png;base64,xyz" {
+		t.Errorf("thumbnail: got %q", resp.Thumbnail)
+	}
+}
+
+/// @brief  Vérifie que PUT /api/components/{id}/thumbnail (méthode non gérée) est rejeté
+/// @input  PUT /api/components/c1/thumbnail
 /// @expect HTTP 405
-func TestComponents_SaveThumbnail_WrongMethod_Rejected(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/components/c1/thumbnail", "")
+func TestComponents_Thumbnail_WrongMethod_Rejected(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPut, "/api/components/c1/thumbnail", "")
 
 	if w.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("got %d, want 405 (body: %s)", w.Code, w.Body.String())
@@ -1559,7 +1602,7 @@ func TestComponent_DELETE_ServiceError(t *testing.T) {
 // ── /api/components/:id/interfaces ───────────────────────────────────────────
 
 func TestComponentInterfaces_GET(t *testing.T) {
-	svc := &mockSvc{listInterfacesForAsset: func(assetID string) ([]*model.AssetInterface, error) {
+	svc := &mockSvc{getModuleInterfaces: func(assetID string) ([]*model.AssetInterface, error) {
 		return []*model.AssetInterface{{ID: "i1", AssetID: assetID}}, nil
 	}}
 	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components/abc/interfaces", "")
@@ -1704,243 +1747,80 @@ func TestAssemblyLinks_MethodNotAllowed(t *testing.T) {
 	}
 }
 
-// ── /api/modules ──────────────────────────────────────────────────────────────
+// ── /api/components/:id/instances, /assemblies (ADR-11 — ex /api/modules) ──────
 
-func TestModules_GET_Empty(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/modules", "")
-	if w.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200", w.Code)
-	}
-	var resp struct {
-		Items []any `json:"items"`
-		Total int   `json:"total"`
-	}
-	decodeJSON(t, w, &resp)
-	if resp.Total != 0 {
-		t.Errorf("total: got %d, want 0", resp.Total)
-	}
-}
-
-func TestModules_GET_WithItems(t *testing.T) {
-	svc := &mockSvc{listModules: func(string) ([]*model.Model3D, error) {
-		return []*model.Model3D{
-			{ID: "m1", Name: "Module A", Status: model.ModuleDraft},
-			{ID: "m2", Name: "Module B", Status: model.ModuleSubmitted},
-		}, nil
-	}}
-	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/modules", "")
-	var resp struct {
-		Total int `json:"total"`
-	}
-	decodeJSON(t, w, &resp)
-	if resp.Total != 2 {
-		t.Errorf("total: got %d, want 2", resp.Total)
-	}
-}
-
-/// @brief  Vérifie que GET /api/modules?owner_id=&status= filtre côté handler comme listGraph pour /api/components
-/// @input  GET /api/modules?owner_id=u1&status=draft, mockSvc.listModules retourne 3 modules (propriétaires/statuts variés)
-/// @expect Seul le module appartenant à u1 en statut draft est retourné
-func TestModules_GET_FiltersByOwnerAndStatus(t *testing.T) {
-	svc := &mockSvc{listModules: func(string) ([]*model.Model3D, error) {
-		return []*model.Model3D{
-			{ID: "m1", OwnerID: "u1", Status: model.ModuleDraft},
-			{ID: "m2", OwnerID: "u1", Status: model.ModuleSubmitted},
-			{ID: "m3", OwnerID: "u2", Status: model.ModuleDraft},
-		}, nil
-	}}
-	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/modules?owner_id=u1&status=draft", "")
-
+func TestComponent_ListInstances_Empty(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/components/m1/instances", "")
 	if w.Code != http.StatusOK {
 		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
 	}
-	var resp struct {
-		Items []struct {
-			ID string `json:"id"`
-		} `json:"items"`
-		Total int `json:"total"`
-	}
-	decodeJSON(t, w, &resp)
-	if resp.Total != 1 || len(resp.Items) != 1 || resp.Items[0].ID != "m1" {
-		t.Errorf("attendu 1 module (m1), got %+v", resp)
+	var insts []model.WorkspaceInstance
+	decodeJSON(t, w, &insts)
+	if len(insts) != 0 {
+		t.Errorf("got %d instances, want 0", len(insts))
 	}
 }
 
-/// @brief  Mode dégradé pour GET /api/modules : mêmes attentes que pour /api/components
-///         (voir TestComponents_GET_BlockchainUnreachable_WithDrafts_Returns200Degraded)
-/// @input  GET /api/modules, mockSvc.listModules retourne (module brouillon, err enveloppant
-///         model.ErrBlockchainUnreachable)
-/// @expect HTTP 200 ; body["degraded"] == true ; body["warning"] non vide
-func TestModules_GET_BlockchainUnreachable_WithDrafts_Returns200Degraded(t *testing.T) {
-	draftModule := &model.Model3D{ID: "mod-local1", Name: "Module brouillon", Status: model.ModuleDraft}
-	svc := &mockSvc{listModules: func(string) ([]*model.Model3D, error) {
-		return []*model.Model3D{draftModule}, fmt.Errorf("fabric ListModelRecords evaluate : %w", model.ErrBlockchainUnreachable)
-	}}
-	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/modules", "")
-	if w.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
-	}
-	var resp struct {
-		Items    []map[string]any `json:"items"`
-		Degraded bool             `json:"degraded"`
-		Warning  string           `json:"warning"`
-	}
-	decodeJSON(t, w, &resp)
-	if !resp.Degraded {
-		t.Error("degraded: got false, want true")
-	}
-	if resp.Warning == "" {
-		t.Error("warning: attendu non vide en mode dégradé")
-	}
-	if len(resp.Items) != 1 || resp.Items[0]["id"] != "mod-local1" {
-		t.Errorf("module brouillon attendu dans items, got %v", resp.Items)
-	}
-}
-
-func TestModules_POST_Created(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/modules",
-		`{"name":"Assemblage A","owner_id":"user1"}`)
-	if w.Code != http.StatusCreated {
-		t.Fatalf("got %d, want 201 (body: %s)", w.Code, w.Body.String())
-	}
-}
-
-func TestModules_POST_MissingName(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/modules", `{"owner_id":"user1"}`)
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("got %d, want 400", w.Code)
-	}
-}
-
-func TestModules_MethodNotAllowed(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPut, "/api/modules", "")
-	if w.Code != http.StatusMethodNotAllowed {
-		t.Errorf("got %d, want 405", w.Code)
-	}
-}
-
-// ── /api/modules/:id ─────────────────────────────────────────────────────────
-
-func TestModule_GET_Found(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/modules/m1", "")
-	if w.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200", w.Code)
-	}
-	var dto struct {
-		ID string `json:"id"`
-	}
-	decodeJSON(t, w, &dto)
-	if dto.ID != "m1" {
-		t.Errorf("ID: got %q, want %q", dto.ID, "m1")
-	}
-}
-
-func TestModule_GET_NotFound(t *testing.T) {
-	svc := &mockSvc{getModule: func(id string) (*model.Model3D, error) {
-		return nil, errors.New("not found")
-	}}
-	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/modules/xyz", "")
-	if w.Code != http.StatusNotFound {
-		t.Errorf("got %d, want 404", w.Code)
-	}
-}
-
-func TestModule_DELETE(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodDelete, "/api/modules/m1", "")
-	if w.Code != http.StatusNoContent {
-		t.Errorf("got %d, want 204", w.Code)
-	}
-}
-
-/// @brief  Vérifie que PATCH /api/modules/{id} modifie les métadonnées via le même UpdateAsset que les composants
-/// @input  PATCH /api/modules/m1, body {"name":"Chassis v2"}
-/// @expect HTTP 200, UpdateAsset appelé avec ID="m1" et Name="Chassis v2"
-func TestModule_PATCH_OK(t *testing.T) {
-	var captured model.UpdateRequest
-	svc := &mockSvc{updateAsset: func(req model.UpdateRequest) (*model.Model3D, error) {
-		captured = req
-		return &model.Model3D{ID: req.ID, Name: req.Name}, nil
-	}}
-	w := do(t, newTestMux(t, svc), http.MethodPatch, "/api/modules/m1", `{"name":"Chassis v2"}`)
-	if w.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
-	}
-	if captured.ID != "m1" || captured.Name != "Chassis v2" {
-		t.Errorf("UpdateRequest: got %+v", captured)
-	}
-}
-
-func TestModule_PATCH_BadJSON(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPatch, "/api/modules/m1", "{bad")
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("got %d, want 400", w.Code)
-	}
-}
-
-func TestModule_Submit(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/modules/m1/submit",
-		`{"note":"v1.0 release"}`)
-	if w.Code != http.StatusOK {
-		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
-	}
-}
-
-func TestModule_AddAssembly(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/modules/m1/assemblies",
-		`{"connection_id":"c1"}`)
-	if w.Code != http.StatusOK {
-		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
-	}
-}
-
-func TestModule_AddAssembly_MissingConnectionID(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/modules/m1/assemblies", `{}`)
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("got %d, want 400", w.Code)
-	}
-}
-
-func TestModule_AddAssetToWorkspace(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/modules/m1/instances",
-		`{"asset_id":"a1"}`)
-	if w.Code != http.StatusOK {
-		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
-	}
-}
-
-func TestModule_ListInstances(t *testing.T) {
+/// @brief  GET /api/components/{id}/instances renvoie le tableau d'instances (pas le componentDTO entier)
+/// @input  mockSvc.get retourne un asset avec 1 WorkspaceInstance
+/// @expect HTTP 200, tableau JSON avec 1 élément
+func TestComponent_ListInstances_WithItems(t *testing.T) {
 	svc := &mockSvc{
-		getModule: func(id string) (*model.Model3D, error) {
+		get: func(id string) (*model.Model3D, error) {
 			return &model.Model3D{ID: id, Status: model.ModuleDraft, WorkspaceInstances: []model.WorkspaceInstance{
 				{ID: "inst1", AssetID: "a1"},
 			}}, nil
 		},
 	}
-	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/modules/m1/instances", "")
+	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components/m1/instances", "")
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	var insts []model.WorkspaceInstance
+	decodeJSON(t, w, &insts)
+	if len(insts) != 1 || insts[0].ID != "inst1" {
+		t.Errorf("got %+v", insts)
+	}
+}
+
+/// @brief  POST /api/components/{id}/instances s'applique à n'importe quel id (ADR-11) —
+///         plus besoin de créer un module séparé au préalable
+/// @input  POST /api/components/c1/instances {"asset_id":"a1"}
+/// @expect HTTP 200, AddAssetToWorkspace reçoit ("c1", "a1"), réponse contient "instances"
+func TestComponent_AddInstance(t *testing.T) {
+	var gotID, gotAsset string
+	svc := &mockSvc{addAssetToWorkspace: func(id, assetID string) (*model.Model3D, error) {
+		gotID, gotAsset = id, assetID
+		return &model.Model3D{ID: id, WorkspaceInstances: []model.WorkspaceInstance{{ID: "inst1", AssetID: assetID}}}, nil
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/instances", `{"asset_id":"a1"}`)
 	if w.Code != http.StatusOK {
 		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	if gotID != "c1" || gotAsset != "a1" {
+		t.Errorf("AddAssetToWorkspace: got id=%q asset=%q", gotID, gotAsset)
 	}
 	if !strings.Contains(w.Body.String(), `"instances"`) {
 		t.Errorf("réponse doit contenir le champ 'instances' : %s", w.Body.String())
 	}
 }
 
-func TestModule_AddTwoAssetsSequentially(t *testing.T) {
+func TestComponent_AddTwoInstancesSequentially(t *testing.T) {
 	var calls []string
 	svc := &mockSvc{
-		addAssetToWorkspace: func(moduleID, assetID string) (*model.Model3D, error) {
+		addAssetToWorkspace: func(id, assetID string) (*model.Model3D, error) {
 			calls = append(calls, assetID)
 			insts := make([]model.WorkspaceInstance, len(calls))
-			for i, id := range calls {
-				insts[i] = model.WorkspaceInstance{ID: "inst" + id, AssetID: id}
+			for i, aid := range calls {
+				insts[i] = model.WorkspaceInstance{ID: "inst" + aid, AssetID: aid}
 			}
-			return &model.Model3D{ID: moduleID, Status: model.ModuleDraft, WorkspaceInstances: insts}, nil
+			return &model.Model3D{ID: id, Status: model.ModuleDraft, WorkspaceInstances: insts}, nil
 		},
 	}
 	mux := newTestMux(t, svc)
 
 	for _, assetID := range []string{"asset1", "asset2"} {
-		w := do(t, mux, http.MethodPost, "/api/modules/m1/instances", `{"asset_id":"`+assetID+`"}`)
+		w := do(t, mux, http.MethodPost, "/api/components/c1/instances", `{"asset_id":"`+assetID+`"}`)
 		if w.Code != http.StatusOK {
 			t.Fatalf("ajout %s : got %d, want 200 (body: %s)", assetID, w.Code, w.Body.String())
 		}
@@ -1954,25 +1834,135 @@ func TestModule_AddTwoAssetsSequentially(t *testing.T) {
 	}
 }
 
-func TestModule_AddAssetToWorkspace_MissingAssetID(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/modules/m1/instances", `{}`)
+func TestComponent_AddInstance_MissingAssetID(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/components/c1/instances", `{}`)
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("got %d, want 400 (asset_id manquant)", w.Code)
 	}
 }
 
-func TestModule_RemoveAssetFromWorkspace(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodDelete, "/api/modules/m1/instances/inst1", "")
+func TestComponent_RemoveInstance(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodDelete, "/api/components/c1/instances/inst1", "")
 	if w.Code != http.StatusOK {
 		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
 	}
 }
 
-func TestModule_UpdateInstancePosition(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPatch, "/api/modules/m1/instances/inst1",
+func TestComponent_UpdateInstancePosition(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPatch, "/api/components/c1/instances/inst1",
 		`{"x":10.5,"y":20.0}`)
 	if w.Code != http.StatusOK {
 		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+}
+
+/// @brief  GET /api/components/{id}/assemblies liste les connexions internes (ex-GET /api/modules/{id}/connections)
+/// @input  mockSvc.get retourne un asset avec Assemblies=["c1"], listConnections retourne cette connexion
+/// @expect HTTP 200, tableau JSON avec 1 connexion
+func TestComponent_ListAssemblies(t *testing.T) {
+	svc := &mockSvc{
+		get: func(id string) (*model.Model3D, error) {
+			return &model.Model3D{ID: id, Assemblies: []string{"conn1"}}, nil
+		},
+		listConnections: func() ([]*model.Connection, error) {
+			return []*model.Connection{{ID: "conn1", From: "a", To: "b"}}, nil
+		},
+	}
+	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components/m1/assemblies", "")
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	var conns []struct {
+		ID string `json:"id"`
+	}
+	decodeJSON(t, w, &conns)
+	if len(conns) != 1 || conns[0].ID != "conn1" {
+		t.Errorf("got %+v", conns)
+	}
+}
+
+func TestComponent_AddAssembly(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/components/m1/assemblies",
+		`{"connection_id":"c1"}`)
+	if w.Code != http.StatusOK {
+		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+}
+
+func TestComponent_AddAssembly_MissingConnectionID(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/components/m1/assemblies", `{}`)
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("got %d, want 400", w.Code)
+	}
+}
+
+func TestComponent_RemoveAssembly(t *testing.T) {
+	var gotID, gotConn string
+	svc := &mockSvc{removeAssemblyFromModule: func(id, connID string) error {
+		gotID, gotConn = id, connID
+		return nil
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodDelete, "/api/components/m1/assemblies/c1", "")
+	if w.Code != http.StatusOK {
+		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	if gotID != "m1" || gotConn != "c1" {
+		t.Errorf("RemoveAssemblyFromModule: got id=%q conn=%q", gotID, gotConn)
+	}
+}
+
+/// @brief  POST /api/components/{id}/submit transmet la note au service quel que soit
+///         le type d'asset — c'est ModelService.Submit qui dispatche en interne (ADR-11)
+/// @input  POST /api/components/m1/submit {"note":"v1.0 release"}
+/// @expect HTTP 200, Submit reçoit note="v1.0 release"
+func TestComponent_Submit_WithNote(t *testing.T) {
+	var gotNote string
+	svc := &mockSvc{submit: func(assetID, note string) (*model.Model3D, error) {
+		gotNote = note
+		return &model.Model3D{ID: assetID, Status: model.ModuleSubmitted}, nil
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/m1/submit", `{"note":"v1.0 release"}`)
+	if w.Code != http.StatusOK {
+		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	if gotNote != "v1.0 release" {
+		t.Errorf("note: got %q, want %q", gotNote, "v1.0 release")
+	}
+}
+
+// ── /api/modules/* — alias déprécié (ADR-11) ────────────────────────────────────
+
+/// @brief  Les anciennes routes /api/modules/* restent servies pendant la fenêtre
+///         de transition, déléguées aux mêmes handlers que /api/components/*
+/// @input  GET /api/modules/m1
+/// @expect HTTP 200, en-tête Deprecation présent, corps résolu comme /api/components/m1
+func TestLegacyModulesAlias_GET_DelegatesToComponents(t *testing.T) {
+	svc := &mockSvc{get: func(id string) (*model.Model3D, error) {
+		return &model.Model3D{ID: id, Name: "Assemblage"}, nil
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/modules/m1", "")
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	if w.Header().Get("Deprecation") == "" {
+		t.Error("en-tête Deprecation attendu sur l'alias /api/modules/*")
+	}
+	var dto struct {
+		ID string `json:"id"`
+	}
+	decodeJSON(t, w, &dto)
+	if dto.ID != "m1" {
+		t.Errorf("ID: got %q, want %q", dto.ID, "m1")
+	}
+}
+
+func TestLegacyModulesAlias_ListRoute(t *testing.T) {
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/modules", "")
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
+	}
+	if w.Header().Get("Deprecation") == "" {
+		t.Error("en-tête Deprecation attendu sur l'alias /api/modules")
 	}
 }
 

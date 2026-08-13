@@ -357,7 +357,7 @@ func TestModelAdd(t *testing.T) {
 func TestService_NilBlockchain_ErrBlockchainUnavailable(t *testing.T) {
 	svc := model.NewService(nil, &mockFS{}).WithDraftStore(newMockDraftStore())
 
-	if _, err := svc.Submit("any"); !errors.Is(err, model.ErrBlockchainUnavailable) {
+	if _, err := svc.Submit("any", ""); !errors.Is(err, model.ErrBlockchainUnavailable) {
 		t.Errorf("Submit: got %v, want ErrBlockchainUnavailable", err)
 	}
 	if _, err := svc.SubmitModule("mod1", "note"); !errors.Is(err, model.ErrBlockchainUnavailable) {
@@ -2347,7 +2347,7 @@ func TestList_MergesDraftsAndBlockchain(t *testing.T) {
 	svc := newFullSvc(t)
 	draft, _ := svc.AddFull(model.AddRequest{Name: "brouillon", ChannelID: "ch1"})
 	toSubmit, _ := svc.AddFull(model.AddRequest{Name: "soumis", ChannelID: "ch1"})
-	submitted, err := svc.Submit(toSubmit.ID)
+	submitted, err := svc.Submit(toSubmit.ID, "")
 	if err != nil {
 		t.Fatalf("Submit: %v", err)
 	}
@@ -2389,7 +2389,7 @@ func TestSubmit_CommitsDraftWithInterfaces(t *testing.T) {
 		t.Fatalf("AddInterface: %v", err)
 	}
 
-	submitted, err := svc.Submit(m.ID)
+	submitted, err := svc.Submit(m.ID, "")
 	if err != nil {
 		t.Fatalf("Submit: %v", err)
 	}
@@ -2418,7 +2418,7 @@ func TestSubmit_CommitsDraftWithInterfaces(t *testing.T) {
 // / @expect Erreur non nil
 func TestSubmit_NotADraft_Rejected(t *testing.T) {
 	svc := newFullSvc(t)
-	if _, err := svc.Submit("introuvable"); err == nil {
+	if _, err := svc.Submit("introuvable", ""); err == nil {
 		t.Error("Submit sur un ID hors brouillon doit retourner une erreur")
 	}
 }
@@ -2428,7 +2428,7 @@ func TestSubmit_NotADraft_Rejected(t *testing.T) {
 // / @expect Erreur non nil
 func TestSubmit_NilDraftStore_Rejected(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
-	if _, err := svc.Submit("any"); err == nil {
+	if _, err := svc.Submit("any", ""); err == nil {
 		t.Error("Submit sans DraftStore doit retourner une erreur")
 	}
 }
@@ -2502,7 +2502,7 @@ func TestRemove_Submitted_HidesLocally(t *testing.T) {
 		WithRemovedStore(newMockRemovedStore())
 
 	m, _ := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
-	submitted, err := svc.Submit(m.ID)
+	submitted, err := svc.Submit(m.ID, "")
 	if err != nil {
 		t.Fatalf("Submit: %v", err)
 	}

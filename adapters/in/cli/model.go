@@ -79,8 +79,13 @@ Examples:
 
 // ── submit ────────────────────────────────────────────────────────────────────
 
-func runModelSubmit(w io.Writer, svc model.ModelService, id string) error {
-	m, err := svc.Submit(id)
+// runModelSubmit soumet n'importe quel asset (composant simple ou décomposé) à
+// la blockchain. ModelService.Submit route en interne vers la logique
+// historique de SubmitModule (RM17, ModuleVersion) dès que l'asset a des
+// instances — cette commande n'a pas à connaître cette distinction (ADR-11,
+// specs/3-Conception/Conception_intro.md). note n'est utilisée que dans ce cas.
+func runModelSubmit(w io.Writer, svc model.ModelService, id, note string) error {
+	m, err := svc.Submit(id, note)
 	if err != nil {
 		return err
 	}
@@ -90,16 +95,20 @@ func runModelSubmit(w io.Writer, svc model.ModelService, id string) error {
 
 var modelSubmitCmd = &cobra.Command{
 	Use:   "submit <id>",
-	Short: "Submit a draft component to the blockchain",
-	Long: `Commit the current state of a draft component (metadata and local interfaces)
-to the blockchain in a single transaction, then mark it as submitted. A
-submitted asset becomes immutable (fork to evolve it further).
+	Short: "Submit a draft asset to the blockchain",
+	Long: `Commit the current state of a draft asset (metadata, local interfaces, and —
+if the asset has instances — its assembly links) to the blockchain in a
+single transaction, then mark it as submitted. Fails if a decomposed asset
+has no assembly link (RM17). A submitted asset becomes immutable (fork to
+evolve it further).
 
 Example:
-  myr model submit abc123def456`,
+  myr model submit abc123def456
+  myr model submit abc123def456 --note "v1 release"`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runModelSubmit(cmd.OutOrStdout(), modelSvc, args[0])
+		note, _ := cmd.Flags().GetString("note")
+		return runModelSubmit(cmd.OutOrStdout(), modelSvc, args[0], note)
 	},
 }
 
@@ -416,6 +425,8 @@ func init() {
 	modelAddCmd.MarkFlagRequired("name")
 
 	modelListCmd.Flags().String("channel", "", "ID du canal")
+
+	modelSubmitCmd.Flags().String("note", "", "Note de version — utilisée uniquement si l'asset a des instances (ModuleVersion.Note)")
 
 	modelUpdateCmd.Flags().String("name", "", "Nouveau nom")
 	modelUpdateCmd.Flags().String("description", "", "Nouvelle description")

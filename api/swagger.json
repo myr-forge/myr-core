@@ -254,7 +254,7 @@
         },
         "/components": {
             "get": {
-                "description": "Filtre côté serveur — ne renvoie qu'un sous-ensemble pour éviter de tout charger. Les modules sont exclus (voir /api/modules).",
+                "description": "Filtre côté serveur — ne renvoie qu'un sous-ensemble pour éviter de tout charger. Inclut tout Model3D, décomposé (instances non vide) ou non.",
                 "produces": [
                     "application/json"
                 ],
@@ -297,6 +297,12 @@
                         "type": "string",
                         "description": "tags séparés par virgule (correspondance sur au moins un tag)",
                         "name": "tags",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filtre par statut : draft ou submitted",
+                        "name": "status",
                         "in": "query"
                     },
                     {
@@ -661,6 +667,388 @@
                 }
             }
         },
+        "/components/{id}/assemblies": {
+            "get": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "GET renvoie les connexions référencées par Assemblies (liste vide si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr model link add) à cette liste — brouillon local, sans effet blockchain avant soumission.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components"
+                ],
+                "summary": "Connexions internes d'un asset décomposé",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'asset",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "connection_id requis — POST uniquement",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/adapters_in_rest.componentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "GET renvoie les connexions référencées par Assemblies (liste vide si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr model link add) à cette liste — brouillon local, sans effet blockchain avant soumission.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components"
+                ],
+                "summary": "Connexions internes d'un asset décomposé",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'asset",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "connection_id requis — POST uniquement",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/adapters_in_rest.componentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/components/{id}/assemblies/{connID}": {
+            "delete": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "Retire connID de la liste Assemblies de l'asset — brouillon local, sans effet blockchain avant soumission. Ne supprime pas la connexion elle-même (voir DELETE /connections/{id}).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components"
+                ],
+                "summary": "Détacher une connexion d'un asset décomposé",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'asset",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "identifiant de la connexion à détacher",
+                        "name": "connID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/adapters_in_rest.componentDTO"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/components/{id}/instances": {
+            "get": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "GET renvoie la liste des instances (vide si l'asset n'a jamais été décomposé). POST ajoute un composant existant comme instance — brouillon local, sans effet blockchain avant soumission.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components"
+                ],
+                "summary": "Instances d'un asset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'asset",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "asset_id requis — POST uniquement",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/adapters_in_rest.componentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "GET renvoie la liste des instances (vide si l'asset n'a jamais été décomposé). POST ajoute un composant existant comme instance — brouillon local, sans effet blockchain avant soumission.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components"
+                ],
+                "summary": "Instances d'un asset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'asset",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "asset_id requis — POST uniquement",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/adapters_in_rest.componentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/components/{id}/instances/{instanceId}": {
+            "delete": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "DELETE retire l'instance et ses connexions en cascade (RM14). PATCH met à jour sa position (x, y).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components"
+                ],
+                "summary": "Retirer ou repositionner une instance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'asset",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'instance",
+                        "name": "instanceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "x, y — PATCH uniquement",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/adapters_in_rest.componentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "description": "DELETE retire l'instance et ses connexions en cascade (RM14). PATCH met à jour sa position (x, y).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "components"
+                ],
+                "summary": "Retirer ou repositionner une instance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'asset",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "identifiant de l'instance",
+                        "name": "instanceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "x, y — PATCH uniquement",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/adapters_in_rest.componentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/components/{id}/interfaces": {
             "get": {
                 "security": [
@@ -668,7 +1056,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "Tant que l'asset porteur est en brouillon, les interfaces sont éditées librement en local et ne rejoignent la blockchain qu'à la soumission de l'asset (règle 27).",
+                "description": "GET renvoie les interfaces physiques directes si l'asset n'a aucune instance, ou les interfaces exposées (non connectées en interne) s'il en a (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l'asset porteur est en brouillon, les interfaces sont éditées librement en local et ne rejoignent la blockchain qu'à la soumission de l'asset (règle 27).",
                 "consumes": [
                     "application/json"
                 ],
@@ -738,7 +1126,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "Tant que l'asset porteur est en brouillon, les interfaces sont éditées librement en local et ne rejoignent la blockchain qu'à la soumission de l'asset (règle 27).",
+                "description": "GET renvoie les interfaces physiques directes si l'asset n'a aucune instance, ou les interfaces exposées (non connectées en interne) s'il en a (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l'asset porteur est en brouillon, les interfaces sont éditées librement en local et ne rejoignent la blockchain qu'à la soumission de l'asset (règle 27).",
                 "consumes": [
                     "application/json"
                 ],
@@ -810,7 +1198,10 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "Committe en une transaction les métadonnées et les interfaces locales du composant, puis passe \"status\" à \"submitted\". Échoue si le composant n'est pas un brouillon local (déjà soumis, ou inexistant).",
+                "description": "Committe en une transaction les métadonnées et les interfaces locales du composant, puis passe \"status\" à \"submitted\". Pour un asset décomposé, vérifie qu'au moins un assemblage existe (RM17) et crée une ModuleVersion horodatée — le champ \"note\" optionnel du corps de la requête n'est utilisé que dans ce cas. Échoue si l'asset n'est pas un brouillon local (déjà soumis — sauf ré-soumission d'un asset décomposé pour une nouvelle version — ou inexistant).",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -825,6 +1216,14 @@
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "note optionnelle, utilisée uniquement pour un asset décomposé (ModuleVersion.Note)",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
                     }
                 ],
                 "responses": {
@@ -920,19 +1319,18 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur. Répond { \"thumbnail\": \"\u003cdataURL\u003e\" } — jamais le DTO complet de l'asset (composant ou module), qu'il faut requêter séparément si besoin d'autre chose que la miniature.",
+                "description": "Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur. Répond { \"thumbnail\": \"\u003cdataURL\u003e\" } — jamais le componentDTO complet, qu'il faut requêter séparément si besoin d'autre chose que la miniature.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "components",
-                    "modules"
+                    "components"
                 ],
                 "summary": "Régénérer la miniature d'un asset depuis son lien source",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "identifiant de l'asset (composant ou module)",
+                        "description": "identifiant de l'asset",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1024,14 +1422,13 @@
                     "application/json"
                 ],
                 "tags": [
-                    "components",
-                    "modules"
+                    "components"
                 ],
                 "summary": "Vérifier l'intégrité d'un asset et la localisation de son fichier source",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "identifiant de l'asset (composant ou module)",
+                        "description": "identifiant de l'asset",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1882,1137 +2279,6 @@
                 }
             }
         },
-        "/modules": {
-            "get": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET liste les modules (filtre texte \"q\", filtre \"owner_id\", filtre \"status\" — \"draft\" ou \"submitted\", pagination \"limit\"). POST crée un module en brouillon (status \"draft\") — un module exige au moins un assemblage avant d'être soumis (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Lister ou créer des modules",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "recherche texte (nom, description) — GET uniquement",
-                        "name": "q",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "filtre par propriétaire — GET uniquement",
-                        "name": "owner_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "filtre par statut : draft ou submitted — GET uniquement",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "nombre maximum de résultats (défaut 200, max 1000) — GET uniquement",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "description": "name (requis), description, owner_id, channel_id, license_id, parent_id — POST uniquement",
-                        "name": "body",
-                        "in": "body",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "GET : {items, total}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "201": {
-                        "description": "POST : module créé",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET liste les modules (filtre texte \"q\", filtre \"owner_id\", filtre \"status\" — \"draft\" ou \"submitted\", pagination \"limit\"). POST crée un module en brouillon (status \"draft\") — un module exige au moins un assemblage avant d'être soumis (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Lister ou créer des modules",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "recherche texte (nom, description) — GET uniquement",
-                        "name": "q",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "filtre par propriétaire — GET uniquement",
-                        "name": "owner_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "filtre par statut : draft ou submitted — GET uniquement",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "nombre maximum de résultats (défaut 200, max 1000) — GET uniquement",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "description": "name (requis), description, owner_id, channel_id, license_id, parent_id — POST uniquement",
-                        "name": "body",
-                        "in": "body",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "GET : {items, total}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "201": {
-                        "description": "POST : module créé",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "Champs modifiables : name, description, license_id, tags, links (identiques à PATCH /components/{id}) — la composition (instances, liaisons) n'est pas modifiable par cette route, voir /modules/{id}/instances.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Modifier les métadonnées d'un module",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "champs à modifier (name, description, license_id, tags, links)",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}/assemblies": {
-            "post": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Ajouter un assemblage à un module",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "connection_id requis",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}/assemblies/{connID}": {
-            "delete": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}/connections": {
-            "get": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}/instances": {
-            "get": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}/instances/{instanceId}": {
-            "delete": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}/interfaces": {
-            "get": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}/submit": {
-            "post": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}/thumbnail": {
-            "get": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré du stockage local, module déjà soumis masqué localement sans jamais modifier le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées. GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID}) : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature. POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis le lien source (og:image). GET/POST /api/modules/{id}/instances : lister / ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId} : retirer (cascade des connexions, règle 15) / repositionner une instance. POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle 14).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "modules"
-                ],
-                "summary": "Opérations sur un module et ses sous-ressources",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du module",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.moduleDTO"
-                        }
-                    },
-                    "204": {
-                        "description": "pas de contenu (DELETE)"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}/thumbnail/regenerate": {
-            "post": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur. Répond { \"thumbnail\": \"\u003cdataURL\u003e\" } — jamais le DTO complet de l'asset (composant ou module), qu'il faut requêter séparément si besoin d'autre chose que la miniature.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "components",
-                    "modules"
-                ],
-                "summary": "Régénérer la miniature d'un asset depuis son lien source",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant de l'asset (composant ou module)",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "aucun lien externe, échec réseau/timeout ou og:image introuvable — un seul code pour ces trois cas",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "503": {
-                        "description": "blockchain indisponible (asset non local et non joignable)",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/modules/{id}/verify": {
-            "post": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "Vérifie la cohérence blockchain des métadonnées puis, si l'asset porte un fichier ressource, sa présence et son intégrité dans le stockage actif. Répond toujours 200 avec un statut explicite (\"ok\", \"reason\", \"location\") — un résultat négatif est un résultat métier, pas une erreur de transport.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "components",
-                    "modules"
-                ],
-                "summary": "Vérifier l'intégrité d'un asset et la localisation de son fichier source",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant de l'asset (composant ou module)",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "503": {
-                        "description": "blockchain indisponible",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/networks": {
             "get": {
                 "description": "Public — ne renvoie que des métadonnées, jamais de credentials.",
@@ -3462,6 +2728,12 @@
         "adapters_in_rest.componentDTO": {
             "type": "object",
             "properties": {
+                "assemblies": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "block_id": {
                     "type": "string"
                 },
@@ -3480,6 +2752,12 @@
                 "id": {
                     "type": "string"
                 },
+                "instances": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/myr-core_domain_model.WorkspaceInstance"
+                    }
+                },
                 "license_id": {
                     "type": "string"
                 },
@@ -3487,6 +2765,12 @@
                     "type": "array",
                     "items": {
                         "type": "string"
+                    }
+                },
+                "module_versions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/myr-core_domain_model.ModuleVersion"
                     }
                 },
                 "name": {
@@ -3576,53 +2860,6 @@
                 },
                 "warning": {
                     "type": "string"
-                }
-            }
-        },
-        "adapters_in_rest.moduleDTO": {
-            "type": "object",
-            "properties": {
-                "assemblies": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "instances": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/myr-core_domain_model.WorkspaceInstance"
-                    }
-                },
-                "license_id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner_id": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/myr-core_domain_model.ModuleStatus"
-                },
-                "thumbnail": {
-                    "type": "string"
-                },
-                "versions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/myr-core_domain_model.ModuleVersion"
-                    }
                 }
             }
         },

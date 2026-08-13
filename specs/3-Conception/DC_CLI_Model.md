@@ -51,22 +51,17 @@ myr model
 │   ├── remove <id>                     — supprimer une liaison
 │   └── list                            — visualiser les liaisons d'un module               UCAM02
 ├── instance
-│   ├── add <moduleID> <assetID>        — ajouter un composant existant comme instance d'un module UCMOD01, UCAM05
-│   └── remove <moduleID> <instanceID>  — retirer une instance d'un module (cascade)        UCAM08
+│   ├── add <assetID> <subAssetID>      — ajouter un composant existant comme instance d'un asset UCMOD01, UCAM05
+│   └── remove <assetID> <instanceID>   — retirer une instance (cascade)                    UCAM08
+├── assembly
+│   ├── add <assetID> <connID>          — rattacher une liaison à l'asset                   UCMOD02
+│   └── remove <assetID> <connID>       — détacher une liaison de l'asset
 └── decompose
     ├── preview <assetID>               — analyser un composant STEP, proposer un découpage UCAM09
     └── commit <assetID> --from <id>    — matérialiser la proposition retenue               UCAM09
-
-myr module
-├── create                              — créer un module (état draft)                     UCMOD01, UCAM05
-├── get <id>                            — visualiser la composition d'un module            UCMOD04
-├── list                                — lister les modules                               UCMOD02
-├── interfaces <id>                     — interfaces exposées d'un module                  UCAM02
-├── add-assembly <id> <connID>          — rattacher une liaison au module                  UCMOD02
-├── remove-assembly <id> <connID>       — détacher une liaison du module
-├── submit <id>                         — soumettre le module à la blockchain              UCMOD06
-└── remove <id>                         — retirer un module non soumis
 ```
+
+**Fusion composant/module (ADR-11, `Conception_intro.md`) :** `myr module` n'est plus un arbre de commandes distinct — `Model3D` est une seule ressource, `myr model` en est l'unique point d'entrée CLI, qu'un asset ait ou non des instances. `add <assetID> <subAssetID>` s'applique à n'importe quel `assetID` existant, y compris un composant qui n'a encore aucune instance ; il n'y a plus de commande `create` séparée pour « créer un module » — un module se crée comme n'importe quel composant (`myr model add`), sa nature d'assemblage vient ensuite de l'ajout d'instances. `interfaces`/`list`/`get`/`submit`/`remove` d'un asset ayant des instances passent par les mêmes commandes `myr model interface list`/`list`/`get`/`submit`/`remove` qu'un composant simple — `submit` route en interne vers la logique `SubmitModule` (RM17, `ModuleVersion`) dès que l'asset a des `Assemblies`, voir ADR-11. Seul `assembly add/remove` (ex-`module add-assembly/remove-assembly`) reste nommé distinctement sous `myr model`, faute d'équivalent générique existant pour rattacher une connexion déjà créée à la liste `Assemblies` d'un asset.
 
 Voir § 5 pour la table de correspondance complète entre méthode du service domaine, commande CLI et use case.
 
@@ -111,36 +106,41 @@ Appelle `ModelService.AddAssemblyLink(fromIfaceID, toIfaceID, label, fromInstanc
 ### 3.5 `myr model instance add` / `remove`
 
 ```
-myr model instance add <moduleID> <assetID>
-myr model instance remove <moduleID> <instanceID>
+myr model instance add <assetID> <subAssetID>
+myr model instance remove <assetID> <instanceID>
 ```
 
-Appellent respectivement `AddAssetToWorkspace` et `RemoveAssetFromWorkspace`. `add` est l'équivalent CLI du placement unitaire décrit dans UCMOD01 (assemblage d'un module) et UCAM05 (transformation composant → module) — une invocation ajoute un composant comme instance ; un placement en lot reste un script shell côté appelant (boucle sur cette commande), pas une commande dédiée. `remove` est l'équivalent CLI de UCAM08 (retrait en cascade — la cascade des connexions est gérée par le service, RM15).
+Appellent respectivement `AddAssetToWorkspace` et `RemoveAssetFromWorkspace`. `add` s'applique à n'importe quel `assetID` existant (ADR-11) — une invocation ajoute un composant comme instance, qu'il s'agisse du premier assemblage (UCMOD01, UCAM05) ou d'un ajout à une composition déjà en cours ; un placement en lot reste un script shell côté appelant (boucle sur cette commande), pas une commande dédiée. `remove` est l'équivalent CLI de UCAM08 (retrait en cascade — la cascade des connexions est gérée par le service, RM15).
 
-### 3.6 `myr module create` / `submit`
-
-```
-myr module create --name <nom> --channel <id> [--owner-id <id>] [--description <texte>] [--license <id>]
-myr module submit <moduleID> [--note <texte>]
-```
-
-Appellent `CreateModule(ModuleRequest{...})` et `SubmitModule(moduleID, note)`. Équivalents CLI de UCMOD01 et UCMOD06. `submit` échoue si le module n'a aucun assemblage (RM14) — même message d'erreur quel que soit le canal.
-
-### 3.6bis `myr model submit` (RM16/RM19 — soumission d'un composant en brouillon)
+### 3.6 `myr model assembly add` / `remove` (ex-`myr module add-assembly`/`remove-assembly`, ADR-11)
 
 ```
-myr model submit <assetID>
+myr model assembly add <assetID> <connID>
+myr model assembly remove <assetID> <connID>
 ```
 
-Équivalent CLI de UCCE01 (« Flux alternatif — Création en brouillon ») et de la précondition « composant en brouillon » d'UCCE06. Committe l'état courant du brouillon (interfaces incluses, `Model3D.Interfaces`) sur Fabric en une transaction et passe `Status` à `submitted`. **Écart de conception (E8, `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus) :** la méthode `ModelService` dédiée généralise la logique déjà utilisée par `SubmitModule` (qui, malgré son nom historique, ne fait qu'ancrer l'état courant d'un `Model3D` sur Fabric) plutôt que d'en écrire une seconde implémentation ; voir § 6 point 4. Sans argument requis au-delà de l'ID : contrairement à `myr module submit`, aucune vérification d'assemblage (RM17, module uniquement) ne s'applique à un composant.
+Appellent `AddAssemblyToModule(assetID, connID)` / `RemoveAssemblyFromModule(assetID, connID)` — rattachent/détachent une connexion déjà créée (`myr model link add`) à la liste `Assemblies` de l'asset. Équivalent CLI de UCMOD02.
 
-### 3.7 `myr model to-module` (UCAM05 — transformation composant → module)
+Il n'existe plus de commande `create` séparée : un asset destiné à devenir un assemblage se crée exactement comme n'importe quel composant (`myr model add`), sa nature d'assemblage venant ensuite de l'ajout d'instances (§3.5) — voir ADR-11, point 3.
+
+### 3.6bis `myr model submit` (RM16/RM17/RM19 — soumission, composant ou assemblage)
 
 ```
-myr model to-module <assetID> --name <nom>
+myr model submit <assetID> [--note <texte>]
 ```
 
-Pas de méthode dédiée dans `ModelService` : la transformation (« découpage », `Category = decoupage`, cf. écart E1 dans `Architecture_Composition.md`) s'implémente comme `CreateModule` avec une référence au composant d'origine puis dépréciation de celui-ci. Documenté ici comme cible ouverte — voir § 6 point 1.
+Équivalent CLI unique de UCCE01 (« Flux alternatif — Création en brouillon »), UCCE06 (fork) et UCMOD06 (soumission d'un module). Committe l'état courant du brouillon (interfaces incluses, `Model3D.Interfaces`) sur Fabric en une transaction et passe `Status` à `submitted`. **Conséquence de la fusion (ADR-11) :** cette commande route en interne vers la logique `SubmitModule` (vérification RM17 — `len(Assemblies) > 0` — et création d'une `ModuleVersion` horodatée, flag `--note`) si `m.IsModule()` est vrai, vers la logique `Submit` générique sinon ; ce n'est plus à l'appelant de savoir laquelle des deux méthodes domaine invoquer. **Écart de conception (E8, `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus) :** `Submit` généralise déjà la logique de persistance de `SubmitModule` — reste à en faire le point de dispatch unique décrit ci-dessus plutôt que deux méthodes séparées exposées séparément ; voir § 6 point 4.
+
+### 3.7 Transformation composant → module (UCAM05, catégorie `decoupage`)
+
+```
+myr model add --category decoupage --parent-id <composantOrigine> --name <nom> [...]
+myr model instance add <nouvelID> <subAssetID>   # répété pour chaque sous-composant
+myr model link add --from <ifaceID> --to <ifaceID> ...   # répété pour chaque liaison
+myr model submit <nouvelID>
+```
+
+Aucune commande dédiée : depuis la fusion (ADR-11), la transformation manuelle décrite par UCAM05 est la composition des commandes génériques ci-dessus — `myr model add` avec `Category = decoupage` (cf. écart E1 dans `Architecture_Composition.md`, constante `CategoryDecoupage` encore absente d'`entity.go`) crée un **nouvel** asset distinct, `parent_id` référençant le composant d'origine, qui n'est lui-même ni modifié ni supprimé (post-condition UCAM09, RM39). Il n'y a donc plus d'ancienne commande `to-module` à documenter séparément. Ce point (nouvel id systématique vs. mutation du composant d'origine en place) reste néanmoins un point ouvert pour le PO — voir ADR-11.
 
 ### 3.8 `myr model decompose preview` / `commit` (UCAM09 — décomposition assistée d'un composant STEP)
 
@@ -149,7 +149,7 @@ myr model decompose preview <assetID>
 myr model decompose commit <assetID> --from <decomposition_id>
 ```
 
-`preview` analyse le fichier STEP/STP du composant `<assetID>` et retourne, sous un `decomposition_id` temporaire, une proposition de sous-pièces et de connexions candidates — sans créer aucune entité (RM40). `commit` reprend cette proposition, éventuellement corrigée côté appelant (sous-pièces retirées/renommées, connexions rejetées), et matérialise sous-composants (draft), module de catégorie `decoupage` et liaisons compatibles (RM39/RM41). Comme `to-module` (§ 3.7), ce couple de commandes n'a pas encore de méthode `ModelService` dédiée — voir § 6 point 5.
+`preview` analyse le fichier STEP/STP du composant `<assetID>` et retourne, sous un `decomposition_id` temporaire, une proposition de sous-pièces et de connexions candidates — sans créer aucune entité (RM40). `commit` reprend cette proposition, éventuellement corrigée côté appelant (sous-pièces retirées/renommées, connexions rejetées), et matérialise sous-composants (draft), module de catégorie `decoupage` et liaisons compatibles (RM39/RM41) — même sémantique d'identité que §3.7 (nouvel asset distinct, composant d'origine inchangé). Ce couple de commandes n'a pas encore de méthode `ModelService` dédiée — voir § 6 point 5.
 
 ---
 
@@ -180,10 +180,10 @@ Mêmes conventions que `DC_CLI_Admin.md` § 7 : succès sur stdout, erreurs sur 
 | `GetRefs` / `AddRefCategory` / `AddRefType` / `AddRefUnit` | `myr model ref list/add-category/add-type/add-unit` | UCAM03 |
 | `AddConnection` / `AddAssemblyLink` / `RemoveConnection` / `ListConnections` | `myr model link add/remove/list` | UCAM01, UCAM07 |
 | `ConnectVirtualToPhysical` | `myr model link connect-virtual` | UCAM03 |
-| `CreateModule` / `GetModule` / `ListModules` / `RemoveModule` | `myr module create/get/list/remove` | UCMOD01, UCMOD02, UCMOD04 |
-| `AddAssemblyToModule` / `RemoveAssemblyFromModule` | `myr module add-assembly/remove-assembly` | UCMOD02 |
-| `SubmitModule` | `myr module submit` | UCMOD06 |
-| `GetModuleInterfaces` | `myr module interfaces` | UCAM02 |
+| `CreateModule` / `GetModule` / `ListModules` / `RemoveModule` (ADR-11 : retirés en tant que commandes CLI distinctes, remplacés par `Add`/`AddFull`, `Get`, `List`, `Remove` déjà génériques) | `myr model add/get/list/remove` | UCMOD01, UCMOD02, UCMOD04 |
+| `AddAssemblyToModule` / `RemoveAssemblyFromModule` | `myr model assembly add/remove` | UCMOD02 |
+| `SubmitModule` (ADR-11 : point de dispatch interne de `myr model submit`, plus une commande distincte) | `myr model submit` | UCMOD06 |
+| `GetModuleInterfaces` (ADR-11 : point de dispatch interne de `myr model interface list`, plus une commande distincte) | `myr model interface list` | UCAM02 |
 | `AddAssetToWorkspace` / `RemoveAssetFromWorkspace` | `myr model instance add/remove` | UCMOD01, UCAM05 (add) · UCAM08 (remove) |
 | `ListLicenses` / `GetLicense` / `CheckLicenseCompatibility` / `CheckModuleLicenseCompatibility` | `myr model license list/get/check` | UCCE04, UCMOD06 |
 | (à concevoir — analyse STEP, aucune persistance) | `myr model decompose preview` | UCAM09, RM40 |
@@ -197,7 +197,7 @@ Recherches et export (UCCL01, UCREC01–05) se combinent à partir de `List`, `G
 
 | # | Écart / question | Impact |
 |---|---|---|
-| 1 | `myr model to-module` (UCAM05) n'a pas de méthode `ModelService` dédiée — la transformation composant → module (catégorie `decoupage`, cf. écart E1 `Architecture_Composition.md`) reste à concevoir au niveau service avant d'être exposée en CLI comme en REST. | UCAM05 non exposable tant que E1 n'est pas résolu, quel que soit le canal (GUI, REST ou CLI) — ce n'est pas un écart spécifique au CLI. |
+| 1 | Depuis la fusion composant/module (ADR-11, `Conception_intro.md`), UCAM05 ne nécessite plus de méthode `ModelService` dédiée ni de commande CLI dédiée (§3.7) — elle se compose entièrement de méthodes déjà génériques (`AddFull`, `AddAssetToWorkspace`, `AddAssemblyLink`, `Submit`). Le seul écart restant est E1 (`Architecture_Composition.md`) : la constante `CategoryDecoupage` est absente d'`entity.go`. | UCAM05 non exposable tant que E1 n'est pas résolu, quel que soit le canal (REST ou CLI) — ce n'est pas un écart spécifique au CLI, et il ne dépend plus de la fusion ADR-11 (déjà réglée côté conception). |
 | 2 | `ModelService` n'expose aucune méthode de filtre serveur (`Search(criteria)`) — `List(channelID)` retourne tout le canal, à charge du dépôt GUI externe de filtrer. Reste à trancher si le filtrage doit devenir un comportement serveur. | UCCL01 et UCREC01–05 : la commande `myr model search` ne peut être qu'un alias de `list` tant que cette décision n'est pas prise et le filtre remonté côté domaine. |
 | 3 | Tarification, commission, transfert de PI, clonage inter-réseau, écoconception (UCPI01/02/04/05/06/07/08/09/10/11) et automatisation (UCAUT01/02/04) n'ont aucun port domaine ni entité correspondante (`Price`, `Commission`, `Transfer`…absents de `domain/model` et `domain/payment`). Documentés dans les UC concernés comme commandes CLI de niveau 2 : le nom de commande est proposé, mais dépend d'abord de la conception du domaine (hors périmètre de ce document). | Pas d'implémentation CLI possible avant modélisation du domaine correspondant. |
 | 4 | `myr model submit` (§ 3.6bis) n'a pas de méthode `ModelService` dédiée : elle nécessite un changement domaine (voir `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus, E8) — ajouter `Status`/`Draft` à `AddRequest` et une méthode `Submit` généralisant `SubmitModule` à tout `Model3D`. | UCCE01 (flux brouillon) et UCCE06 (fork) dépendent de ce changement domaine, contrairement aux autres commandes de ce document qui n'exigent qu'un adaptateur CLI sur des méthodes `ModelService` déjà définies. |

@@ -30,6 +30,10 @@ definitions:
     type: object
   adapters_in_rest.componentDTO:
     properties:
+      assemblies:
+        items:
+          type: string
+        type: array
       block_id:
         type: string
       category:
@@ -42,11 +46,19 @@ definitions:
         type: string
       id:
         type: string
+      instances:
+        items:
+          $ref: '#/definitions/myr-core_domain_model.WorkspaceInstance'
+        type: array
       license_id:
         type: string
       links:
         items:
           type: string
+        type: array
+      module_versions:
+        items:
+          $ref: '#/definitions/myr-core_domain_model.ModuleVersion'
         type: array
       name:
         type: string
@@ -111,37 +123,6 @@ definitions:
         type: integer
       warning:
         type: string
-    type: object
-  adapters_in_rest.moduleDTO:
-    properties:
-      assemblies:
-        items:
-          type: string
-        type: array
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      instances:
-        items:
-          $ref: '#/definitions/myr-core_domain_model.WorkspaceInstance'
-        type: array
-      license_id:
-        type: string
-      name:
-        type: string
-      owner_id:
-        type: string
-      status:
-        $ref: '#/definitions/myr-core_domain_model.ModuleStatus'
-      thumbnail:
-        type: string
-      versions:
-        items:
-          $ref: '#/definitions/myr-core_domain_model.ModuleVersion'
-        type: array
     type: object
   adapters_in_rest.networkPolicyResponse:
     properties:
@@ -559,7 +540,7 @@ paths:
   /components:
     get:
       description: Filtre côté serveur — ne renvoie qu'un sous-ensemble pour éviter
-        de tout charger. Les modules sont exclus (voir /api/modules).
+        de tout charger. Inclut tout Model3D, décomposé (instances non vide) ou non.
       parameters:
       - description: recherche texte (nom, description, tags)
         in: query
@@ -584,6 +565,10 @@ paths:
       - description: tags séparés par virgule (correspondance sur au moins un tag)
         in: query
         name: tags
+        type: string
+      - description: 'filtre par statut : draft ou submitted'
+        in: query
+        name: status
         type: string
       - description: nombre maximum de résultats (défaut 200, max 1000)
         in: query
@@ -771,13 +756,272 @@ paths:
       summary: Modifier un composant
       tags:
       - components
+  /components/{id}/assemblies:
+    get:
+      consumes:
+      - application/json
+      description: GET renvoie les connexions référencées par Assemblies (liste vide
+        si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr
+        model link add) à cette liste — brouillon local, sans effet blockchain avant
+        soumission.
+      parameters:
+      - description: identifiant de l'asset
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: connection_id requis — POST uniquement
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/adapters_in_rest.componentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Connexions internes d'un asset décomposé
+      tags:
+      - components
+    post:
+      consumes:
+      - application/json
+      description: GET renvoie les connexions référencées par Assemblies (liste vide
+        si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr
+        model link add) à cette liste — brouillon local, sans effet blockchain avant
+        soumission.
+      parameters:
+      - description: identifiant de l'asset
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: connection_id requis — POST uniquement
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/adapters_in_rest.componentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Connexions internes d'un asset décomposé
+      tags:
+      - components
+  /components/{id}/assemblies/{connID}:
+    delete:
+      description: Retire connID de la liste Assemblies de l'asset — brouillon local,
+        sans effet blockchain avant soumission. Ne supprime pas la connexion elle-même
+        (voir DELETE /connections/{id}).
+      parameters:
+      - description: identifiant de l'asset
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: identifiant de la connexion à détacher
+        in: path
+        name: connID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/adapters_in_rest.componentDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Détacher une connexion d'un asset décomposé
+      tags:
+      - components
+  /components/{id}/instances:
+    get:
+      consumes:
+      - application/json
+      description: GET renvoie la liste des instances (vide si l'asset n'a jamais
+        été décomposé). POST ajoute un composant existant comme instance — brouillon
+        local, sans effet blockchain avant soumission.
+      parameters:
+      - description: identifiant de l'asset
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: asset_id requis — POST uniquement
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/adapters_in_rest.componentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Instances d'un asset
+      tags:
+      - components
+    post:
+      consumes:
+      - application/json
+      description: GET renvoie la liste des instances (vide si l'asset n'a jamais
+        été décomposé). POST ajoute un composant existant comme instance — brouillon
+        local, sans effet blockchain avant soumission.
+      parameters:
+      - description: identifiant de l'asset
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: asset_id requis — POST uniquement
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/adapters_in_rest.componentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Instances d'un asset
+      tags:
+      - components
+  /components/{id}/instances/{instanceId}:
+    delete:
+      consumes:
+      - application/json
+      description: DELETE retire l'instance et ses connexions en cascade (RM14). PATCH
+        met à jour sa position (x, y).
+      parameters:
+      - description: identifiant de l'asset
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: identifiant de l'instance
+        in: path
+        name: instanceId
+        required: true
+        type: string
+      - description: x, y — PATCH uniquement
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/adapters_in_rest.componentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Retirer ou repositionner une instance
+      tags:
+      - components
+    patch:
+      consumes:
+      - application/json
+      description: DELETE retire l'instance et ses connexions en cascade (RM14). PATCH
+        met à jour sa position (x, y).
+      parameters:
+      - description: identifiant de l'asset
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: identifiant de l'instance
+        in: path
+        name: instanceId
+        required: true
+        type: string
+      - description: x, y — PATCH uniquement
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/adapters_in_rest.componentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Retirer ou repositionner une instance
+      tags:
+      - components
   /components/{id}/interfaces:
     get:
       consumes:
       - application/json
-      description: Tant que l'asset porteur est en brouillon, les interfaces sont
-        éditées librement en local et ne rejoignent la blockchain qu'à la soumission
-        de l'asset (règle 27).
+      description: GET renvoie les interfaces physiques directes si l'asset n'a aucune
+        instance, ou les interfaces exposées (non connectées en interne) s'il en a
+        (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l'asset porteur
+        est en brouillon, les interfaces sont éditées librement en local et ne rejoignent
+        la blockchain qu'à la soumission de l'asset (règle 27).
       parameters:
       - description: identifiant du composant
         in: path
@@ -822,9 +1066,11 @@ paths:
     post:
       consumes:
       - application/json
-      description: Tant que l'asset porteur est en brouillon, les interfaces sont
-        éditées librement en local et ne rejoignent la blockchain qu'à la soumission
-        de l'asset (règle 27).
+      description: GET renvoie les interfaces physiques directes si l'asset n'a aucune
+        instance, ou les interfaces exposées (non connectées en interne) s'il en a
+        (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l'asset porteur
+        est en brouillon, les interfaces sont éditées librement en local et ne rejoignent
+        la blockchain qu'à la soumission de l'asset (règle 27).
       parameters:
       - description: identifiant du composant
         in: path
@@ -868,15 +1114,26 @@ paths:
       - components
   /components/{id}/submit:
     post:
+      consumes:
+      - application/json
       description: Committe en une transaction les métadonnées et les interfaces locales
-        du composant, puis passe "status" à "submitted". Échoue si le composant n'est
-        pas un brouillon local (déjà soumis, ou inexistant).
+        du composant, puis passe "status" à "submitted". Pour un asset décomposé,
+        vérifie qu'au moins un assemblage existe (RM17) et crée une ModuleVersion
+        horodatée — le champ "note" optionnel du corps de la requête n'est utilisé
+        que dans ce cas. Échoue si l'asset n'est pas un brouillon local (déjà soumis
+        — sauf ré-soumission d'un asset décomposé pour une nouvelle version — ou inexistant).
       parameters:
       - description: identifiant du composant en brouillon
         in: path
         name: id
         required: true
         type: string
+      - description: note optionnelle, utilisée uniquement pour un asset décomposé
+          (ModuleVersion.Note)
+        in: body
+        name: body
+        schema:
+          type: object
       produces:
       - application/json
       responses:
@@ -945,10 +1202,10 @@ paths:
       description: 'Redérive la miniature depuis l''og:image du premier lien externe
         enregistré (Links). Échoue si l''asset n''a aucun lien externe — un modèle
         3D sans lien n''a pas de source régénérable côté serveur. Répond { "thumbnail":
-        "<dataURL>" } — jamais le DTO complet de l''asset (composant ou module), qu''il
-        faut requêter séparément si besoin d''autre chose que la miniature.'
+        "<dataURL>" } — jamais le componentDTO complet, qu''il faut requêter séparément
+        si besoin d''autre chose que la miniature.'
       parameters:
-      - description: identifiant de l'asset (composant ou module)
+      - description: identifiant de l'asset
         in: path
         name: id
         required: true
@@ -980,7 +1237,6 @@ paths:
       summary: Régénérer la miniature d'un asset depuis son lien source
       tags:
       - components
-      - modules
   /components/{id}/tree:
     get:
       description: Tous les ancêtres (via parent_id) et descendants (parcours en largeur)
@@ -1016,7 +1272,7 @@ paths:
         actif. Répond toujours 200 avec un statut explicite ("ok", "reason", "location")
         — un résultat négatif est un résultat métier, pas une erreur de transport.
       parameters:
-      - description: identifiant de l'asset (composant ou module)
+      - description: identifiant de l'asset
         in: path
         name: id
         required: true
@@ -1040,7 +1296,6 @@ paths:
       summary: Vérifier l'intégrité d'un asset et la localisation de son fichier source
       tags:
       - components
-      - modules
   /components/batch:
     post:
       consumes:
@@ -1651,882 +1906,6 @@ paths:
       summary: Détail d'une licence ou vérification de compatibilité
       tags:
       - licenses
-  /modules:
-    get:
-      consumes:
-      - application/json
-      description: GET liste les modules (filtre texte "q", filtre "owner_id", filtre
-        "status" — "draft" ou "submitted", pagination "limit"). POST crée un module
-        en brouillon (status "draft") — un module exige au moins un assemblage avant
-        d'être soumis (règle 14).
-      parameters:
-      - description: recherche texte (nom, description) — GET uniquement
-        in: query
-        name: q
-        type: string
-      - description: filtre par propriétaire — GET uniquement
-        in: query
-        name: owner_id
-        type: string
-      - description: 'filtre par statut : draft ou submitted — GET uniquement'
-        in: query
-        name: status
-        type: string
-      - description: nombre maximum de résultats (défaut 200, max 1000) — GET uniquement
-        in: query
-        name: limit
-        type: integer
-      - description: name (requis), description, owner_id, channel_id, license_id,
-          parent_id — POST uniquement
-        in: body
-        name: body
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 'GET : {items, total}'
-          schema:
-            additionalProperties: true
-            type: object
-        "201":
-          description: 'POST : module créé'
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Lister ou créer des modules
-      tags:
-      - modules
-    post:
-      consumes:
-      - application/json
-      description: GET liste les modules (filtre texte "q", filtre "owner_id", filtre
-        "status" — "draft" ou "submitted", pagination "limit"). POST crée un module
-        en brouillon (status "draft") — un module exige au moins un assemblage avant
-        d'être soumis (règle 14).
-      parameters:
-      - description: recherche texte (nom, description) — GET uniquement
-        in: query
-        name: q
-        type: string
-      - description: filtre par propriétaire — GET uniquement
-        in: query
-        name: owner_id
-        type: string
-      - description: 'filtre par statut : draft ou submitted — GET uniquement'
-        in: query
-        name: status
-        type: string
-      - description: nombre maximum de résultats (défaut 200, max 1000) — GET uniquement
-        in: query
-        name: limit
-        type: integer
-      - description: name (requis), description, owner_id, channel_id, license_id,
-          parent_id — POST uniquement
-        in: body
-        name: body
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 'GET : {items, total}'
-          schema:
-            additionalProperties: true
-            type: object
-        "201":
-          description: 'POST : module créé'
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Lister ou créer des modules
-      tags:
-      - modules
-  /modules/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-    get:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-    patch:
-      consumes:
-      - application/json
-      description: 'Champs modifiables : name, description, license_id, tags, links
-        (identiques à PATCH /components/{id}) — la composition (instances, liaisons)
-        n''est pas modifiable par cette route, voir /modules/{id}/instances.'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: champs à modifier (name, description, license_id, tags, links)
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Modifier les métadonnées d'un module
-      tags:
-      - modules
-  /modules/{id}/assemblies:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: connection_id requis
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Ajouter un assemblage à un module
-      tags:
-      - modules
-  /modules/{id}/assemblies/{connID}:
-    delete:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-  /modules/{id}/connections:
-    get:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-  /modules/{id}/instances:
-    get:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-    post:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-  /modules/{id}/instances/{instanceId}:
-    delete:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-    patch:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-  /modules/{id}/interfaces:
-    get:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-  /modules/{id}/submit:
-    post:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-  /modules/{id}/thumbnail:
-    get:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-    post:
-      consumes:
-      - application/json
-      description: 'GET /api/modules/{id} : détail. PATCH /api/modules/{id} : métadonnées
-        (voir patchModule). DELETE /api/modules/{id} : suppression — brouillon retiré
-        du stockage local, module déjà soumis masqué localement sans jamais modifier
-        le ledger (règle 8). GET /api/modules/{id}/interfaces : interfaces exposées.
-        GET /api/modules/{id}/connections : connexions internes. POST/DELETE /api/modules/{id}/assemblies(/{connID})
-        : ajouter/retirer un assemblage. GET/POST /api/modules/{id}/thumbnail : miniature.
-        POST /api/modules/{id}/thumbnail/regenerate : redériver la miniature depuis
-        le lien source (og:image). GET/POST /api/modules/{id}/instances : lister /
-        ajouter une instance de composant. DELETE/PATCH /api/modules/{id}/instances/{instanceId}
-        : retirer (cascade des connexions, règle 15) / repositionner une instance.
-        POST /api/modules/{id}/submit : soumettre le module à la blockchain (règle
-        14).'
-      parameters:
-      - description: identifiant du module
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.moduleDTO'
-        "204":
-          description: pas de contenu (DELETE)
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Opérations sur un module et ses sous-ressources
-      tags:
-      - modules
-  /modules/{id}/thumbnail/regenerate:
-    post:
-      description: 'Redérive la miniature depuis l''og:image du premier lien externe
-        enregistré (Links). Échoue si l''asset n''a aucun lien externe — un modèle
-        3D sans lien n''a pas de source régénérable côté serveur. Répond { "thumbnail":
-        "<dataURL>" } — jamais le DTO complet de l''asset (composant ou module), qu''il
-        faut requêter séparément si besoin d''autre chose que la miniature.'
-      parameters:
-      - description: identifiant de l'asset (composant ou module)
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: aucun lien externe, échec réseau/timeout ou og:image introuvable
-            — un seul code pour ces trois cas
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "503":
-          description: blockchain indisponible (asset non local et non joignable)
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Régénérer la miniature d'un asset depuis son lien source
-      tags:
-      - components
-      - modules
-  /modules/{id}/verify:
-    post:
-      description: Vérifie la cohérence blockchain des métadonnées puis, si l'asset
-        porte un fichier ressource, sa présence et son intégrité dans le stockage
-        actif. Répond toujours 200 avec un statut explicite ("ok", "reason", "location")
-        — un résultat négatif est un résultat métier, pas une erreur de transport.
-      parameters:
-      - description: identifiant de l'asset (composant ou module)
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "503":
-          description: blockchain indisponible
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Vérifier l'intégrité d'un asset et la localisation de son fichier source
-      tags:
-      - components
-      - modules
   /networks:
     get:
       description: Public — ne renvoie que des métadonnées, jamais de credentials.

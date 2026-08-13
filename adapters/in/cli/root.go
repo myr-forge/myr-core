@@ -44,7 +44,7 @@ Run 'myr man [command]' to read the full manual for any command.`,
 // CommandTree returns rootCmd with all subcommands registered.
 // Used by man page generation (no services required).
 func CommandTree() *cobra.Command {
-	rootCmd.AddCommand(modelCmd, moduleCmd, channelCmd, paymentCmd, networkCmd, orgCmd, nodeCmd, roleCmd, identityCmd, sessionCmd, manCmd)
+	rootCmd.AddCommand(modelCmd, channelCmd, paymentCmd, networkCmd, orgCmd, nodeCmd, roleCmd, identityCmd, sessionCmd, manCmd)
 	return rootCmd
 }
 
@@ -59,7 +59,7 @@ func Execute(ms model.ModelService, cs channel.ChannelService, ps payment.Paymen
 	sessionSvc = ss
 
 	rootCmd.Version = Version
-	rootCmd.AddCommand(modelCmd, moduleCmd, channelCmd, paymentCmd, networkCmd, orgCmd, nodeCmd, roleCmd, identityCmd, sessionCmd, manCmd)
+	rootCmd.AddCommand(modelCmd, channelCmd, paymentCmd, networkCmd, orgCmd, nodeCmd, roleCmd, identityCmd, sessionCmd, manCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

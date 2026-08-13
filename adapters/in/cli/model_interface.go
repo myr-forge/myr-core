@@ -87,18 +87,14 @@ var modelInterfaceRemoveCmd = &cobra.Command{
 
 // ── list ──────────────────────────────────────────────────────────────────────
 
+// runModelInterfaceList affiche les interfaces d'un asset : directes s'il n'a
+// aucune instance, exposées (non connectées en interne) s'il en a —
+// GetModuleInterfaces gère les deux cas (ADR-11, cohérent avec le handler REST
+// équivalent).
 func runModelInterfaceList(w io.Writer, svc model.ModelService, assetID string) error {
-	ifaces, err := svc.ListInterfacesForAsset(assetID)
+	ifaces, err := svc.GetModuleInterfaces(assetID)
 	if err != nil {
 		return err
-	}
-	if len(ifaces) == 0 {
-		if mod, err := svc.GetModule(assetID); err == nil && mod != nil {
-			ifaces, err = svc.GetModuleInterfaces(assetID)
-			if err != nil {
-				return err
-			}
-		}
 	}
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(tw, "ID\tCATÉGORIE\tTYPE\tDIRECTION\tVALEUR\tUNITÉ\tVIRTUELLE")

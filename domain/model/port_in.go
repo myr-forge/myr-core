@@ -24,9 +24,11 @@ type ModelService interface {
 	AddFull(req AddRequest) (*Model3D, error)
 	// Submit engage sur la blockchain un composant créé en brouillon :
 	// une seule transaction committe les métadonnées et les interfaces locales
-	// (Model3D.Interfaces), puis Status passe à submitted. Généralise SubmitModule
-	// à tout Model3D, sans la vérification d'assemblage (RM17, propre aux modules).
-	Submit(assetID string) (*Model3D, error)
+	// (Model3D.Interfaces), puis Status passe à submitted. Point d'entrée unique
+	// pour tout Model3D (ADR-11) : délègue à SubmitModule (RM17, ModuleVersion)
+	// dès que l'asset a des Assemblies (IsModule()) ; note n'est utilisée que
+	// dans ce cas, ignorée pour un composant simple.
+	Submit(assetID, note string) (*Model3D, error)
 	Remove(id string) error
 
 	// Connexions d'assemblage (optionnel selon adapter)

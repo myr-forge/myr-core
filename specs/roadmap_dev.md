@@ -58,6 +58,19 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 
 ---
 
+## Écart de Conception — Fusion composant/module (ADR-11)
+
+> Décidé suite à une demande de handoff du dépôt `myr-web` (2026-08-12) — voir `specs/3-Conception/Conception_intro.md` ADR-11 pour la décision complète et le point ouvert PO qui subsiste.
+
+- [ ] `adapters/in/rest/handlers.go` — retirer `moduleDTO` comme type distinct ; `componentDTO` porte `instances`/`assemblies`/`versions`/`module_versions` (vides si non pertinents) ; retirer l'exclusion des assets ayant des instances dans `GET /api/components` (commentaire `// les modules sont exposés via /api/modules, pas /api/components`)
+- [ ] `adapters/in/rest/server.go` — router les anciennes routes `/api/modules/*` vers les mêmes handlers que `/api/components/*` (fenêtre de transition, en-tête `Deprecation`) ou les retirer selon la date de coupure coordonnée avec `myr-web` (point ouvert PO, ADR-11)
+- [ ] `adapters/in/rest/handlers.go` — le handler de soumission unique (`POST /api/components/{id}/submit`) doit dispatcher vers la logique `SubmitModule` (RM17, `ModuleVersion`) si `m.IsModule()`, vers `Submit` sinon — ne jamais appeler `Submit` seul sur un asset ayant des `Assemblies`
+- [ ] `adapters/in/cli/module.go` — retirer l'arbre `myr module` ; `adapters/in/cli/model_instance.go` et les commandes `myr model` déjà génériques (`add`, `get`, `list`, `submit`, `remove`, `interface list`) couvrent les mêmes cas ; ajouter `myr model assembly add/remove` (ex-`module add-assembly/remove-assembly`)
+- [ ] `api/swagger.yaml`/`api/swagger.json` — régénérer (`make docs-api`) une fois les annotations `swag` des handlers mises à jour
+- [ ] **Point ouvert PO, non résolu par ce ticket :** sémantique d'identité de la décomposition — même id (proposition `myr-web`) vs. nouvel id systématique (déjà spécifié par UCAM05/UCAM09/RM39) ; voir ADR-11 pour l'analyse complète avant de trancher
+
+---
+
 ## Alpha — "Créer, assembler, soumettre"
 
 > **Objectif :** Un administrateur peut démarrer un réseau. Un concepteur peut créer des composants, les assembler dans l'atelier et soumettre un module sur la blockchain.
@@ -102,7 +115,7 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 - [ ] UCCE05 — Ajouter une extension à un composant
 - [ ] UCCE06 — Ajouter une interface à un composant existant
 - [ ] UCCE07 — Supprimer un composant (masquage local si déjà soumis, ledger jamais modifié — RM08)
-- [ ] Correctif entité : catégorie `découpage` ajoutée *(RM02 — 8e type, bloque UCAM05)*
+- [ ] Correctif entité : catégorie `découpage` ajoutée *(RM02 — 8e type, bloque UCAM05 — écart E1, non affecté par ADR-11 : voir § Écart de Conception — Fusion composant/module)*
 - [ ] Correctif entité : champ `Tag` dans `AssetInterface` *(5e critère de compatibilité RM11)*
 
 ### Atelier (Workspace) — UCAM01–08
@@ -111,7 +124,7 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 - [ ] UCAM02 — Visualiser les interfaces physiques d'un composant dans l'atelier
 - [ ] UCAM03 — Définir une interface sur un composant dans l'atelier (slot virtuel → interface concrète) *(RM13)*
 - [ ] UCAM04 — Ajouter plusieurs composants simultanément à l'atelier
-- [ ] UCAM05 — Transformer un composant en module (`découpage`) *(RM02)*
+- [ ] UCAM05 — Transformer un composant en module (`découpage`) *(RM02 — depuis ADR-11, se compose entièrement de méthodes déjà génériques (`AddFull`, `AddAssetToWorkspace`, `AddAssemblyLink`, `Submit`) ; seul E1 reste bloquant)*
 - [ ] UCAM06 — Slot virtuel garanti et recréé automatiquement *(RM13)*
 - [ ] UCAM07 — Choisir un asset d'accroche (fastener picker) pour une liaison
 - [ ] UCAM08 — Retirer un composant de l'atelier (suppression en cascade des connexions) *(RM14)*
@@ -119,6 +132,8 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 - [ ] Seconde instance indépendante si module déjà dans l'atelier *(RM15)*
 
 ### Modules — UCMOD01–08
+
+> **Surface REST/CLI** — depuis ADR-11 (`Conception_intro.md`), ces use cases n'exposent plus de ressource `/api/modules/*` ni de commande `myr module` séparées : ils sont servis par `/api/components/*` et `myr model`, voir § Écart de Conception — Fusion composant/module ci-dessus.
 
 > **Numérotation** — UCMOD05 est référencé par `Matrice_Tracabilite.md` (EF28) mais ne correspond à aucun fichier existant dans `specs/1-Expression/UCMOD-Module/` ni `specs/2-Analyse/UCMOD-Module/` — origine à clarifier avant de combler ou de retirer cette référence (voir annotation `#incoherence` posée sur la matrice). UCMOD07 et UCMOD08 sont des UC nouvellement ajoutés, sans lien avec ce gap.
 

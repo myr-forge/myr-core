@@ -5,6 +5,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	rbac "myr-core/domain/role"
@@ -19,6 +20,21 @@ type Server struct {
 
 func NewServer(h *Handler, addr string) *Server {
 	return &Server{handler: h, addr: addr}
+}
+
+// legacyModulesAlias adapte les anciennes routes /api/modules/* vers les
+// handlers unifiés /api/components/* (ADR-11, specs/3-Conception/Conception_intro.md
+// — fenêtre de transition pour myr-web, durée non tranchée). Le corps de
+// réponse suit désormais la forme componentDTO, plus moduleDTO — attendu, la
+// fusion porte justement sur l'unification du contrat, pas sur la préservation
+// de l'ancienne forme derrière l'ancienne URL.
+func legacyModulesAlias(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Deprecation", "true")
+		w.Header().Set("Link", `</api/components`+strings.TrimPrefix(r.URL.Path, "/api/modules")+`>; rel="successor-version"`)
+		r.URL.Path = "/api/components" + strings.TrimPrefix(r.URL.Path, "/api/modules")
+		next(w, r)
+	}
 }
 
 // secureHeaders ajoute les en-têtes de sécurité HTTP à chaque réponse.
@@ -110,8 +126,11 @@ func (s *Server) buildMux() (http.Handler, error) {
 	mux.HandleFunc("/api/connections/", contrib(s.handler.handleConnection))
 	mux.HandleFunc("/api/assembly-links", contrib(s.handler.handleAssemblyLinks))
 	mux.HandleFunc("/api/virtual-connect", contrib(s.handler.handleVirtualConnect))
-	mux.HandleFunc("/api/modules", contrib(s.handler.handleModules))
-	mux.HandleFunc("/api/modules/", contrib(s.handler.handleModule))
+	// /api/modules/* — alias déprécié, ADR-11 : Model3D est désormais une
+	// ressource REST unique (component), retirer ces deux lignes clôt la
+	// fenêtre de transition une fois myr-web basculé.
+	mux.HandleFunc("/api/modules", contrib(legacyModulesAlias(s.handler.handleComponents)))
+	mux.HandleFunc("/api/modules/", contrib(legacyModulesAlias(s.handler.handleComponent)))
 	mux.HandleFunc("/api/interfaces/", contrib(s.handler.handleInterface))
 	mux.HandleFunc("/api/refs", auth(s.handler.handleRefs))
 	mux.HandleFunc("/api/refs/categories", auth(s.handler.handleRefCategories))

@@ -53,12 +53,12 @@ func TestRunModelAdd_ServiceError_Rejected(t *testing.T) {
 /// @expect Sortie contient l'id et "submitted", pas d'erreur
 func TestRunModelSubmit_NominalCase(t *testing.T) {
 	var captured string
-	svc := &mockModelSvc{submit: func(assetID string) (*model.Model3D, error) {
+	svc := &mockModelSvc{submit: func(assetID, note string) (*model.Model3D, error) {
 		captured = assetID
 		return &model.Model3D{ID: assetID, Status: model.ModuleSubmitted}, nil
 	}}
 	var buf bytes.Buffer
-	if err := runModelSubmit(&buf, svc, "d1"); err != nil {
+	if err := runModelSubmit(&buf, svc, "d1", ""); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if captured != "d1" {
@@ -74,11 +74,30 @@ func TestRunModelSubmit_NominalCase(t *testing.T) {
 /// @expect L'erreur est retournée telle quelle
 func TestRunModelSubmit_ServiceError_Rejected(t *testing.T) {
 	wantErr := errors.New("brouillon introuvable")
-	svc := &mockModelSvc{submit: func(string) (*model.Model3D, error) { return nil, wantErr }}
+	svc := &mockModelSvc{submit: func(string, string) (*model.Model3D, error) { return nil, wantErr }}
 	var buf bytes.Buffer
-	err := runModelSubmit(&buf, svc, "unknown")
+	err := runModelSubmit(&buf, svc, "unknown", "")
 	if !errors.Is(err, wantErr) {
 		t.Fatalf("expected %v, got %v", wantErr, err)
+	}
+}
+
+/// @brief  runModelSubmit transmet la note au service quel que soit le type d'asset —
+///         Submit dispatche en interne selon IsModule() (ADR-11)
+/// @input  id="d1", note="v1"
+/// @expect Submit reçoit id et note, sortie contient le statut "submitted"
+func TestRunModelSubmit_WithNote(t *testing.T) {
+	var gotID, gotNote string
+	svc := &mockModelSvc{submit: func(assetID, note string) (*model.Model3D, error) {
+		gotID, gotNote = assetID, note
+		return &model.Model3D{ID: assetID, Status: model.ModuleSubmitted}, nil
+	}}
+	var buf bytes.Buffer
+	if err := runModelSubmit(&buf, svc, "d1", "v1"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if gotID != "d1" || gotNote != "v1" {
+		t.Fatalf("unexpected forwarded args: id=%q note=%q", gotID, gotNote)
 	}
 }
 

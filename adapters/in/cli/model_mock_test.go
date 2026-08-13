@@ -9,7 +9,7 @@ type mockModelSvc struct {
 	list                            func(channelID string) ([]*model.Model3D, error)
 	verify                          func(id, channelID string) (bool, string, error)
 	addFull                         func(req model.AddRequest) (*model.Model3D, error)
-	submit                          func(assetID string) (*model.Model3D, error)
+	submit                          func(assetID, note string) (*model.Model3D, error)
 	remove                          func(id string) error
 	addConnection                   func(from, to, label string) (*model.Connection, error)
 	addAssemblyLink                 func(fromIfaceID, toIfaceID, label, fromInstanceID, toInstanceID, fastenerAssetID string) (*model.Connection, error)
@@ -78,9 +78,9 @@ func (m *mockModelSvc) AddFull(req model.AddRequest) (*model.Model3D, error) {
 	}
 	return &model.Model3D{ID: "m-test", Name: req.Name}, nil
 }
-func (m *mockModelSvc) Submit(assetID string) (*model.Model3D, error) {
+func (m *mockModelSvc) Submit(assetID, note string) (*model.Model3D, error) {
 	if m.submit != nil {
-		return m.submit(assetID)
+		return m.submit(assetID, note)
 	}
 	return &model.Model3D{ID: assetID, Status: model.ModuleSubmitted}, nil
 }
