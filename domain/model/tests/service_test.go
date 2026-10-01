@@ -1658,6 +1658,84 @@ func TestGetModuleInterfaces_InternalConnectionsConsumed(t *testing.T) {
 	}
 }
 
+// / @brief  GetModuleInterfaces expose une interface par instance, même quand plusieurs
+// /         instances du module référencent le même asset
+// / @input  module avec 3 instances du composant Vis (1 interface chacune), aucune liaison
+// / @expect 3 interfaces exposées (une par instance), pas 1 seule dédupliquée par asset
+func TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed(t *testing.T) {
+	svc := newFullSvc(t)
+
+	screw, _ := svc.AddFull(model.AddRequest{Name: "Vis", ChannelID: "ch1", OwnerID: "o1"})
+	iface := &model.AssetInterface{AssetID: screw.ID, Category: "MECA", Type: "Vis M3", Direction: model.IfaceOut}
+	svc.AddInterface(iface)
+
+	mod, _ := svc.CreateModule(model.ModuleRequest{Name: "Module Vis x3", ChannelID: "ch1", OwnerID: "o1"})
+	svc.AddAssetToWorkspace(mod.ID, screw.ID)
+	svc.AddAssetToWorkspace(mod.ID, screw.ID)
+	svc.AddAssetToWorkspace(mod.ID, screw.ID)
+
+	ifaces, err := svc.GetModuleInterfaces(mod.ID)
+	if err != nil {
+		t.Fatalf("GetModuleInterfaces: %v", err)
+	}
+	count := 0
+	for _, f := range ifaces {
+		if f.ID == iface.ID {
+			count++
+		}
+	}
+	if count != 3 {
+		t.Fatalf("attendu l'interface Vis exposée 3 fois (une par instance), got %d occurrences sur %d interfaces au total", count, len(ifaces))
+	}
+}
+
+// / @brief  GetModuleInterfaces n'exclut qu'une instance précise quand la liaison
+// /         porte un FromInstanceID/ToInstanceID explicite — les autres instances du
+// /         même asset restent exposées
+// / @input  module avec 2 instances du composant Vis, liaison interne ciblant seulement instB
+// / @expect l'interface de instB absente ; l'interface de instA (même ID) toujours exposée
+func TestGetModuleInterfaces_InternalConnection_ScopedToInstance(t *testing.T) {
+	svc := newFullSvc(t)
+
+	screw, _ := svc.AddFull(model.AddRequest{Name: "Vis", ChannelID: "ch1", OwnerID: "o1"})
+	screwIface := &model.AssetInterface{AssetID: screw.ID, Category: "MECA", Type: "Vis M3", Direction: model.IfaceOut}
+	svc.AddInterface(screwIface)
+
+	plate, _ := svc.AddFull(model.AddRequest{Name: "Plaque", ChannelID: "ch1", OwnerID: "o1"})
+	plateIface := &model.AssetInterface{AssetID: plate.ID, Category: "MECA", Type: "Vis M3", Direction: model.IfaceIn}
+	svc.AddInterface(plateIface)
+
+	mod, _ := svc.CreateModule(model.ModuleRequest{Name: "Module", ChannelID: "ch1", OwnerID: "o1"})
+	svc.AddAssetToWorkspace(mod.ID, screw.ID)
+	modB, _ := svc.AddAssetToWorkspace(mod.ID, screw.ID)
+	instB := modB.WorkspaceInstances[len(modB.WorkspaceInstances)-1].ID
+	modP, _ := svc.AddAssetToWorkspace(mod.ID, plate.ID)
+	instP := modP.WorkspaceInstances[len(modP.WorkspaceInstances)-1].ID
+
+	conn, _ := svc.AddAssemblyLink(screwIface.ID, plateIface.ID, "liaison", instB, instP, "")
+	svc.AddAssemblyToModule(mod.ID, conn.ID)
+
+	ifaces, err := svc.GetModuleInterfaces(mod.ID)
+	if err != nil {
+		t.Fatalf("GetModuleInterfaces: %v", err)
+	}
+	screwCount, plateCount := 0, 0
+	for _, f := range ifaces {
+		if f.ID == screwIface.ID {
+			screwCount++
+		}
+		if f.ID == plateIface.ID {
+			plateCount++
+		}
+	}
+	if screwCount != 1 {
+		t.Errorf("attendu screwIface exposée 1 fois (instance non connectée), got %d", screwCount)
+	}
+	if plateCount != 0 {
+		t.Errorf("attendu plateIface absente (son unique instance instP est connectée), got %d", plateCount)
+	}
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // Tests — CheckModuleLicenseCompatibility
 // ══════════════════════════════════════════════════════════════════════════════

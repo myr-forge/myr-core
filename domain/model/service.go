@@ -1045,8 +1045,30 @@ func (s *Service) getModuleInterfacesInto(moduleID string, cache map[string][]*A
 	if len(ownIfacesCheck) == 0 {
 		s.ensureVirtualSlot(moduleID)
 	}
-	// Calculer les interfaces exposées (non connectées en interne)
-	internalIfaceIDs := map[string]bool{}
+	// Calculer les interfaces exposées (non connectées en interne).
+	// Une connexion porte l'instance de chaque extrémité (FromInstanceID/ToInstanceID) :
+	// quand elle est renseignée, seule cette instance précise est marquée interne, ce qui
+	// permet à deux instances d'un même asset d'exposer chacune leur propre interface non
+	// connectée. Une connexion créée sans contexte d'instance (endpoint hors workspace)
+	// marque l'interface interne pour toutes les instances qui la partagent.
+	internalGlobal := map[string]bool{}
+	internalByInstance := map[string]map[string]bool{}
+	markInternal := func(ifaceID, instanceID string) {
+		if ifaceID == "" {
+			return
+		}
+		if instanceID == "" {
+			internalGlobal[ifaceID] = true
+			return
+		}
+		if internalByInstance[instanceID] == nil {
+			internalByInstance[instanceID] = map[string]bool{}
+		}
+		internalByInstance[instanceID][ifaceID] = true
+	}
+	isInternal := func(ifaceID, instanceID string) bool {
+		return internalGlobal[ifaceID] || internalByInstance[instanceID][ifaceID]
+	}
 	if s.connStore != nil {
 		asmSet := map[string]bool{}
 		for _, id := range mod.Assemblies {
@@ -1055,28 +1077,19 @@ func (s *Service) getModuleInterfacesInto(moduleID string, cache map[string][]*A
 		conns, _ := s.connStore.ListConnections()
 		for _, c := range conns {
 			if asmSet[c.ID] {
-				if c.FromIfaceID != "" {
-					internalIfaceIDs[c.FromIfaceID] = true
-				}
-				if c.ToIfaceID != "" {
-					internalIfaceIDs[c.ToIfaceID] = true
-				}
+				markInternal(c.FromIfaceID, c.FromInstanceID)
+				markInternal(c.ToIfaceID, c.ToInstanceID)
 			}
 		}
 	}
-	seen := map[string]bool{}
 	var exposed []*AssetInterface
 	for _, inst := range mod.WorkspaceInstances {
-		if seen[inst.AssetID] {
-			continue
-		}
-		seen[inst.AssetID] = true
 		ifaces, err := s.getModuleInterfacesInto(inst.AssetID, cache)
 		if err != nil {
 			continue
 		}
 		for _, iface := range ifaces {
-			if !internalIfaceIDs[iface.ID] {
+			if !isInternal(iface.ID, inst.ID) {
 				exposed = append(exposed, iface)
 			}
 		}
@@ -1084,7 +1097,7 @@ func (s *Service) getModuleInterfacesInto(moduleID string, cache map[string][]*A
 	// Inclure les interfaces directes du module lui-même (son slot virtuel propre)
 	ownIfaces, _ := s.ifaceStore.ListInterfacesForAsset(moduleID)
 	for _, iface := range ownIfaces {
-		if !internalIfaceIDs[iface.ID] {
+		if !isInternal(iface.ID, "") {
 			exposed = append(exposed, iface)
 		}
 	}

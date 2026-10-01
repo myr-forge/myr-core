@@ -34,7 +34,7 @@ Chaque composant ou module expose ses interfaces physiques (`AssetInterface`) co
 
 Les interfaces sont persistées dans l'`InterfaceStore` local tant que l'asset qui les porte est en brouillon (ADR-02, `specs/3-Conception/Conception_intro.md`) — récupérées via `GET /api/components/:id/interfaces` ou `GET /api/modules/:id/interfaces`. Elles ne rejoignent la blockchain (`Model3D.Interfaces`) qu'à la soumission de l'asset.
 
-Pour un module, les interfaces exposées sont calculées dynamiquement : seules les interfaces des sous-composants **non reliées en interne** sont exposées (`GetModuleInterfaces` — calcul récursif avec cache).
+Pour un module, les interfaces exposées sont calculées dynamiquement : seules les interfaces des sous-composants **non reliées en interne** sont exposées (`GetModuleInterfaces` — calcul récursif avec cache). Chaque instance du module contribue ses propres interfaces non reliées en interne, y compris lorsque plusieurs instances partagent le même asset sous-jacent : le cache de résolution récursive par asset ne doit jamais faire disparaître une instance de la liste exposée.
 
 Un slot virtuel (`Virtual: true`) est toujours présent sur chaque asset (RM13), permettant au client de proposer la création d'une nouvelle interface (voir UCAM03).
 
@@ -59,7 +59,7 @@ Un slot virtuel (`Virtual: true`) est toujours présent sur chaque asset (RM13),
 
 1. Le client appelle `GET /api/modules/:id/interfaces`
 2. Le handler appelle `service.GetModuleInterfaces(id)` — calcul récursif
-3. Le service parcourt les `WorkspaceInstances` du module et collecte les interfaces de chaque sous-composant
+3. Le service parcourt les `WorkspaceInstances` du module et collecte les interfaces de chaque sous-composant — une instance dont l'asset est partagé avec une autre instance du même module contribue quand même ses propres interfaces, séparément
 4. Seules les interfaces non présentes dans une connexion interne au module sont retournées (interfaces "exposées")
 5. Un slot virtuel propre au module est garanti si aucune interface directe n'existe
 
@@ -139,7 +139,7 @@ end
 - `GET /api/components/:id/interfaces` → `handleComponentInterfaces()` — retourne `ListInterfacesForAsset`
 - `GET /api/modules/:id/interfaces` → sous-route dans `handleModule()` — retourne `GetModuleInterfaces`
 
-**Interfaces exposées d'un module :** Le calcul est récursif dans `getModuleInterfacesInto()`. Un cache `map[string][]*AssetInterface` évite les appels blockchain redondants. Les interfaces internes (présentes dans `m.Assemblies` comme `FromIfaceID` ou `ToIfaceID`) sont exclues du résultat.
+**Interfaces exposées d'un module :** Le calcul est récursif dans `getModuleInterfacesInto()`. Un cache `map[string][]*AssetInterface` évite les appels blockchain redondants pour la résolution récursive d'un même asset, mais ne réduit jamais le nombre d'instances traitées au niveau du module : deux instances du module référençant le même asset exposent chacune leurs propres interfaces non connectées en interne. Les interfaces internes (présentes dans `m.Assemblies` comme `FromIfaceID` ou `ToIfaceID`) sont exclues du résultat.
 
 **Statut d'utilisation d'une interface :** une interface est "utilisée" si son `id` apparaît dans `connection.from_iface_id` ou `connection.to_iface_id` d'une connexion non incompatible — c'est un croisement que le client peut effectuer localement à partir des réponses de `GET .../interfaces` et `GET /api/connections`, sans appel serveur supplémentaire.
 

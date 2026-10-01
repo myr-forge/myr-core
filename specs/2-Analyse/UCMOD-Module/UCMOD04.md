@@ -35,7 +35,7 @@ Un Module est structuré comme un graphe d'instances de Composants et de sous-Mo
 Cette lecture est une opération en **lecture seule** qui ne modifie pas l'état du Module. Elle s'appuie sur trois sources de données :
 - `Model3D.WorkspaceInstances` : liste des instances d'assets composant le module
 - `Model3D.Assemblies` : IDs des Liaisons internes
-- `GetModuleInterfaces()` : calcule les interfaces exposées (non connectées en interne) de façon récursive
+- `GetModuleInterfaces()` : calcule les interfaces exposées (non connectées en interne) de façon récursive — chaque instance du module contribue ses propres interfaces non connectées en interne à la liste exposée, même si plusieurs instances partagent le même asset sous-jacent : le décompte se fait par `(instance, interface)`, jamais dédupliqué au niveau de l'asset
 
 > La présentation (navigation hiérarchique, fil d'Ariane, rendu 3D) relève du dépôt GUI externe — hors périmètre de ce document. Seuls les contrats REST et CLI ci-dessous font partie de `myr` — le CLI n'est pas un citoyen de seconde zone par rapport à l'API.
 
@@ -140,6 +140,6 @@ REST --> Client : 200 [Connection ...]
 - `GET /api/modules/:id/interfaces` → interfaces exposées via `GetModuleInterfaces()` (handlers.go:~1032)
 - `GET /api/modules/:id/connections` → liaisons internes (handlers.go:~1047)
 
-**Récursivité `GetModuleInterfaces()` :** La fonction `getModuleInterfacesInto()` (service.go:~640) parcourt récursivement les `WorkspaceInstances` pour calculer les interfaces non connectées en interne. Un cache par `assetID` évite les appels blockchain redondants. Les modules profondément imbriqués peuvent générer de nombreux appels — un mécanisme de profondeur maximale est à envisager pour les cas extrêmes.
+**Récursivité `GetModuleInterfaces()` :** La fonction `getModuleInterfacesInto()` (service.go:~640) parcourt récursivement les `WorkspaceInstances` pour calculer les interfaces non connectées en interne. Un cache par `assetID` évite les appels blockchain redondants — mais ce cache sert uniquement à réutiliser le résultat déjà calculé pour un asset donné (résolution récursive de ses propres sous-instances) ; il ne doit jamais réduire le nombre d'instances traitées au niveau du module courant : quand plusieurs `WorkspaceInstances` du module référencent le même asset, chacune contribue séparément ses interfaces non connectées en interne à la liste exposée. Les modules profondément imbriqués peuvent générer de nombreux appels — un mécanisme de profondeur maximale est à envisager pour les cas extrêmes.
 
 **Commande CLI équivalente :** `myr module get <id>` (méthode `GetModule`) est le strict équivalent en lecture seule de `GET /api/modules/:id`. `myr module interfaces <id>` (méthode `GetModuleInterfaces`) couvre `GET /api/modules/:id/interfaces`. Voir `specs/3-Conception/DC_CLI_Model.md` § 5.
