@@ -119,30 +119,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
-- [UCPI11 — couche analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI11.md)
-- [Traçabilité UCPI11 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI11)
-
-**Exigences fonctionnelles couvertes**
-- [EF59 — Modifier le prix d'un asset (effet commandes futures uniquement)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCPI04 — Définir un prix sur un Composant proprietaire](UCPI04.md)
-- [UCPI05 — Définir un prix sur un Module proprietaire](UCPI05.md)
-
-**Règles métier**
-- [RM31 — Modification de prix — effet sur les commandes futures uniquement](../Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM32 — Asset à prix nul — librement disponible](../Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM33 — Devise unique par réseau](../Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-
-**Cité par**
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCPI04 (analyse)](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI04.md)
-- [UCPI05 (analyse)](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI05.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCPI11 — analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI11.md)
 
 <!-- liens-obsidian:end -->

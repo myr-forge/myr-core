@@ -204,38 +204,9 @@ if strings.HasSuffix(rest, "/bom") {
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCREC — Recherche](../../Carte_des_specs.md#UCREC%20—%20Recherche)
-- [UCREC05 — couche expression](../../1-Expression/UCREC-Recherche/UCREC05.md)
-- [Traçabilité UCREC05 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCREC05)
-
-**Exigences fonctionnelles couvertes**
-- [EF43 — Exporter la BOM (Bill Of Materials) d'un module](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCPI04 — Définir un prix sur un Composant proprietaire](../UCPI-Propriete_Intellectuelle/UCPI04.md)
-- [UCPI05 — Définir un prix sur un Module proprietaire](../UCPI-Propriete_Intellectuelle/UCPI05.md)
-
-**Règles métier**
-- [RM15 — Instance indépendante](../../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
-
-**Exigences non fonctionnelles**
-- [ENF03 — Génération d'une BOM module](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [todo (analyse)](../todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **API_REST** : [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](../../3-Conception/API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29)
+- **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case) · [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **DC_D8_Recherche** : [§ DC — D8 : Recherche](../../3-Conception/DC_D8_Recherche.md#DC%20—%20D8%20:%20Recherche) · [§ 1. Objectif](../../3-Conception/DC_D8_Recherche.md#1.%20Objectif) · [§ 5. UCREC05 — Export BOM (Bill of Materials)](../../3-Conception/DC_D8_Recherche.md#5.%20UCREC05%20—%20Export%20BOM%20%28Bill%20of%20Materials%29) · [§ 7. Écarts code → specs](../../3-Conception/DC_D8_Recherche.md#7.%20Écarts%20code%20→%20specs) · [§ 8. CLI et REST](../../3-Conception/DC_D8_Recherche.md#8.%20CLI%20et%20REST)
 
 <!-- liens-obsidian:end -->

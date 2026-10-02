@@ -104,36 +104,7 @@ stop
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
-- [UCPI05 — couche analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI05.md)
-- [Traçabilité UCPI05 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI05)
-
-**Exigences fonctionnelles couvertes**
-- [EF33 — Définir un prix sur un module propriétaire](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Règles métier**
-- [RM23 — Distribution automatique des commissions](../Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM24 — Répartition proportionnelle multi-auteurs](../Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM30 — Calcul automatique du prix d'un module](../Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [UCPI03 (expression)](UCPI03.md)
-- [UCPI11 (expression)](UCPI11.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCAUT02 (analyse)](../../2-Analyse/UCAUT-Automatisation/UCAUT02.md)
-- [UCPI03 (analyse)](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI03.md)
-- [UCPI11 (analyse)](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI11.md)
-- [UCREC05 (analyse)](../../2-Analyse/UCREC-Recherche/UCREC05.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [Chaincode](../../3-Conception/Chaincode.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
-- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCPI05 — analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI05.md)
 
 <!-- liens-obsidian:end -->

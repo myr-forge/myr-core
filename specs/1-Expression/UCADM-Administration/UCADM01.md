@@ -82,35 +82,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
-- [UCADM01 — couche analyse](../../2-Analyse/UCADM-Administration/UCADM01.md)
-- [Traçabilité UCADM01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM01)
-
-**Exigences fonctionnelles couvertes**
-- [EF08 — Gérer les organisations membres d'un réseau (ajout, mise à jour)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCADM06 — Attribuer des rôles à une organisation](UCADM06.md)
-- [UCADM07 — Gérer les rôles](UCADM07.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [UCADM06 (expression)](UCADM06.md)
-- [UCDEV02 (expression)](../UCDEV-Developpement/UCDEV02.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCADM03 (analyse)](../../2-Analyse/UCADM-Administration/UCADM03.md)
-- [UCADM06 (analyse)](../../2-Analyse/UCADM-Administration/UCADM06.md)
-- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
-- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCADM01 — analyse](../../2-Analyse/UCADM-Administration/UCADM01.md)
 
 <!-- liens-obsidian:end -->

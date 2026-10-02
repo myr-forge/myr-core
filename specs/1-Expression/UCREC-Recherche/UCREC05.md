@@ -97,27 +97,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCREC — Recherche](../../Carte_des_specs.md#UCREC%20—%20Recherche)
-- [UCREC05 — couche analyse](../../2-Analyse/UCREC-Recherche/UCREC05.md)
-- [Traçabilité UCREC05 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCREC05)
-
-**Exigences fonctionnelles couvertes**
-- [EF43 — Exporter la BOM (Bill Of Materials) d'un module](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Règles métier**
-- [RM15 — Instance indépendante](../Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCREC05 — analyse](../../2-Analyse/UCREC-Recherche/UCREC05.md)
 
 <!-- liens-obsidian:end -->

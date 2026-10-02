@@ -193,29 +193,8 @@ end
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
-- [UCADM07 — couche expression](../../1-Expression/UCADM-Administration/UCADM07.md)
-- [Traçabilité UCADM07 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM07)
-
-**Use cases cités**
-- [UCADM06 — Attribuer des rôles à une organisation](UCADM06.md)
-
-**Règles métier**
-- [RM34 — Rôle admin protégé](../../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-- [RM35 — Révocation en cascade à la suppression d'un rôle](../../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-- [RM36 — Nom de rôle unique](../../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-
-**Exigences non fonctionnelles**
-- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Cité par**
-- [UCADM01 (expression)](../../1-Expression/UCADM-Administration/UCADM01.md)
-- [UCADM06 (expression)](../../1-Expression/UCADM-Administration/UCADM06.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCADM01 (analyse)](UCADM01.md)
-- [UCADM06 (analyse)](UCADM06.md)
-- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
-- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+**Étape suivante — conception**
+- **DC_CLI_Admin** : [§ 11. Écarts code → specs](../../3-Conception/DC_CLI_Admin.md#11.%20Écarts%20code%20→%20specs)
+- **DC_D2_Administration** : [§ DC — D2 : Administration réseau](../../3-Conception/DC_D2_Administration.md#DC%20—%20D2%20:%20Administration%20réseau) · [§ Entités à concevoir (non présentes dans le code)](../../3-Conception/DC_D2_Administration.md#Entités%20à%20concevoir%20%28non%20présentes%20dans%20le%20code%29) · [§ 8. Écarts code → specs](../../3-Conception/DC_D2_Administration.md#8.%20Écarts%20code%20→%20specs)
 
 <!-- liens-obsidian:end -->

@@ -132,34 +132,9 @@ REST --> Client : 200 [{id, name, status, versions, ...}]
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCREC — Recherche](../../Carte_des_specs.md#UCREC%20—%20Recherche)
-- [UCREC01 — couche expression](../../1-Expression/UCREC-Recherche/UCREC01.md)
-- [Traçabilité UCREC01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCREC01)
-
-**Exigences fonctionnelles couvertes**
-- [EF39 — Rechercher un asset par référence ou filtre](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCCL01 — Faire une recherche par filtre](../UCCL-Composant_Lecture/UCCL01.md)
-
-**Règles métier**
-- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [UCMOD02 (expression)](../../1-Expression/UCMOD-Module/UCMOD02.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCMOD02 (analyse)](../UCMOD-Module/UCMOD02.md)
-- [todo (analyse)](../todo.md)
-- [Chaincode](../../3-Conception/Chaincode.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **Chaincode** : [§ 4. Fonctions chaincode — Store/Read (D3/D4/D6)](../../3-Conception/Chaincode.md#4.%20Fonctions%20chaincode%20—%20Store/Read%20%28D3/D4/D6%29)
+- **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case) · [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **DC_D8_Recherche** : [§ DC — D8 : Recherche](../../3-Conception/DC_D8_Recherche.md#DC%20—%20D8%20:%20Recherche) · [§ 1. Objectif](../../3-Conception/DC_D8_Recherche.md#1.%20Objectif)
 
 <!-- liens-obsidian:end -->

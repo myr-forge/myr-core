@@ -53,10 +53,10 @@ Spike limité dans le temps avant toute reprise ; périmètre réduit à une v1 
 
 ## Liens
 
-- **Use cases** : [UCAM09 (expression)](../specs/1-Expression/UCAM-Assemblage_Module/UCAM09.md)
-- **Règles métier** : [RM39](../specs/1-Expression/Regles_Metier.md) · [RM40](../specs/1-Expression/Regles_Metier.md) · [RM41](../specs/1-Expression/Regles_Metier.md)
+- **Use cases** : [UCAM09](../specs/1-Expression/UCAM-Assemblage_Module/UCAM09.md)
+- **Règles métier** : `RM39`, `RM40`, `RM41` (tags `rm/…`)
 - **Specs** : [DC_CLI_Model](../specs/3-Conception/DC_CLI_Model.md)
-- **Code** : [domain/model/entity.go](../domain/model/entity.go)
+- **Code** : `domain/model/entity.go`
 - **Tickets liés** : [FT-014 — Catégorie d'asset decoupage absente](FT-014-categorie-d-asset-decoupage-absente.md)
 
 ## Historique

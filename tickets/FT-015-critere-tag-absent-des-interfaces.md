@@ -53,9 +53,9 @@ Ajouter `Tag` à `AssetInterface` et l'intégrer à `ifacesCompatible` (critère
 
 ## Liens
 
-- **Use cases** : [UCAM01 (analyse)](../specs/2-Analyse/UCAM-Assemblage_Module/UCAM01.md) · [UCAM01 (expression)](../specs/1-Expression/UCAM-Assemblage_Module/UCAM01.md) · [UCREC02 (analyse)](../specs/2-Analyse/UCREC-Recherche/UCREC02.md) · [UCREC02 (expression)](../specs/1-Expression/UCREC-Recherche/UCREC02.md)
-- **Règles métier** : [RM11](../specs/1-Expression/Regles_Metier.md)
-- **Code** : [domain/model/entity.go](../domain/model/entity.go)
+- **Use cases** : [UCAM01](../specs/2-Analyse/UCAM-Assemblage_Module/UCAM01.md) · [UCREC02](../specs/2-Analyse/UCREC-Recherche/UCREC02.md)
+- **Règles métier** : `RM11` (tags `rm/…`)
+- **Code** : `domain/model/entity.go`
 - **Fonctions** : [ModelService.AddAssemblyLink](../docs/code/fonctions/model.ModelService.AddAssemblyLink.md)
 
 ## Historique

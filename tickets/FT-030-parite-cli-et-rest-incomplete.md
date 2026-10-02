@@ -61,9 +61,9 @@ Ajouter les routes manquantes dans `handlers_<domaine>.go` en appelant les même
 
 ## Liens
 
-- **Use cases** : [UCADM01 (analyse)](../specs/2-Analyse/UCADM-Administration/UCADM01.md) · [UCADM01 (expression)](../specs/1-Expression/UCADM-Administration/UCADM01.md) · [UCADM03 (analyse)](../specs/2-Analyse/UCADM-Administration/UCADM03.md) · [UCADM03 (expression)](../specs/1-Expression/UCADM-Administration/UCADM03.md) · [UCADM04 (analyse)](../specs/2-Analyse/UCADM-Administration/UCADM04.md) · [UCADM04 (expression)](../specs/1-Expression/UCADM-Administration/UCADM04.md) · [UCPI01 (analyse)](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md) · [UCPI01 (expression)](../specs/1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md) · [UCPI02 (analyse)](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI02.md) · [UCPI02 (expression)](../specs/1-Expression/UCPI-Propriete_Intellectuelle/UCPI02.md) · [UCADM07 (analyse)](../specs/2-Analyse/UCADM-Administration/UCADM07.md) · [UCADM07 (expression)](../specs/1-Expression/UCADM-Administration/UCADM07.md)
+- **Use cases** : [UCADM01](../specs/2-Analyse/UCADM-Administration/UCADM01.md) · [UCADM03](../specs/2-Analyse/UCADM-Administration/UCADM03.md) · [UCADM04](../specs/2-Analyse/UCADM-Administration/UCADM04.md) · [UCPI01](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md) · [UCPI02](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI02.md) · [UCADM07](../specs/2-Analyse/UCADM-Administration/UCADM07.md)
 - **Specs** : [API_REST](../specs/3-Conception/API_REST.md) · [DC_CLI_Admin](../specs/3-Conception/DC_CLI_Admin.md)
-- **Code** : [adapters/in/rest/server.go](../adapters/in/rest/server.go)
+- **Code** : `adapters/in/rest/server.go`
 - **Fonctions** : [NetworkService.Add](../docs/code/fonctions/network.NetworkService.Add.md) · [ChannelService.AddOrganisation](../docs/code/fonctions/channel.ChannelService.AddOrganisation.md) · [RoleService.Create](../docs/code/fonctions/role.RoleService.Create.md)
 
 ## Historique

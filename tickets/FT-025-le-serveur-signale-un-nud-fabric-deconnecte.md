@@ -52,10 +52,10 @@ Sur le serveur : `systemctl --user status myr`, `journalctl --user -u myr`, pré
 
 ## Liens
 
-- **Use cases** : [UCADM02 (analyse)](../specs/2-Analyse/UCADM-Administration/UCADM02.md) · [UCADM02 (expression)](../specs/1-Expression/UCADM-Administration/UCADM02.md)
-- **Exigences non fonctionnelles** : [ENF05](../specs/1-Expression/Exigences_Non_Fonctionnelles.md) · [ENF06](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
+- **Use cases** : [UCADM02](../specs/2-Analyse/UCADM-Administration/UCADM02.md)
+- **Exigences non fonctionnelles** : `ENF05`, `ENF06` (tags `enf/…`)
 - **Specs** : [Deploiement](../specs/3-Conception/Deploiement.md)
-- **Code** : [cmd/api/main.go:84](../cmd/api/main.go) · [adapters/in/rest/handlers_health.go](../adapters/in/rest/handlers_health.go)
+- **Code** : `cmd/api/main.go:84` · `adapters/in/rest/handlers_health.go`
 - **Tickets liés** : [FT-003 — Le client CA du serveur REST ignore le profil réseau actif](FT-003-le-client-ca-du-serveur-rest-ignore.md) · [FT-024 — Chaincode myrcc absent du canal de production](FT-024-chaincode-myrcc-absent-du-canal-de-production.md) · [FT-029 — make deploy suppose un fabric.env présent sur le serveur](FT-029-make-deploy-suppose-un-fabric-env-present.md)
 
 ## Historique

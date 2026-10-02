@@ -64,11 +64,11 @@ Faire porter l'identité appelante jusqu'au domaine (paramètre explicite ou con
 
 ## Liens
 
-- **Use cases** : [UCCE01 (analyse)](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE01.md) · [UCCE01 (expression)](../specs/1-Expression/UCCE-Composant_Ecriture/UCCE01.md) · [UCCE02 (analyse)](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE02.md) · [UCCE02 (expression)](../specs/1-Expression/UCCE-Composant_Ecriture/UCCE02.md) · [UCCE07 (analyse)](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE07.md) · [UCCE07 (expression)](../specs/1-Expression/UCCE-Composant_Ecriture/UCCE07.md) · [UCMOD03 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD03.md) · [UCMOD03 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD03.md) · [UCMOD04 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD04.md) · [UCMOD04 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD04.md) · [UCMOD08 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD08.md) · [UCMOD08 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD08.md) · [UCPI07 (analyse)](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI07.md) · [UCPI07 (expression)](../specs/1-Expression/UCPI-Propriete_Intellectuelle/UCPI07.md)
-- **Règles métier** : [RM08](../specs/1-Expression/Regles_Metier.md) · [RM23](../specs/1-Expression/Regles_Metier.md) · [RM24](../specs/1-Expression/Regles_Metier.md)
-- **Exigences non fonctionnelles** : [ENF12](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
+- **Use cases** : [UCCE01](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE01.md) · [UCCE02](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE02.md) · [UCCE07](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE07.md) · [UCMOD03](../specs/2-Analyse/UCMOD-Module/UCMOD03.md) · [UCMOD04](../specs/2-Analyse/UCMOD-Module/UCMOD04.md) · [UCMOD08](../specs/2-Analyse/UCMOD-Module/UCMOD08.md) · [UCPI07](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI07.md)
+- **Règles métier** : `RM08`, `RM23`, `RM24` (tags `rm/…`)
+- **Exigences non fonctionnelles** : `ENF12` (tags `enf/…`)
 - **Specs** : [Modele_Domaine](../specs/3-Conception/Modele_Domaine.md) · [Securite](../specs/3-Conception/Securite.md)
-- **Code** : [adapters/in/rest/handlers.go:640](../adapters/in/rest/handlers.go) · [adapters/in/rest/handlers.go:796](../adapters/in/rest/handlers.go) · [adapters/in/rest/handlers.go:529](../adapters/in/rest/handlers.go)
+- **Code** : `adapters/in/rest/handlers.go:640` · `adapters/in/rest/handlers.go:796` · `adapters/in/rest/handlers.go:529`
 - **Fonctions** : [ModelService.AddFull](../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.Remove](../docs/code/fonctions/model.ModelService.Remove.md) · [ModelService.Submit](../docs/code/fonctions/model.ModelService.Submit.md)
 - **Tickets liés** : [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md)
 

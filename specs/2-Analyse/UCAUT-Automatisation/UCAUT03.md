@@ -203,43 +203,8 @@ end
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCAUT — Automatisation](../../Carte_des_specs.md#UCAUT%20—%20Automatisation)
-- [UCAUT03 — couche expression](../../1-Expression/UCAUT-Automatisation/UCAUT03.md)
-- [Traçabilité UCAUT03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAUT03)
-
-**Exigences fonctionnelles couvertes**
-- [EF46 — Intégrer un modèle 3D depuis un logiciel CAO (plugin)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCCE01 — Ajout d'un composant Physique](../UCCE-Composant_Ecriture/UCCE01.md)
-- [UCCE03 — Ajout d'un composant Numérique](../UCCE-Composant_Ecriture/UCCE03.md)
-- [UCPI06 — Déclarer un composant similaire](../UCPI-Propriete_Intellectuelle/UCPI06.md)
-
-**Règles métier**
-- [RM01 — Anti-plagiat obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM02 — Catégorie d'asset obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM04 — UUID unique](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM05 — ParentID obligatoire pour les dérivés](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF15 — Taille maximale d'un fichier CAO](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [todo (analyse)](../todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **API_REST** : [§ 12. D9 — Automatisation avancée](../../3-Conception/API_REST.md#12.%20D9%20—%20Automatisation%20avancée)
+- **DC_D9_Automatisation** : [§ DC — D9 : Automatisation](../../3-Conception/DC_D9_Automatisation.md#DC%20—%20D9%20:%20Automatisation) · [§ 1. Objectif](../../3-Conception/DC_D9_Automatisation.md#1.%20Objectif) · [§ 4. UCAUT03 — Import depuis un plugin CAO](../../3-Conception/DC_D9_Automatisation.md#4.%20UCAUT03%20—%20Import%20depuis%20un%20plugin%20CAO) · [§ 6. Écarts code → specs](../../3-Conception/DC_D9_Automatisation.md#6.%20Écarts%20code%20→%20specs) · [§ 7. CLI et REST cibles](../../3-Conception/DC_D9_Automatisation.md#7.%20CLI%20et%20REST%20cibles)
 
 <!-- liens-obsidian:end -->

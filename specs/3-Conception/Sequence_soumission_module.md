@@ -127,35 +127,10 @@ end
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Use cases cités**
-- UCAM01 — Liaison entre interfaces : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM01.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM01.md)
-- UCAM07 — Choisir un asset d'accroche (Fastener) : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM07.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM07.md)
-- UCAM08 — Retirer une instance de composant d'un Module : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM08.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM08.md)
-- UCMOD01 — Créer un Module : [expression](../1-Expression/UCMOD-Module/UCMOD01.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD01.md)
-- UCMOD02 — Ajouter un Module existant : [expression](../1-Expression/UCMOD-Module/UCMOD02.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD02.md)
-- UCMOD06 — Soumettre un module à la blockchain : [expression](../1-Expression/UCMOD-Module/UCMOD06.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD06.md)
-
-**Règles métier**
-- [RM09 — Interface à usage unique](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM10 — Vérification de compatibilité automatique](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM11 — Critères de compatibilité d'interfaces](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM12 — Persistance des liaisons incompatibles](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM14 — Suppression en cascade des connexions](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
-- [RM15 — Instance indépendante](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
-- [RM16 — État draft](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM17 — Assemblage requis pour soumission (module uniquement)](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM18 — ModuleVersion immuable (module uniquement)](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM19 — Fork d'un asset soumis](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-
-**Documents cités**
-- [Analyse_des_besoins](../2-Analyse/Analyse_des_besoins.md)
-- [Architecture_Composition](Architecture_Composition.md)
-- [Conception_intro](Conception_intro.md)
-
-**Cité par**
-- [Conception_intro](Conception_intro.md)
+**Étape suivante — code, par section**
+- [§ 1. Objectif](Sequence_soumission_module.md#1.%20Objectif) → [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
+- [§ 2. Création et composition (état `draft`, entièrement local)](Sequence_soumission_module.md#2.%20Création%20et%20composition%20%28état%20`draft`,%20entièrement%20local%29) → [REST /api/modules/](../../docs/code/routes/REST%20api-modules.md) · [REST /api/connections/](../../docs/code/routes/REST%20api-connections.md) · [CLI myr model instance add](../../docs/code/commandes/CLI%20myr-model-instance-add.md) · [CLI myr model link add](../../docs/code/commandes/CLI%20myr-model-link-add.md) · [CLI myr model instance remove](../../docs/code/commandes/CLI%20myr-model-instance-remove.md) · [ConnectionStore.ListConnections](../../docs/code/fonctions/model.ConnectionStore.ListConnections.md) · [ConnectionStore.SaveConnection](../../docs/code/fonctions/model.ConnectionStore.SaveConnection.md) · [InterfaceStore.GetInterface](../../docs/code/fonctions/model.InterfaceStore.GetInterface.md) · [ModelService.AddAssemblyLink](../../docs/code/fonctions/model.ModelService.AddAssemblyLink.md) · [ModelService.AddAssetToWorkspace](../../docs/code/fonctions/model.ModelService.AddAssetToWorkspace.md) · [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.GetInterface](../../docs/code/fonctions/model.ModelService.GetInterface.md) · [ModelService.ListConnections](../../docs/code/fonctions/model.ModelService.ListConnections.md) · [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md)
+- [§ 3. Soumission (`SubmitModule` — RM17/RM18, transaction unique)](Sequence_soumission_module.md#3.%20Soumission%20%28`SubmitModule`%20—%20RM17/RM18,%20transaction%20unique%29) → [REST /api/modules/](../../docs/code/routes/REST%20api-modules.md) · [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [ConnectionStore.ListConnections](../../docs/code/fonctions/model.ConnectionStore.ListConnections.md) · [ModelService.ListConnections](../../docs/code/fonctions/model.ModelService.ListConnections.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
+- [§ 4. Notes](Sequence_soumission_module.md#4.%20Notes) → [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
 
 <!-- liens-obsidian:end -->

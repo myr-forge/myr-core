@@ -241,52 +241,9 @@ if a.Tag != "" && b.Tag != "" && a.Tag != b.Tag {
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCCE — Composant Ecriture](../../Carte_des_specs.md#UCCE%20—%20Composant%20Ecriture)
-- [UCCE06 — couche expression](../../1-Expression/UCCE-Composant_Ecriture/UCCE06.md)
-- [Traçabilité UCCE06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCE06)
-
-**Exigences fonctionnelles couvertes**
-- [EF14 — Ajouter une interface à un composant existant](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCAM01 — Liaison entre interfaces](../UCAM-Assemblage_Module/UCAM01.md)
-- [UCAM03 — Créer une interface sur un composant](../UCAM-Assemblage_Module/UCAM03.md)
-- [UCCE01 — Ajout d'un composant Physique](UCCE01.md)
-- [UCCE03 — Ajout d'un composant Numérique](UCCE03.md)
-- [UCCE04 — Améliorer un Composant](UCCE04.md)
-- [UCCE05 — Créer une extension de Composant](UCCE05.md)
-
-**Règles métier**
-- [RM02 — Catégorie d'asset obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM11 — Critères de compatibilité d'interfaces](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM12 — Persistance des liaisons incompatibles](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM16 — État draft](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM19 — Fork d'un asset soumis](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [Regles_Metier](../../1-Expression/Regles_Metier.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [Conception_intro](../../3-Conception/Conception_intro.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCCE01 (analyse)](UCCE01.md)
-- [UCCE05 (analyse)](UCCE05.md)
-- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
-- [todo (analyse)](../todo.md)
-- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
-- [Conception_intro](../../3-Conception/Conception_intro.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [Sequence_soumission_asset](../../3-Conception/Sequence_soumission_asset.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29) · [§ 3. Diagramme d'états — Model3D](../../3-Conception/Architecture_Composition.md#3.%20Diagramme%20d'états%20—%20Model3D)
+- **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 3.1 `myr model add`](../../3-Conception/DC_CLI_Model.md#3.1%20`myr%20model%20add`) · [§ 3.2 `myr model interface add`](../../3-Conception/DC_CLI_Model.md#3.2%20`myr%20model%20interface%20add`) · [§ 3.6bis `myr model submit` (RM16/RM17/RM19 — soumission, composant ou assemblage)](../../3-Conception/DC_CLI_Model.md#3.6bis%20`myr%20model%20submit`%20%28RM16/RM17/RM19%20—%20soumission,%20composant%20ou%20assemblage%29) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case) · [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **Sequence_soumission_asset** : [§ Séquence — Soumission d'un composant (D3)](../../3-Conception/Sequence_soumission_asset.md#Séquence%20—%20Soumission%20d'un%20composant%20%28D3%29) · [§ 3. Chemin brouillon — `draft: true` puis `Submit` (E8)](../../3-Conception/Sequence_soumission_asset.md#3.%20Chemin%20brouillon%20—%20`draft:%20true`%20puis%20`Submit`%20%28E8%29)
 
 <!-- liens-obsidian:end -->

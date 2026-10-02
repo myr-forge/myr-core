@@ -49,8 +49,9 @@ Décision PO ; si une technologie est retenue, la documenter dans specs/3-Concep
 
 ## Liens
 
-- **Use cases** : [UCAUT04 (analyse)](../specs/2-Analyse/UCAUT-Automatisation/UCAUT04.md) · [UCAUT04 (expression)](../specs/1-Expression/UCAUT-Automatisation/UCAUT04.md)
+- **Use cases** : [UCAUT04](../specs/2-Analyse/UCAUT-Automatisation/UCAUT04.md)
 - **Specs** : [DC_D9_Automatisation](../specs/3-Conception/DC_D9_Automatisation.md)
+- **Code** : aucun — la gestion de versions des modèles 3D (UCAUT04) n'est pas développée
 
 ## Historique
 

@@ -185,32 +185,9 @@ REST --> Browser : 200 {diffXML, similarityScore, added[], removed[], modified[]
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCAUT — Automatisation](../../Carte_des_specs.md#UCAUT%20—%20Automatisation)
-- [UCAUT04 — couche expression](../../1-Expression/UCAUT-Automatisation/UCAUT04.md)
-- [Traçabilité UCAUT04 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAUT04)
-
-**Exigences fonctionnelles couvertes**
-- [EF47 — Gérer les versions SCM d'un modèle 3D](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Règles métier**
-- [RM01 — Anti-plagiat obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM18 — ModuleVersion immuable (module uniquement)](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [todo (analyse)](../todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **API_REST** : [§ 12. D9 — Automatisation avancée](../../3-Conception/API_REST.md#12.%20D9%20—%20Automatisation%20avancée)
+- **DC_CLI_Model** : [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **DC_D9_Automatisation** : [§ DC — D9 : Automatisation](../../3-Conception/DC_D9_Automatisation.md#DC%20—%20D9%20:%20Automatisation) · [§ 1. Objectif](../../3-Conception/DC_D9_Automatisation.md#1.%20Objectif) · [§ 5. UCAUT04 — Gestion SCM (versionnement) d'un modèle 3D](../../3-Conception/DC_D9_Automatisation.md#5.%20UCAUT04%20—%20Gestion%20SCM%20%28versionnement%29%20d'un%20modèle%203D) · [§ 6. Écarts code → specs](../../3-Conception/DC_D9_Automatisation.md#6.%20Écarts%20code%20→%20specs) · [§ 7. CLI et REST cibles](../../3-Conception/DC_D9_Automatisation.md#7.%20CLI%20et%20REST%20cibles)
 
 <!-- liens-obsidian:end -->

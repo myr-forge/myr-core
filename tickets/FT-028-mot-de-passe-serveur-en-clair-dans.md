@@ -50,8 +50,9 @@ Changer le mot de passe du compte sur le serveur ; faire pointer `make deploy` v
 
 ## Liens
 
-- **Exigences non fonctionnelles** : [ENF11](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
+- **Exigences non fonctionnelles** : `ENF11` (tags `enf/…`)
 - **Specs** : [Deploiement](../specs/3-Conception/Deploiement.md) · [Securite](../specs/3-Conception/Securite.md)
+- **Code** : `scripts/deploy.ps1:12` · `scripts/deploy_api.ps1` _(dossier `scripts/` non versionné : liens valables en local uniquement)_
 - **Tickets liés** : [FT-029 — make deploy suppose un fabric.env présent sur le serveur](FT-029-make-deploy-suppose-un-fabric-env-present.md)
 
 ## Historique

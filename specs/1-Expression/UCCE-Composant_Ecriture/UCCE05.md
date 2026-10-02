@@ -80,23 +80,7 @@ stop
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCCE — Composant Ecriture](../../Carte_des_specs.md#UCCE%20—%20Composant%20Ecriture)
-- [UCCE05 — couche analyse](../../2-Analyse/UCCE-Composant_Ecriture/UCCE05.md)
-- [Traçabilité UCCE05 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCE05)
-
-**Exigences fonctionnelles couvertes**
-- [EF13 — Faire évoluer un composant (amélioration, dérivation, extension)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCCE06 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE06.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCCE05 — analyse](../../2-Analyse/UCCE-Composant_Ecriture/UCCE05.md)
 
 <!-- liens-obsidian:end -->

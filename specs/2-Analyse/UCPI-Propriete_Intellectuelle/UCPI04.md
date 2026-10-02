@@ -171,55 +171,11 @@ end
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
-- [UCPI04 — couche expression](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI04.md)
-- [Traçabilité UCPI04 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI04)
-
-**Exigences fonctionnelles couvertes**
-- [EF32 — Définir un prix sur un composant propriétaire](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCAUT01 — Fabrication/Livraison d'un Composant](../UCAUT-Automatisation/UCAUT01.md)
-- [UCPI11 — Modifier le prix d'un asset](UCPI11.md)
-
-**Règles métier**
-- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
-- [RM23 — Distribution automatique des commissions](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM24 — Répartition proportionnelle multi-auteurs](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM29 — Taux de commission défini par le réseau](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM30 — Calcul automatique du prix d'un module](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM31 — Modification de prix — effet sur les commandes futures uniquement](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM32 — Asset à prix nul — librement disponible](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM33 — Devise unique par réseau](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF27 — Protection des données personnelles (RGPD)](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [Regles_Metier](../../1-Expression/Regles_Metier.md)
-- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [UCPI03 (expression)](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI03.md)
-- [UCPI11 (expression)](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI11.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCAUT02 (analyse)](../UCAUT-Automatisation/UCAUT02.md)
-- [UCPI03 (analyse)](UCPI03.md)
-- [UCPI05 (analyse)](UCPI05.md)
-- [UCPI11 (analyse)](UCPI11.md)
-- [UCREC05 (analyse)](../UCREC-Recherche/UCREC05.md)
-- [todo (analyse)](../todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [Chaincode](../../3-Conception/Chaincode.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
-- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **API_REST** : [§ 11. D7 — Paiement](../../3-Conception/API_REST.md#11.%20D7%20—%20Paiement)
+- **Chaincode** : [§ 5. Fonctions chaincode — Commissions (D7, à implémenter)](../../3-Conception/Chaincode.md#5.%20Fonctions%20chaincode%20—%20Commissions%20%28D7,%20à%20implémenter%29)
+- **DC_CLI_Model** : [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **DC_D7_Payment** : [§ DC — D7 : Propriété Intellectuelle & Paiements](../../3-Conception/DC_D7_Payment.md#DC%20—%20D7%20:%20Propriété%20Intellectuelle%20&%20Paiements) · [§ 4. Algorithme de distribution des commissions (RM23/RM24)](../../3-Conception/DC_D7_Payment.md#4.%20Algorithme%20de%20distribution%20des%20commissions%20%28RM23/RM24%29) · [§ 7. Écarts code → specs](../../3-Conception/DC_D7_Payment.md#7.%20Écarts%20code%20→%20specs)
+- **DC_D8_Recherche** : [§ 5. UCREC05 — Export BOM (Bill of Materials)](../../3-Conception/DC_D8_Recherche.md#5.%20UCREC05%20—%20Export%20BOM%20%28Bill%20of%20Materials%29)
 
 <!-- liens-obsidian:end -->

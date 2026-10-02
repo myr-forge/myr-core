@@ -129,28 +129,9 @@ In --> C : composant soumis — immuable (RM19)
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Use cases cités**
-- UCAM03 — Créer une interface sur un composant : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM03.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM03.md)
-- UCCE01 — Ajout d'un composant Physique : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE01.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE01.md)
-- UCCE06 — Ajouter une interface à un Composant déjà créé : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE06.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE06.md)
-
-**Règles métier**
-- [RM01 — Anti-plagiat obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM03 — Compatibilité de licence](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM04 — UUID unique](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM07 — Validation préalable obligatoire](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM19 — Fork d'un asset soumis](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM42 — Traçabilité et alerte des emplacements externes](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-
-**Documents cités**
-- [Analyse_des_besoins](../2-Analyse/Analyse_des_besoins.md)
-- [Architecture_Composition](Architecture_Composition.md)
-- [Conception_intro](Conception_intro.md)
-
-**Cité par**
-- [Conception_intro](Conception_intro.md)
+**Étape suivante — code, par section**
+- [§ 2. Chemin par défaut — création directe (`AddFull`)](Sequence_soumission_asset.md#2.%20Chemin%20par%20défaut%20—%20création%20directe%20%28`AddFull`%29) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [CLI myr model add](../../docs/code/commandes/CLI%20myr-model-add.md) · [BlockchainPort.ListModelRecords](../../docs/code/fonctions/model.BlockchainPort.ListModelRecords.md) · [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.CheckLicenseCompatibility](../../docs/code/fonctions/model.ModelService.CheckLicenseCompatibility.md)
+- [§ 3. Chemin brouillon — `draft: true` puis `Submit` (E8)](Sequence_soumission_asset.md#3.%20Chemin%20brouillon%20—%20`draft:%20true`%20puis%20`Submit`%20%28E8%29) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [CLI myr model add](../../docs/code/commandes/CLI%20myr-model-add.md) · [CLI myr model interface add](../../docs/code/commandes/CLI%20myr-model-interface-add.md) · [CLI myr model submit](../../docs/code/commandes/CLI%20myr-model-submit.md) · [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [InterfaceStore.ListInterfacesForAsset](../../docs/code/fonctions/model.InterfaceStore.ListInterfacesForAsset.md) · [InterfaceStore.RemoveInterface](../../docs/code/fonctions/model.InterfaceStore.RemoveInterface.md) · [InterfaceStore.SaveInterface](../../docs/code/fonctions/model.InterfaceStore.SaveInterface.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.AddInterface](../../docs/code/fonctions/model.ModelService.AddInterface.md) · [ModelService.EnsureVirtualSlot](../../docs/code/fonctions/model.ModelService.EnsureVirtualSlot.md) · [ModelService.ListInterfacesForAsset](../../docs/code/fonctions/model.ModelService.ListInterfacesForAsset.md) · [ModelService.RemoveInterface](../../docs/code/fonctions/model.ModelService.RemoveInterface.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md) · [ModelService.UpdateInterface](../../docs/code/fonctions/model.ModelService.UpdateInterface.md)
+- [§ 4. Notes](Sequence_soumission_asset.md#4.%20Notes) → [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [ModelService.Submit](../../docs/code/fonctions/model.ModelService.Submit.md)
 
 <!-- liens-obsidian:end -->

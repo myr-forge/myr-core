@@ -51,8 +51,9 @@ Décider : rédiger UCMOD05 (ajout via plugin navigateur) ou retirer les référ
 
 ## Liens
 
-- **Use cases** : [UCMOD02 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD02.md) · [UCMOD02 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD02.md) · [UCMOD03 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD03.md) · [UCMOD03 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD03.md)
+- **Use cases** : [UCMOD02](../specs/2-Analyse/UCMOD-Module/UCMOD02.md) · [UCMOD03](../specs/2-Analyse/UCMOD-Module/UCMOD03.md)
 - **Specs** : [Matrice_Tracabilite](../specs/1-Expression/Matrice_Tracabilite.md) · [roadmap_dev](../specs/roadmap_dev.md)
+- **Code** : aucun — UCMOD05 n'a ni spec ni code (ajout d'un module via plugin navigateur non développé)
 
 ## Historique
 

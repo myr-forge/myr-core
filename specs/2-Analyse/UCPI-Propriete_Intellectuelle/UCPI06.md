@@ -188,34 +188,8 @@ REST --> Browser : 200 {reportID, decision}
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
-- [UCPI06 — couche expression](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI06.md)
-- [Traçabilité UCPI06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI06)
-
-**Exigences fonctionnelles couvertes**
-- [EF34 — Signaler un composant similaire à un existant](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Règles métier**
-- [RM01 — Anti-plagiat obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM05 — ParentID obligatoire pour les dérivés](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCAUT03 (analyse)](../UCAUT-Automatisation/UCAUT03.md)
-- [todo (analyse)](../todo.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **DC_CLI_Model** : [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **DC_D7_Payment** : [§ DC — D7 : Propriété Intellectuelle & Paiements](../../3-Conception/DC_D7_Payment.md#DC%20—%20D7%20:%20Propriété%20Intellectuelle%20&%20Paiements) · [§ 7. Écarts code → specs](../../3-Conception/DC_D7_Payment.md#7.%20Écarts%20code%20→%20specs)
 
 <!-- liens-obsidian:end -->

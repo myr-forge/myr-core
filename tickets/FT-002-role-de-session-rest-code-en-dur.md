@@ -58,11 +58,11 @@ Lire le rôle depuis l'attribut `Myr.role` du certificat enrôlé (via `domain/i
 
 ## Liens
 
-- **Use cases** : [UCA02 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA02.md) · [UCA02 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA02.md) · [UCA05 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA05.md) · [UCA05 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA05.md) · [UCA07 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA07.md) · [UCA07 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA07.md)
-- **Règles métier** : [RM21](../specs/1-Expression/Regles_Metier.md) · [RM22](../specs/1-Expression/Regles_Metier.md)
-- **Exigences non fonctionnelles** : [ENF12](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
+- **Use cases** : [UCA02](../specs/2-Analyse/UCA-Compte_et_Acces/UCA02.md) · [UCA05](../specs/2-Analyse/UCA-Compte_et_Acces/UCA05.md) · [UCA07](../specs/2-Analyse/UCA-Compte_et_Acces/UCA07.md)
+- **Règles métier** : `RM21`, `RM22` (tags `rm/…`)
+- **Exigences non fonctionnelles** : `ENF12` (tags `enf/…`)
 - **Specs** : [DC_D1_Auth_Identity](../specs/3-Conception/DC_D1_Auth_Identity.md) · [Modele_Domaine](../specs/3-Conception/Modele_Domaine.md)
-- **Code** : [adapters/in/rest/handlers_identity.go:388](../adapters/in/rest/handlers_identity.go)
+- **Code** : `adapters/in/rest/handlers_identity.go:388`
 - **Fonctions** : [IdentityService.GetStatus](../docs/code/fonctions/identity.IdentityService.GetStatus.md) · [RoleService.HasPermission](../docs/code/fonctions/role.RoleService.HasPermission.md)
 - **Tickets liés** : [FT-001 — Propriété des assets non contrôlée côté serveur](FT-001-propriete-des-assets-non-controlee-cote-serveur.md) · [FT-034 — Modèle de domaine : ligne RM22 décrivant un écart](FT-034-modele-de-domaine-ligne-rm22-decrivant-un.md)
 

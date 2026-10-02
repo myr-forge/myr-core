@@ -50,9 +50,9 @@ Renommer la valeur de retour (« référence de stockage ») dans le port et sa 
 
 ## Liens
 
-- **Use cases** : [UCCL03 (expression)](../specs/1-Expression/UCCL-Composant_Lecture/UCCL03.md)
-- **Règles métier** : [RM42](../specs/1-Expression/Regles_Metier.md)
-- **Code** : [adapters/out/localstorage/store.go](../adapters/out/localstorage/store.go) · [domain/model/ports.go](../domain/model/ports.go)
+- **Use cases** : [UCCL03](../specs/1-Expression/UCCL-Composant_Lecture/UCCL03.md)
+- **Règles métier** : `RM42` (tags `rm/…`)
+- **Code** : `adapters/out/localstorage/store.go` · `domain/model/ports.go`
 - **Fonctions** : [FileStoragePort.Upload](../docs/code/fonctions/model.FileStoragePort.Upload.md)
 
 ## Historique

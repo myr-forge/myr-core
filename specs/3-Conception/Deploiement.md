@@ -227,16 +227,9 @@ go run ./cmd/mangen  # génère les man pages dans docs/man/
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Documents cités**
-- [Architecture_Hexagonale](Architecture_Hexagonale.md)
-- [Conception_intro](Conception_intro.md)
-- [Securite](Securite.md)
-
-**Cité par**
-- [Conception_intro](Conception_intro.md)
-- [todo (conception)](todo.md)
+**Étape suivante — code, par section**
+- [§ CLI admin (via SSH sur le serveur)](Deploiement.md#CLI%20admin%20%28via%20SSH%20sur%20le%20serveur%29) → [CLI myr channel list](../../docs/code/commandes/CLI%20myr-channel-list.md) · [CLI myr model add](../../docs/code/commandes/CLI%20myr-model-add.md)
+- [§ 8. Monitoring](Deploiement.md#8.%20Monitoring) → [REST /api/ping](../../docs/code/routes/REST%20api-ping.md) · [REST /api/health](../../docs/code/routes/REST%20api-health.md) · [REST /api/status](../../docs/code/routes/REST%20api-status.md)
+- [§ 10. Informations manquantes](Deploiement.md#10.%20Informations%20manquantes) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md)
 
 <!-- liens-obsidian:end -->

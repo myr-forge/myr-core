@@ -55,10 +55,10 @@ Décision PO ; puis mettre à jour RM23/RM24, DC_D7_Payment §3-§4 et lever les
 
 ## Liens
 
-- **Use cases** : [UCPI02 (analyse)](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI02.md) · [UCPI02 (expression)](../specs/1-Expression/UCPI-Propriete_Intellectuelle/UCPI02.md) · [UCPI04 (analyse)](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI04.md) · [UCPI04 (expression)](../specs/1-Expression/UCPI-Propriete_Intellectuelle/UCPI04.md) · [UCPI01 (analyse)](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md) · [UCPI01 (expression)](../specs/1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md)
-- **Règles métier** : [RM23](../specs/1-Expression/Regles_Metier.md) · [RM24](../specs/1-Expression/Regles_Metier.md)
+- **Use cases** : [UCPI02](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI02.md) · [UCPI04](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI04.md) · [UCPI01](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md)
+- **Règles métier** : `RM23`, `RM24` (tags `rm/…`)
 - **Specs** : [DC_D7_Payment](../specs/3-Conception/DC_D7_Payment.md)
-- **Code** : [domain/payment/entity.go](../domain/payment/entity.go)
+- **Code** : `domain/payment/entity.go`
 - **Tickets liés** : [FT-037 — Commission sur le canal de fabrication externe](FT-037-commission-sur-le-canal-de-fabrication-externe.md)
 
 ## Historique

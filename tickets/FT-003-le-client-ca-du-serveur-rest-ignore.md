@@ -53,9 +53,9 @@ Deux options décrites par ADR-08, à trancher par le PO : (a) construire la con
 
 ## Liens
 
-- **Use cases** : [UCA01 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md) · [UCA01 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA01.md)
+- **Use cases** : [UCA01](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md)
 - **Specs** : [Conception_intro — ADR-08](../specs/3-Conception/Conception_intro.md) · [DC_D1_Auth_Identity](../specs/3-Conception/DC_D1_Auth_Identity.md)
-- **Code** : [cmd/api/main.go:84](../cmd/api/main.go) · [cmd/api/main.go:104](../cmd/api/main.go) · [adapters/out/fabric/config.go](../adapters/out/fabric/config.go)
+- **Code** : `cmd/api/main.go:84` · `cmd/api/main.go:104` · `adapters/out/fabric/config.go`
 - **Fonctions** : [IdentityService.AutoRegister](../docs/code/fonctions/identity.IdentityService.AutoRegister.md) · [NetworkService.GetActive](../docs/code/fonctions/network.NetworkService.GetActive.md)
 - **Tickets liés** : [FT-004 — Échec de l'auto-enregistrement CA non journalisé](FT-004-echec-de-l-auto-enregistrement-ca-non.md) · [FT-005 — Aucune approbation manuelle des demandes de compte](FT-005-aucune-approbation-manuelle-des-demandes-de-compte.md) · [FT-025 — Le serveur signale un nœud Fabric déconnecté](FT-025-le-serveur-signale-un-nud-fabric-deconnecte.md)
 

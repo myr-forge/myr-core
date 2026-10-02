@@ -155,35 +155,11 @@ REST --> Client : 200 [Connection ...]
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
-- [UCMOD04 — couche expression](../../1-Expression/UCMOD-Module/UCMOD04.md)
-- [Traçabilité UCMOD04 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD04)
-
-**Exigences fonctionnelles couvertes**
-- [EF29 — Visualiser la composition d'un module](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Règles métier**
-- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
-- [todo (analyse)](../todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
-- [Chaincode](../../3-Conception/Chaincode.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D1_Auth_Identity](../../3-Conception/DC_D1_Auth_Identity.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **API_REST** : [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](../../3-Conception/API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29)
+- **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29)
+- **Chaincode** : [§ 4. Fonctions chaincode — Store/Read (D3/D4/D6)](../../3-Conception/Chaincode.md#4.%20Fonctions%20chaincode%20—%20Store/Read%20%28D3/D4/D6%29)
+- **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case)
+- **DC_D1_Auth_Identity** : [§ 6. Décisions de conception](../../3-Conception/DC_D1_Auth_Identity.md#6.%20Décisions%20de%20conception)
 
 <!-- liens-obsidian:end -->

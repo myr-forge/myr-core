@@ -87,23 +87,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
-- [UCPI09 — couche analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI09.md)
-- [Traçabilité UCPI09 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI09)
-
-**Exigences fonctionnelles couvertes**
-- [EF37 — Cloner un module sur un réseau externe](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCPI09 — analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI09.md)
 
 <!-- liens-obsidian:end -->

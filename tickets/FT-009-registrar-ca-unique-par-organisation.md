@@ -49,9 +49,9 @@ ADR-07.
 
 ## Liens
 
-- **Use cases** : [UCA01 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md) · [UCA01 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA01.md)
+- **Use cases** : [UCA01](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md)
 - **Specs** : [Conception_intro — ADR-07](../specs/3-Conception/Conception_intro.md)
-- **Code** : [adapters/out/fabric/ca_client.go](../adapters/out/fabric/ca_client.go)
+- **Code** : `adapters/out/fabric/ca_client.go`
 - **Fonctions** : [CAPort.Register](../docs/code/fonctions/identity.CAPort.Register.md)
 
 ## Historique

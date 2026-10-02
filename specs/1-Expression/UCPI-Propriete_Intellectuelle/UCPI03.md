@@ -36,21 +36,7 @@ UCPAR01/02 étaient des use cases 100 % frontend (changement de langue de l'inte
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
-- [UCPI03 — couche analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI03.md)
-- [Traçabilité UCPI03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI03)
-
-**Use cases cités**
-- [UCPI04 — Définir un prix sur un Composant proprietaire](UCPI04.md)
-- [UCPI05 — Définir un prix sur un Module proprietaire](UCPI05.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
-- [todo (conception)](../../3-Conception/todo.md)
+**Étape suivante — analyse**
+- [UCPI03 — analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI03.md)
 
 <!-- liens-obsidian:end -->

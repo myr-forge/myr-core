@@ -123,24 +123,15 @@ Aucune règle métier nouvelle — opération de lecture pure, filtrage appliqu�
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
-- [UCMOD07 — couche expression](../../1-Expression/UCMOD-Module/UCMOD07.md)
-- [Traçabilité UCMOD07 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD07)
+**Étape suivante — conception**
+- _Aucun document de conception ne traite ce use case : la chaîne s'arrête à l'analyse._
 
-**Exigences fonctionnelles couvertes**
-- [EF63 — Lister ses modules en brouillon, filtrés par propriétaire et par statut](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCCL01 — Faire une recherche par filtre](../UCCL-Composant_Lecture/UCCL01.md)
-- [UCMOD01 — Créer un Module](UCMOD01.md)
-
-**Exigences non fonctionnelles**
-- [ENF01 — Temps de réponse des endpoints REST](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Cité par**
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Code cité par cette analyse (sans conception : non relié)**
+- REST `/api/modules/`
+- REST `/api/components/`
+- CLI `myr model list`
+- `BlockchainPort.ListModelRecords`
+- `DraftStore.ListDrafts`
+- `ModelService.ListModules`
 
 <!-- liens-obsidian:end -->

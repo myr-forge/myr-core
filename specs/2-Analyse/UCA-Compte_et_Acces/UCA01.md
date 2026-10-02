@@ -158,42 +158,9 @@ end
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
-- [UCA01 — couche expression](../../1-Expression/UCA-Compte_et_Acces/UCA01.md)
-- [Traçabilité UCA01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA01)
-
-**Exigences fonctionnelles couvertes**
-- [EF01 — Permettre à un visiteur de créer un compte sur un réseau](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCA02 — Se Connecter](UCA02.md)
-- [UCA08 — Demander un rôle](UCA08.md)
-
-**Règles métier**
-- [RM20 — Identité = enrôlement CA, pas un compte séparé](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
-- [RM21 — Rôle Lecteur par défaut à l'auto-enregistrement](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [Conception_intro](../../3-Conception/Conception_intro.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [UCA02 (expression)](../../1-Expression/UCA-Compte_et_Acces/UCA02.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCA02 (analyse)](UCA02.md)
-- [UCA08 (analyse)](UCA08.md)
-- [todo (analyse)](../todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [Conception_intro](../../3-Conception/Conception_intro.md)
-- [DC_CLI_Identity](../../3-Conception/DC_CLI_Identity.md)
-- [DC_D1_Auth_Identity](../../3-Conception/DC_D1_Auth_Identity.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **API_REST** : [§ 2. D1 — Identité & RBAC](../../3-Conception/API_REST.md#2.%20D1%20—%20Identité%20&%20RBAC)
+- **DC_CLI_Identity** : [§ DC — CLI Identité & Session : Référence des commandes `myr identity` / `myr session`](../../3-Conception/DC_CLI_Identity.md#DC%20—%20CLI%20Identité%20&%20Session%20:%20Référence%20des%20commandes%20`myr%20identity`%20/%20`myr%20session`) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Identity.md#2.%20Arbre%20de%20commandes) · [§ 3.5 `myr identity request`](../../3-Conception/DC_CLI_Identity.md#3.5%20`myr%20identity%20request`) · [§ 4. Points ouverts](../../3-Conception/DC_CLI_Identity.md#4.%20Points%20ouverts) · [§ 5. Décisions de conception](../../3-Conception/DC_CLI_Identity.md#5.%20Décisions%20de%20conception)
+- **DC_D1_Auth_Identity** : [§ AccountRequest (`domain/identity`)](../../3-Conception/DC_D1_Auth_Identity.md#AccountRequest%20%28`domain/identity`%29)
 
 <!-- liens-obsidian:end -->

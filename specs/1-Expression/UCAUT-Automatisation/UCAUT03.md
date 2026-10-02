@@ -106,27 +106,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCAUT — Automatisation](../../Carte_des_specs.md#UCAUT%20—%20Automatisation)
-- [UCAUT03 — couche analyse](../../2-Analyse/UCAUT-Automatisation/UCAUT03.md)
-- [Traçabilité UCAUT03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAUT03)
-
-**Exigences fonctionnelles couvertes**
-- [EF46 — Intégrer un modèle 3D depuis un logiciel CAO (plugin)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCCE01 — Ajout d'un composant Physique](../UCCE-Composant_Ecriture/UCCE01.md)
-- [UCCE03 — Ajout d'un composant Numérique](../UCCE-Composant_Ecriture/UCCE03.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCAUT03 — analyse](../../2-Analyse/UCAUT-Automatisation/UCAUT03.md)
 
 <!-- liens-obsidian:end -->

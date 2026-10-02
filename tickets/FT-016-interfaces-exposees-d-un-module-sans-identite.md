@@ -53,10 +53,10 @@ Le client (myr-web) doit recouper avec `WorkspaceInstances` pour savoir quelle i
 
 ## Liens
 
-- **Use cases** : [UCMOD04 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD04.md) · [UCMOD04 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD04.md) · [UCAM02 (analyse)](../specs/2-Analyse/UCAM-Assemblage_Module/UCAM02.md) · [UCAM02 (expression)](../specs/1-Expression/UCAM-Assemblage_Module/UCAM02.md)
-- **Règles métier** : [RM13](../specs/1-Expression/Regles_Metier.md)
+- **Use cases** : [UCMOD04](../specs/2-Analyse/UCMOD-Module/UCMOD04.md) · [UCAM02](../specs/2-Analyse/UCAM-Assemblage_Module/UCAM02.md)
+- **Règles métier** : `RM13` (tags `rm/…`)
 - **Specs** : [API_REST](../specs/3-Conception/API_REST.md)
-- **Code** : [domain/model/entity.go](../domain/model/entity.go)
+- **Code** : `domain/model/entity.go`
 - **Fonctions** : [ModelService.GetModuleInterfaces](../docs/code/fonctions/model.ModelService.GetModuleInterfaces.md)
 - **Tickets liés** : [FT-017 — GetModuleInterfaces n'exposait qu'une interface par asset partagé](FT-017-getmoduleinterfaces-n-exposait-qu-une-interface-par.md)
 

@@ -94,26 +94,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
-- [UCPI08 — couche analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI08.md)
-- [Traçabilité UCPI08 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI08)
-
-**Exigences fonctionnelles couvertes**
-- [EF36 — Cloner un composant sur un réseau externe](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCPI09 (analyse)](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI09.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [Chaincode](../../3-Conception/Chaincode.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCPI08 — analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI08.md)
 
 <!-- liens-obsidian:end -->

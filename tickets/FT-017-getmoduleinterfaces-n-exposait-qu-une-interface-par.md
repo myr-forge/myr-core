@@ -52,9 +52,9 @@ Corrigé : suppression du dédoublonnage ; filtre « interne » scindé en `inte
 
 ## Liens
 
-- **Use cases** : [UCMOD04 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD04.md) · [UCMOD04 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD04.md) · [UCAM02 (analyse)](../specs/2-Analyse/UCAM-Assemblage_Module/UCAM02.md) · [UCAM02 (expression)](../specs/1-Expression/UCAM-Assemblage_Module/UCAM02.md)
-- **Règles métier** : [RM13](../specs/1-Expression/Regles_Metier.md)
-- **Code** : [domain/model/service.go:994](../domain/model/service.go)
+- **Use cases** : [UCMOD04](../specs/2-Analyse/UCMOD-Module/UCMOD04.md) · [UCAM02](../specs/2-Analyse/UCAM-Assemblage_Module/UCAM02.md)
+- **Règles métier** : `RM13` (tags `rm/…`)
+- **Code** : `domain/model/service.go:994`
 - **Fonctions** : [ModelService.GetModuleInterfaces](../docs/code/fonctions/model.ModelService.GetModuleInterfaces.md)
 - **Tickets liés** : [FT-016 — Interfaces exposées d'un module sans identité d'instance](FT-016-interfaces-exposees-d-un-module-sans-identite.md)
 

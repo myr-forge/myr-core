@@ -80,24 +80,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
-- [UCA06 — couche analyse](../../2-Analyse/UCA-Compte_et_Acces/UCA06.md)
-- [Traçabilité UCA06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA06)
-
-**Exigences fonctionnelles couvertes**
-- [EF06 — Consulter les assets possédés par l'utilisateur](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCREC04 (analyse)](../../2-Analyse/UCREC-Recherche/UCREC04.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
-- [Securite](../../3-Conception/Securite.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCA06 — analyse](../../2-Analyse/UCA-Compte_et_Acces/UCA06.md)
 
 <!-- liens-obsidian:end -->

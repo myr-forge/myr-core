@@ -58,11 +58,11 @@ Vérifier sur le serveur : `peer lifecycle chaincode querycommitted -C sandbox`.
 
 ## Liens
 
-- **Use cases** : [UCCL01 (analyse)](../specs/2-Analyse/UCCL-Composant_Lecture/UCCL01.md) · [UCCL01 (expression)](../specs/1-Expression/UCCL-Composant_Lecture/UCCL01.md) · [UCCE01 (analyse)](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE01.md) · [UCCE01 (expression)](../specs/1-Expression/UCCE-Composant_Ecriture/UCCE01.md) · [UCMOD06 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD06.md) · [UCMOD06 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD06.md)
-- **Règles métier** : [RM06](../specs/1-Expression/Regles_Metier.md)
-- **Exigences non fonctionnelles** : [ENF02](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
+- **Use cases** : [UCCL01](../specs/2-Analyse/UCCL-Composant_Lecture/UCCL01.md) · [UCCE01](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE01.md) · [UCMOD06](../specs/2-Analyse/UCMOD-Module/UCMOD06.md)
+- **Règles métier** : `RM06` (tags `rm/…`)
+- **Exigences non fonctionnelles** : `ENF02` (tags `enf/…`)
 - **Specs** : [Chaincode](../specs/3-Conception/Chaincode.md) · [Deploiement](../specs/3-Conception/Deploiement.md)
-- **Code** : [chaincode/model/contract.go](../chaincode/model/contract.go) · [chaincode/model/entity.go](../chaincode/model/entity.go)
+- **Code** : `chaincode/model/contract.go` · `chaincode/model/entity.go`
 - **Fonctions** : [BlockchainPort.StoreModelRecord](../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [BlockchainPort.ListModelRecords](../docs/code/fonctions/model.BlockchainPort.ListModelRecords.md)
 - **Tickets liés** : [FT-025 — Le serveur signale un nœud Fabric déconnecté](FT-025-le-serveur-signale-un-nud-fabric-deconnecte.md) · [FT-026 — Erreur Fabric indisponible renvoyée en 500 au lieu de 503](FT-026-erreur-fabric-indisponible-renvoyee-en-500-au.md) · [FT-018 — Identifiant de bloc des versions de module simulé](FT-018-identifiant-de-bloc-des-versions-de-module.md)
 

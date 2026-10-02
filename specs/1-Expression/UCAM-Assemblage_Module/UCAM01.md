@@ -210,46 +210,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
-- [UCAM01 — couche analyse](../../2-Analyse/UCAM-Assemblage_Module/UCAM01.md)
-- [Traçabilité UCAM01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM01)
-
-**Exigences fonctionnelles couvertes**
-- [EF18 — Créer des liaisons entre interfaces compatibles de composants](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCAM02 — Visualiser les interfaces physiques de composants](UCAM02.md)
-- [UCAM07 — Choisir un asset d'accroche (Fastener)](UCAM07.md)
-
-**Règles métier**
-- [RM09 — Interface à usage unique](../Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM10 — Vérification de compatibilité automatique](../Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM11 — Critères de compatibilité d'interfaces](../Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [UCAM05 (expression)](UCAM05.md)
-- [UCAM07 (expression)](UCAM07.md)
-- [UCCE06 (expression)](../UCCE-Composant_Ecriture/UCCE06.md)
-- [UCMOD01 (expression)](../UCMOD-Module/UCMOD01.md)
-- [UCMOD02 (expression)](../UCMOD-Module/UCMOD02.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCAM02 (analyse)](../../2-Analyse/UCAM-Assemblage_Module/UCAM02.md)
-- [UCAM05 (analyse)](../../2-Analyse/UCAM-Assemblage_Module/UCAM05.md)
-- [UCAM07 (analyse)](../../2-Analyse/UCAM-Assemblage_Module/UCAM07.md)
-- [UCCE05 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE05.md)
-- [UCCE06 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE06.md)
-- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
-- [UCMOD02 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD02.md)
-- [UCMOD03 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD03.md)
-- [UCMOD06 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD06.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCAM01 — analyse](../../2-Analyse/UCAM-Assemblage_Module/UCAM01.md)
 
 <!-- liens-obsidian:end -->

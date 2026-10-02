@@ -51,9 +51,9 @@ Ajouter `.github/workflows/ci.yml` conforme à ADR-10 (secret SSH pour le déplo
 
 ## Liens
 
-- **Exigences non fonctionnelles** : [ENF18](../specs/1-Expression/Exigences_Non_Fonctionnelles.md) · [ENF19](../specs/1-Expression/Exigences_Non_Fonctionnelles.md) · [ENF25](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
+- **Exigences non fonctionnelles** : `ENF18`, `ENF19`, `ENF25` (tags `enf/…`)
 - **Specs** : [Conception_intro — ADR-10](../specs/3-Conception/Conception_intro.md)
-- **Code** : [Makefile](../Makefile) · [scripts/ci/check-domain-imports.sh](../scripts/ci/check-domain-imports.sh)
+- **Code** : `Makefile` · `scripts/ci/check-domain-imports.sh`
 - **Tickets liés** : [FT-019 — Deux tests rouges dans domain/model](FT-019-deux-tests-rouges-dans-domain-model.md)
 
 ## Historique

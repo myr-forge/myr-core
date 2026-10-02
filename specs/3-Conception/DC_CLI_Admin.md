@@ -982,40 +982,34 @@ La commande `myr network destroy` est la seule commande CLI qui appelle directem
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Use cases cités**
-- UCADM01 — Ajouter une organisation au réseau : [expression](../1-Expression/UCADM-Administration/UCADM01.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM01.md)
-- UCADM02 — Créer un réseau indépendant : [expression](../1-Expression/UCADM-Administration/UCADM02.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM02.md)
-- UCADM03 — Ajouter un nœud à un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM03.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM03.md)
-- UCADM04 — Retirer un nœud d'un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM04.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM04.md)
-- UCADM05 — Démanteler un réseau (dev/test uniquement) : [expression](../1-Expression/UCADM-Administration/UCADM05.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM05.md)
-- UCADM06 — Attribuer des rôles à une organisation : [expression](../1-Expression/UCADM-Administration/UCADM06.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM06.md)
-- UCADM07 — Gérer les rôles : [expression](../1-Expression/UCADM-Administration/UCADM07.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM07.md)
-- UCDEV02 — Utilisation du CLI : [expression](../1-Expression/UCDEV-Developpement/UCDEV02.md) · [analyse](../2-Analyse/UCDEV-Developpement/UCDEV02.md)
-
-**Règles métier**
-- [RM27 — Nombre minimum de nœuds actifs](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-- [RM28 — Démantèlement réseau : opération d'infrastructure locale](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-- [RM34 — Rôle admin protégé](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-- [RM35 — Révocation en cascade à la suppression d'un rôle](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-- [RM36 — Nom de rôle unique](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-
-**Exigences non fonctionnelles**
-- [ENF18 — Isolation du domaine métier](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../1-Expression/Expression_des_besoins_Intro.md)
-- [Analyse_des_besoins](../2-Analyse/Analyse_des_besoins.md)
-- [UCDEV02 (analyse)](../2-Analyse/UCDEV-Developpement/UCDEV02.md)
-- [API_REST](API_REST.md)
-- [Architecture_Hexagonale](Architecture_Hexagonale.md)
-- [Conception_intro](Conception_intro.md)
-- [DC_CLI_Identity](DC_CLI_Identity.md)
-- [DC_CLI_Model](DC_CLI_Model.md)
-- [DC_D2_Administration](DC_D2_Administration.md)
-- [DC_D9_Automatisation](DC_D9_Automatisation.md)
-- [roadmap_dev](../roadmap_dev.md)
+**Étape suivante — code, par section**
+- [§ 1. Objectif](DC_CLI_Admin.md#1.%20Objectif) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md)
+- [§ 3.1 `myr network list`](DC_CLI_Admin.md#3.1%20`myr%20network%20list`) → [CLI myr network list](../../docs/code/commandes/CLI%20myr-network-list.md) · [CLI myr network add](../../docs/code/commandes/CLI%20myr-network-add.md) · [CLI myr network import](../../docs/code/commandes/CLI%20myr-network-import.md) · [ChannelService.List](../../docs/code/fonctions/channel.ChannelService.List.md) · [NetworkService.List](../../docs/code/fonctions/network.NetworkService.List.md)
+- [§ 3.2 `myr network show <id>`](DC_CLI_Admin.md#3.2%20`myr%20network%20show%20<id>`) → [CLI myr network show](../../docs/code/commandes/CLI%20myr-network-show.md) · [ChannelService.Get](../../docs/code/fonctions/channel.ChannelService.Get.md) · [ChannelService.List](../../docs/code/fonctions/channel.ChannelService.List.md) · [NetworkService.List](../../docs/code/fonctions/network.NetworkService.List.md)
+- [§ 3.3 `myr network add`](DC_CLI_Admin.md#3.3%20`myr%20network%20add`) → [CLI myr network add](../../docs/code/commandes/CLI%20myr-network-add.md) · [CLI myr network activate](../../docs/code/commandes/CLI%20myr-network-activate.md) · [CLI myr network update](../../docs/code/commandes/CLI%20myr-network-update.md) · [NetworkService.Add](../../docs/code/fonctions/network.NetworkService.Add.md)
+- [§ 3.4 `myr network update <id>`](DC_CLI_Admin.md#3.4%20`myr%20network%20update%20<id>`) → [CLI myr network update](../../docs/code/commandes/CLI%20myr-network-update.md) · [ChannelService.List](../../docs/code/fonctions/channel.ChannelService.List.md) · [NetworkService.List](../../docs/code/fonctions/network.NetworkService.List.md) · [NetworkService.Update](../../docs/code/fonctions/network.NetworkService.Update.md)
+- [§ 3.5 `myr network activate <id>`](DC_CLI_Admin.md#3.5%20`myr%20network%20activate%20<id>`) → [CLI myr network activate](../../docs/code/commandes/CLI%20myr-network-activate.md) · [NetworkService.Activate](../../docs/code/fonctions/network.NetworkService.Activate.md)
+- [§ 3.6 `myr network delete <id>`](DC_CLI_Admin.md#3.6%20`myr%20network%20delete%20<id>`) → [CLI myr network delete](../../docs/code/commandes/CLI%20myr-network-delete.md) · [NetworkService.Delete](../../docs/code/fonctions/network.NetworkService.Delete.md) · [Repo.Delete](../../docs/code/fonctions/network.Repo.Delete.md)
+- [§ 3.7 `myr network test (id)`](DC_CLI_Admin.md#3.7%20`myr%20network%20test%20[id]`) → [CLI myr network test](../../docs/code/commandes/CLI%20myr-network-test.md) · [CLI myr network activate](../../docs/code/commandes/CLI%20myr-network-activate.md) · [NetworkService.TestConnection](../../docs/code/fonctions/network.NetworkService.TestConnection.md)
+- [§ 3.8 `myr network import`](DC_CLI_Admin.md#3.8%20`myr%20network%20import`) → [CLI myr network import](../../docs/code/commandes/CLI%20myr-network-import.md) · [CLI myr network update](../../docs/code/commandes/CLI%20myr-network-update.md) · [NetworkService.Add](../../docs/code/fonctions/network.NetworkService.Add.md)
+- [§ 3.9 `myr network destroy <id> --confirm` *(UCADM05)*](DC_CLI_Admin.md#3.9%20`myr%20network%20destroy%20<id>%20--confirm`%20*%28UCADM05%29*) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [CLI myr network update](../../docs/code/commandes/CLI%20myr-network-update.md) · [ChannelService.List](../../docs/code/fonctions/channel.ChannelService.List.md) · [NetworkService.Delete](../../docs/code/fonctions/network.NetworkService.Delete.md) · [NetworkService.List](../../docs/code/fonctions/network.NetworkService.List.md) · [Repo.Delete](../../docs/code/fonctions/network.Repo.Delete.md)
+- [§ 4.1 `myr org add`](DC_CLI_Admin.md#4.1%20`myr%20org%20add`) → [CLI myr org add](../../docs/code/commandes/CLI%20myr-org-add.md) · [ChannelConfigPort.AddOrganisation](../../docs/code/fonctions/channel.ChannelConfigPort.AddOrganisation.md) · [ChannelService.AddOrganisation](../../docs/code/fonctions/channel.ChannelService.AddOrganisation.md)
+- [§ 4.2 `myr org role assign` *(UCADM06)*](DC_CLI_Admin.md#4.2%20`myr%20org%20role%20assign`%20*%28UCADM06%29*) → [CLI myr org](../../docs/code/commandes/CLI%20myr-org.md) · [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md)
+- [§ 4.3 `myr org role remove` *(UCADM06)*](DC_CLI_Admin.md#4.3%20`myr%20org%20role%20remove`%20*%28UCADM06%29*) → [CLI myr org](../../docs/code/commandes/CLI%20myr-org.md)
+- [§ 5.1 `myr role list`](DC_CLI_Admin.md#5.1%20`myr%20role%20list`) → [CLI myr role list](../../docs/code/commandes/CLI%20myr-role-list.md)
+- [§ 5.2 `myr role create` *(UCADM07)*](DC_CLI_Admin.md#5.2%20`myr%20role%20create`%20*%28UCADM07%29*) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md)
+- [§ 5.3 `myr role edit <id>` *(UCADM07)*](DC_CLI_Admin.md#5.3%20`myr%20role%20edit%20<id>`%20*%28UCADM07%29*) → [CLI myr role](../../docs/code/commandes/CLI%20myr-role.md)
+- [§ 5.4 `myr role delete <id>` *(UCADM07)*](DC_CLI_Admin.md#5.4%20`myr%20role%20delete%20<id>`%20*%28UCADM07%29*) → [CLI myr role delete](../../docs/code/commandes/CLI%20myr-role-delete.md)
+- [§ 5.1 `myr node add` *(UCADM03)*](DC_CLI_Admin.md#5.1%20`myr%20node%20add`%20*%28UCADM03%29*) → [CLI myr node add](../../docs/code/commandes/CLI%20myr-node-add.md) · [CLI myr network test](../../docs/code/commandes/CLI%20myr-network-test.md) · [ChannelConfigPort.AddNode](../../docs/code/fonctions/channel.ChannelConfigPort.AddNode.md) · [ChannelService.AddNode](../../docs/code/fonctions/channel.ChannelService.AddNode.md)
+- [§ 5.2 `myr node provision` — enregistrer l'identité d'un nouveau nœud](DC_CLI_Admin.md#5.2%20`myr%20node%20provision`%20—%20enregistrer%20l'identité%20d'un%20nouveau%20nœud) → [CLI myr node provision](../../docs/code/commandes/CLI%20myr-node-provision.md) · [NetworkService.AddPeer](../../docs/code/fonctions/network.NetworkService.AddPeer.md)
+- [§ 5.3 `myr node remove` *(UCADM04)*](DC_CLI_Admin.md#5.3%20`myr%20node%20remove`%20*%28UCADM04%29*) → [CLI myr node remove](../../docs/code/commandes/CLI%20myr-node-remove.md) · [CLI myr network update](../../docs/code/commandes/CLI%20myr-network-update.md) · [ChannelConfigPort.RemoveNode](../../docs/code/fonctions/channel.ChannelConfigPort.RemoveNode.md) · [ChannelService.RemoveNode](../../docs/code/fonctions/channel.ChannelService.RemoveNode.md)
+- [§ 7.1 Extensions de `ChannelService` (port_in)](DC_CLI_Admin.md#7.1%20Extensions%20de%20`ChannelService`%20%28port_in%29) → [ChannelConfigPort.AddNode](../../docs/code/fonctions/channel.ChannelConfigPort.AddNode.md) · [ChannelConfigPort.AddOrganisation](../../docs/code/fonctions/channel.ChannelConfigPort.AddOrganisation.md) · [ChannelConfigPort.RemoveNode](../../docs/code/fonctions/channel.ChannelConfigPort.RemoveNode.md) · [ChannelService.AddNode](../../docs/code/fonctions/channel.ChannelService.AddNode.md) · [ChannelService.AddOrganisation](../../docs/code/fonctions/channel.ChannelService.AddOrganisation.md) · [ChannelService.RemoveNode](../../docs/code/fonctions/channel.ChannelService.RemoveNode.md)
+- [§ 7.4 Extension de `ChannelConfigPort` (port_out)](DC_CLI_Admin.md#7.4%20Extension%20de%20`ChannelConfigPort`%20%28port_out%29) → [ChannelConfigPort.AddNode](../../docs/code/fonctions/channel.ChannelConfigPort.AddNode.md) · [ChannelConfigPort.AddOrganisation](../../docs/code/fonctions/channel.ChannelConfigPort.AddOrganisation.md) · [ChannelConfigPort.RemoveNode](../../docs/code/fonctions/channel.ChannelConfigPort.RemoveNode.md) · [ChannelService.AddNode](../../docs/code/fonctions/channel.ChannelService.AddNode.md) · [ChannelService.AddOrganisation](../../docs/code/fonctions/channel.ChannelService.AddOrganisation.md) · [ChannelService.RemoveNode](../../docs/code/fonctions/channel.ChannelService.RemoveNode.md)
+- [§ 7.6 Champ à ajouter à `NetworkProfile` (`domain/network/entity.go`)](DC_CLI_Admin.md#7.6%20Champ%20à%20ajouter%20à%20`NetworkProfile`%20%28`domain/network/entity.go`%29) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md)
+- [§ 8. Résolution du canal cible](DC_CLI_Admin.md#8.%20Résolution%20du%20canal%20cible) → [CLI myr network update](../../docs/code/commandes/CLI%20myr-network-update.md) · [NetworkService.GetActive](../../docs/code/fonctions/network.NetworkService.GetActive.md)
+- [§ 9. Injection de services](DC_CLI_Admin.md#9.%20Injection%20de%20services) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md)
+- [§ 10. Décisions de conception](DC_CLI_Admin.md#10.%20Décisions%20de%20conception) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [CLI myr network update](../../docs/code/commandes/CLI%20myr-network-update.md) · [CLI myr network import](../../docs/code/commandes/CLI%20myr-network-import.md) · [NetworkService.Update](../../docs/code/fonctions/network.NetworkService.Update.md)
+- [§ 11. Écarts code → specs](DC_CLI_Admin.md#11.%20Écarts%20code%20→%20specs) → [CLI myr network](../../docs/code/commandes/CLI%20myr-network.md) · [CLI myr org add](../../docs/code/commandes/CLI%20myr-org-add.md) · [CLI myr node add](../../docs/code/commandes/CLI%20myr-node-add.md) · [CLI myr node remove](../../docs/code/commandes/CLI%20myr-node-remove.md) · [CLI myr role](../../docs/code/commandes/CLI%20myr-role.md) · [CLI myr org](../../docs/code/commandes/CLI%20myr-org.md) · [ChannelConfigPort.AddNode](../../docs/code/fonctions/channel.ChannelConfigPort.AddNode.md) · [ChannelConfigPort.AddOrganisation](../../docs/code/fonctions/channel.ChannelConfigPort.AddOrganisation.md) · [ChannelConfigPort.RemoveNode](../../docs/code/fonctions/channel.ChannelConfigPort.RemoveNode.md) · [ChannelService.AddNode](../../docs/code/fonctions/channel.ChannelService.AddNode.md) · [ChannelService.AddOrganisation](../../docs/code/fonctions/channel.ChannelService.AddOrganisation.md) · [ChannelService.RemoveNode](../../docs/code/fonctions/channel.ChannelService.RemoveNode.md)
+- [§ 12. Informations manquantes / points ouverts](DC_CLI_Admin.md#12.%20Informations%20manquantes%20/%20points%20ouverts) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [CLI myr network create](../../docs/code/commandes/CLI%20myr-network-create.md) · [CLI myr network import](../../docs/code/commandes/CLI%20myr-network-import.md) · [ChannelConfigPort.RemoveNode](../../docs/code/fonctions/channel.ChannelConfigPort.RemoveNode.md) · [ChannelService.RemoveNode](../../docs/code/fonctions/channel.ChannelService.RemoveNode.md)
 
 <!-- liens-obsidian:end -->

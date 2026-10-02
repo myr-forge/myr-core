@@ -128,29 +128,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
-- [UCADM05 — couche analyse](../../2-Analyse/UCADM-Administration/UCADM05.md)
-- [Traçabilité UCADM05 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM05)
-
-**Exigences fonctionnelles couvertes**
-- [EF58 — Démanteler un réseau de test (CLI uniquement — jamais via REST)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCADM02 — Créer un réseau indépendant](UCADM02.md)
-
-**Règles métier**
-- [RM28 — Démantèlement réseau : opération d'infrastructure locale](../Regles_Metier.md#8.%20Administration%20réseau)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [UCDEV02 (expression)](../UCDEV-Developpement/UCDEV02.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
-- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCADM05 — analyse](../../2-Analyse/UCADM-Administration/UCADM05.md)
 
 <!-- liens-obsidian:end -->

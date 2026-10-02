@@ -247,56 +247,11 @@ end
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCCE — Composant Ecriture](../../Carte_des_specs.md#UCCE%20—%20Composant%20Ecriture)
-- [UCCE01 — couche expression](../../1-Expression/UCCE-Composant_Ecriture/UCCE01.md)
-- [Traçabilité UCCE01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCE01)
-
-**Exigences fonctionnelles couvertes**
-- [EF10 — Enregistrer un composant physique sur la blockchain](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-- [EF15 — Vérifier l'unicité d'un composant (anti-plagiat SHA-256 + SCM > 50 %)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCAM03 — Créer une interface sur un composant](../UCAM-Assemblage_Module/UCAM03.md)
-- [UCAM05 — Transformation d'un composant en module](../UCAM-Assemblage_Module/UCAM05.md)
-- [UCCE06 — Ajouter une interface à un Composant déjà créé](UCCE06.md)
-- [UCCL03 — Vérifier la validité des emplacements externes d'un composant ou module](../../1-Expression/UCCL-Composant_Lecture/UCCL03.md)
-
-**Règles métier**
-- [RM01 — Anti-plagiat obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM02 — Catégorie d'asset obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM03 — Compatibilité de licence](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM04 — UUID unique](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM05 — ParentID obligatoire pour les dérivés](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM16 — État draft](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM19 — Fork d'un asset soumis](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [UCAUT03 (expression)](../../1-Expression/UCAUT-Automatisation/UCAUT03.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCAUT03 (analyse)](../UCAUT-Automatisation/UCAUT03.md)
-- [UCCE03 (analyse)](UCCE03.md)
-- [UCCE04 (analyse)](UCCE04.md)
-- [UCCE06 (analyse)](UCCE06.md)
-- [todo (analyse)](../todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
-- [Chaincode](../../3-Conception/Chaincode.md)
-- [Conception_intro](../../3-Conception/Conception_intro.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [Sequence_soumission_asset](../../3-Conception/Sequence_soumission_asset.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **API_REST** : [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](../../3-Conception/API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29)
+- **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29)
+- **Chaincode** : [§ 4. Fonctions chaincode — Store/Read (D3/D4/D6)](../../3-Conception/Chaincode.md#4.%20Fonctions%20chaincode%20—%20Store/Read%20%28D3/D4/D6%29)
+- **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 3.1 `myr model add`](../../3-Conception/DC_CLI_Model.md#3.1%20`myr%20model%20add`) · [§ 3.6bis `myr model submit` (RM16/RM17/RM19 — soumission, composant ou assemblage)](../../3-Conception/DC_CLI_Model.md#3.6bis%20`myr%20model%20submit`%20%28RM16/RM17/RM19%20—%20soumission,%20composant%20ou%20assemblage%29) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case) · [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **Sequence_soumission_asset** : [§ Séquence — Soumission d'un composant (D3)](../../3-Conception/Sequence_soumission_asset.md#Séquence%20—%20Soumission%20d'un%20composant%20%28D3%29)
 
 <!-- liens-obsidian:end -->

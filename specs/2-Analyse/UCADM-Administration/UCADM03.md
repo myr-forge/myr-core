@@ -208,42 +208,10 @@ end
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
-- [UCADM03 — couche expression](../../1-Expression/UCADM-Administration/UCADM03.md)
-- [Traçabilité UCADM03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM03)
-
-**Exigences fonctionnelles couvertes**
-- [EF09 — Étendre un réseau avec de nouveaux nœuds (peer ou orderer)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCADM01 — Ajouter une organisation au réseau](UCADM01.md)
-- [UCADM02 — Créer un réseau indépendant](UCADM02.md)
-
-**Règles métier**
-- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM08 — Masquage local, ledger jamais modifié](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-
-**Exigences non fonctionnelles**
-- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [UCADM04 (expression)](../../1-Expression/UCADM-Administration/UCADM04.md)
-- [UCDEV02 (expression)](../../1-Expression/UCDEV-Developpement/UCDEV02.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCADM04 (analyse)](UCADM04.md)
-- [UCADM05 (analyse)](UCADM05.md)
-- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
-- [todo (analyse)](../todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [Conception_intro](../../3-Conception/Conception_intro.md)
-- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **API_REST** : [§ 3. D2 — Administration](../../3-Conception/API_REST.md#3.%20D2%20—%20Administration)
+- **DC_CLI_Admin** : [§ DC — CLI Admin : Référence des commandes administrateur](../../3-Conception/DC_CLI_Admin.md#DC%20—%20CLI%20Admin%20:%20Référence%20des%20commandes%20administrateur) · [§ 1. Objectif](../../3-Conception/DC_CLI_Admin.md#1.%20Objectif) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Admin.md#2.%20Arbre%20de%20commandes) · [§ 7.1 Extensions de `ChannelService` (port_in)](../../3-Conception/DC_CLI_Admin.md#7.1%20Extensions%20de%20`ChannelService`%20%28port_in%29) · [§ 11. Écarts code → specs](../../3-Conception/DC_CLI_Admin.md#11.%20Écarts%20code%20→%20specs) · [§ 12. Informations manquantes / points ouverts](../../3-Conception/DC_CLI_Admin.md#12.%20Informations%20manquantes%20/%20points%20ouverts)
+- **DC_CLI_Model** : [§ 1. Objectif](../../3-Conception/DC_CLI_Model.md#1.%20Objectif)
+- **DC_D2_Administration** : [§ DC — D2 : Administration réseau](../../3-Conception/DC_D2_Administration.md#DC%20—%20D2%20:%20Administration%20réseau) · [§ Entités à concevoir (non présentes dans le code)](../../3-Conception/DC_D2_Administration.md#Entités%20à%20concevoir%20%28non%20présentes%20dans%20le%20code%29) · [§ Port entrant — ChannelService](../../3-Conception/DC_D2_Administration.md#Port%20entrant%20—%20ChannelService) · [§ 8. Écarts code → specs](../../3-Conception/DC_D2_Administration.md#8.%20Écarts%20code%20→%20specs) · [§ 9. Informations manquantes](../../3-Conception/DC_D2_Administration.md#9.%20Informations%20manquantes)
 
 <!-- liens-obsidian:end -->

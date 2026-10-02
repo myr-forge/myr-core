@@ -115,31 +115,8 @@ Aucune règle métier dédiée à ce filtre — c'est une projection en lecture 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
-- [UCA06 — couche expression](../../1-Expression/UCA-Compte_et_Acces/UCA06.md)
-- [Traçabilité UCA06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA06)
-
-**Exigences fonctionnelles couvertes**
-- [EF06 — Consulter les assets possédés par l'utilisateur](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Exigences non fonctionnelles**
-- [ENF02 — Temps de soumission d'une transaction Fabric](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [Securite](../../3-Conception/Securite.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCREC04 (analyse)](../UCREC-Recherche/UCREC04.md)
-- [todo (analyse)](../todo.md)
-- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
-- [Securite](../../3-Conception/Securite.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **DC_D8_Recherche** : [§ 4. UCREC04 — Modules utilisant un composant](../../3-Conception/DC_D8_Recherche.md#4.%20UCREC04%20—%20Modules%20utilisant%20un%20composant) · [§ 7. Écarts code → specs](../../3-Conception/DC_D8_Recherche.md#7.%20Écarts%20code%20→%20specs)
+- **Securite** : [§ 9. Surfaces d'attaque et mitigations](../../3-Conception/Securite.md#9.%20Surfaces%20d'attaque%20et%20mitigations)
 
 <!-- liens-obsidian:end -->

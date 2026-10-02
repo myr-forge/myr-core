@@ -139,35 +139,10 @@ type VersionDiff struct {
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Use cases cités**
-- UCAUT01 — Fabrication/Livraison d'un Composant : [expression](../1-Expression/UCAUT-Automatisation/UCAUT01.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT01.md)
-- UCAUT02 — Commande en ligne de Asset : [expression](../1-Expression/UCAUT-Automatisation/UCAUT02.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT02.md)
-- UCAUT03 — Ajouter un modèle 3D depuis un logiciel CAO : [expression](../1-Expression/UCAUT-Automatisation/UCAUT03.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT03.md)
-- UCAUT04 — Gestion SCM d'un modèle 3D : [expression](../1-Expression/UCAUT-Automatisation/UCAUT04.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT04.md)
-- UCPI01 — Commander un Module complet : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md)
-
-**Règles métier**
-- [RM01 — Anti-plagiat obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM07 — Validation préalable obligatoire](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM23 — Distribution automatique des commissions](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM24 — Répartition proportionnelle multi-auteurs](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-
-**Documents cités**
-- [Architecture_Composition](Architecture_Composition.md)
-- [Chaincode](Chaincode.md)
-- [Conception_intro](Conception_intro.md)
-- [DC_CLI_Admin](DC_CLI_Admin.md)
-- [DC_D1_Auth_Identity](DC_D1_Auth_Identity.md)
-- [DC_D7_Payment](DC_D7_Payment.md)
-- [Modele_Domaine](Modele_Domaine.md)
-- [roadmap_dev](../roadmap_dev.md)
-
-**Cité par**
-- [API_REST](API_REST.md)
-- [Conception_intro](Conception_intro.md)
-- [todo (conception)](todo.md)
+**Étape suivante — code, par section**
+- [§ 2. UCAUT01 — Déclenchement des commissions à la livraison](DC_D9_Automatisation.md#2.%20UCAUT01%20—%20Déclenchement%20des%20commissions%20à%20la%20livraison) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md)
+- [§ 4. UCAUT03 — Import depuis un plugin CAO](DC_D9_Automatisation.md#4.%20UCAUT03%20—%20Import%20depuis%20un%20plugin%20CAO) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [ModelService.AddInterface](../../docs/code/fonctions/model.ModelService.AddInterface.md)
+- [§ 6. Écarts code → specs](DC_D9_Automatisation.md#6.%20Écarts%20code%20→%20specs) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.AddInterface](../../docs/code/fonctions/model.ModelService.AddInterface.md)
+- [§ 7. CLI et REST cibles](DC_D9_Automatisation.md#7.%20CLI%20et%20REST%20cibles) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [CLI myr model add](../../docs/code/commandes/CLI%20myr-model-add.md) · [CLI myr model](../../docs/code/commandes/CLI%20myr-model.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md)
 
 <!-- liens-obsidian:end -->

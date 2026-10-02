@@ -55,9 +55,9 @@ Pour chaque test : décider si le comportement attendu (specs UCREC03, UCCE01) o
 
 ## Liens
 
-- **Use cases** : [UCREC03 (analyse)](../specs/2-Analyse/UCREC-Recherche/UCREC03.md) · [UCREC03 (expression)](../specs/1-Expression/UCREC-Recherche/UCREC03.md) · [UCCE01 (analyse)](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE01.md) · [UCCE01 (expression)](../specs/1-Expression/UCCE-Composant_Ecriture/UCCE01.md)
-- **Exigences non fonctionnelles** : [ENF19](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
-- **Code** : [domain/model/tests/service_test.go:1557](../domain/model/tests/service_test.go) · [domain/model/tests/service_test.go:2401](../domain/model/tests/service_test.go)
+- **Use cases** : [UCREC03](../specs/2-Analyse/UCREC-Recherche/UCREC03.md) · [UCCE01](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE01.md)
+- **Exigences non fonctionnelles** : `ENF19` (tags `enf/…`)
+- **Code** : `domain/model/tests/service_test.go:1557` · `domain/model/tests/service_test.go:2401`
 - **Fonctions** : [ModelService.GetChildren](../docs/code/fonctions/model.ModelService.GetChildren.md) · [ModelService.AddFull](../docs/code/fonctions/model.ModelService.AddFull.md)
 - **Tickets liés** : [FT-027 — Intégration continue absente du dépôt](FT-027-integration-continue-absente-du-depot.md)
 

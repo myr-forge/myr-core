@@ -48,7 +48,7 @@ Réécrire ces commentaires pour décrire le jeton de session opaque.
 ## Liens
 
 - **Specs** : [DC_D1_Auth_Identity](../specs/3-Conception/DC_D1_Auth_Identity.md)
-- **Code** : [adapters/in/rest/handlers.go:295](../adapters/in/rest/handlers.go) · [adapters/in/rest/handlers.go:1707](../adapters/in/rest/handlers.go) · [adapters/in/rest/handlers_network.go:147](../adapters/in/rest/handlers_network.go)
+- **Code** : `adapters/in/rest/handlers.go:295` · `adapters/in/rest/handlers.go:1707` · `adapters/in/rest/handlers_network.go:147`
 
 ## Historique
 

@@ -54,9 +54,9 @@ Ajouter au profil réseau un réglage « lecture publique » (désactivé par d�
 
 ## Liens
 
-- **Use cases** : [UCA01 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md) · [UCA01 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA01.md) · [UCCL01 (analyse)](../specs/2-Analyse/UCCL-Composant_Lecture/UCCL01.md) · [UCCL01 (expression)](../specs/1-Expression/UCCL-Composant_Lecture/UCCL01.md)
-- **Exigences non fonctionnelles** : [ENF12](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
-- **Code** : [adapters/in/rest/server.go:123](../adapters/in/rest/server.go)
+- **Use cases** : [UCA01](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md) · [UCCL01](../specs/2-Analyse/UCCL-Composant_Lecture/UCCL01.md)
+- **Exigences non fonctionnelles** : `ENF12` (tags `enf/…`)
+- **Code** : `adapters/in/rest/server.go:123`
 - **Fonctions** : [ModelService.List](../docs/code/fonctions/model.ModelService.List.md) · [ModelService.Get](../docs/code/fonctions/model.ModelService.Get.md)
 
 ## Historique

@@ -50,9 +50,9 @@ Annotations `#incoherence` : `specs/1-Expression/UCA-Compte_et_Acces/UCA01.md` (
 
 ## Liens
 
-- **Use cases** : [UCA01 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md) · [UCA01 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA01.md)
+- **Use cases** : [UCA01](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md)
 - **Specs** : [Conception_intro](../specs/3-Conception/Conception_intro.md)
-- **Code** : [adapters/out/localstorage/request_store.go](../adapters/out/localstorage/request_store.go)
+- **Code** : `adapters/out/localstorage/request_store.go`
 - **Fonctions** : [RequestStore.Save](../docs/code/fonctions/identity.RequestStore.Save.md)
 - **Tickets liés** : [FT-005 — Aucune approbation manuelle des demandes de compte](FT-005-aucune-approbation-manuelle-des-demandes-de-compte.md)
 

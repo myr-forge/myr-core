@@ -161,39 +161,12 @@ Ce tableau complète — sans le remplacer — `DC_CLI_Model.md` §6 point 2/3, 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Use cases cités**
-- UCA06 — Vérifier les possessions : [expression](../1-Expression/UCA-Compte_et_Acces/UCA06.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA06.md)
-- UCPI04 — Définir un prix sur un Composant proprietaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI04.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI04.md)
-- UCPI05 — Définir un prix sur un Module proprietaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI05.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI05.md)
-- UCREC01 — Rechercher une référence existante : [expression](../1-Expression/UCREC-Recherche/UCREC01.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC01.md)
-- UCREC02 — Rechercher les Composants compatibles : [expression](../1-Expression/UCREC-Recherche/UCREC02.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC02.md)
-- UCREC03 — Rechercher les versions des Composants : [expression](../1-Expression/UCREC-Recherche/UCREC03.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC03.md)
-- UCREC04 — Rechercher les Modules qui utilisent un Composant : [expression](../1-Expression/UCREC-Recherche/UCREC04.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC04.md)
-- UCREC05 — Exporter BOM Module : [expression](../1-Expression/UCREC-Recherche/UCREC05.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC05.md)
-
-**Règles métier**
-- [RM02 — Catégorie d'asset obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM11 — Critères de compatibilité d'interfaces](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM15 — Instance indépendante](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
-- [RM16 — État draft](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-
-**Exigences non fonctionnelles**
-- [ENF03 — Génération d'une BOM module](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [Architecture_Composition](Architecture_Composition.md)
-- [DC_CLI_Model](DC_CLI_Model.md)
-- [DC_D2_Administration](DC_D2_Administration.md)
-- [DC_D7_Payment](DC_D7_Payment.md)
-- [Securite](Securite.md)
-
-**Cité par**
-- [API_REST](API_REST.md)
-- [Conception_intro](Conception_intro.md)
-- [DC_CLI_Model](DC_CLI_Model.md)
-- [todo (conception)](todo.md)
+**Étape suivante — code, par section**
+- [§ 1. Objectif](DC_D8_Recherche.md#1.%20Objectif) → [ModelService.Get](../../docs/code/fonctions/model.ModelService.Get.md) · [ModelService.List](../../docs/code/fonctions/model.ModelService.List.md)
+- [§ 3. UCREC03 — Arbre de versions (généalogie `ParentID`)](DC_D8_Recherche.md#3.%20UCREC03%20—%20Arbre%20de%20versions%20%28généalogie%20`ParentID`%29) → [ModelService.GetChildren](../../docs/code/fonctions/model.ModelService.GetChildren.md)
+- [§ 4. UCREC04 — Modules utilisant un composant](DC_D8_Recherche.md#4.%20UCREC04%20—%20Modules%20utilisant%20un%20composant) → [ModelService.ListModules](../../docs/code/fonctions/model.ModelService.ListModules.md)
+- [§ 6. Décisions de conception](DC_D8_Recherche.md#6.%20Décisions%20de%20conception) → [ModelService.GetChildren](../../docs/code/fonctions/model.ModelService.GetChildren.md)
+- [§ 7. Écarts code → specs](DC_D8_Recherche.md#7.%20Écarts%20code%20→%20specs) → [ModelService.GetChildren](../../docs/code/fonctions/model.ModelService.GetChildren.md)
+- [§ 8. CLI et REST](DC_D8_Recherche.md#8.%20CLI%20et%20REST) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [REST /api/modules/](../../docs/code/routes/REST%20api-modules.md) · [CLI myr model](../../docs/code/commandes/CLI%20myr-model.md)
 
 <!-- liens-obsidian:end -->

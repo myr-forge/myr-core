@@ -104,22 +104,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
-- [UCADM06 — couche analyse](../../2-Analyse/UCADM-Administration/UCADM06.md)
-- [Traçabilité UCADM06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM06)
-
-**Use cases cités**
-- [UCADM01 — Ajouter une organisation au réseau](UCADM01.md)
-- [UCADM07 — Gérer les rôles](UCADM07.md)
-
-**Cité par**
-- [UCADM01 (expression)](UCADM01.md)
-- [UCADM07 (expression)](UCADM07.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCADM01 (analyse)](../../2-Analyse/UCADM-Administration/UCADM01.md)
-- [UCADM07 (analyse)](../../2-Analyse/UCADM-Administration/UCADM07.md)
-- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
-- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+**Étape suivante — analyse**
+- [UCADM06 — analyse](../../2-Analyse/UCADM-Administration/UCADM06.md)
 
 <!-- liens-obsidian:end -->

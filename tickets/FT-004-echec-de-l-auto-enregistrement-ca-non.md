@@ -51,9 +51,9 @@ Journaliser l'échec sans données sensibles (pseudo et cause, jamais le secret)
 
 ## Liens
 
-- **Use cases** : [UCA01 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md) · [UCA01 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA01.md)
-- **Exigences non fonctionnelles** : [ENF11](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
-- **Code** : [adapters/in/rest/handlers_identity.go:248](../adapters/in/rest/handlers_identity.go)
+- **Use cases** : [UCA01](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md)
+- **Exigences non fonctionnelles** : `ENF11` (tags `enf/…`)
+- **Code** : `adapters/in/rest/handlers_identity.go:248`
 - **Fonctions** : [IdentityService.AutoRegister](../docs/code/fonctions/identity.IdentityService.AutoRegister.md)
 - **Tickets liés** : [FT-003 — Le client CA du serveur REST ignore le profil réseau actif](FT-003-le-client-ca-du-serveur-rest-ignore.md)
 

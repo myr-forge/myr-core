@@ -54,11 +54,11 @@ Refuser `SubmitModule` (et les mutations de composition : ajout/retrait d'instan
 
 ## Liens
 
-- **Use cases** : [UCMOD06 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD06.md) · [UCMOD06 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD06.md)
-- **Règles métier** : [RM19](../specs/1-Expression/Regles_Metier.md) · [RM06](../specs/1-Expression/Regles_Metier.md)
-- **Exigences non fonctionnelles** : [ENF28](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
+- **Use cases** : [UCMOD06](../specs/2-Analyse/UCMOD-Module/UCMOD06.md)
+- **Règles métier** : `RM19`, `RM06` (tags `rm/…`)
+- **Exigences non fonctionnelles** : `ENF28` (tags `enf/…`)
 - **Specs** : [Sequence_soumission_module](../specs/3-Conception/Sequence_soumission_module.md)
-- **Code** : [domain/model/service.go:838](../domain/model/service.go)
+- **Code** : `domain/model/service.go:838`
 - **Fonctions** : [ModelService.SubmitModule](../docs/code/fonctions/model.ModelService.SubmitModule.md) · [ModelService.Submit](../docs/code/fonctions/model.ModelService.Submit.md) · [ModelService.AddAssetToWorkspace](../docs/code/fonctions/model.ModelService.AddAssetToWorkspace.md)
 - **Tickets liés** : [FT-018 — Identifiant de bloc des versions de module simulé](FT-018-identifiant-de-bloc-des-versions-de-module.md)
 

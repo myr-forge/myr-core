@@ -110,29 +110,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
-- [UCAM07 — couche analyse](../../2-Analyse/UCAM-Assemblage_Module/UCAM07.md)
-- [Traçabilité UCAM07 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM07)
-
-**Exigences fonctionnelles couvertes**
-- [EF23 — Choisir un asset d'accroche (fastener) pour une liaison](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCAM01 — Liaison entre interfaces](UCAM01.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [UCAM01 (expression)](UCAM01.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCAM01 (analyse)](../../2-Analyse/UCAM-Assemblage_Module/UCAM01.md)
-- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCAM07 — analyse](../../2-Analyse/UCAM-Assemblage_Module/UCAM07.md)
 
 <!-- liens-obsidian:end -->

@@ -60,9 +60,9 @@ Pour chaque citation : la remplacer par la commande ou route actuelle (ex. `myr 
 
 ## Liens
 
-- **Use cases** : [UCAM08 (analyse)](../specs/2-Analyse/UCAM-Assemblage_Module/UCAM08.md) · [UCAM08 (expression)](../specs/1-Expression/UCAM-Assemblage_Module/UCAM08.md) · [UCMOD01 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD01.md) · [UCMOD01 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD01.md) · [UCMOD04 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD04.md) · [UCMOD04 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD04.md) · [UCDEV02 (analyse)](../specs/2-Analyse/UCDEV-Developpement/UCDEV02.md) · [UCDEV02 (expression)](../specs/1-Expression/UCDEV-Developpement/UCDEV02.md) · [UCADM07 (analyse)](../specs/2-Analyse/UCADM-Administration/UCADM07.md) · [UCADM07 (expression)](../specs/1-Expression/UCADM-Administration/UCADM07.md) · [UCA03 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA03.md) · [UCA03 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA03.md) · [UCA04 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA04.md) · [UCA04 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA04.md)
+- **Use cases** : [UCAM08](../specs/2-Analyse/UCAM-Assemblage_Module/UCAM08.md) · [UCMOD01](../specs/2-Analyse/UCMOD-Module/UCMOD01.md) · [UCMOD04](../specs/2-Analyse/UCMOD-Module/UCMOD04.md) · [UCDEV02](../specs/2-Analyse/UCDEV-Developpement/UCDEV02.md) · [UCADM07](../specs/2-Analyse/UCADM-Administration/UCADM07.md) · [UCA03](../specs/2-Analyse/UCA-Compte_et_Acces/UCA03.md) · [UCA04](../specs/2-Analyse/UCA-Compte_et_Acces/UCA04.md)
 - **Specs** : [DC_CLI_Model](../specs/3-Conception/DC_CLI_Model.md) · [DC_CLI_Admin](../specs/3-Conception/DC_CLI_Admin.md)
-- **Code** : [adapters/in/cli/root.go:47](../adapters/in/cli/root.go)
+- **Code** : `adapters/in/cli/root.go:47`
 - **Tickets liés** : [FT-022 — Date de retrait des routes legacy /api/modules](FT-022-date-de-retrait-des-routes-legacy-api.md) · [FT-035 — Roadmap et tableaux d'état d'implémentation obsolètes](FT-035-roadmap-et-tableaux-d-etat-d-implementation.md)
 
 ## Historique

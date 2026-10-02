@@ -390,35 +390,15 @@ Annuaire des peers : déclaré dans `configtx.yaml`, distribué sur le ledger. C
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Use cases cités**
-- UCADM01 — Ajouter une organisation au réseau : [expression](../1-Expression/UCADM-Administration/UCADM01.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM01.md)
-- UCADM02 — Créer un réseau indépendant : [expression](../1-Expression/UCADM-Administration/UCADM02.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM02.md)
-- UCADM03 — Ajouter un nœud à un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM03.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM03.md)
-- UCADM04 — Retirer un nœud d'un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM04.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM04.md)
-- UCADM05 — Démanteler un réseau (dev/test uniquement) : [expression](../1-Expression/UCADM-Administration/UCADM05.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM05.md)
-- UCADM06 — Attribuer des rôles à une organisation : [expression](../1-Expression/UCADM-Administration/UCADM06.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM06.md)
-- UCADM07 — Gérer les rôles : [expression](../1-Expression/UCADM-Administration/UCADM07.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM07.md)
-
-**Règles métier**
-- [RM07 — Validation préalable obligatoire](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM27 — Nombre minimum de nœuds actifs](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-- [RM34 — Rôle admin protégé](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-- [RM35 — Révocation en cascade à la suppression d'un rôle](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-- [RM36 — Nom de rôle unique](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-- [RM37 — Multi-rôles par organisation](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
-
-**Exigences non fonctionnelles**
-- [ENF18 — Isolation du domaine métier](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [DC_CLI_Admin](DC_CLI_Admin.md)
-
-**Cité par**
-- [Conception_intro](Conception_intro.md)
-- [DC_D8_Recherche](DC_D8_Recherche.md)
-- [todo (conception)](todo.md)
+**Étape suivante — code, par section**
+- [§ NetworkProfile (domain/network)](DC_D2_Administration.md#NetworkProfile%20%28domain/network%29) → [REST /api/networks/active](../../docs/code/routes/REST%20api-networks-active.md) · [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md)
+- [§ Champ à ajouter à NetworkProfile](DC_D2_Administration.md#Champ%20à%20ajouter%20à%20NetworkProfile) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md)
+- [§ Role (domain/channel)](DC_D2_Administration.md#Role%20%28domain/channel%29) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md) · [CLI myr role](../../docs/code/commandes/CLI%20myr-role.md) · [CLI myr role delete](../../docs/code/commandes/CLI%20myr-role-delete.md)
+- [§ 4. Politique d'accès réseau](DC_D2_Administration.md#4.%20Politique%20d'accès%20réseau) → [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md)
+- [§ Port entrant — NetworkService](DC_D2_Administration.md#Port%20entrant%20—%20NetworkService) → [NetworkService.AddPeer](../../docs/code/fonctions/network.NetworkService.AddPeer.md) · [NetworkService.GetActive](../../docs/code/fonctions/network.NetworkService.GetActive.md) · [NetworkService.TestConnection](../../docs/code/fonctions/network.NetworkService.TestConnection.md)
+- [§ Port entrant — ChannelService](DC_D2_Administration.md#Port%20entrant%20—%20ChannelService) → [ChannelConfigPort.AddNode](../../docs/code/fonctions/channel.ChannelConfigPort.AddNode.md) · [ChannelConfigPort.AddOrganisation](../../docs/code/fonctions/channel.ChannelConfigPort.AddOrganisation.md) · [ChannelConfigPort.RemoveNode](../../docs/code/fonctions/channel.ChannelConfigPort.RemoveNode.md) · [ChannelService.AddNode](../../docs/code/fonctions/channel.ChannelService.AddNode.md) · [ChannelService.AddOrganisation](../../docs/code/fonctions/channel.ChannelService.AddOrganisation.md) · [ChannelService.RemoveNode](../../docs/code/fonctions/channel.ChannelService.RemoveNode.md)
+- [§ 7. Décisions de conception](DC_D2_Administration.md#7.%20Décisions%20de%20conception) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [NetworkService.Delete](../../docs/code/fonctions/network.NetworkService.Delete.md) · [Repo.Delete](../../docs/code/fonctions/network.Repo.Delete.md)
+- [§ 8. Écarts code → specs](DC_D2_Administration.md#8.%20Écarts%20code%20→%20specs) → [CLI myr network](../../docs/code/commandes/CLI%20myr-network.md) · [CLI myr org](../../docs/code/commandes/CLI%20myr-org.md) · [CLI myr node](../../docs/code/commandes/CLI%20myr-node.md) · [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [ChannelConfigPort.AddNode](../../docs/code/fonctions/channel.ChannelConfigPort.AddNode.md) · [ChannelConfigPort.AddOrganisation](../../docs/code/fonctions/channel.ChannelConfigPort.AddOrganisation.md) · [ChannelConfigPort.RemoveNode](../../docs/code/fonctions/channel.ChannelConfigPort.RemoveNode.md) · [ChannelService.AddNode](../../docs/code/fonctions/channel.ChannelService.AddNode.md) · [ChannelService.AddOrganisation](../../docs/code/fonctions/channel.ChannelService.AddOrganisation.md) · [ChannelService.RemoveNode](../../docs/code/fonctions/channel.ChannelService.RemoveNode.md)
+- [§ 9. Informations manquantes](DC_D2_Administration.md#9.%20Informations%20manquantes) → [CLI myr network create](../../docs/code/commandes/CLI%20myr-network-create.md) · [CLI myr network import](../../docs/code/commandes/CLI%20myr-network-import.md)
 
 <!-- liens-obsidian:end -->

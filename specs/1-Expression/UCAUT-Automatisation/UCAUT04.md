@@ -79,24 +79,7 @@ stop
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCAUT — Automatisation](../../Carte_des_specs.md#UCAUT%20—%20Automatisation)
-- [UCAUT04 — couche analyse](../../2-Analyse/UCAUT-Automatisation/UCAUT04.md)
-- [Traçabilité UCAUT04 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAUT04)
-
-**Exigences fonctionnelles couvertes**
-- [EF47 — Gérer les versions SCM d'un modèle 3D](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCAUT04 — analyse](../../2-Analyse/UCAUT-Automatisation/UCAUT04.md)
 
 <!-- liens-obsidian:end -->

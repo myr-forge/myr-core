@@ -53,9 +53,9 @@ Convenir d'une date avec myr-web, signaler la dépréciation (en-tête `Deprecat
 
 ## Liens
 
-- **Use cases** : [UCMOD01 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD01.md) · [UCMOD01 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD01.md) · [UCMOD04 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD04.md) · [UCMOD04 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD04.md) · [UCMOD06 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD06.md) · [UCMOD06 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD06.md)
+- **Use cases** : [UCMOD01](../specs/2-Analyse/UCMOD-Module/UCMOD01.md) · [UCMOD04](../specs/2-Analyse/UCMOD-Module/UCMOD04.md) · [UCMOD06](../specs/2-Analyse/UCMOD-Module/UCMOD06.md)
 - **Specs** : [API_REST](../specs/3-Conception/API_REST.md)
-- **Code** : [adapters/in/rest/server.go:25](../adapters/in/rest/server.go) · [adapters/in/rest/server.go:132](../adapters/in/rest/server.go)
+- **Code** : `adapters/in/rest/server.go:25` · `adapters/in/rest/server.go:132`
 - **Tickets liés** : [FT-021 — Identifiant d'un asset décomposé en module](FT-021-identifiant-d-un-asset-decompose-en-module.md) · [FT-031 — Les specs citent des commandes et routes qui n'existent pas](FT-031-les-specs-citent-des-commandes-et-routes.md)
 
 ## Historique

@@ -40,27 +40,7 @@ UCPAR01/02 étaient des use cases 100 % frontend (changement de langue de l'inte
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
-- [UCPI03 — couche expression](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI03.md)
-- [Traçabilité UCPI03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI03)
-
-**Use cases cités**
-- [UCPI04 — Définir un prix sur un Composant proprietaire](UCPI04.md)
-- [UCPI05 — Définir un prix sur un Module proprietaire](UCPI05.md)
-
-**Règles métier**
-- [RM23 — Distribution automatique des commissions](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM24 — Répartition proportionnelle multi-auteurs](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM25 — Transfert de propriété définitif](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM26 — Traçabilité du clonage inter-réseaux](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [todo (analyse)](../todo.md)
-- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
-- [todo (conception)](../../3-Conception/todo.md)
+**Étape suivante — conception**
+- **DC_D7_Payment** : [§ DC — D7 : Propriété Intellectuelle & Paiements](../../3-Conception/DC_D7_Payment.md#DC%20—%20D7%20:%20Propriété%20Intellectuelle%20&%20Paiements) · [§ 7. Écarts code → specs](../../3-Conception/DC_D7_Payment.md#7.%20Écarts%20code%20→%20specs)
 
 <!-- liens-obsidian:end -->

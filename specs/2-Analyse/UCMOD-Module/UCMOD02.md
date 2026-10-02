@@ -160,43 +160,9 @@ REST --> Client : 200 moduleDTO
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
-- [UCMOD02 — couche expression](../../1-Expression/UCMOD-Module/UCMOD02.md)
-- [Traçabilité UCMOD02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD02)
-
-**Exigences fonctionnelles couvertes**
-- [EF28 — Ajouter un module existant à l'espace de travail](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCAM01 — Liaison entre interfaces](../UCAM-Assemblage_Module/UCAM01.md)
-- [UCCL01 — Faire une recherche par filtre](../UCCL-Composant_Lecture/UCCL01.md)
-- [UCMOD01 — Créer un Module](UCMOD01.md)
-- [UCREC01 — Rechercher une référence existante](../UCREC-Recherche/UCREC01.md)
-
-**Règles métier**
-- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM15 — Instance indépendante](../../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF28 — Immuabilité des transactions blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [UCAM08 (expression)](../../1-Expression/UCAM-Assemblage_Module/UCAM08.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
-- [UCMOD03 (analyse)](UCMOD03.md)
-- [todo (analyse)](../todo.md)
-- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29)
+- **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 3.6 `myr model assembly add` / `remove` (ex-`myr module add-assembly`/`remove-assembly`, ADR-11)](../../3-Conception/DC_CLI_Model.md#3.6%20`myr%20model%20assembly%20add`%20/%20`remove`%20%28ex-`myr%20module%20add-assembly`/`remove-assembly`,%20ADR-11%29) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case)
+- **Sequence_soumission_module** : [§ Séquence — Composition et soumission d'un module (D5/D6)](../../3-Conception/Sequence_soumission_module.md#Séquence%20—%20Composition%20et%20soumission%20d'un%20module%20%28D5/D6%29)
 
 <!-- liens-obsidian:end -->

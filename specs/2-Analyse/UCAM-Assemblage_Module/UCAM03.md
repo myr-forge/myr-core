@@ -225,45 +225,9 @@ end
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
-- [UCAM03 — couche expression](../../1-Expression/UCAM-Assemblage_Module/UCAM03.md)
-- [Traçabilité UCAM03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM03)
-
-**Exigences fonctionnelles couvertes**
-- [EF20 — Définir une interface sur un composant](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-- [EF25 — Garantir un slot virtuel disponible sur chaque asset](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Règles métier**
-- [RM09 — Interface à usage unique](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM10 — Vérification de compatibilité automatique](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM11 — Critères de compatibilité d'interfaces](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [UCAM05 (expression)](../../1-Expression/UCAM-Assemblage_Module/UCAM05.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCAM01 (analyse)](UCAM01.md)
-- [UCAM02 (analyse)](UCAM02.md)
-- [UCAM05 (analyse)](UCAM05.md)
-- [UCCE01 (analyse)](../UCCE-Composant_Ecriture/UCCE01.md)
-- [UCCE06 (analyse)](../UCCE-Composant_Ecriture/UCCE06.md)
-- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
-- [todo (analyse)](../todo.md)
-- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
-- [Conception_intro](../../3-Conception/Conception_intro.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [Sequence_soumission_asset](../../3-Conception/Sequence_soumission_asset.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29) · [§ 3. Diagramme d'états — Model3D](../../3-Conception/Architecture_Composition.md#3.%20Diagramme%20d'états%20—%20Model3D)
+- **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 3.1 `myr model add`](../../3-Conception/DC_CLI_Model.md#3.1%20`myr%20model%20add`) · [§ 3.2 `myr model interface add`](../../3-Conception/DC_CLI_Model.md#3.2%20`myr%20model%20interface%20add`) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case)
+- **Sequence_soumission_asset** : [§ 3. Chemin brouillon — `draft: true` puis `Submit` (E8)](../../3-Conception/Sequence_soumission_asset.md#3.%20Chemin%20brouillon%20—%20`draft:%20true`%20puis%20`Submit`%20%28E8%29)
 
 <!-- liens-obsidian:end -->

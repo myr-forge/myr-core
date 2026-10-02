@@ -97,31 +97,7 @@ stop
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
-- [UCADM02 — couche analyse](../../2-Analyse/UCADM-Administration/UCADM02.md)
-- [Traçabilité UCADM02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM02)
-
-**Exigences fonctionnelles couvertes**
-- [EF07 — Créer un réseau blockchain indépendant](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
-- [UCADM05 (expression)](UCADM05.md)
-- [UCDEV02 (expression)](../UCDEV-Developpement/UCDEV02.md)
-- [todo (expression)](../todo.md)
-- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
-- [UCADM01 (analyse)](../../2-Analyse/UCADM-Administration/UCADM01.md)
-- [UCADM03 (analyse)](../../2-Analyse/UCADM-Administration/UCADM03.md)
-- [UCADM04 (analyse)](../../2-Analyse/UCADM-Administration/UCADM04.md)
-- [UCADM05 (analyse)](../../2-Analyse/UCADM-Administration/UCADM05.md)
-- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
-- [todo (analyse)](../../2-Analyse/todo.md)
-- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — analyse**
+- [UCADM02 — analyse](../../2-Analyse/UCADM-Administration/UCADM02.md)
 
 <!-- liens-obsidian:end -->

@@ -52,10 +52,10 @@ Aucune occurrence de `WALLET_ENCRYPT_KEY` dans le code Go (hors `vendor/`).
 
 ## Liens
 
-- **Use cases** : [UCA02 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA02.md) · [UCA02 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA02.md)
-- **Exigences non fonctionnelles** : [ENF10](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
+- **Use cases** : [UCA02](../specs/2-Analyse/UCA-Compte_et_Acces/UCA02.md)
+- **Exigences non fonctionnelles** : `ENF10` (tags `enf/…`)
 - **Specs** : [Conception_intro — ADR-03](../specs/3-Conception/Conception_intro.md) · [Securite](../specs/3-Conception/Securite.md)
-- **Code** : [domain/identity/service.go](../domain/identity/service.go)
+- **Code** : `domain/identity/service.go`
 - **Tickets liés** : [FT-035 — Roadmap et tableaux d'état d'implémentation obsolètes](FT-035-roadmap-et-tableaux-d-etat-d-implementation.md)
 
 ## Historique

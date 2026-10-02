@@ -54,9 +54,9 @@ Trancher chaque écart (PO), mettre à jour les tableaux, lever les annotations 
 
 ## Liens
 
-- **Use cases** : [UCCE02 (analyse)](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE02.md) · [UCCE02 (expression)](../specs/1-Expression/UCCE-Composant_Ecriture/UCCE02.md) · [UCMOD03 (analyse)](../specs/2-Analyse/UCMOD-Module/UCMOD03.md) · [UCMOD03 (expression)](../specs/1-Expression/UCMOD-Module/UCMOD03.md)
+- **Use cases** : [UCCE02](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE02.md) · [UCMOD03](../specs/2-Analyse/UCMOD-Module/UCMOD03.md)
 - **Specs** : [API_REST](../specs/3-Conception/API_REST.md)
-- **Code** : [adapters/in/rest/handlers.go:914](../adapters/in/rest/handlers.go)
+- **Code** : `adapters/in/rest/handlers.go:914`
 - **Tickets liés** : [FT-022 — Date de retrait des routes legacy /api/modules](FT-022-date-de-retrait-des-routes-legacy-api.md)
 
 ## Historique

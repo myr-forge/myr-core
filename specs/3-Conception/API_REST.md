@@ -263,74 +263,17 @@ En cas d'écart entre les tableaux `§1`–`§12` de ce document et `api/swagger
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Use cases cités**
-- UCA01 — Création d'un compte : [expression](../1-Expression/UCA-Compte_et_Acces/UCA01.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA01.md)
-- UCADM01 — Ajouter une organisation au réseau : [expression](../1-Expression/UCADM-Administration/UCADM01.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM01.md)
-- UCADM03 — Ajouter un nœud à un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM03.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM03.md)
-- UCADM04 — Retirer un nœud d'un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM04.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM04.md)
-- UCAM02 — Visualiser les interfaces physiques de composants : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM02.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM02.md)
-- UCAM05 — Transformation d'un composant en module : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM05.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM05.md)
-- UCAM08 — Retirer une instance de composant d'un Module : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM08.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM08.md)
-- UCAM09 — Décomposition assistée d'un composant assemblage : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM09.md)
-- UCAUT01 — Fabrication/Livraison d'un Composant : [expression](../1-Expression/UCAUT-Automatisation/UCAUT01.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT01.md)
-- UCAUT03 — Ajouter un modèle 3D depuis un logiciel CAO : [expression](../1-Expression/UCAUT-Automatisation/UCAUT03.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT03.md)
-- UCAUT04 — Gestion SCM d'un modèle 3D : [expression](../1-Expression/UCAUT-Automatisation/UCAUT04.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT04.md)
-- UCCE01 — Ajout d'un composant Physique : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE01.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE01.md)
-- UCCE02 — Configurer un Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE02.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE02.md)
-- UCCE03 — Ajout d'un composant Numérique : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE03.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE03.md)
-- UCCE07 — Supprimer un Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE07.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE07.md)
-- UCCL01 — Faire une recherche par filtre : [expression](../1-Expression/UCCL-Composant_Lecture/UCCL01.md) · [analyse](../2-Analyse/UCCL-Composant_Lecture/UCCL01.md)
-- UCMOD01 — Créer un Module : [expression](../1-Expression/UCMOD-Module/UCMOD01.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD01.md)
-- UCMOD03 — Modifier les métadonnées d'un Module : [expression](../1-Expression/UCMOD-Module/UCMOD03.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD03.md)
-- UCMOD04 — Visualiser les composants d'un Module : [expression](../1-Expression/UCMOD-Module/UCMOD04.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD04.md)
-- UCMOD08 — Supprimer un Module : [expression](../1-Expression/UCMOD-Module/UCMOD08.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD08.md)
-- UCPI01 — Commander un Module complet : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md)
-- UCPI04 — Définir un prix sur un Composant proprietaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI04.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI04.md)
-- UCPI07 — Transfert de propriété intellectuelle : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI07.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI07.md)
-- UCPI08 — Cloner un Composant sur un réseau exterieur : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI08.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI08.md)
-- UCREC02 — Rechercher les Composants compatibles : [expression](../1-Expression/UCREC-Recherche/UCREC02.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC02.md)
-- UCREC03 — Rechercher les versions des Composants : [expression](../1-Expression/UCREC-Recherche/UCREC03.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC03.md)
-- UCREC04 — Rechercher les Modules qui utilisent un Composant : [expression](../1-Expression/UCREC-Recherche/UCREC04.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC04.md)
-- UCREC05 — Exporter BOM Module : [expression](../1-Expression/UCREC-Recherche/UCREC05.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC05.md)
-
-**Règles métier**
-- [RM01 — Anti-plagiat obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM08 — Masquage local, ledger jamais modifié](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM14 — Suppression en cascade des connexions](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
-- [RM17 — Assemblage requis pour soumission (module uniquement)](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM19 — Fork d'un asset soumis](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM23 — Distribution automatique des commissions](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM24 — Répartition proportionnelle multi-auteurs](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM30 — Calcul automatique du prix d'un module](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM31 — Modification de prix — effet sur les commandes futures uniquement](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM32 — Asset à prix nul — librement disponible](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM33 — Devise unique par réseau](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM39 — Filiation d'un découpage](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM40 — Proposition de découpage non engageante](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM41 — Compatibilité toujours vérifiée pour une connexion suggérée](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-- [RM42 — Traçabilité et alerte des emplacements externes](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-
-**Exigences non fonctionnelles**
-- [ENF18 — Isolation du domaine métier](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF25 — Licence du code source](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [Conception_intro](Conception_intro.md)
-- [DC_CLI_Admin](DC_CLI_Admin.md)
-- [DC_CLI_Model](DC_CLI_Model.md)
-- [DC_D1_Auth_Identity](DC_D1_Auth_Identity.md)
-- [DC_D7_Payment](DC_D7_Payment.md)
-- [DC_D8_Recherche](DC_D8_Recherche.md)
-- [DC_D9_Automatisation](DC_D9_Automatisation.md)
-- [Modele_Domaine](Modele_Domaine.md)
-- [Securite](Securite.md)
-- [roadmap_dev](../roadmap_dev.md)
-
-**Cité par**
-- [Conception_intro](Conception_intro.md)
-- [DC_D1_Auth_Identity](DC_D1_Auth_Identity.md)
+**Étape suivante — code, par section**
+- [§ 2. D1 — Identité & RBAC](API_REST.md#2.%20D1%20—%20Identité%20&%20RBAC) → [REST /api/identity/policy](../../docs/code/routes/REST%20api-identity-policy.md) · [REST /api/identity/enroll](../../docs/code/routes/REST%20api-identity-enroll.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/requests](../../docs/code/routes/REST%20api-identity-requests.md) · [REST /api/identity/wallets](../../docs/code/routes/REST%20api-identity-wallets.md) · [REST /api/identity/status](../../docs/code/routes/REST%20api-identity-status.md) · [CLI myr role](../../docs/code/commandes/CLI%20myr-role.md)
+- [§ 3. D2 — Administration](API_REST.md#3.%20D2%20—%20Administration) → [REST /api/channels](../../docs/code/routes/REST%20api-channels.md) · [REST /api/networks](../../docs/code/routes/REST%20api-networks.md) · [REST /api/networks/active](../../docs/code/routes/REST%20api-networks-active.md) · [REST /api/admin/sessions/](../../docs/code/routes/REST%20api-admin-sessions.md) · [CLI myr org add](../../docs/code/commandes/CLI%20myr-org-add.md) · [CLI myr node add](../../docs/code/commandes/CLI%20myr-node-add.md)
+- [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29) → [REST /api/modules/](../../docs/code/routes/REST%20api-modules.md) · [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [ModelService.AddAssetToWorkspace](../../docs/code/fonctions/model.ModelService.AddAssetToWorkspace.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.Submit](../../docs/code/fonctions/model.ModelService.Submit.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
+- [§ 5. D5 — Connexions et Interfaces (Composition de Module)](API_REST.md#5.%20D5%20—%20Connexions%20et%20Interfaces%20%28Composition%20de%20Module%29) → [REST /api/connections/](../../docs/code/routes/REST%20api-connections.md) · [REST /api/assembly-links](../../docs/code/routes/REST%20api-assembly-links.md) · [REST /api/virtual-connect](../../docs/code/routes/REST%20api-virtual-connect.md) · [REST /api/interfaces/](../../docs/code/routes/REST%20api-interfaces.md) · [REST /api/refs](../../docs/code/routes/REST%20api-refs.md) · [REST /api/refs/categories](../../docs/code/routes/REST%20api-refs-categories.md) · [REST /api/refs/types](../../docs/code/routes/REST%20api-refs-types.md) · [REST /api/refs/units](../../docs/code/routes/REST%20api-refs-units.md)
+- [§ 6. D6 — Modules (retiré, fusionné dans §4 — ADR-11)](API_REST.md#6.%20D6%20—%20Modules%20%28retiré,%20fusionné%20dans%20§4%20—%20ADR-11%29) → [REST /api/modules/](../../docs/code/routes/REST%20api-modules.md) · [REST /api/components/](../../docs/code/routes/REST%20api-components.md)
+- [§ 7. Licences](API_REST.md#7.%20Licences) → [REST /api/licenses/](../../docs/code/routes/REST%20api-licenses.md)
+- [§ 8. Miniatures](API_REST.md#8.%20Miniatures) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md)
+- [§ 8bis. Vérification d'intégrité blockchain](API_REST.md#8bis.%20Vérification%20d'intégrité%20blockchain) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md)
+- [§ 8ter. Traçabilité et alerte des emplacements externes (RM42)](API_REST.md#8ter.%20Traçabilité%20et%20alerte%20des%20emplacements%20externes%20%28RM42%29) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md)
+- [§ 9. Infrastructure](API_REST.md#9.%20Infrastructure) → [REST /api/ping](../../docs/code/routes/REST%20api-ping.md) · [REST /api/status](../../docs/code/routes/REST%20api-status.md) · [REST /api/health](../../docs/code/routes/REST%20api-health.md)
+- [§ 12. D9 — Automatisation avancée](API_REST.md#12.%20D9%20—%20Automatisation%20avancée) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md)
 
 <!-- liens-obsidian:end -->

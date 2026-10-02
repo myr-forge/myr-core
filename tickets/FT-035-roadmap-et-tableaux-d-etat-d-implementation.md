@@ -55,8 +55,9 @@ Rafraîchir la roadmap et la limiter au backlog fonctionnel ; renvoyer les faits
 
 ## Liens
 
-- **Use cases** : [UCA02 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA02.md) · [UCA02 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA02.md)
+- **Use cases** : [UCA02](../specs/2-Analyse/UCA-Compte_et_Acces/UCA02.md)
 - **Specs** : [roadmap_dev](../specs/roadmap_dev.md)
+- **Code** : `chaincode/model/contract.go` · `adapters/out/ipfs/storage.go` · `adapters/in/rest/server.go:25` · `adapters/in/rest/handlers_identity.go:391`
 - **Tickets liés** : [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md) · [FT-008 — Wallets non chiffrés au repos](FT-008-wallets-non-chiffres-au-repos.md) · [FT-024 — Chaincode myrcc absent du canal de production](FT-024-chaincode-myrcc-absent-du-canal-de-production.md) · [FT-031 — Les specs citent des commandes et routes qui n'existent pas](FT-031-les-specs-citent-des-commandes-et-routes.md)
 
 ## Historique

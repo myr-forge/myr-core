@@ -220,37 +220,10 @@ mux.HandleFunc("/api/components", func(w http.ResponseWriter, r *http.Request) {
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCCL — Composant Lecture](../../Carte_des_specs.md#UCCL%20—%20Composant%20Lecture)
-- [UCCL01 — couche expression](../../1-Expression/UCCL-Composant_Lecture/UCCL01.md)
-- [Traçabilité UCCL01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCL01)
-
-**Exigences fonctionnelles couvertes**
-- [EF17 — Rechercher et filtrer les composants disponibles sur le réseau](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Exigences non fonctionnelles**
-- [ENF01 — Temps de réponse des endpoints REST](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF14 — Nombre d'assets par réseau](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [Architecture_Hexagonale](../../3-Conception/Architecture_Hexagonale.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [UCMOD02 (expression)](../../1-Expression/UCMOD-Module/UCMOD02.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCMOD02 (analyse)](../UCMOD-Module/UCMOD02.md)
-- [UCMOD07 (analyse)](../UCMOD-Module/UCMOD07.md)
-- [UCREC01 (analyse)](../UCREC-Recherche/UCREC01.md)
-- [todo (analyse)](../todo.md)
-- [API_REST](../../3-Conception/API_REST.md)
-- [Chaincode](../../3-Conception/Chaincode.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D1_Auth_Identity](../../3-Conception/DC_D1_Auth_Identity.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **API_REST** : [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](../../3-Conception/API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29)
+- **Chaincode** : [§ 4. Fonctions chaincode — Store/Read (D3/D4/D6)](../../3-Conception/Chaincode.md#4.%20Fonctions%20chaincode%20—%20Store/Read%20%28D3/D4/D6%29)
+- **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case) · [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **DC_D1_Auth_Identity** : [§ 6. Décisions de conception](../../3-Conception/DC_D1_Auth_Identity.md#6.%20Décisions%20de%20conception)
 
 <!-- liens-obsidian:end -->

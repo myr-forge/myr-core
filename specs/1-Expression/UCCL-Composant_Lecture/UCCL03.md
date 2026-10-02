@@ -109,17 +109,7 @@ endif
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCCL — Composant Lecture](../../Carte_des_specs.md#UCCL%20—%20Composant%20Lecture)
-- [Traçabilité UCCL03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCL03)
-
-**Règles métier**
-- [RM01 — Anti-plagiat obligatoire](../Regles_Metier.md#1.%20Assets%20et%20composants)
-
-**Cité par**
-- [UCCE01 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE01.md)
-- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [Modele_Domaine](../../3-Conception/Modele_Domaine.md)
+**Étape suivante — analyse**
+- _Pas d'analyse pour ce use case._
 
 <!-- liens-obsidian:end -->

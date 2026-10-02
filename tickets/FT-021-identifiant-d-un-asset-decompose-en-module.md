@@ -52,9 +52,10 @@ Trancher entre les deux options en tenant compte de l'immuabilité (un asset sou
 
 ## Liens
 
-- **Use cases** : [UCAM05 (analyse)](../specs/2-Analyse/UCAM-Assemblage_Module/UCAM05.md) · [UCAM05 (expression)](../specs/1-Expression/UCAM-Assemblage_Module/UCAM05.md) · [UCAM09 (expression)](../specs/1-Expression/UCAM-Assemblage_Module/UCAM09.md)
-- **Règles métier** : [RM39](../specs/1-Expression/Regles_Metier.md)
+- **Use cases** : [UCAM05](../specs/2-Analyse/UCAM-Assemblage_Module/UCAM05.md) · [UCAM09](../specs/1-Expression/UCAM-Assemblage_Module/UCAM09.md)
+- **Règles métier** : `RM39` (tags `rm/…`)
 - **Specs** : [Conception_intro — ADR-11](../specs/3-Conception/Conception_intro.md)
+- **Code** : `domain/model/service.go:85` · `domain/model/service.go:880`
 - **Fonctions** : [ModelService.AddFull](../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.AddAssetToWorkspace](../docs/code/fonctions/model.ModelService.AddAssetToWorkspace.md)
 - **Tickets liés** : [FT-014 — Catégorie d'asset decoupage absente](FT-014-categorie-d-asset-decoupage-absente.md) · [FT-022 — Date de retrait des routes legacy /api/modules](FT-022-date-de-retrait-des-routes-legacy-api.md)
 

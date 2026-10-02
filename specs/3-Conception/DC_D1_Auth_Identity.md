@@ -351,27 +351,15 @@ note right : Implémentée par sessionStore (mémoire + JSON optionnel)\net redi
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Use cases cités**
-- UCA01 — Création d'un compte : [expression](../1-Expression/UCA-Compte_et_Acces/UCA01.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA01.md)
-- UCCL01 — Faire une recherche par filtre : [expression](../1-Expression/UCCL-Composant_Lecture/UCCL01.md) · [analyse](../2-Analyse/UCCL-Composant_Lecture/UCCL01.md)
-- UCMOD04 — Visualiser les composants d'un Module : [expression](../1-Expression/UCMOD-Module/UCMOD04.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD04.md)
-
-**Documents cités**
-- [API_REST](API_REST.md)
-- [Conception_intro](Conception_intro.md)
-- [roadmap_dev](../roadmap_dev.md)
-
-**Cité par**
-- [UCDEV01 (analyse)](../2-Analyse/UCDEV-Developpement/UCDEV01.md)
-- [API_REST](API_REST.md)
-- [Conception_intro](Conception_intro.md)
-- [DC_CLI_Identity](DC_CLI_Identity.md)
-- [DC_D9_Automatisation](DC_D9_Automatisation.md)
-- [Modele_Domaine](Modele_Domaine.md)
-- [todo (conception)](todo.md)
-- [roadmap_dev](../roadmap_dev.md)
+**Étape suivante — code, par section**
+- [§ 2. Diagramme de classes](DC_D1_Auth_Identity.md#2.%20Diagramme%20de%20classes) → [RoleService.HasPermission](../../docs/code/fonctions/role.RoleService.HasPermission.md)
+- [§ AccountRequest (`domain/identity`)](DC_D1_Auth_Identity.md#AccountRequest%20%28`domain/identity`%29) → [REST /api/identity/policy](../../docs/code/routes/REST%20api-identity-policy.md) · [CLI myr network update](../../docs/code/commandes/CLI%20myr-network-update.md) · [IdentityService.AutoRegister](../../docs/code/fonctions/identity.IdentityService.AutoRegister.md)
+- [§ Role / Permission (`domain/role`)](DC_D1_Auth_Identity.md#Role%20/%20Permission%20%28`domain/role`%29) → [CLI myr role](../../docs/code/commandes/CLI%20myr-role.md) · [RoleService.HasPermission](../../docs/code/fonctions/role.RoleService.HasPermission.md)
+- [§ Session (`domain/session`)](DC_D1_Auth_Identity.md#Session%20%28`domain/session`%29) → [CLI myr session create](../../docs/code/commandes/CLI%20myr-session-create.md) · [CLI myr session show](../../docs/code/commandes/CLI%20myr-session-show.md) · [CLI myr session logout](../../docs/code/commandes/CLI%20myr-session-logout.md) · [SessionService.Logout](../../docs/code/fonctions/session.SessionService.Logout.md) · [Store.Clear](../../docs/code/fonctions/session.Store.Clear.md)
+- [§ 4. Relations et dépendances](DC_D1_Auth_Identity.md#4.%20Relations%20et%20dépendances) → [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [RoleService.HasPermission](../../docs/code/fonctions/role.RoleService.HasPermission.md)
+- [§ Port entrant — IdentityService](DC_D1_Auth_Identity.md#Port%20entrant%20—%20IdentityService) → [IdentityService.AutoRegister](../../docs/code/fonctions/identity.IdentityService.AutoRegister.md) · [IdentityService.ListLocalWallets](../../docs/code/fonctions/identity.IdentityService.ListLocalWallets.md) · [IdentityService.ListRequests](../../docs/code/fonctions/identity.IdentityService.ListRequests.md) · [IdentityService.LoadGuestWallet](../../docs/code/fonctions/identity.IdentityService.LoadGuestWallet.md) · [IdentityService.SetRole](../../docs/code/fonctions/identity.IdentityService.SetRole.md) · [IdentityService.SubmitRequest](../../docs/code/fonctions/identity.IdentityService.SubmitRequest.md) · [IdentityService.WalletDir](../../docs/code/fonctions/identity.IdentityService.WalletDir.md)
+- [§ Port sortant — CAPort / RequestStore (identity)](DC_D1_Auth_Identity.md#Port%20sortant%20—%20CAPort%20/%20RequestStore%20%28identity%29) → [CAPort.UpdateAttributes](../../docs/code/fonctions/identity.CAPort.UpdateAttributes.md)
+- [§ Port entrant/sortant — RoleService / Repo (role)](DC_D1_Auth_Identity.md#Port%20entrant/sortant%20—%20RoleService%20/%20Repo%20%28role%29) → [Repo.FindByName](../../docs/code/fonctions/role.Repo.FindByName.md) · [RoleService.HasPermission](../../docs/code/fonctions/role.RoleService.HasPermission.md)
+- [§ 6. Décisions de conception](DC_D1_Auth_Identity.md#6.%20Décisions%20de%20conception) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [REST /api/modules/](../../docs/code/routes/REST%20api-modules.md) · [CLI myr session create](../../docs/code/commandes/CLI%20myr-session-create.md)
 
 <!-- liens-obsidian:end -->

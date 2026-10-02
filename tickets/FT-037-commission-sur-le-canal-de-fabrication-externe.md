@@ -52,9 +52,10 @@ Décision PO, puis mise à jour de DC_D7_Payment (DC-D7-09) et RM29.
 
 ## Liens
 
-- **Use cases** : [UCAUT01 (analyse)](../specs/2-Analyse/UCAUT-Automatisation/UCAUT01.md) · [UCAUT01 (expression)](../specs/1-Expression/UCAUT-Automatisation/UCAUT01.md) · [UCPI01 (analyse)](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md) · [UCPI01 (expression)](../specs/1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md)
-- **Règles métier** : [RM24](../specs/1-Expression/Regles_Metier.md) · [RM29](../specs/1-Expression/Regles_Metier.md)
+- **Use cases** : [UCAUT01](../specs/2-Analyse/UCAUT-Automatisation/UCAUT01.md) · [UCPI01](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md)
+- **Règles métier** : `RM24`, `RM29` (tags `rm/…`)
 - **Specs** : [Conception_intro — ADR-09](../specs/3-Conception/Conception_intro.md) · [DC_D7_Payment](../specs/3-Conception/DC_D7_Payment.md)
+- **Code** : `domain/payment/entity.go` · `domain/payment/service.go`
 - **Tickets liés** : [FT-036 — Commissions : composition seule ou aussi chaîne de dérivation](FT-036-commissions-composition-seule-ou-aussi-chaine-de.md)
 
 ## Historique

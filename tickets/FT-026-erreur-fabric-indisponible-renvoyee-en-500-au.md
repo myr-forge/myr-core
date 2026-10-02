@@ -51,9 +51,9 @@ Traduire dans l'adapter Fabric les erreurs gRPC d'indisponibilité (`FailedPreco
 
 ## Liens
 
-- **Use cases** : [UCCL01 (analyse)](../specs/2-Analyse/UCCL-Composant_Lecture/UCCL01.md) · [UCCL01 (expression)](../specs/1-Expression/UCCL-Composant_Lecture/UCCL01.md)
-- **Exigences non fonctionnelles** : [ENF05](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
-- **Code** : [adapters/in/rest/handlers.go:2060](../adapters/in/rest/handlers.go) · [adapters/out/fabric/blockchain.go](../adapters/out/fabric/blockchain.go)
+- **Use cases** : [UCCL01](../specs/2-Analyse/UCCL-Composant_Lecture/UCCL01.md)
+- **Exigences non fonctionnelles** : `ENF05` (tags `enf/…`)
+- **Code** : `adapters/in/rest/handlers.go:2060` · `adapters/out/fabric/blockchain.go`
 - **Fonctions** : [BlockchainPort.ListModelRecords](../docs/code/fonctions/model.BlockchainPort.ListModelRecords.md)
 - **Tickets liés** : [FT-024 — Chaincode myrcc absent du canal de production](FT-024-chaincode-myrcc-absent-du-canal-de-production.md)
 

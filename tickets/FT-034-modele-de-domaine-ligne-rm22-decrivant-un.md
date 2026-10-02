@@ -51,9 +51,10 @@ Réécrire la ligne RM22 selon la règle cible, retirer l'annotation « non vali
 
 ## Liens
 
-- **Use cases** : [UCA02 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA02.md) · [UCA02 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA02.md)
-- **Règles métier** : [RM22](../specs/1-Expression/Regles_Metier.md)
+- **Use cases** : [UCA02](../specs/2-Analyse/UCA-Compte_et_Acces/UCA02.md)
+- **Règles métier** : `RM22` (tags `rm/…`)
 - **Specs** : [Modele_Domaine](../specs/3-Conception/Modele_Domaine.md)
+- **Code** : `adapters/in/rest/handlers_identity.go:388` · `adapters/in/rest/handlers.go:640`
 - **Tickets liés** : [FT-001 — Propriété des assets non contrôlée côté serveur](FT-001-propriete-des-assets-non-controlee-cote-serveur.md) · [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md)
 
 ## Historique

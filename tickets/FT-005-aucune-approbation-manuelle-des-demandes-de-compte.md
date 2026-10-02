@@ -55,10 +55,10 @@ Ajouter au domaine une approbation (et un refus) de demande par un administrateu
 
 ## Liens
 
-- **Use cases** : [UCA01 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md) · [UCA01 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA01.md) · [UCA08 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA08.md) · [UCA08 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA08.md)
-- **Règles métier** : [RM20](../specs/1-Expression/Regles_Metier.md) · [RM22](../specs/1-Expression/Regles_Metier.md)
+- **Use cases** : [UCA01](../specs/2-Analyse/UCA-Compte_et_Acces/UCA01.md) · [UCA08](../specs/2-Analyse/UCA-Compte_et_Acces/UCA08.md)
+- **Règles métier** : `RM20`, `RM22` (tags `rm/…`)
 - **Specs** : [DC_D1_Auth_Identity](../specs/3-Conception/DC_D1_Auth_Identity.md) · [DC_CLI_Identity](../specs/3-Conception/DC_CLI_Identity.md)
-- **Code** : [domain/identity/port_in.go](../domain/identity/port_in.go) · [adapters/out/localstorage/request_store.go](../adapters/out/localstorage/request_store.go)
+- **Code** : `domain/identity/port_in.go` · `adapters/out/localstorage/request_store.go`
 - **Fonctions** : [IdentityService.ListRequests](../docs/code/fonctions/identity.IdentityService.ListRequests.md) · [IdentityService.AutoRegister](../docs/code/fonctions/identity.IdentityService.AutoRegister.md)
 - **Tickets liés** : [FT-003 — Le client CA du serveur REST ignore le profil réseau actif](FT-003-le-client-ca-du-serveur-rest-ignore.md) · [FT-006 — Demandes de compte stockées sur un seul nœud](FT-006-demandes-de-compte-stockees-sur-un-seul.md)
 

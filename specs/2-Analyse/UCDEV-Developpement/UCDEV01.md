@@ -173,33 +173,36 @@ end
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCDEV — Developpement](../../Carte_des_specs.md#UCDEV%20—%20Developpement)
-- [UCDEV01 — couche expression](../../1-Expression/UCDEV-Developpement/UCDEV01.md)
-- [Traçabilité UCDEV01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCDEV01)
+**Étape suivante — conception**
+- _Aucun document de conception ne traite ce use case : la chaîne s'arrête à l'analyse._
 
-**Exigences fonctionnelles couvertes**
-- [EF55 — Exposer une API REST pour les intégrations tierces](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Règles métier**
-- [RM01 — Anti-plagiat obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
-- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM08 — Masquage local, ledger jamais modifié](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [DC_D1_Auth_Identity](../../3-Conception/DC_D1_Auth_Identity.md)
-- [roadmap_dev](../../roadmap_dev.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [UCDEV02 (expression)](../../1-Expression/UCDEV-Developpement/UCDEV02.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCDEV02 (analyse)](UCDEV02.md)
-- [todo (analyse)](../todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Code cité par cette analyse (sans conception : non relié)**
+- REST `/api/identity/session`
+- REST `/api/identity/guest`
+- REST `/api/components/`
+- REST `/api/identity/policy`
+- REST `/api/identity/enroll`
+- REST `/api/identity/request`
+- REST `/api/identity/requests`
+- REST `/api/identity/wallets`
+- REST `/api/identity/status`
+- REST `/api/connections/`
+- REST `/api/assembly-links`
+- REST `/api/virtual-connect`
+- REST `/api/modules/`
+- REST `/api/interfaces/`
+- REST `/api/refs`
+- REST `/api/refs/categories`
+- REST `/api/refs/types`
+- REST `/api/refs/units`
+- REST `/api/channels`
+- REST `/api/networks`
+- REST `/api/networks/active`
+- REST `/api/ping`
+- REST `/api/status`
+- REST `/api/health`
+- REST `/api/licenses/`
+- REST `/api/admin/sessions/`
+- `RoleService.HasPermission`
 
 <!-- liens-obsidian:end -->

@@ -224,34 +224,14 @@ Au-delà, `HTTP 429` est retourné.
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Use cases cités**
-- UCA06 — Vérifier les possessions : [expression](../1-Expression/UCA-Compte_et_Acces/UCA06.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA06.md)
-
-**Règles métier**
-- [RM07 — Validation préalable obligatoire](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM19 — Fork d'un asset soumis](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
-
-**Exigences non fonctionnelles**
-- [ENF10 — Chiffrement des wallets Fabric](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF12 — Contrôle d'accès par rôle](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF18 — Isolation du domaine métier](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF27 — Protection des données personnelles (RGPD)](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF28 — Immuabilité des transactions blockchain](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [Conception_intro](Conception_intro.md)
-- [roadmap_dev](../roadmap_dev.md)
-
-**Cité par**
-- [UCA06 (analyse)](../2-Analyse/UCA-Compte_et_Acces/UCA06.md)
-- [UCREC04 (analyse)](../2-Analyse/UCREC-Recherche/UCREC04.md)
-- [API_REST](API_REST.md)
-- [Conception_intro](Conception_intro.md)
-- [DC_D8_Recherche](DC_D8_Recherche.md)
-- [Deploiement](Deploiement.md)
-- [Modele_Domaine](Modele_Domaine.md)
+**Étape suivante — code, par section**
+- [§ 1. Vue d'ensemble](Securite.md#1.%20Vue%20d'ensemble) → [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [RoleService.HasPermission](../../docs/code/fonctions/role.RoleService.HasPermission.md)
+- [§ Flux d'authentification](Securite.md#Flux%20d'authentification) → [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
+- [§ Révocation](Securite.md#Révocation) → [REST /api/admin/sessions/](../../docs/code/routes/REST%20api-admin-sessions.md)
+- [§ Cycle de vie d'une identité](Securite.md#Cycle%20de%20vie%20d'une%20identité) → [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
+- [§ Rôles et permissions](Securite.md#Rôles%20et%20permissions) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md) · [CLI myr identity set-role](../../docs/code/commandes/CLI%20myr-identity-set-role.md)
+- [§ Middleware de contrôle d'accès](Securite.md#Middleware%20de%20contrôle%20d'accès) → [RoleService.HasPermission](../../docs/code/fonctions/role.RoleService.HasPermission.md)
+- [§ 8. Rate limiting](Securite.md#8.%20Rate%20limiting) → [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md)
+- [§ 9. Surfaces d'attaque et mitigations](Securite.md#9.%20Surfaces%20d'attaque%20et%20mitigations) → [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [REST /api/admin/sessions/](../../docs/code/routes/REST%20api-admin-sessions.md)
 
 <!-- liens-obsidian:end -->

@@ -49,8 +49,9 @@ Unifier les scripts (un seul chemin de déploiement), vérifier la présence de 
 
 ## Liens
 
-- **Exigences non fonctionnelles** : [ENF07](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
+- **Exigences non fonctionnelles** : `ENF07` (tags `enf/…`)
 - **Specs** : [Deploiement](../specs/3-Conception/Deploiement.md)
+- **Code** : `scripts/deploy.ps1` · `scripts/deploy_api.ps1` · `cmd/api/main.go:84` _(dossier `scripts/` non versionné : liens valables en local uniquement)_
 - **Tickets liés** : [FT-028 — Mot de passe serveur en clair dans le script de déploiement](FT-028-mot-de-passe-serveur-en-clair-dans.md) · [FT-025 — Le serveur signale un nœud Fabric déconnecté](FT-025-le-serveur-signale-un-nud-fabric-deconnecte.md)
 
 ## Historique

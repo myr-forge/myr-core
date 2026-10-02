@@ -181,41 +181,10 @@ REST --> Browser : 200 [{commission, amount, date, modelID}]
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
-- [UCPI02 — couche expression](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI02.md)
-- [Traçabilité UCPI02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI02)
-
-**Exigences fonctionnelles couvertes**
-- [EF31 — Distribuer automatiquement les commissions aux auteurs à la livraison](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCAUT01 — Fabrication/Livraison d'un Composant](../UCAUT-Automatisation/UCAUT01.md)
-- [UCPI01 — Commander un Module complet](UCPI01.md)
-
-**Règles métier**
-- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM23 — Distribution automatique des commissions](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-- [RM24 — Répartition proportionnelle multi-auteurs](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-
-**Exigences non fonctionnelles**
-- [ENF02 — Temps de soumission d'une transaction Fabric](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [Regles_Metier](../../1-Expression/Regles_Metier.md)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [todo (analyse)](../todo.md)
-- [Chaincode](../../3-Conception/Chaincode.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
-- [Modele_Domaine](../../3-Conception/Modele_Domaine.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **Chaincode** : [§ 5. Fonctions chaincode — Commissions (D7, à implémenter)](../../3-Conception/Chaincode.md#5.%20Fonctions%20chaincode%20—%20Commissions%20%28D7,%20à%20implémenter%29)
+- **DC_CLI_Model** : [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **DC_D7_Payment** : [§ DC — D7 : Propriété Intellectuelle & Paiements](../../3-Conception/DC_D7_Payment.md#DC%20—%20D7%20:%20Propriété%20Intellectuelle%20&%20Paiements) · [§ 3. Entités à concevoir (RM23/RM24)](../../3-Conception/DC_D7_Payment.md#3.%20Entités%20à%20concevoir%20%28RM23/RM24%29) · [§ 4. Algorithme de distribution des commissions (RM23/RM24)](../../3-Conception/DC_D7_Payment.md#4.%20Algorithme%20de%20distribution%20des%20commissions%20%28RM23/RM24%29) · [§ 7. Écarts code → specs](../../3-Conception/DC_D7_Payment.md#7.%20Écarts%20code%20→%20specs)
+- **Modele_Domaine** : [§ Agrégat Paiement (D7)](../../3-Conception/Modele_Domaine.md#Agrégat%20Paiement%20%28D7%29)
 
 <!-- liens-obsidian:end -->

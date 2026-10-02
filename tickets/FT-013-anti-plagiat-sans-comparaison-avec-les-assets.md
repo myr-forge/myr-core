@@ -54,11 +54,11 @@ Un même fichier peut être enregistré plusieurs fois comme création originale
 
 ## Liens
 
-- **Use cases** : [UCCE01 (analyse)](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE01.md) · [UCCE01 (expression)](../specs/1-Expression/UCCE-Composant_Ecriture/UCCE01.md) · [UCPI06 (analyse)](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI06.md) · [UCPI06 (expression)](../specs/1-Expression/UCPI-Propriete_Intellectuelle/UCPI06.md)
-- **Règles métier** : [RM01](../specs/1-Expression/Regles_Metier.md)
-- **Exigences non fonctionnelles** : [ENF29](../specs/1-Expression/Exigences_Non_Fonctionnelles.md)
+- **Use cases** : [UCCE01](../specs/2-Analyse/UCCE-Composant_Ecriture/UCCE01.md) · [UCPI06](../specs/2-Analyse/UCPI-Propriete_Intellectuelle/UCPI06.md)
+- **Règles métier** : `RM01` (tags `rm/…`)
+- **Exigences non fonctionnelles** : `ENF29` (tags `enf/…`)
 - **Specs** : [Sequence_soumission_asset](../specs/3-Conception/Sequence_soumission_asset.md)
-- **Code** : [domain/model/service.go:85](../domain/model/service.go)
+- **Code** : `domain/model/service.go:85`
 - **Fonctions** : [ModelService.AddFull](../docs/code/fonctions/model.ModelService.AddFull.md)
 
 ## Historique

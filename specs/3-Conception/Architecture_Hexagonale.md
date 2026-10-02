@@ -336,20 +336,10 @@ main.go
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs](../Carte_des_specs.md)
-
-**Exigences non fonctionnelles**
-- [ENF18 — Isolation du domaine métier](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF25 — Licence du code source](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Documents cités**
-- [DC_CLI_Admin](DC_CLI_Admin.md)
-
-**Cité par**
-- [UCCL01 (analyse)](../2-Analyse/UCCL-Composant_Lecture/UCCL01.md)
-- [Conception_intro](Conception_intro.md)
-- [DC_CLI_Model](DC_CLI_Model.md)
-- [Deploiement](Deploiement.md)
+**Étape suivante — code, par section**
+- [§ 1.2 Adapters remplaçables par configuration](Architecture_Hexagonale.md#1.2%20Adapters%20remplaçables%20par%20configuration) → [CLI myr network add](../../docs/code/commandes/CLI%20myr-network-add.md)
+- [§ Routes REST — niveaux d'accès](Architecture_Hexagonale.md#Routes%20REST%20—%20niveaux%20d'accès) → [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/policy](../../docs/code/routes/REST%20api-identity-policy.md) · [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [REST /api/modules/](../../docs/code/routes/REST%20api-modules.md) · [REST /api/refs](../../docs/code/routes/REST%20api-refs.md) · [REST /api/assembly-links](../../docs/code/routes/REST%20api-assembly-links.md) · [REST /api/admin/sessions/](../../docs/code/routes/REST%20api-admin-sessions.md) · [RoleService.HasPermission](../../docs/code/fonctions/role.RoleService.HasPermission.md)
+- [§ 5. Adapters sortants (OUT)](Architecture_Hexagonale.md#5.%20Adapters%20sortants%20%28OUT%29) → [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
+- [§ 6. Mode de fallback (JSONBlockchain)](Architecture_Hexagonale.md#6.%20Mode%20de%20fallback%20%28JSONBlockchain%29) → [BlockchainPort.GetModelRecord](../../docs/code/fonctions/model.BlockchainPort.GetModelRecord.md) · [BlockchainPort.ListModelRecords](../../docs/code/fonctions/model.BlockchainPort.ListModelRecords.md) · [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [BlockchainPort.VerifyIntegrity](../../docs/code/fonctions/model.BlockchainPort.VerifyIntegrity.md)
 
 <!-- liens-obsidian:end -->

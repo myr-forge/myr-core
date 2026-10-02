@@ -51,8 +51,9 @@ Soit modéliser les capacités manquantes (détails de connexion, rôle courant)
 
 ## Liens
 
-- **Use cases** : [UCA04 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA04.md) · [UCA04 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA04.md) · [UCA07 (analyse)](../specs/2-Analyse/UCA-Compte_et_Acces/UCA07.md) · [UCA07 (expression)](../specs/1-Expression/UCA-Compte_et_Acces/UCA07.md)
+- **Use cases** : [UCA04](../specs/2-Analyse/UCA-Compte_et_Acces/UCA04.md) · [UCA07](../specs/2-Analyse/UCA-Compte_et_Acces/UCA07.md)
 - **Specs** : [DC_CLI_Identity](../specs/3-Conception/DC_CLI_Identity.md)
+- **Code** : `domain/identity/service.go:115` · `adapters/in/rest/handlers_identity.go:150` · `adapters/in/cli/identity.go:74`
 - **Fonctions** : [IdentityService.GetStatus](../docs/code/fonctions/identity.IdentityService.GetStatus.md)
 - **Tickets liés** : [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md)
 

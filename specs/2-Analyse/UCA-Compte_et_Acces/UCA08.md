@@ -122,34 +122,7 @@ CLI --> ADM : "Rôle de alice@org1 mis à jour : contributor.\nLe nouveau rôle 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
-- [UCA08 — couche expression](../../1-Expression/UCA-Compte_et_Acces/UCA08.md)
-- [Traçabilité UCA08 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA08)
-
-**Use cases cités**
-- [UCA01 — Création d'un compte](UCA01.md)
-- [UCA02 — Se Connecter](UCA02.md)
-- [UCA05 — Vérification des accès du rôle attribué](UCA05.md)
-
-**Règles métier**
-- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
-
-**Exigences non fonctionnelles**
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [UCA01 (expression)](../../1-Expression/UCA-Compte_et_Acces/UCA01.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [UCA01 (analyse)](UCA01.md)
-- [UCA02 (analyse)](UCA02.md)
-- [UCA05 (analyse)](UCA05.md)
-- [UCA07 (analyse)](UCA07.md)
-- [todo (analyse)](../todo.md)
-- [DC_CLI_Identity](../../3-Conception/DC_CLI_Identity.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **DC_CLI_Identity** : [§ DC — CLI Identité & Session : Référence des commandes `myr identity` / `myr session`](../../3-Conception/DC_CLI_Identity.md#DC%20—%20CLI%20Identité%20&%20Session%20:%20Référence%20des%20commandes%20`myr%20identity`%20/%20`myr%20session`) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Identity.md#2.%20Arbre%20de%20commandes) · [§ 3.4 `myr identity re-enroll`](../../3-Conception/DC_CLI_Identity.md#3.4%20`myr%20identity%20re-enroll`) · [§ 3.7 `myr identity set-role`](../../3-Conception/DC_CLI_Identity.md#3.7%20`myr%20identity%20set-role`)
 
 <!-- liens-obsidian:end -->

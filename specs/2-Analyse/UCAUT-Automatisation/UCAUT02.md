@@ -194,40 +194,8 @@ end
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
-**Navigation**
-- [Carte des specs › UCAUT — Automatisation](../../Carte_des_specs.md#UCAUT%20—%20Automatisation)
-- [UCAUT02 — couche expression](../../1-Expression/UCAUT-Automatisation/UCAUT02.md)
-- [Traçabilité UCAUT02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAUT02)
-
-**Exigences fonctionnelles couvertes**
-- [EF45 — Automatiser la commande en ligne d'un asset](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
-
-**Use cases cités**
-- [UCAUT01 — Fabrication/Livraison d'un Composant](UCAUT01.md)
-- [UCPI01 — Commander un Module complet](../UCPI-Propriete_Intellectuelle/UCPI01.md)
-- [UCPI04 — Définir un prix sur un Composant proprietaire](../UCPI-Propriete_Intellectuelle/UCPI04.md)
-- [UCPI05 — Définir un prix sur un Module proprietaire](../UCPI-Propriete_Intellectuelle/UCPI05.md)
-
-**Règles métier**
-- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
-- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
-- [RM23 — Distribution automatique des commissions](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
-
-**Exigences non fonctionnelles**
-- [ENF01 — Temps de réponse des endpoints REST](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF14 — Nombre d'assets par réseau](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-- [ENF16 — Utilisateurs simultanés par instance](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
-
-**Cité par**
-- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
-- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
-- [todo (expression)](../../1-Expression/todo.md)
-- [Analyse_des_besoins](../Analyse_des_besoins.md)
-- [todo (analyse)](../todo.md)
-- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
-- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
-- [todo (conception)](../../3-Conception/todo.md)
-- [roadmap_dev](../../roadmap_dev.md)
+**Étape suivante — conception**
+- **DC_CLI_Model** : [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **DC_D9_Automatisation** : [§ DC — D9 : Automatisation](../../3-Conception/DC_D9_Automatisation.md#DC%20—%20D9%20:%20Automatisation) · [§ 1. Objectif](../../3-Conception/DC_D9_Automatisation.md#1.%20Objectif) · [§ 3. UCAUT02 — Commande via boutique partenaire (API tierce)](../../3-Conception/DC_D9_Automatisation.md#3.%20UCAUT02%20—%20Commande%20via%20boutique%20partenaire%20%28API%20tierce%29) · [§ 6. Écarts code → specs](../../3-Conception/DC_D9_Automatisation.md#6.%20Écarts%20code%20→%20specs) · [§ 7. CLI et REST cibles](../../3-Conception/DC_D9_Automatisation.md#7.%20CLI%20et%20REST%20cibles)
 
 <!-- liens-obsidian:end -->
