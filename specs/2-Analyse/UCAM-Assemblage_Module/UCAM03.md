@@ -5,6 +5,18 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCAM
+  - domaine/model
+  - uc/UCAM03
+  - rm/RM09
+  - rm/RM10
+  - rm/RM11
+  - rm/RM13
+  - enf/ENF12
+  - enf/ENF18
 ---
 
 # Créer une interface sur un composant
@@ -209,3 +221,49 @@ end
 **EnsureVirtualSlot — idempotence :** La fonction vérifie d'abord si un slot `Virtual: true` existe déjà sur l'asset avant d'en créer un nouveau. Elle est donc idempotente et peut être appelée à tout moment sans risque de duplication.
 
 **Commande CLI équivalente :** Le Flux B (attributs explicites) correspond à `myr model interface add <assetID> --category --type --direction [--value-min --value-max --unit] --tag <tag> [--name <label>]` (voir `DC_CLI_Model.md` § 3.2), qui appelle `ModelService.AddInterface(&iface)` — la même méthode que le handler `POST /api/components/:id/interfaces`. Le Flux A (connexion virtuelle / matérialisation + liaison en une opération) correspond à `myr model link connect-virtual --virtual-iface <id> --physical-iface <id> --tag <tag>`, appelant `ModelService.ConnectVirtualToPhysical()` — la même méthode que le handler `POST /api/virtual-connect`, avec le même maintien du slot virtuel (RM13). Le comportement (règles métier, erreurs) est strictement identique quel que soit le canal ; seul le format de sortie change (texte terminal vs JSON HTTP). Le champ Tag (E2) reste à transmettre explicitement dans les deux cas, puisqu'il n'est pas déductible automatiquement.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
+- [UCAM03 — couche expression](../../1-Expression/UCAM-Assemblage_Module/UCAM03.md)
+- [Traçabilité UCAM03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM03)
+
+**Exigences fonctionnelles couvertes**
+- [EF20 — Définir une interface sur un composant](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+- [EF25 — Garantir un slot virtuel disponible sur chaque asset](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Règles métier**
+- [RM09 — Interface à usage unique](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM10 — Vérification de compatibilité automatique](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM11 — Critères de compatibilité d'interfaces](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCAM05 (expression)](../../1-Expression/UCAM-Assemblage_Module/UCAM05.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCAM01 (analyse)](UCAM01.md)
+- [UCAM02 (analyse)](UCAM02.md)
+- [UCAM05 (analyse)](UCAM05.md)
+- [UCCE01 (analyse)](../UCCE-Composant_Ecriture/UCCE01.md)
+- [UCCE06 (analyse)](../UCCE-Composant_Ecriture/UCCE06.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../todo.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_asset](../../3-Conception/Sequence_soumission_asset.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

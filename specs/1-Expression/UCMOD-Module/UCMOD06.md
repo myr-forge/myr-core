@@ -5,6 +5,13 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD06
+  - rm/RM17
 ---
 
 # Soumettre un module à la blockchain
@@ -125,3 +132,39 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD06 — couche analyse](../../2-Analyse/UCMOD-Module/UCMOD06.md)
+- [Traçabilité UCMOD06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD06)
+
+**Exigences fonctionnelles couvertes**
+- [EF16 — Vérifier la compatibilité de licence lors d'une dérivation](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+- [EF27 — Soumettre un module à la blockchain (ModuleVersion immuable)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCMOD01 — Créer un Module](UCMOD01.md)
+
+**Règles métier**
+- [RM17 — Assemblage requis pour soumission (module uniquement)](../Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCMOD01 (expression)](UCMOD01.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [UCMOD01 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD01.md)
+- [UCMOD03 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD03.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

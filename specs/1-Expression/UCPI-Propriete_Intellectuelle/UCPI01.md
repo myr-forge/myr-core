@@ -4,6 +4,13 @@ titre: "Commander un Module complet"
 probabilite: 5
 impact: 5
 importance: 25
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCPI
+  - domaine/model
+  - domaine/payment
+  - uc/UCPI01
 ---
 
 # Commander un Module complet
@@ -123,3 +130,36 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
+- [UCPI01 — couche analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md)
+- [Traçabilité UCPI01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI01)
+
+**Exigences fonctionnelles couvertes**
+- [EF30 — Commander un module complet (fabrication ou achat en stock)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCAUT01 (analyse)](../../2-Analyse/UCAUT-Automatisation/UCAUT01.md)
+- [UCAUT02 (analyse)](../../2-Analyse/UCAUT-Automatisation/UCAUT02.md)
+- [UCPI02 (analyse)](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI02.md)
+- [UCPI05 (analyse)](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI05.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
+- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
+- [Modele_Domaine](../../3-Conception/Modele_Domaine.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

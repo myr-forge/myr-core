@@ -5,6 +5,16 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCCE
+  - domaine/model
+  - uc/UCCE02
+  - rm/RM03
+  - rm/RM07
+  - enf/ENF12
+  - enf/ENF30
 ---
 
 # Configurer un Composant
@@ -198,3 +208,46 @@ note "Asset parent → Asset dérivé\nC = Commercial  NC = Non-Commercial" as N
 **Vérification de licence manquante dans UpdateAsset :** `service.UpdateAsset()` ne vérifie pas actuellement la compatibilité de licence lors d'une modification. À ajouter : si `req.LicenseID != ""` et que l'asset a un `ParentID`, appeler `CheckLicenseCompatibility(parent.LicenseID, req.LicenseID)` avant `StoreModelRecord`.
 
 **Catalogue de licences :** `service.ListLicenses()` et `service.GetLicense(id)` sont déjà implémentés dans `domain/model/`. L'interface REST d'exposition du catalogue (`GET /api/licenses`) est à créer.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCCE — Composant Ecriture](../../Carte_des_specs.md#UCCE%20—%20Composant%20Ecriture)
+- [UCCE02 — couche expression](../../1-Expression/UCCE-Composant_Ecriture/UCCE02.md)
+- [Traçabilité UCCE02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCE02)
+
+**Exigences fonctionnelles couvertes**
+- [EF12 — Configurer les métadonnées d'un composant](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCMOD03 — Modifier les métadonnées d'un Module](../UCMOD-Module/UCMOD03.md)
+
+**Règles métier**
+- [RM03 — Compatibilité de licence](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCMOD03 (expression)](../../1-Expression/UCMOD-Module/UCMOD03.md)
+- [UCREC01 (expression)](../../1-Expression/UCREC-Recherche/UCREC01.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [UCMOD01 (analyse)](../UCMOD-Module/UCMOD01.md)
+- [UCMOD03 (analyse)](../UCMOD-Module/UCMOD03.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

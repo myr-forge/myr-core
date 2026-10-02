@@ -5,6 +5,18 @@ probabilite: 1
 impact: 5
 importance: 5
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCAUT
+  - domaine/model
+  - domaine/payment
+  - domaine/role
+  - uc/UCAUT04
+  - rm/RM01
+  - rm/RM18
+  - rm/RM22
+  - enf/ENF12
 ---
 
 # Gestion SCM d'un modèle 3D
@@ -169,3 +181,36 @@ REST --> Browser : 200 {diffXML, similarityScore, added[], removed[], modified[]
 - Ce UC est de faible priorité dans la roadmap (priorité "Could have" en MoSCoW) — à implémenter après les UC de plus haute importance
 - Question ouverte : les versions SCM sont-elles stockées uniquement localement (serveur) ou aussi sur la blockchain ? Les stocker sur la blockchain alourdirait les transactions pour un usage intermédiaire de travail
 - **Parité CLI/REST :** conformément au principe de parité, l'enregistrement et la consultation de versions SCM devraient être exposables en CLI. Comme noté ci-dessus, l'entité `SCMVersion` et le store local correspondant n'existent pas encore — des commandes CLI (par ex. `myr model version save/list/diff <id>`) ne pourront être ajoutées qu'une fois ce domaine conçu, en parallèle des routes REST manquantes.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAUT — Automatisation](../../Carte_des_specs.md#UCAUT%20—%20Automatisation)
+- [UCAUT04 — couche expression](../../1-Expression/UCAUT-Automatisation/UCAUT04.md)
+- [Traçabilité UCAUT04 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAUT04)
+
+**Exigences fonctionnelles couvertes**
+- [EF47 — Gérer les versions SCM d'un modèle 3D](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Règles métier**
+- [RM01 — Anti-plagiat obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM18 — ModuleVersion immuable (module uniquement)](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

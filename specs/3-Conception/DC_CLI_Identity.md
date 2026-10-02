@@ -1,3 +1,15 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - domaine/identity
+  - domaine/role
+  - uc/UCA01
+  - uc/UCA02
+  - uc/UCA04
+  - uc/UCA07
+  - uc/UCA08
+---
 # DC — CLI Identité & Session : Référence des commandes `myr identity` / `myr session`
 
 > Phase 3 — Arrington | Use cases : UCA01–02, UCA04, UCA07–08 | Outil : `myr` (`bin/myr-cli`)
@@ -188,3 +200,23 @@ myr session logout
 | DC-CLII-01 | `myr identity request` reproduit l'orchestration (soumission + auto-enregistrement conditionnel) déjà présente dans `handleIdentityRequest` (REST), plutôt que de se limiter à `SubmitRequest` | Nécessaire pour une parité fonctionnelle réelle avec `POST /api/identity/request` (UCA01) — un administrateur agissant pour le compte d'un tiers doit obtenir le même résultat, quel que soit le canal. Cette orchestration (lire la politique réseau puis décider d'auto-enregistrer) vit aujourd'hui dans les deux adapters `in/` plutôt que dans le service domaine — dupplication à surveiller, cf. règle de centralisation (28), non résolue par ce document. |
 | DC-CLII-02 | `myr session` n'a aucune route REST | `domain/session` modélise le compte local de la machine qui exécute le CLI — un client REST n'a pas de « machine locale » à ce sens, cf. `DC_D1_Auth_Identity.md` § 1. |
 | DC-CLII-03 | `myr identity register` et `myr identity guest-wallet load` ne sont pas exposés dans cette itération | Points ouverts (§4, #2 et #3) nécessitant une décision produit avant exposition — pas un oubli d'adapter. |
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCA01 — Création d'un compte : [expression](../1-Expression/UCA-Compte_et_Acces/UCA01.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA01.md)
+- UCA02 — Se Connecter : [expression](../1-Expression/UCA-Compte_et_Acces/UCA02.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA02.md)
+- UCA04 — Vérification de la connexion : [expression](../1-Expression/UCA-Compte_et_Acces/UCA04.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA04.md)
+- UCA07 — Vérification du rôle attribué : [expression](../1-Expression/UCA-Compte_et_Acces/UCA07.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA07.md)
+- UCA08 — Demander un rôle : [expression](../1-Expression/UCA-Compte_et_Acces/UCA08.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA08.md)
+
+**Documents cités**
+- [DC_CLI_Admin](DC_CLI_Admin.md)
+- [DC_CLI_Model](DC_CLI_Model.md)
+- [DC_D1_Auth_Identity](DC_D1_Auth_Identity.md)
+
+<!-- liens-obsidian:end -->

@@ -1,3 +1,8 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+---
 # Déploiement — Infrastructure Myr
 
 > Phase 3 — Arrington | Référence : `specs/3-Conception/Architecture_Hexagonale.md`
@@ -218,3 +223,20 @@ go run ./cmd/mangen  # génère les man pages dans docs/man/
 - **TLS pour myr-api** : le serveur HTTP de `myr-api` ne fait pas TLS lui-même — à placer derrière un reverse proxy (nginx, Caddy) avec certificat Let's Encrypt
 - **Taille maximale de requête (nginx)** : le reverse proxy placé devant `myr-api` (point précédent) applique par défaut une limite de corps de requête (`client_max_body_size 1m` sur nginx) bien en dessous de la taille d'un import par lot de plusieurs fichiers 3D (`POST /api/components/batch`) ou d'un fichier CAO volumineux unique — le rejet se traduit par un `413 Request Entity Too Large` renvoyé par le reverse proxy lui-même, avant que la requête n'atteigne `myr-api` (qui n'impose aucune limite de taille côté Go — voir `adapters/in/rest/handlers.go`, `ParseMultipartForm` ne fait que borner le buffer mémoire, pas la taille totale de la requête). À relever explicitement dans la configuration du vhost du reverse proxy sur le serveur (`client_max_body_size` porté à une valeur couvrant le plus gros import par lot attendu), sinon tout import un peu conséquent échoue côté client sans que `myr-api` ne soit jamais sollicité
 - **Procédure de mise à jour du chaincode** : le versionnement et l'upgrade du chaincode en production (lifecycle Fabric v2) n'est pas documenté
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Documents cités**
+- [Architecture_Hexagonale](Architecture_Hexagonale.md)
+- [Conception_intro](Conception_intro.md)
+- [Securite](Securite.md)
+
+**Cité par**
+- [Conception_intro](Conception_intro.md)
+- [todo (conception)](todo.md)
+
+<!-- liens-obsidian:end -->

@@ -5,6 +5,22 @@ probabilite: 5
 impact: 4
 importance: 20
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCAUT
+  - domaine/model
+  - domaine/payment
+  - domaine/role
+  - uc/UCAUT01
+  - rm/RM07
+  - rm/RM22
+  - rm/RM23
+  - rm/RM24
+  - enf/ENF01
+  - enf/ENF02
+  - enf/ENF12
+  - enf/ENF30
 ---
 
 # Fabrication/Livraison d'un Composant
@@ -207,3 +223,57 @@ REST --> BrowserCons : 200 {status: delivered, timestamp}
 - **Non implémenté** : `ManufacturingPort` et ses adapters (`adapters/out/manufacturing/<partenaire>/`) pour le canal `external_adapter`, ainsi que le champ `OrderItem.FulfillmentChannel` (voir `DC_D7_Payment.md` §3/§5)
 - L'atomicité livraison + commissions dans un seul bloc Fabric est une contrainte forte — Hyperledger Fabric supporte plusieurs écritures dans une seule transaction, mais les limites de taille de bloc sont à surveiller pour les modules avec de nombreux co-auteurs
 - **Parité CLI/REST :** conformément au principe de parité, la confirmation de livraison par un manufactureur devrait être déclenchable en CLI pour son compte. Comme noté ci-dessus, l'entité `Order` et la fonction chaincode `ConfirmDelivery` n'existent pas encore — une commande CLI (par ex. `myr order deliver <id>`) ne pourra être ajoutée qu'une fois ce domaine conçu, en parallèle des routes REST manquantes.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAUT — Automatisation](../../Carte_des_specs.md#UCAUT%20—%20Automatisation)
+- [UCAUT01 — couche expression](../../1-Expression/UCAUT-Automatisation/UCAUT01.md)
+- [Traçabilité UCAUT01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAUT01)
+
+**Exigences fonctionnelles couvertes**
+- [EF31 — Distribuer automatiquement les commissions aux auteurs à la livraison](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+- [EF44 — Automatiser la fabrication et la livraison d'un composant](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCPI01 — Commander un Module complet](../UCPI-Propriete_Intellectuelle/UCPI01.md)
+
+**Règles métier**
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM23 — Distribution automatique des commissions](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM24 — Répartition proportionnelle multi-auteurs](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+
+**Exigences non fonctionnelles**
+- [ENF01 — Temps de réponse des endpoints REST](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF02 — Temps de soumission d'une transaction Fabric](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCAUT02 (analyse)](UCAUT02.md)
+- [UCPI01 (analyse)](../UCPI-Propriete_Intellectuelle/UCPI01.md)
+- [UCPI02 (analyse)](../UCPI-Propriete_Intellectuelle/UCPI02.md)
+- [UCPI04 (analyse)](../UCPI-Propriete_Intellectuelle/UCPI04.md)
+- [UCPI05 (analyse)](../UCPI-Propriete_Intellectuelle/UCPI05.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
+- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
+- [Modele_Domaine](../../3-Conception/Modele_Domaine.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

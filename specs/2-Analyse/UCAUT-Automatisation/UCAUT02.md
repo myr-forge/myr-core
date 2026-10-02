@@ -5,6 +5,21 @@ probabilite: 5
 impact: 3
 importance: 15
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCAUT
+  - domaine/model
+  - domaine/payment
+  - domaine/role
+  - uc/UCAUT02
+  - rm/RM07
+  - rm/RM22
+  - rm/RM23
+  - enf/ENF01
+  - enf/ENF12
+  - enf/ENF14
+  - enf/ENF16
 ---
 
 # Commande en ligne de Asset
@@ -175,3 +190,44 @@ end
 - La gestion du "prix mis à jour entre affichage et commande" (race condition e-commerce classique) nécessite un mécanisme de price lock ou de validation côté client — à discuter avec le PO
 - L'API `GET /api/assets/{id}/price` peut être publique (sans auth) pour faciliter l'intégration — à décider avec le PO
 - **Parité CLI/REST :** conformément au principe de parité, une commande passée par une boutique partenaire via l'API devrait pouvoir être reproduite en CLI pour le compte d'un consommateur. Le volet paiement recoupe `domain/payment.Pay(from, to, modelID, amount)`, déjà exposé via `myr payment pay <from> <to> <modelID> <amount>` — mais comme noté ci-dessus, la récupération de prix en temps réel et l'entité `Order` (statut, adresse, `orderID`) n'existent pas encore : une commande CLI complète ne pourra être ajoutée qu'une fois ce domaine conçu.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAUT — Automatisation](../../Carte_des_specs.md#UCAUT%20—%20Automatisation)
+- [UCAUT02 — couche expression](../../1-Expression/UCAUT-Automatisation/UCAUT02.md)
+- [Traçabilité UCAUT02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAUT02)
+
+**Exigences fonctionnelles couvertes**
+- [EF45 — Automatiser la commande en ligne d'un asset](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAUT01 — Fabrication/Livraison d'un Composant](UCAUT01.md)
+- [UCPI01 — Commander un Module complet](../UCPI-Propriete_Intellectuelle/UCPI01.md)
+- [UCPI04 — Définir un prix sur un Composant proprietaire](../UCPI-Propriete_Intellectuelle/UCPI04.md)
+- [UCPI05 — Définir un prix sur un Module proprietaire](../UCPI-Propriete_Intellectuelle/UCPI05.md)
+
+**Règles métier**
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM23 — Distribution automatique des commissions](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+
+**Exigences non fonctionnelles**
+- [ENF01 — Temps de réponse des endpoints REST](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF14 — Nombre d'assets par réseau](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF16 — Utilisateurs simultanés par instance](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

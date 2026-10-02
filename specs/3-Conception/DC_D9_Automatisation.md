@@ -1,3 +1,20 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - domaine/model
+  - domaine/payment
+  - domaine/role
+  - uc/UCAUT01
+  - uc/UCAUT02
+  - uc/UCAUT03
+  - uc/UCAUT04
+  - rm/RM01
+  - rm/RM07
+  - rm/RM23
+  - rm/RM24
+  - relecture/remarque
+---
 # DC — D9 : Automatisation
 
 > Phase 3 — Arrington | Use cases : UCAUT01–04 | Domaines : `payment`, `model`, `role`
@@ -118,3 +135,39 @@ type VersionDiff struct {
 | `SaveVersion` | `myr model version save <id> --message <msg>` | `POST /api/components/:id/versions` | UCAUT04 |
 | `DiffVersions` / `ExportVersionDiff` | `myr model version diff <id> --from <n> --to <n>` | `GET /api/components/:id/versions/diff?from=&to=` | UCAUT04 |
 | `CreateOrder` (déjà cible `DC_D7_Payment.md`) | — (boutique tierce, pas de CLI dédié) | `POST /api/orders` | UCAUT02 |
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCAUT01 — Fabrication/Livraison d'un Composant : [expression](../1-Expression/UCAUT-Automatisation/UCAUT01.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT01.md)
+- UCAUT02 — Commande en ligne de Asset : [expression](../1-Expression/UCAUT-Automatisation/UCAUT02.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT02.md)
+- UCAUT03 — Ajouter un modèle 3D depuis un logiciel CAO : [expression](../1-Expression/UCAUT-Automatisation/UCAUT03.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT03.md)
+- UCAUT04 — Gestion SCM d'un modèle 3D : [expression](../1-Expression/UCAUT-Automatisation/UCAUT04.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT04.md)
+- UCPI01 — Commander un Module complet : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md)
+
+**Règles métier**
+- [RM01 — Anti-plagiat obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM07 — Validation préalable obligatoire](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM23 — Distribution automatique des commissions](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM24 — Répartition proportionnelle multi-auteurs](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+
+**Documents cités**
+- [Architecture_Composition](Architecture_Composition.md)
+- [Chaincode](Chaincode.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_CLI_Admin](DC_CLI_Admin.md)
+- [DC_D1_Auth_Identity](DC_D1_Auth_Identity.md)
+- [DC_D7_Payment](DC_D7_Payment.md)
+- [Modele_Domaine](Modele_Domaine.md)
+- [roadmap_dev](../roadmap_dev.md)
+
+**Cité par**
+- [API_REST](API_REST.md)
+- [Conception_intro](Conception_intro.md)
+- [todo (conception)](todo.md)
+
+<!-- liens-obsidian:end -->

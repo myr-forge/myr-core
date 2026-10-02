@@ -5,6 +5,14 @@ probabilite: 5
 impact: 5
 importance: 25
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCA
+  - domaine/identity
+  - domaine/role
+  - uc/UCA03
+  - enf/ENF12
 ---
 
 # Se Déconnecter
@@ -101,3 +109,28 @@ Aucune règle métier dédiée. La révocation est une opération d'administrati
 **Pas de révocation en libre-service :** Aucun endpoint `POST /api/identity/logout` ou équivalent n'existe. Si ce comportement est jugé nécessaire, il resterait à concevoir (ex. un endpoint qui révoque le token porté par la requête elle-même, sans besoin de droits admin).
 
 **Durée résiduelle :** un token « oublié » côté client reste exploitable par quiconque le détiendrait pendant jusqu'à 7 jours (`sessionTTL`) — accepté comme risque résiduel en l'absence de logout self-service.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
+- [UCA03 — couche expression](../../1-Expression/UCA-Compte_et_Acces/UCA03.md)
+- [Traçabilité UCA03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA03)
+
+**Exigences fonctionnelles couvertes**
+- [EF03 — Déconnecter un utilisateur et invalider sa session](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

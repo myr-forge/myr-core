@@ -5,6 +5,17 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD03
+  - rm/RM03
+  - rm/RM07
+  - rm/RM19
+  - enf/ENF12
+  - enf/ENF30
 ---
 
 # Modifier les métadonnées d'un Module
@@ -204,3 +215,52 @@ Cet écart ne bloque pas le renommage ou l'ajout de lien, qui sont des métadonn
 **Routage :** `handleModule()` distingue la branche `PATCH /api/modules/:id` des branches `GET`/`DELETE` (UCMOD08) et route le patch vers `UpdateAsset`, exactement comme `handleComponent()` le fait pour `PATCH /api/components/:id` (UCCE02) — même helper de décodage partagé entre les deux routes.
 
 **Commande CLI équivalente :** `myr model update <id> [--name <nom>] [--description <texte>] [--license <id>] [--tags <a,b>] [--add-link <url>]` appelle la même méthode de service (`UpdateAsset`) que `PATCH /api/modules/:id`, avec le même comportement de patch partiel. Voir `specs/3-Conception/DC_CLI_Model.md` § 5.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD03 — couche expression](../../1-Expression/UCMOD-Module/UCMOD03.md)
+- [Traçabilité UCMOD03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD03)
+
+**Exigences fonctionnelles couvertes**
+- [EF61 — Modifier les métadonnées d'un module (nom, description, licence, tags, liens)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM01 — Liaison entre interfaces](../UCAM-Assemblage_Module/UCAM01.md)
+- [UCAM02 — Visualiser les interfaces physiques de composants](../UCAM-Assemblage_Module/UCAM02.md)
+- [UCCE02 — Configurer un Composant](../UCCE-Composant_Ecriture/UCCE02.md)
+- [UCMOD01 — Créer un Module](UCMOD01.md)
+- [UCMOD02 — Ajouter un Module existant](UCMOD02.md)
+- [UCMOD06 — Soumettre un module à la blockchain](UCMOD06.md)
+- [UCMOD08 — Supprimer un Module](UCMOD08.md)
+
+**Règles métier**
+- [RM03 — Compatibilité de licence](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM19 — Fork d'un asset soumis](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCMOD01 (expression)](../../1-Expression/UCMOD-Module/UCMOD01.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCCE02 (analyse)](../UCCE-Composant_Ecriture/UCCE02.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [UCMOD01 (analyse)](UCMOD01.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

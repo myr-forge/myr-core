@@ -5,6 +5,12 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCCE
+  - domaine/model
+  - uc/UCCE02
 ---
 
 # Configurer un Composant
@@ -88,3 +94,32 @@ start
 stop
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCCE — Composant Ecriture](../../Carte_des_specs.md#UCCE%20—%20Composant%20Ecriture)
+- [UCCE02 — couche analyse](../../2-Analyse/UCCE-Composant_Ecriture/UCCE02.md)
+- [Traçabilité UCCE02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCE02)
+
+**Exigences fonctionnelles couvertes**
+- [EF12 — Configurer les métadonnées d'un composant](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCMOD03 (expression)](../UCMOD-Module/UCMOD03.md)
+- [UCREC01 (expression)](../UCREC-Recherche/UCREC01.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [UCMOD01 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD01.md)
+- [UCMOD03 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD03.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

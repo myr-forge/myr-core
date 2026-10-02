@@ -5,6 +5,20 @@ probabilite: 1
 impact: 2
 importance: 2
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCPI
+  - domaine/model
+  - domaine/payment
+  - uc/UCPI09
+  - rm/RM03
+  - rm/RM07
+  - rm/RM22
+  - rm/RM26
+  - enf/ENF03
+  - enf/ENF12
+  - enf/ENF30
 ---
 
 # Cloner un Module sur un réseau exterieur
@@ -187,3 +201,41 @@ end
 - L'état de "clonage en cours" pour la reprise en cas d'échec partiel nécessite un stockage local de l'état d'avancement — table dans SQLite ou fichier JSON dans `adapters/out/localstorage/`
 - Question ouverte : le concepteur doit-il être propriétaire de **tous** les composants, ou suffit-il que les licences soient compatibles ? (Un concepteur peut vouloir cloner un module intégrant des composants d'autrui avec une licence open-source)
 - **Parité CLI/REST :** conformément au principe de parité, le clonage d'un module (orchestration multi-composants) devrait être exposable en CLI. Comme noté ci-dessus, cette orchestration n'existe dans aucun domaine ni route REST — une commande CLI (par ex. `myr module clone <id> --target-network <id>`) ne pourra être ajoutée qu'une fois ce domaine conçu, généralisation de l'écart déjà constaté pour UCPI08.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
+- [UCPI09 — couche expression](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI09.md)
+- [Traçabilité UCPI09 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI09)
+
+**Exigences fonctionnelles couvertes**
+- [EF37 — Cloner un module sur un réseau externe](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCPI08 — Cloner un Composant sur un réseau exterieur](UCPI08.md)
+
+**Règles métier**
+- [RM03 — Compatibilité de licence](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM26 — Traçabilité du clonage inter-réseaux](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+
+**Exigences non fonctionnelles**
+- [ENF03 — Génération d'une BOM module](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

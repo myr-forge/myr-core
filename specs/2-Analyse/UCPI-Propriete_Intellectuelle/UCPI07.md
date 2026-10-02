@@ -5,6 +5,19 @@ probabilite: 1
 impact: 3
 importance: 3
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCPI
+  - domaine/model
+  - domaine/payment
+  - uc/UCPI07
+  - rm/RM07
+  - rm/RM22
+  - rm/RM25
+  - rm/RM26
+  - enf/ENF12
+  - enf/ENF30
 ---
 
 # Transfert de propriété intellectuelle
@@ -182,3 +195,39 @@ end
 - La durée d'expiration du token (48h par défaut) doit être configurable par l'administrateur du réseau
 - Question ouverte : un transfert vers une organisation (pas un individu) est-il supporté ? L'`OwnerID` peut-il être un OrgID ?
 - **Parité CLI/REST :** conformément au principe de parité, l'initiation puis l'acceptation d'un transfert de propriété devraient être exposables en CLI. Comme noté ci-dessus, aucune fonction `InitiateTransfer`/`FinalizeTransfer` n'existe dans `domain/model` ni de route REST correspondante — des commandes CLI (par ex. `myr model transfer initiate/accept <id> ...`) ne pourront être ajoutées qu'une fois ce domaine conçu.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
+- [UCPI07 — couche expression](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI07.md)
+- [Traçabilité UCPI07 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI07)
+
+**Exigences fonctionnelles couvertes**
+- [EF35 — Transférer la propriété intellectuelle d'un asset](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Règles métier**
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM25 — Transfert de propriété définitif](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM26 — Traçabilité du clonage inter-réseaux](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

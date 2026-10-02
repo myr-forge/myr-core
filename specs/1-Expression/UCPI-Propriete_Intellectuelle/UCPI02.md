@@ -4,6 +4,13 @@ titre: "Recevoir une commission sur l'utilisation d'un Module"
 probabilite: 5
 impact: 5
 importance: 25
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCPI
+  - domaine/model
+  - domaine/payment
+  - uc/UCPI02
 ---
 
 # Recevoir une commission sur l'utilisation d'un Module
@@ -93,3 +100,29 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
+- [UCPI02 — couche analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI02.md)
+- [Traçabilité UCPI02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI02)
+
+**Exigences fonctionnelles couvertes**
+- [EF31 — Distribuer automatiquement les commissions aux auteurs à la livraison](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
+- [Modele_Domaine](../../3-Conception/Modele_Domaine.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

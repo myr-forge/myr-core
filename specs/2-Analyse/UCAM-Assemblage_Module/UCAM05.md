@@ -5,6 +5,23 @@ probabilite: 1
 impact: 4
 importance: 4
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCAM
+  - domaine/model
+  - uc/UCAM05
+  - rm/RM02
+  - rm/RM05
+  - rm/RM07
+  - rm/RM08
+  - rm/RM13
+  - rm/RM17
+  - rm/RM18
+  - rm/RM19
+  - enf/ENF12
+  - enf/ENF18
+  - enf/ENF30
 ---
 
 # Transformation d'un composant en module
@@ -207,3 +224,58 @@ const (
 **RM19 — Fork obligatoire (manquant, E5) :** Une fois soumis, le module ne devrait plus être modifiable directement. Ce comportement n'est pas encore contraint dans le code. À documenter dans UCMOD pour traitement.
 
 **Commande CLI équivalente :** `myr model to-module <assetID> --name <nom>` est documentée dans `DC_CLI_Model.md` § 3.7 et § 6 point 1 ; contrairement aux autres UCAM, elle repose sur un écart ouvert : la transformation « découpage » n'a pas de méthode `ModelService` dédiée (pas d'équivalent à `CreateModule`+`AddAssetToWorkspace`+liaisons+`SubmitModule` packagé en une seule opération de service) — ce blocage est le même pour le REST, ce n'est pas un écart spécifique au CLI. Ce point dépend de l'écart E1 (constante `CategoryDecoupage`, voir `Architecture_Composition.md`), qui doit être résolu au niveau du service domaine avant qu'un handler REST ou une commande CLI puisse exposer la transformation. Une fois ce point tranché, la commande CLI enchaîne les mêmes appels de service que la séquence REST ci-dessus (`CreateModule`, `AddAssetToWorkspace` en boucle, `AddAssemblyLink`, `SubmitModule`).
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
+- [UCAM05 — couche expression](../../1-Expression/UCAM-Assemblage_Module/UCAM05.md)
+- [Traçabilité UCAM05 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM05)
+
+**Exigences fonctionnelles couvertes**
+- [EF22 — Transformer un composant en module (découpage en sous-systèmes)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM01 — Liaison entre interfaces](UCAM01.md)
+- [UCAM03 — Créer une interface sur un composant](UCAM03.md)
+- [UCCE07 — Supprimer un Composant](../UCCE-Composant_Ecriture/UCCE07.md)
+- [UCMOD01 — Créer un Module](../UCMOD-Module/UCMOD01.md)
+
+**Règles métier**
+- [RM02 — Catégorie d'asset obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM05 — ParentID obligatoire pour les dérivés](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM08 — Masquage local, ledger jamais modifié](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM17 — Assemblage requis pour soumission (module uniquement)](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM18 — ModuleVersion immuable (module uniquement)](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM19 — Fork d'un asset soumis](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCAM09 (expression)](../../1-Expression/UCAM-Assemblage_Module/UCAM09.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCCE01 (analyse)](../UCCE-Composant_Ecriture/UCCE01.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [UCREC03 (analyse)](../UCREC-Recherche/UCREC03.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

@@ -5,6 +5,19 @@ probabilite: 2
 impact: 3
 importance: 6
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCADM
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM04
+  - rm/RM06
+  - rm/RM07
+  - rm/RM27
+  - enf/ENF06
+  - enf/ENF18
 ---
 
 # Retirer un nœud d'un réseau existant
@@ -172,3 +185,41 @@ end
 **Gateway peer :** Si le peer retiré était le `GatewayPeer` du `NetworkProfile` actif, le retrait doit déclencher un avertissement explicite invitant l'admin à reconfigurer le gateway.
 
 **Seuil configurable :** RM27 impose 3 nœuds minimum. Ce seuil peut être rendu configurable dans `config/` à terme (ex : réseaux à 5 nœuds exigeant un seuil plus élevé).
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
+- [UCADM04 — couche expression](../../1-Expression/UCADM-Administration/UCADM04.md)
+- [Traçabilité UCADM04 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM04)
+
+**Exigences fonctionnelles couvertes**
+- [EF57 — Retirer administrativement un nœud d'un réseau existant](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCADM02 — Créer un réseau indépendant](UCADM02.md)
+- [UCADM03 — Ajouter un nœud à un réseau existant](UCADM03.md)
+
+**Règles métier**
+- [RM06 — Immuabilité des transactions](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM27 — Nombre minimum de nœuds actifs](../../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+
+**Exigences non fonctionnelles**
+- [ENF06 — Disponibilité du réseau blockchain (multi-nœuds)](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCDEV02 (expression)](../../1-Expression/UCDEV-Developpement/UCDEV02.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

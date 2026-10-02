@@ -5,6 +5,18 @@ probabilite: 2
 impact: 4
 importance: 8
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCAM
+  - domaine/model
+  - uc/UCAM09
+  - rm/RM10
+  - rm/RM11
+  - rm/RM16
+  - rm/RM39
+  - rm/RM40
+  - rm/RM41
 ---
 
 # Décomposition assistée d'un composant assemblage
@@ -132,3 +144,39 @@ else (oui)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
+- [Traçabilité UCAM09 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM09)
+
+**Exigences fonctionnelles couvertes**
+- [EF64 — Proposer un découpage automatique (sous-pièces + connexions candidates) d'un composant STEP en amont d'une transformation composant → module](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM05 — Transformation d'un composant en module](UCAM05.md)
+
+**Règles métier**
+- [RM10 — Vérification de compatibilité automatique](../Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM11 — Critères de compatibilité d'interfaces](../Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM16 — État draft](../Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM39 — Filiation d'un découpage](../Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM40 — Proposition de découpage non engageante](../Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM41 — Compatibilité toujours vérifiée pour une connexion suggérée](../Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Documents cités**
+- [Modele_Domaine](../../3-Conception/Modele_Domaine.md)
+
+**Cité par**
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCAM05 (expression)](UCAM05.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Modele_Domaine](../../3-Conception/Modele_Domaine.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

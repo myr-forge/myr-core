@@ -5,6 +5,17 @@ probabilite: 2
 impact: 5
 importance: 10
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCADM
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM02
+  - rm/RM07
+  - rm/RM08
+  - enf/ENF18
 ---
 
 # Créer un réseau indépendant
@@ -202,3 +213,42 @@ end
 **Format profil de connexion :** Le fichier `connection-profiles/gateway-connection.json` existant dans le repo sert de référence de schéma.
 
 **Résilience Raft :** Le consensus Raft requiert un quorum `(N/2)+1`. Avec 3 orderers, 1 peut tomber sans perte de service. L'implémentation doit refuser toute topologie avec moins de 3 nœuds orderer.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
+- [UCADM02 — couche expression](../../1-Expression/UCADM-Administration/UCADM02.md)
+- [Traçabilité UCADM02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM02)
+
+**Exigences fonctionnelles couvertes**
+- [EF07 — Créer un réseau blockchain indépendant](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Règles métier**
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM08 — Masquage local, ledger jamais modifié](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+
+**Exigences non fonctionnelles**
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCADM05 (expression)](../../1-Expression/UCADM-Administration/UCADM05.md)
+- [UCDEV02 (expression)](../../1-Expression/UCDEV-Developpement/UCDEV02.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCADM01 (analyse)](UCADM01.md)
+- [UCADM03 (analyse)](UCADM03.md)
+- [UCADM04 (analyse)](UCADM04.md)
+- [UCADM05 (analyse)](UCADM05.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../todo.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

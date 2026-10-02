@@ -1,3 +1,42 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - domaine/model
+  - uc/UCAM01
+  - uc/UCAM02
+  - uc/UCAM03
+  - uc/UCAM05
+  - uc/UCAM07
+  - uc/UCAM08
+  - uc/UCCE01
+  - uc/UCCE02
+  - uc/UCCE03
+  - uc/UCCE04
+  - uc/UCCE05
+  - uc/UCCE06
+  - uc/UCMOD01
+  - uc/UCMOD02
+  - uc/UCMOD03
+  - uc/UCMOD04
+  - uc/UCMOD06
+  - rm/RM01
+  - rm/RM04
+  - rm/RM05
+  - rm/RM07
+  - rm/RM09
+  - rm/RM10
+  - rm/RM11
+  - rm/RM12
+  - rm/RM13
+  - rm/RM14
+  - rm/RM15
+  - rm/RM16
+  - rm/RM17
+  - rm/RM18
+  - rm/RM19
+  - rm/RM42
+---
 # Architecture — Composition (D3/D5/D6 : composant, assemblage, module)
 
 > Phase 3 — Arrington | Use cases : UCCE01–06, UCAM01–08, UCMOD01–06 | Domaine : `domain/model`
@@ -542,3 +581,65 @@ Le détail des écarts E1, E2, E4, E5, E6, E8, E9 est centralisé dans `specs/2-
 - **Algorithme SCM** : spécification manquante pour l'analyse de similarité structurelle > 50% (RM01) — voir §6, question ouverte PO.
 - **Persistance de la composition** : en cas de crash serveur avant `SubmitModule`, les connexions non sauvegardées sont perdues — aucun mécanisme de récupération n'est prévu.
 - **`License`** : catalogue de licences (`domain/model/license.go`) non centralisé dans `Modele_Domaine.md` (voir `Modele_Domaine.md` §5).
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCAM01 — Liaison entre interfaces : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM01.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM01.md)
+- UCAM02 — Visualiser les interfaces physiques de composants : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM02.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM02.md)
+- UCAM03 — Créer une interface sur un composant : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM03.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM03.md)
+- UCAM05 — Transformation d'un composant en module : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM05.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM05.md)
+- UCAM07 — Choisir un asset d'accroche (Fastener) : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM07.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM07.md)
+- UCAM08 — Retirer une instance de composant d'un Module : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM08.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM08.md)
+- UCCE01 — Ajout d'un composant Physique : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE01.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE01.md)
+- UCCE02 — Configurer un Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE02.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE02.md)
+- UCCE03 — Ajout d'un composant Numérique : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE03.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE03.md)
+- UCCE04 — Améliorer un Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE04.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE04.md)
+- UCCE05 — Créer une extension de Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE05.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE05.md)
+- UCCE06 — Ajouter une interface à un Composant déjà créé : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE06.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE06.md)
+- UCCL03 — Vérifier la validité des emplacements externes d'un composant ou module : [expression](../1-Expression/UCCL-Composant_Lecture/UCCL03.md)
+- UCMOD01 — Créer un Module : [expression](../1-Expression/UCMOD-Module/UCMOD01.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD01.md)
+- UCMOD02 — Ajouter un Module existant : [expression](../1-Expression/UCMOD-Module/UCMOD02.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD02.md)
+- UCMOD03 — Modifier les métadonnées d'un Module : [expression](../1-Expression/UCMOD-Module/UCMOD03.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD03.md)
+- UCMOD04 — Visualiser les composants d'un Module : [expression](../1-Expression/UCMOD-Module/UCMOD04.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD04.md)
+- UCMOD06 — Soumettre un module à la blockchain : [expression](../1-Expression/UCMOD-Module/UCMOD06.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD06.md)
+
+**Règles métier**
+- [RM01 — Anti-plagiat obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM04 — UUID unique](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM05 — ParentID obligatoire pour les dérivés](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM07 — Validation préalable obligatoire](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM09 — Interface à usage unique](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM10 — Vérification de compatibilité automatique](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM11 — Critères de compatibilité d'interfaces](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM12 — Persistance des liaisons incompatibles](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM13 — Slot virtuel garanti](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM14 — Suppression en cascade des connexions](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+- [RM15 — Instance indépendante](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+- [RM16 — État draft](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM17 — Assemblage requis pour soumission (module uniquement)](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM18 — ModuleVersion immuable (module uniquement)](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM19 — Fork d'un asset soumis](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM42 — Traçabilité et alerte des emplacements externes](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+
+**Documents cités**
+- [Analyse_des_besoins](../2-Analyse/Analyse_des_besoins.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_CLI_Model](DC_CLI_Model.md)
+- [Modele_Domaine](Modele_Domaine.md)
+
+**Cité par**
+- [UCAM05 (analyse)](../2-Analyse/UCAM-Assemblage_Module/UCAM05.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_CLI_Model](DC_CLI_Model.md)
+- [DC_D8_Recherche](DC_D8_Recherche.md)
+- [DC_D9_Automatisation](DC_D9_Automatisation.md)
+- [Sequence_soumission_asset](Sequence_soumission_asset.md)
+- [Sequence_soumission_module](Sequence_soumission_module.md)
+- [todo (conception)](todo.md)
+
+<!-- liens-obsidian:end -->

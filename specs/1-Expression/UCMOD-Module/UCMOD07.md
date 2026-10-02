@@ -5,6 +5,12 @@ probabilite: 3
 impact: 4
 importance: 12
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD07
 ---
 
 # Lister ses Modules en brouillon
@@ -60,3 +66,20 @@ start
 stop
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD07 — couche analyse](../../2-Analyse/UCMOD-Module/UCMOD07.md)
+- [Traçabilité UCMOD07 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD07)
+
+**Exigences fonctionnelles couvertes**
+- [EF63 — Lister ses modules en brouillon, filtrés par propriétaire et par statut](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Cité par**
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

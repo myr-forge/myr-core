@@ -5,6 +5,13 @@ probabilite: 5
 impact: 5
 importance: 25
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCA
+  - domaine/identity
+  - domaine/role
+  - uc/UCA03
 ---
 
 # Se Déconnecter
@@ -60,3 +67,25 @@ start
 stop
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
+- [UCA03 — couche analyse](../../2-Analyse/UCA-Compte_et_Acces/UCA03.md)
+- [Traçabilité UCA03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA03)
+
+**Exigences fonctionnelles couvertes**
+- [EF03 — Déconnecter un utilisateur et invalider sa session](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

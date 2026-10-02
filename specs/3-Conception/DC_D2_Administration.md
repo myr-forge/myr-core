@@ -1,3 +1,25 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM01
+  - uc/UCADM02
+  - uc/UCADM03
+  - uc/UCADM04
+  - uc/UCADM05
+  - uc/UCADM06
+  - uc/UCADM07
+  - rm/RM07
+  - rm/RM27
+  - rm/RM34
+  - rm/RM35
+  - rm/RM36
+  - rm/RM37
+  - enf/ENF18
+---
 # DC — D2 : Administration réseau
 
 > Phase 3 — Arrington | Use cases : UCADM01–UCADM07 | Domaine : `network`, `channel`, `identity`
@@ -364,3 +386,39 @@ Annuaire des peers : déclaré dans `configtx.yaml`, distribué sur le ledger. C
 - **Minimum de nœuds** : le seuil de 3 nœuds (RM27) est-il configurable dans `config/` ou constant ? En v1 : constante.
 - **Répertoire ledger Fabric** : chemin des données à supprimer (UCADM05) — configurable via `MYR_FABRIC_DATA_PATH`. Détails dans `DC_CLI_Admin.md` §3.9.1.
 - **`myr network create`** (UCADM02 flux nominal) : opération complexe impliquant `configtx.yaml`, genesis block, démarrage des nœuds — reportée post-v1. En v1 : `myr network import` depuis un profil existant couvre le besoin principal.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCADM01 — Ajouter une organisation au réseau : [expression](../1-Expression/UCADM-Administration/UCADM01.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM01.md)
+- UCADM02 — Créer un réseau indépendant : [expression](../1-Expression/UCADM-Administration/UCADM02.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM02.md)
+- UCADM03 — Ajouter un nœud à un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM03.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM03.md)
+- UCADM04 — Retirer un nœud d'un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM04.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM04.md)
+- UCADM05 — Démanteler un réseau (dev/test uniquement) : [expression](../1-Expression/UCADM-Administration/UCADM05.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM05.md)
+- UCADM06 — Attribuer des rôles à une organisation : [expression](../1-Expression/UCADM-Administration/UCADM06.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM06.md)
+- UCADM07 — Gérer les rôles : [expression](../1-Expression/UCADM-Administration/UCADM07.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM07.md)
+
+**Règles métier**
+- [RM07 — Validation préalable obligatoire](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM27 — Nombre minimum de nœuds actifs](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM34 — Rôle admin protégé](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM35 — Révocation en cascade à la suppression d'un rôle](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM36 — Nom de rôle unique](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM37 — Multi-rôles par organisation](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+
+**Exigences non fonctionnelles**
+- [ENF18 — Isolation du domaine métier](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Admin](DC_CLI_Admin.md)
+
+**Cité par**
+- [Conception_intro](Conception_intro.md)
+- [DC_D8_Recherche](DC_D8_Recherche.md)
+- [todo (conception)](todo.md)
+
+<!-- liens-obsidian:end -->

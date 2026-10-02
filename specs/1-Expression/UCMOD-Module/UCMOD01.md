@@ -5,6 +5,12 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD01
 ---
 
 # Créer un Module
@@ -96,3 +102,44 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD01 — couche analyse](../../2-Analyse/UCMOD-Module/UCMOD01.md)
+- [Traçabilité UCMOD01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD01)
+
+**Exigences fonctionnelles couvertes**
+- [EF16 — Vérifier la compatibilité de licence lors d'une dérivation](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+- [EF26 — Assembler plusieurs composants en module (état draft), y compris par dérivation d'un module existant (composition dupliquée depuis un `parent_id`)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM01 — Liaison entre interfaces](../UCAM-Assemblage_Module/UCAM01.md)
+- [UCMOD03 — Modifier les métadonnées d'un Module](UCMOD03.md)
+- [UCMOD06 — Soumettre un module à la blockchain](UCMOD06.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCMOD03 (expression)](UCMOD03.md)
+- [UCMOD06 (expression)](UCMOD06.md)
+- [UCMOD08 (expression)](UCMOD08.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCAM05 (analyse)](../../2-Analyse/UCAM-Assemblage_Module/UCAM05.md)
+- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [UCMOD02 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD02.md)
+- [UCMOD03 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD03.md)
+- [UCMOD06 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD06.md)
+- [UCMOD07 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD07.md)
+- [UCMOD08 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD08.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

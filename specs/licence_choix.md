@@ -1,3 +1,8 @@
+---
+tags:
+  - couche/transverse
+  - type/licence
+---
 # Stratégie de licence open-source du projet
 
 ## 1. Contexte
@@ -275,3 +280,11 @@ Architecture recommandée :
 - [Apache Software Foundation — GPL compatibility](https://www.apache.org/licenses/GPL-compatibility.html)
 - [Open Source Initiative — Licenses](https://opensource.org/licenses)
 - [Nextcloud — Licensing information](https://nextcloud.com/licensing/)
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](Carte_des_specs.md)
+
+<!-- liens-obsidian:end -->

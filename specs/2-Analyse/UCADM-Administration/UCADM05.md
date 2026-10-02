@@ -5,6 +5,18 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCADM
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM05
+  - rm/RM06
+  - rm/RM08
+  - rm/RM28
+  - enf/ENF18
 ---
 
 # Démanteler un réseau (dev/test uniquement)
@@ -179,3 +191,39 @@ end
 **Répertoire ledger configurable :** Le chemin des données ledger Fabric doit être configurable (`MYR_FABRIC_DATA_PATH` ou dans `config/`) car il varie selon le mode de déploiement (Docker, bare-metal, dev local).
 
 **Scope limité :** Cette commande n'est disponible que dans `myr-cli` (binaire admin). Elle ne doit jamais être exposée dans `myr-api` (serveur HTTP).
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
+- [UCADM05 — couche expression](../../1-Expression/UCADM-Administration/UCADM05.md)
+- [Traçabilité UCADM05 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM05)
+
+**Exigences fonctionnelles couvertes**
+- [EF58 — Démanteler un réseau de test (CLI uniquement — jamais via REST)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCADM02 — Créer un réseau indépendant](UCADM02.md)
+- [UCADM03 — Ajouter un nœud à un réseau existant](UCADM03.md)
+
+**Règles métier**
+- [RM06 — Immuabilité des transactions](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM08 — Masquage local, ledger jamais modifié](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM28 — Démantèlement réseau : opération d'infrastructure locale](../../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+
+**Exigences non fonctionnelles**
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCDEV02 (expression)](../../1-Expression/UCDEV-Developpement/UCDEV02.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

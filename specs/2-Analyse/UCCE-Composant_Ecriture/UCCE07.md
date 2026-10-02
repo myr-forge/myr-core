@@ -5,6 +5,16 @@ probabilite: 3
 impact: 4
 importance: 12
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCCE
+  - domaine/model
+  - uc/UCCE07
+  - rm/RM06
+  - rm/RM08
+  - rm/RM14
+  - enf/ENF12
 ---
 
 # Supprimer un Composant
@@ -135,3 +145,36 @@ REST --> Client : 204 No Content
 **Commande CLI équivalente :** `myr model remove <id>` appelle la même méthode `Remove()`.
 
 **Voir aussi UCMOD08** (« Supprimer un Module ») — comportement strictement identique, RM08 s'applique de façon générique à tout asset, composant ou module.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCCE — Composant Ecriture](../../Carte_des_specs.md#UCCE%20—%20Composant%20Ecriture)
+- [UCCE07 — couche expression](../../1-Expression/UCCE-Composant_Ecriture/UCCE07.md)
+- [Traçabilité UCCE07 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCE07)
+
+**Exigences fonctionnelles couvertes**
+- [EF60 — Supprimer un composant (masquage local des listes, ledger jamais modifié)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM08 — Retirer une instance de composant d'un Module](../UCAM-Assemblage_Module/UCAM08.md)
+- [UCMOD08 — Supprimer un Module](../UCMOD-Module/UCMOD08.md)
+
+**Règles métier**
+- [RM06 — Immuabilité des transactions](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM08 — Masquage local, ledger jamais modifié](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM14 — Suppression en cascade des connexions](../../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCMOD08 (expression)](../../1-Expression/UCMOD-Module/UCMOD08.md)
+- [UCAM05 (analyse)](../UCAM-Assemblage_Module/UCAM05.md)
+- [UCMOD08 (analyse)](../UCMOD-Module/UCMOD08.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

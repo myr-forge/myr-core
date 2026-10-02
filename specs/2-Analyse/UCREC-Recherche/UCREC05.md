@@ -5,6 +5,15 @@ probabilite: 4
 impact: 3
 importance: 12
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCREC
+  - domaine/model
+  - uc/UCREC05
+  - rm/RM15
+  - enf/ENF03
+  - enf/ENF12
 ---
 
 # Exporter BOM Module
@@ -191,3 +200,42 @@ if strings.HasSuffix(rest, "/bom") {
 - Le format PDF est-il prioritaire pour v1 ?
 
 **Commande CLI équivalente (point ouvert) :** Aucune méthode `ModelService` de résolution de nomenclature n'existe — ni l'endpoint REST (`GET /api/modules/:id/bom`) ni une commande CLI (`myr module bom-export`, à concevoir) ne sont disponibles tant que ce point n'est pas conçu au niveau du domaine (cf. `specs/3-Conception/DC_CLI_Model.md` § 6 point 3). En attendant, une BOM partielle et manuelle peut être reconstituée par script à partir de `myr module get <id>` (instances) et `myr model get <assetID>` (métadonnées par composant), sans export de fichier ni agrégation automatique des quantités (RM15).
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCREC — Recherche](../../Carte_des_specs.md#UCREC%20—%20Recherche)
+- [UCREC05 — couche expression](../../1-Expression/UCREC-Recherche/UCREC05.md)
+- [Traçabilité UCREC05 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCREC05)
+
+**Exigences fonctionnelles couvertes**
+- [EF43 — Exporter la BOM (Bill Of Materials) d'un module](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCPI04 — Définir un prix sur un Composant proprietaire](../UCPI-Propriete_Intellectuelle/UCPI04.md)
+- [UCPI05 — Définir un prix sur un Module proprietaire](../UCPI-Propriete_Intellectuelle/UCPI05.md)
+
+**Règles métier**
+- [RM15 — Instance indépendante](../../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+
+**Exigences non fonctionnelles**
+- [ENF03 — Génération d'une BOM module](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

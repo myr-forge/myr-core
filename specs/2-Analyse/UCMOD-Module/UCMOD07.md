@@ -5,6 +5,14 @@ probabilite: 3
 impact: 4
 importance: 12
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD07
+  - enf/ENF01
+  - enf/ENF12
 ---
 
 # Lister ses Modules en brouillon
@@ -111,3 +119,28 @@ Aucune règle métier nouvelle — opération de lecture pure, filtrage appliqu�
 **Cohérence avec `GET /api/components` :** le filtre `owner_id` reprend exactement le même nom de paramètre et la même sémantique que `listGraph` (`adapters/in/rest/handlers.go`, UCCL01) — aucune divergence de contrat entre les deux endpoints de listing.
 
 **Commande CLI équivalente :** `myr module list` (méthode `ListModules`) — l'ajout de flags `--owner-id`/`--status` côté CLI reste un point ouvert, la CLI composants (`myr model list`) ne les expose pas non plus aujourd'hui ; pas de nouvelle asymétrie introduite par cet UC.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD07 — couche expression](../../1-Expression/UCMOD-Module/UCMOD07.md)
+- [Traçabilité UCMOD07 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD07)
+
+**Exigences fonctionnelles couvertes**
+- [EF63 — Lister ses modules en brouillon, filtrés par propriétaire et par statut](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCCL01 — Faire une recherche par filtre](../UCCL-Composant_Lecture/UCCL01.md)
+- [UCMOD01 — Créer un Module](UCMOD01.md)
+
+**Exigences non fonctionnelles**
+- [ENF01 — Temps de réponse des endpoints REST](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

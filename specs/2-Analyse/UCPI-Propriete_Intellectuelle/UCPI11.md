@@ -5,6 +5,19 @@ probabilite: 3
 impact: 4
 importance: 12
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCPI
+  - domaine/model
+  - domaine/payment
+  - uc/UCPI11
+  - rm/RM22
+  - rm/RM31
+  - rm/RM32
+  - rm/RM33
+  - enf/ENF12
+  - enf/ENF27
 ---
 
 # Modifier le prix d'un asset
@@ -151,3 +164,42 @@ end
 - **À créer** : structure `AssetPrice{AssetID, OwnerID, Amount, Currency, UpdatedAt}` dans `domain/payment/`, persistée via un nouveau store `adapters/out/localstorage/price_store.go` — même store que UCPI04/UCPI05 (définition initiale du prix), pas de duplication
 - **À créer** : routes `PUT /api/components/{id}/price` et `PUT /api/modules/{id}/price`, réutilisées par UCPI04/UCPI05 pour la première définition et par UCPI11 pour la modification — un seul chemin de code, pas de duplication
 - **Parité CLI/REST :** `myr model price update <id> <montant>` et `myr module price update <id> <montant>` doivent appeler le même service domaine `payment` que la route REST — aucun accès direct à `localstorage` depuis l'adapter CLI
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
+- [UCPI11 — couche expression](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI11.md)
+- [Traçabilité UCPI11 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI11)
+
+**Exigences fonctionnelles couvertes**
+- [EF59 — Modifier le prix d'un asset (effet commandes futures uniquement)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCPI04 — Définir un prix sur un Composant proprietaire](UCPI04.md)
+- [UCPI05 — Définir un prix sur un Module proprietaire](UCPI05.md)
+
+**Règles métier**
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM31 — Modification de prix — effet sur les commandes futures uniquement](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM32 — Asset à prix nul — librement disponible](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM33 — Devise unique par réseau](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF27 — Protection des données personnelles (RGPD)](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+
+**Cité par**
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCPI04 (analyse)](UCPI04.md)
+- [UCPI05 (analyse)](UCPI05.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

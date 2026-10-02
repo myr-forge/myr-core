@@ -5,6 +5,13 @@ probabilite: 4
 impact: 4
 importance: 16
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCAM
+  - domaine/model
+  - uc/UCAM08
+  - rm/RM15
 ---
 
 # Retirer une instance de composant d'un Module
@@ -95,3 +102,35 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
+- [UCAM08 — couche analyse](../../2-Analyse/UCAM-Assemblage_Module/UCAM08.md)
+- [Traçabilité UCAM08 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM08)
+
+**Exigences fonctionnelles couvertes**
+- [EF24 — Retirer une instance de composant d'un module (avec cascade des connexions)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCMOD02 — Ajouter un Module existant](../UCMOD-Module/UCMOD02.md)
+
+**Règles métier**
+- [RM15 — Instance indépendante](../Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [todo (expression)](../todo.md)
+- [UCCE07 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE07.md)
+- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

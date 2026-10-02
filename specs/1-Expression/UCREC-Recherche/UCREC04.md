@@ -4,6 +4,12 @@ titre: "Rechercher les Modules qui utilisent un Composant"
 probabilite: 3
 impact: 4
 importance: 12
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCREC
+  - domaine/model
+  - uc/UCREC04
 ---
 
 # Rechercher les Modules qui utilisent un Composant
@@ -73,3 +79,28 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCREC — Recherche](../../Carte_des_specs.md#UCREC%20—%20Recherche)
+- [UCREC04 — couche analyse](../../2-Analyse/UCREC-Recherche/UCREC04.md)
+- [Traçabilité UCREC04 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCREC04)
+
+**Exigences fonctionnelles couvertes**
+- [EF42 — Identifier tous les modules qui intègrent un composant donné](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

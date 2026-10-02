@@ -5,6 +5,13 @@ probabilite: 1
 impact: 0
 importance: 0
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCDEV
+  - uc/UCDEV02
+  - rm/RM01
+  - rm/RM07
 ---
 
 # Utilisation du CLI
@@ -209,3 +216,54 @@ CLIHandler --> Dev : "Réseau démantelé."
 **Domaines manquants dans le CLI :** `identity`, `session`, `auth` n'ont pas de commandes CLI. Ces domaines sont priorité HAUTE pour l'exposition REST — leur exposition CLI est MOYENNE.
 
 **Man pages :** `cmd/mangen/` — `go run ./cmd/mangen` → `docs/man/`. Consultables via `man myr-model`, `man myr-channel`, etc.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCDEV — Developpement](../../Carte_des_specs.md#UCDEV%20—%20Developpement)
+- [UCDEV02 — couche expression](../../1-Expression/UCDEV-Developpement/UCDEV02.md)
+- [Traçabilité UCDEV02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCDEV02)
+
+**Exigences fonctionnelles couvertes**
+- [EF56 — Proposer un CLI d'administration serveur](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCADM01 — Ajouter une organisation au réseau](../UCADM-Administration/UCADM01.md)
+- [UCADM02 — Créer un réseau indépendant](../UCADM-Administration/UCADM02.md)
+- [UCADM03 — Ajouter un nœud à un réseau existant](../UCADM-Administration/UCADM03.md)
+- [UCADM04 — Retirer un nœud d'un réseau existant](../UCADM-Administration/UCADM04.md)
+- [UCADM05 — Démanteler un réseau (dev/test uniquement)](../UCADM-Administration/UCADM05.md)
+- [UCAM01 — Liaison entre interfaces](../UCAM-Assemblage_Module/UCAM01.md)
+- [UCAM02 — Visualiser les interfaces physiques de composants](../UCAM-Assemblage_Module/UCAM02.md)
+- [UCAM03 — Créer une interface sur un composant](../UCAM-Assemblage_Module/UCAM03.md)
+- [UCAM05 — Transformation d'un composant en module](../UCAM-Assemblage_Module/UCAM05.md)
+- [UCAM07 — Choisir un asset d'accroche (Fastener)](../UCAM-Assemblage_Module/UCAM07.md)
+- [UCAM08 — Retirer une instance de composant d'un Module](../UCAM-Assemblage_Module/UCAM08.md)
+- [UCCE02 — Configurer un Composant](../UCCE-Composant_Ecriture/UCCE02.md)
+- [UCCE06 — Ajouter une interface à un Composant déjà créé](../UCCE-Composant_Ecriture/UCCE06.md)
+- [UCDEV01 — Utilisation de l'API](UCDEV01.md)
+- [UCMOD01 — Créer un Module](../UCMOD-Module/UCMOD01.md)
+- [UCMOD02 — Ajouter un Module existant](../UCMOD-Module/UCMOD02.md)
+- [UCMOD03 — Modifier les métadonnées d'un Module](../UCMOD-Module/UCMOD03.md)
+- [UCMOD04 — Visualiser les composants d'un Module](../UCMOD-Module/UCMOD04.md)
+- [UCMOD06 — Soumettre un module à la blockchain](../UCMOD-Module/UCMOD06.md)
+
+**Règles métier**
+- [RM01 — Anti-plagiat obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+
+**Documents cités**
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

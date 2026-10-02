@@ -1,3 +1,8 @@
+---
+tags:
+  - couche/analyse
+  - type/introduction
+---
 # Analyse des besoins — Myr System
 
 - [Analyse des besoins — Myr System](#analyse-des-besoins--myr-system)
@@ -602,3 +607,133 @@ UCA01 → UCA02 → UCADM02 → UCADM01 → UCCE01 → UCCE06
 
 *Document produit à partir de `specs/1-Expression/` — méthode Arrington — version initiale.*
 *Référence code : commit courant, branche `feature/project-base`.*
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCA01 — Création d'un compte : [expression](../1-Expression/UCA-Compte_et_Acces/UCA01.md) · [analyse](UCA-Compte_et_Acces/UCA01.md)
+- UCA02 — Se Connecter : [expression](../1-Expression/UCA-Compte_et_Acces/UCA02.md) · [analyse](UCA-Compte_et_Acces/UCA02.md)
+- UCA03 — Se Déconnecter : [expression](../1-Expression/UCA-Compte_et_Acces/UCA03.md) · [analyse](UCA-Compte_et_Acces/UCA03.md)
+- UCA04 — Vérification de la connexion : [expression](../1-Expression/UCA-Compte_et_Acces/UCA04.md) · [analyse](UCA-Compte_et_Acces/UCA04.md)
+- UCA05 — Vérification des accès du rôle attribué : [expression](../1-Expression/UCA-Compte_et_Acces/UCA05.md) · [analyse](UCA-Compte_et_Acces/UCA05.md)
+- UCA06 — Vérifier les possessions : [expression](../1-Expression/UCA-Compte_et_Acces/UCA06.md) · [analyse](UCA-Compte_et_Acces/UCA06.md)
+- UCA07 — Vérification du rôle attribué : [expression](../1-Expression/UCA-Compte_et_Acces/UCA07.md) · [analyse](UCA-Compte_et_Acces/UCA07.md)
+- UCA08 — Demander un rôle : [expression](../1-Expression/UCA-Compte_et_Acces/UCA08.md) · [analyse](UCA-Compte_et_Acces/UCA08.md)
+- UCADM01 — Ajouter une organisation au réseau : [expression](../1-Expression/UCADM-Administration/UCADM01.md) · [analyse](UCADM-Administration/UCADM01.md)
+- UCADM02 — Créer un réseau indépendant : [expression](../1-Expression/UCADM-Administration/UCADM02.md) · [analyse](UCADM-Administration/UCADM02.md)
+- UCADM03 — Ajouter un nœud à un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM03.md) · [analyse](UCADM-Administration/UCADM03.md)
+- UCADM04 — Retirer un nœud d'un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM04.md) · [analyse](UCADM-Administration/UCADM04.md)
+- UCADM05 — Démanteler un réseau (dev/test uniquement) : [expression](../1-Expression/UCADM-Administration/UCADM05.md) · [analyse](UCADM-Administration/UCADM05.md)
+- UCADM06 — Attribuer des rôles à une organisation : [expression](../1-Expression/UCADM-Administration/UCADM06.md) · [analyse](UCADM-Administration/UCADM06.md)
+- UCADM07 — Gérer les rôles : [expression](../1-Expression/UCADM-Administration/UCADM07.md) · [analyse](UCADM-Administration/UCADM07.md)
+- UCAM01 — Liaison entre interfaces : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM01.md) · [analyse](UCAM-Assemblage_Module/UCAM01.md)
+- UCAM02 — Visualiser les interfaces physiques de composants : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM02.md) · [analyse](UCAM-Assemblage_Module/UCAM02.md)
+- UCAM03 — Créer une interface sur un composant : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM03.md) · [analyse](UCAM-Assemblage_Module/UCAM03.md)
+- UCAM05 — Transformation d'un composant en module : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM05.md) · [analyse](UCAM-Assemblage_Module/UCAM05.md)
+- UCAM07 — Choisir un asset d'accroche (Fastener) : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM07.md) · [analyse](UCAM-Assemblage_Module/UCAM07.md)
+- UCAM09 — Décomposition assistée d'un composant assemblage : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM09.md)
+- UCAUT01 — Fabrication/Livraison d'un Composant : [expression](../1-Expression/UCAUT-Automatisation/UCAUT01.md) · [analyse](UCAUT-Automatisation/UCAUT01.md)
+- UCAUT02 — Commande en ligne de Asset : [expression](../1-Expression/UCAUT-Automatisation/UCAUT02.md) · [analyse](UCAUT-Automatisation/UCAUT02.md)
+- UCAUT03 — Ajouter un modèle 3D depuis un logiciel CAO : [expression](../1-Expression/UCAUT-Automatisation/UCAUT03.md) · [analyse](UCAUT-Automatisation/UCAUT03.md)
+- UCAUT04 — Gestion SCM d'un modèle 3D : [expression](../1-Expression/UCAUT-Automatisation/UCAUT04.md) · [analyse](UCAUT-Automatisation/UCAUT04.md)
+- UCCE01 — Ajout d'un composant Physique : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE01.md) · [analyse](UCCE-Composant_Ecriture/UCCE01.md)
+- UCCE02 — Configurer un Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE02.md) · [analyse](UCCE-Composant_Ecriture/UCCE02.md)
+- UCCE03 — Ajout d'un composant Numérique : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE03.md) · [analyse](UCCE-Composant_Ecriture/UCCE03.md)
+- UCCE04 — Améliorer un Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE04.md) · [analyse](UCCE-Composant_Ecriture/UCCE04.md)
+- UCCE05 — Créer une extension de Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE05.md) · [analyse](UCCE-Composant_Ecriture/UCCE05.md)
+- UCCE06 — Ajouter une interface à un Composant déjà créé : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE06.md) · [analyse](UCCE-Composant_Ecriture/UCCE06.md)
+- UCCL01 — Faire une recherche par filtre : [expression](../1-Expression/UCCL-Composant_Lecture/UCCL01.md) · [analyse](UCCL-Composant_Lecture/UCCL01.md)
+- UCDEV01 — Utilisation de l'API : [expression](../1-Expression/UCDEV-Developpement/UCDEV01.md) · [analyse](UCDEV-Developpement/UCDEV01.md)
+- UCDEV02 — Utilisation du CLI : [expression](../1-Expression/UCDEV-Developpement/UCDEV02.md) · [analyse](UCDEV-Developpement/UCDEV02.md)
+- UCMOD01 — Créer un Module : [expression](../1-Expression/UCMOD-Module/UCMOD01.md) · [analyse](UCMOD-Module/UCMOD01.md)
+- UCMOD02 — Ajouter un Module existant : [expression](../1-Expression/UCMOD-Module/UCMOD02.md) · [analyse](UCMOD-Module/UCMOD02.md)
+- UCMOD03 — Modifier les métadonnées d'un Module : [expression](../1-Expression/UCMOD-Module/UCMOD03.md) · [analyse](UCMOD-Module/UCMOD03.md)
+- UCMOD04 — Visualiser les composants d'un Module : [expression](../1-Expression/UCMOD-Module/UCMOD04.md) · [analyse](UCMOD-Module/UCMOD04.md)
+- UCMOD06 — Soumettre un module à la blockchain : [expression](../1-Expression/UCMOD-Module/UCMOD06.md) · [analyse](UCMOD-Module/UCMOD06.md)
+- UCPI01 — Commander un Module complet : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI01.md)
+- UCPI02 — Recevoir une commission sur l'utilisation d'un Module : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI02.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI02.md)
+- UCPI03 — [RECLASSIFIÉ] Paramètres de langue de l'interface : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI03.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI03.md)
+- UCPI04 — Définir un prix sur un Composant proprietaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI04.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI04.md)
+- UCPI05 — Définir un prix sur un Module proprietaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI05.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI05.md)
+- UCPI06 — Déclarer un composant similaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI06.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI06.md)
+- UCPI07 — Transfert de propriété intellectuelle : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI07.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI07.md)
+- UCPI08 — Cloner un Composant sur un réseau exterieur : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI08.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI08.md)
+- UCPI09 — Cloner un Module sur un réseau exterieur : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI09.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI09.md)
+- UCPI10 — Norme de conception écoconception : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI10.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI10.md)
+- UCPI11 — Modifier le prix d'un asset : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI11.md) · [analyse](UCPI-Propriete_Intellectuelle/UCPI11.md)
+- UCREC01 — Rechercher une référence existante : [expression](../1-Expression/UCREC-Recherche/UCREC01.md) · [analyse](UCREC-Recherche/UCREC01.md)
+- UCREC02 — Rechercher les Composants compatibles : [expression](../1-Expression/UCREC-Recherche/UCREC02.md) · [analyse](UCREC-Recherche/UCREC02.md)
+- UCREC03 — Rechercher les versions des Composants : [expression](../1-Expression/UCREC-Recherche/UCREC03.md) · [analyse](UCREC-Recherche/UCREC03.md)
+- UCREC04 — Rechercher les Modules qui utilisent un Composant : [expression](../1-Expression/UCREC-Recherche/UCREC04.md) · [analyse](UCREC-Recherche/UCREC04.md)
+- UCREC05 — Exporter BOM Module : [expression](../1-Expression/UCREC-Recherche/UCREC05.md) · [analyse](UCREC-Recherche/UCREC05.md)
+
+**Règles métier**
+- [RM01 — Anti-plagiat obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM02 — Catégorie d'asset obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM03 — Compatibilité de licence](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM04 — UUID unique](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM05 — ParentID obligatoire pour les dérivés](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM06 — Immuabilité des transactions](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM07 — Validation préalable obligatoire](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM08 — Masquage local, ledger jamais modifié](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM09 — Interface à usage unique](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM10 — Vérification de compatibilité automatique](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM11 — Critères de compatibilité d'interfaces](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM12 — Persistance des liaisons incompatibles](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM13 — Slot virtuel garanti](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM14 — Suppression en cascade des connexions](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+- [RM15 — Instance indépendante](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+- [RM16 — État draft](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM17 — Assemblage requis pour soumission (module uniquement)](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM18 — ModuleVersion immuable (module uniquement)](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM19 — Fork d'un asset soumis](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM20 — Identité = enrôlement CA, pas un compte séparé](../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM21 — Rôle Lecteur par défaut à l'auto-enregistrement](../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM22 — Changement de rôle réservé à l'administrateur](../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM23 — Distribution automatique des commissions](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM24 — Répartition proportionnelle multi-auteurs](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM25 — Transfert de propriété définitif](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM26 — Traçabilité du clonage inter-réseaux](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM27 — Nombre minimum de nœuds actifs](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM28 — Démantèlement réseau : opération d'infrastructure locale](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM29 — Taux de commission défini par le réseau](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM30 — Calcul automatique du prix d'un module](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM31 — Modification de prix — effet sur les commandes futures uniquement](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM32 — Asset à prix nul — librement disponible](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM33 — Devise unique par réseau](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM34 — Rôle admin protégé](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM35 — Révocation en cascade à la suppression d'un rôle](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM36 — Nom de rôle unique](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM37 — Multi-rôles par organisation](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM39 — Filiation d'un découpage](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM40 — Proposition de découpage non engageante](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM41 — Compatibilité toujours vérifiée pour une connexion suggérée](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Exigences non fonctionnelles**
+- [ENF03 — Génération d'une BOM module](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [Expression_des_besoins_Intro](../1-Expression/Expression_des_besoins_Intro.md)
+- [DC_CLI_Admin](../3-Conception/DC_CLI_Admin.md)
+- [roadmap_dev](../roadmap_dev.md)
+
+**Cité par**
+- [UCCE01 (analyse)](UCCE-Composant_Ecriture/UCCE01.md)
+- [UCCE06 (analyse)](UCCE-Composant_Ecriture/UCCE06.md)
+- [UCPI11 (analyse)](UCPI-Propriete_Intellectuelle/UCPI11.md)
+- [Architecture_Composition](../3-Conception/Architecture_Composition.md)
+- [Conception_intro](../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../3-Conception/DC_CLI_Model.md)
+- [Modele_Domaine](../3-Conception/Modele_Domaine.md)
+- [Sequence_soumission_asset](../3-Conception/Sequence_soumission_asset.md)
+- [Sequence_soumission_module](../3-Conception/Sequence_soumission_module.md)
+- [roadmap_dev](../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

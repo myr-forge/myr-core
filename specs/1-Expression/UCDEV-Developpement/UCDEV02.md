@@ -4,6 +4,11 @@ titre: "Utilisation du CLI"
 probabilite: 1
 importance: 0
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCDEV
+  - uc/UCDEV02
 ---
 
 # Utilisation du CLI
@@ -87,3 +92,33 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCDEV — Developpement](../../Carte_des_specs.md#UCDEV%20—%20Developpement)
+- [UCDEV02 — couche analyse](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [Traçabilité UCDEV02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCDEV02)
+
+**Exigences fonctionnelles couvertes**
+- [EF56 — Proposer un CLI d'administration serveur](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCADM01 — Ajouter une organisation au réseau](../UCADM-Administration/UCADM01.md)
+- [UCADM02 — Créer un réseau indépendant](../UCADM-Administration/UCADM02.md)
+- [UCADM03 — Ajouter un nœud à un réseau existant](../UCADM-Administration/UCADM03.md)
+- [UCADM04 — Retirer un nœud d'un réseau existant](../UCADM-Administration/UCADM04.md)
+- [UCADM05 — Démanteler un réseau (dev/test uniquement)](../UCADM-Administration/UCADM05.md)
+- [UCDEV01 — Utilisation de l'API](UCDEV01.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

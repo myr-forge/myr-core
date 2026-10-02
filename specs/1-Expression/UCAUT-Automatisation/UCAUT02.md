@@ -5,6 +5,14 @@ probabilite: 5
 impact: 3
 importance: 15
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCAUT
+  - domaine/model
+  - domaine/payment
+  - domaine/role
+  - uc/UCAUT02
 ---
 
 # Commande en ligne de asset
@@ -77,3 +85,27 @@ start
 stop
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAUT — Automatisation](../../Carte_des_specs.md#UCAUT%20—%20Automatisation)
+- [UCAUT02 — couche analyse](../../2-Analyse/UCAUT-Automatisation/UCAUT02.md)
+- [Traçabilité UCAUT02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAUT02)
+
+**Exigences fonctionnelles couvertes**
+- [EF45 — Automatiser la commande en ligne d'un asset](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

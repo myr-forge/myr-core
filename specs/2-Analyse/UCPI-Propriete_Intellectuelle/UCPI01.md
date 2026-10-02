@@ -5,6 +5,19 @@ probabilite: 5
 impact: 5
 importance: 25
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCPI
+  - domaine/model
+  - domaine/payment
+  - uc/UCPI01
+  - rm/RM07
+  - rm/RM22
+  - rm/RM23
+  - enf/ENF01
+  - enf/ENF12
+  - enf/ENF30
 ---
 
 # Commander un Module complet
@@ -186,3 +199,49 @@ end
 - Le smart contract chaincode ne contient actuellement aucune logique de commande — à créer dans `chaincode/`
 - L'identification des boutiques partenaires et manufactureurs suppose un registre sur la blockchain non encore défini
 - **Parité CLI/REST :** conformément au principe de parité, une commande de ce type devrait être reproductible en CLI pour le compte d'un consommateur. Le volet paiement recoupe `domain/payment.Pay(from, to, modelID, amount)`, déjà exposé via `myr payment pay <from> <to> <modelID> <amount>` — mais comme noté ci-dessus, l'entité `Order` (statut, type, manufacturier/boutique, adresse de livraison) n'existe pas encore : une commande CLI complète (`myr order create ...`) ne pourra être ajoutée qu'une fois ce domaine conçu, au même titre que la route REST manquante.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
+- [UCPI01 — couche expression](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md)
+- [Traçabilité UCPI01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI01)
+
+**Exigences fonctionnelles couvertes**
+- [EF30 — Commander un module complet (fabrication ou achat en stock)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAUT01 — Fabrication/Livraison d'un Composant](../UCAUT-Automatisation/UCAUT01.md)
+
+**Règles métier**
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM23 — Distribution automatique des commissions](../../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+
+**Exigences non fonctionnelles**
+- [ENF01 — Temps de réponse des endpoints REST](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCAUT01 (analyse)](../UCAUT-Automatisation/UCAUT01.md)
+- [UCAUT02 (analyse)](../UCAUT-Automatisation/UCAUT02.md)
+- [UCPI02 (analyse)](UCPI02.md)
+- [UCPI05 (analyse)](UCPI05.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
+- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
+- [Modele_Domaine](../../3-Conception/Modele_Domaine.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

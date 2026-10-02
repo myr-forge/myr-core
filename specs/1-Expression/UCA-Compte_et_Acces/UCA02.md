@@ -5,6 +5,13 @@ probabilite: 5
 impact: 5
 importance: 25
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCA
+  - domaine/identity
+  - domaine/role
+  - uc/UCA02
 ---
 
 # Se Connecter
@@ -115,3 +122,35 @@ else (non — accès invité)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
+- [UCA02 — couche analyse](../../2-Analyse/UCA-Compte_et_Acces/UCA02.md)
+- [Traçabilité UCA02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA02)
+
+**Exigences fonctionnelles couvertes**
+- [EF02 — Authentifier une identité (enrôlement CA + token de session opaque)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCA01 — Création d'un compte](UCA01.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCA01 (expression)](UCA01.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCA01 (analyse)](../../2-Analyse/UCA-Compte_et_Acces/UCA01.md)
+- [UCA04 (analyse)](../../2-Analyse/UCA-Compte_et_Acces/UCA04.md)
+- [UCA05 (analyse)](../../2-Analyse/UCA-Compte_et_Acces/UCA05.md)
+- [UCA07 (analyse)](../../2-Analyse/UCA-Compte_et_Acces/UCA07.md)
+- [UCA08 (analyse)](../../2-Analyse/UCA-Compte_et_Acces/UCA08.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [DC_CLI_Identity](../../3-Conception/DC_CLI_Identity.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

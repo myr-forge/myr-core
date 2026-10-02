@@ -1,3 +1,47 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - domaine/model
+  - uc/UCAM01
+  - uc/UCAM02
+  - uc/UCAM03
+  - uc/UCAM05
+  - uc/UCAM07
+  - uc/UCAM08
+  - uc/UCCE01
+  - uc/UCCE02
+  - uc/UCCE03
+  - uc/UCCE04
+  - uc/UCCE05
+  - uc/UCCE06
+  - uc/UCCL01
+  - uc/UCMOD01
+  - uc/UCMOD02
+  - uc/UCMOD03
+  - uc/UCMOD04
+  - uc/UCMOD06
+  - uc/UCREC01
+  - uc/UCREC02
+  - uc/UCREC03
+  - uc/UCREC04
+  - uc/UCREC05
+  - rm/RM01
+  - rm/RM03
+  - rm/RM09
+  - rm/RM10
+  - rm/RM11
+  - rm/RM13
+  - rm/RM14
+  - rm/RM15
+  - rm/RM16
+  - rm/RM17
+  - rm/RM19
+  - rm/RM27
+  - rm/RM39
+  - rm/RM40
+  - rm/RM41
+---
 # DC — CLI Modèle : Référence des commandes composant / interfaces / module
 
 > Phase 3 — Arrington | Use cases : UCCE01–06, UCAM01–03/05/07/08, UCMOD01–06, UCCL01, UCREC01–05 | Outil : `myr` (`bin/myr-cli`)
@@ -224,3 +268,112 @@ Orientation retenue : une librairie **Go native**, cohérente avec le stack 100 
 2. **Détection géométrique des contacts/coaxialités entre sous-pièces** (§2.2 de la proposition d'origine) — nécessite une représentation B-rep et des calculs de géométrie solide qu'aucune librairie Go connue ne fournit ; c'est typiquement le rôle d'un noyau CAO (OpenCASCADE et équivalents), aujourd'hui hors de la table des technologies autorisées.
 
 **Ce point reste ouvert** : soit un parseur Go maison se limite dans un premier temps à la structure d'assemblage et à une détection de contact approximative (recouvrement de boîtes englobantes plutôt qu'analyse de faces), avec un score de confiance revu à la baisse en conséquence ; soit le besoin de précision impose de revisiter l'option d'un noyau géométrique externe malgré le coût d'intégration. Décision à prendre avant toute implémentation (règle 20 CLAUDE.md) et à documenter ici une fois tranchée.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCADM01 — Ajouter une organisation au réseau : [expression](../1-Expression/UCADM-Administration/UCADM01.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM01.md)
+- UCADM02 — Créer un réseau indépendant : [expression](../1-Expression/UCADM-Administration/UCADM02.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM02.md)
+- UCADM03 — Ajouter un nœud à un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM03.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM03.md)
+- UCADM04 — Retirer un nœud d'un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM04.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM04.md)
+- UCADM05 — Démanteler un réseau (dev/test uniquement) : [expression](../1-Expression/UCADM-Administration/UCADM05.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM05.md)
+- UCAM01 — Liaison entre interfaces : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM01.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM01.md)
+- UCAM02 — Visualiser les interfaces physiques de composants : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM02.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM02.md)
+- UCAM03 — Créer une interface sur un composant : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM03.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM03.md)
+- UCAM05 — Transformation d'un composant en module : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM05.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM05.md)
+- UCAM07 — Choisir un asset d'accroche (Fastener) : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM07.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM07.md)
+- UCAM08 — Retirer une instance de composant d'un Module : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM08.md) · [analyse](../2-Analyse/UCAM-Assemblage_Module/UCAM08.md)
+- UCAM09 — Décomposition assistée d'un composant assemblage : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM09.md)
+- UCAUT01 — Fabrication/Livraison d'un Composant : [expression](../1-Expression/UCAUT-Automatisation/UCAUT01.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT01.md)
+- UCAUT02 — Commande en ligne de Asset : [expression](../1-Expression/UCAUT-Automatisation/UCAUT02.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT02.md)
+- UCAUT04 — Gestion SCM d'un modèle 3D : [expression](../1-Expression/UCAUT-Automatisation/UCAUT04.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT04.md)
+- UCCE01 — Ajout d'un composant Physique : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE01.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE01.md)
+- UCCE02 — Configurer un Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE02.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE02.md)
+- UCCE03 — Ajout d'un composant Numérique : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE03.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE03.md)
+- UCCE04 — Améliorer un Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE04.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE04.md)
+- UCCE05 — Créer une extension de Composant : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE05.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE05.md)
+- UCCE06 — Ajouter une interface à un Composant déjà créé : [expression](../1-Expression/UCCE-Composant_Ecriture/UCCE06.md) · [analyse](../2-Analyse/UCCE-Composant_Ecriture/UCCE06.md)
+- UCCL01 — Faire une recherche par filtre : [expression](../1-Expression/UCCL-Composant_Lecture/UCCL01.md) · [analyse](../2-Analyse/UCCL-Composant_Lecture/UCCL01.md)
+- UCCL03 — Vérifier la validité des emplacements externes d'un composant ou module : [expression](../1-Expression/UCCL-Composant_Lecture/UCCL03.md)
+- UCMOD01 — Créer un Module : [expression](../1-Expression/UCMOD-Module/UCMOD01.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD01.md)
+- UCMOD02 — Ajouter un Module existant : [expression](../1-Expression/UCMOD-Module/UCMOD02.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD02.md)
+- UCMOD03 — Modifier les métadonnées d'un Module : [expression](../1-Expression/UCMOD-Module/UCMOD03.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD03.md)
+- UCMOD04 — Visualiser les composants d'un Module : [expression](../1-Expression/UCMOD-Module/UCMOD04.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD04.md)
+- UCMOD06 — Soumettre un module à la blockchain : [expression](../1-Expression/UCMOD-Module/UCMOD06.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD06.md)
+- UCPI01 — Commander un Module complet : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md)
+- UCPI02 — Recevoir une commission sur l'utilisation d'un Module : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI02.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI02.md)
+- UCPI04 — Définir un prix sur un Composant proprietaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI04.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI04.md)
+- UCPI05 — Définir un prix sur un Module proprietaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI05.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI05.md)
+- UCPI06 — Déclarer un composant similaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI06.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI06.md)
+- UCPI07 — Transfert de propriété intellectuelle : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI07.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI07.md)
+- UCPI08 — Cloner un Composant sur un réseau exterieur : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI08.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI08.md)
+- UCPI09 — Cloner un Module sur un réseau exterieur : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI09.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI09.md)
+- UCPI10 — Norme de conception écoconception : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI10.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI10.md)
+- UCPI11 — Modifier le prix d'un asset : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI11.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI11.md)
+- UCREC01 — Rechercher une référence existante : [expression](../1-Expression/UCREC-Recherche/UCREC01.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC01.md)
+- UCREC02 — Rechercher les Composants compatibles : [expression](../1-Expression/UCREC-Recherche/UCREC02.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC02.md)
+- UCREC03 — Rechercher les versions des Composants : [expression](../1-Expression/UCREC-Recherche/UCREC03.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC03.md)
+- UCREC04 — Rechercher les Modules qui utilisent un Composant : [expression](../1-Expression/UCREC-Recherche/UCREC04.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC04.md)
+- UCREC05 — Exporter BOM Module : [expression](../1-Expression/UCREC-Recherche/UCREC05.md) · [analyse](../2-Analyse/UCREC-Recherche/UCREC05.md)
+
+**Règles métier**
+- [RM01 — Anti-plagiat obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM03 — Compatibilité de licence](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM09 — Interface à usage unique](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM10 — Vérification de compatibilité automatique](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM11 — Critères de compatibilité d'interfaces](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM13 — Slot virtuel garanti](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM14 — Suppression en cascade des connexions](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+- [RM15 — Instance indépendante](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+- [RM16 — État draft](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM17 — Assemblage requis pour soumission (module uniquement)](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM19 — Fork d'un asset soumis](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM27 — Nombre minimum de nœuds actifs](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM39 — Filiation d'un découpage](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM40 — Proposition de découpage non engageante](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM41 — Compatibilité toujours vérifiée pour une connexion suggérée](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Documents cités**
+- [Analyse_des_besoins](../2-Analyse/Analyse_des_besoins.md)
+- [Architecture_Composition](Architecture_Composition.md)
+- [Architecture_Hexagonale](Architecture_Hexagonale.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_CLI_Admin](DC_CLI_Admin.md)
+- [DC_D8_Recherche](DC_D8_Recherche.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../1-Expression/Expression_des_besoins_Intro.md)
+- [UCAM01 (analyse)](../2-Analyse/UCAM-Assemblage_Module/UCAM01.md)
+- [UCAM02 (analyse)](../2-Analyse/UCAM-Assemblage_Module/UCAM02.md)
+- [UCAM03 (analyse)](../2-Analyse/UCAM-Assemblage_Module/UCAM03.md)
+- [UCAM05 (analyse)](../2-Analyse/UCAM-Assemblage_Module/UCAM05.md)
+- [UCAM07 (analyse)](../2-Analyse/UCAM-Assemblage_Module/UCAM07.md)
+- [UCAM08 (analyse)](../2-Analyse/UCAM-Assemblage_Module/UCAM08.md)
+- [UCAUT03 (analyse)](../2-Analyse/UCAUT-Automatisation/UCAUT03.md)
+- [UCCE01 (analyse)](../2-Analyse/UCCE-Composant_Ecriture/UCCE01.md)
+- [UCCE02 (analyse)](../2-Analyse/UCCE-Composant_Ecriture/UCCE02.md)
+- [UCCE03 (analyse)](../2-Analyse/UCCE-Composant_Ecriture/UCCE03.md)
+- [UCCE04 (analyse)](../2-Analyse/UCCE-Composant_Ecriture/UCCE04.md)
+- [UCCE05 (analyse)](../2-Analyse/UCCE-Composant_Ecriture/UCCE05.md)
+- [UCCE06 (analyse)](../2-Analyse/UCCE-Composant_Ecriture/UCCE06.md)
+- [UCCL01 (analyse)](../2-Analyse/UCCL-Composant_Lecture/UCCL01.md)
+- [UCDEV02 (analyse)](../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [UCMOD01 (analyse)](../2-Analyse/UCMOD-Module/UCMOD01.md)
+- [UCMOD02 (analyse)](../2-Analyse/UCMOD-Module/UCMOD02.md)
+- [UCMOD03 (analyse)](../2-Analyse/UCMOD-Module/UCMOD03.md)
+- [UCMOD04 (analyse)](../2-Analyse/UCMOD-Module/UCMOD04.md)
+- [UCMOD06 (analyse)](../2-Analyse/UCMOD-Module/UCMOD06.md)
+- [UCREC05 (analyse)](../2-Analyse/UCREC-Recherche/UCREC05.md)
+- [API_REST](API_REST.md)
+- [Architecture_Composition](Architecture_Composition.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_CLI_Identity](DC_CLI_Identity.md)
+- [DC_D8_Recherche](DC_D8_Recherche.md)
+- [todo (conception)](todo.md)
+- [roadmap_dev](../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

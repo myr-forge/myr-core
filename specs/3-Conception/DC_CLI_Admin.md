@@ -1,3 +1,23 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM01
+  - uc/UCADM02
+  - uc/UCADM03
+  - uc/UCADM04
+  - uc/UCADM05
+  - uc/UCDEV02
+  - rm/RM27
+  - rm/RM28
+  - rm/RM34
+  - rm/RM35
+  - rm/RM36
+  - enf/ENF18
+---
 # DC — CLI Admin : Référence des commandes administrateur
 
 > Phase 3 — Arrington | Use cases : UCADM01–UCADM05, UCDEV02 | Outil : `myr` (`bin/myr-cli`, installé dans `~/.local/bin/myr` sur le serveur)
@@ -958,3 +978,44 @@ La commande `myr network destroy` est la seule commande CLI qui appelle directem
 | 3 | **Chemin ledger configurable** pour `myr network destroy` — `MYR_FABRIC_DATA_PATH` ou dans `config/` ? | Nécessaire pour UCADM05 fonctionnel |
 | 4 | **Mode déploiement** de l'infrastructure Fabric pour `destroy` — Docker Compose ou bare-metal ? Quelle est la cible principale de déploiement ? | Détermine l'ordre de priorité de la logique d'arrêt processus (DC-CLI-07) |
 | 5 | **`myr network create`** (UCADM02 flux nominal — création réseau Fabric from scratch) — reporté post-v1. En v1, `myr network import` depuis un profil `gateway-connection.json` existant couvre le cas nominal. La création from scratch (configtx.yaml, genesis block, cryptogen) est documentée manuellement hors CLI. Visible dans l'arbre avec tag `[POST-V1]`. | Résolu — reporté explicitement. |
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCADM01 — Ajouter une organisation au réseau : [expression](../1-Expression/UCADM-Administration/UCADM01.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM01.md)
+- UCADM02 — Créer un réseau indépendant : [expression](../1-Expression/UCADM-Administration/UCADM02.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM02.md)
+- UCADM03 — Ajouter un nœud à un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM03.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM03.md)
+- UCADM04 — Retirer un nœud d'un réseau existant : [expression](../1-Expression/UCADM-Administration/UCADM04.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM04.md)
+- UCADM05 — Démanteler un réseau (dev/test uniquement) : [expression](../1-Expression/UCADM-Administration/UCADM05.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM05.md)
+- UCADM06 — Attribuer des rôles à une organisation : [expression](../1-Expression/UCADM-Administration/UCADM06.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM06.md)
+- UCADM07 — Gérer les rôles : [expression](../1-Expression/UCADM-Administration/UCADM07.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM07.md)
+- UCDEV02 — Utilisation du CLI : [expression](../1-Expression/UCDEV-Developpement/UCDEV02.md) · [analyse](../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+
+**Règles métier**
+- [RM27 — Nombre minimum de nœuds actifs](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM28 — Démantèlement réseau : opération d'infrastructure locale](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM34 — Rôle admin protégé](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM35 — Révocation en cascade à la suppression d'un rôle](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM36 — Nom de rôle unique](../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+
+**Exigences non fonctionnelles**
+- [ENF18 — Isolation du domaine métier](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../1-Expression/Expression_des_besoins_Intro.md)
+- [Analyse_des_besoins](../2-Analyse/Analyse_des_besoins.md)
+- [UCDEV02 (analyse)](../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [API_REST](API_REST.md)
+- [Architecture_Hexagonale](Architecture_Hexagonale.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_CLI_Identity](DC_CLI_Identity.md)
+- [DC_CLI_Model](DC_CLI_Model.md)
+- [DC_D2_Administration](DC_D2_Administration.md)
+- [DC_D9_Automatisation](DC_D9_Automatisation.md)
+- [roadmap_dev](../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

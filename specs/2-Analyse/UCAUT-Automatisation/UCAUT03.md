@@ -5,6 +5,22 @@ probabilite: 5
 impact: 2
 importance: 10
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCAUT
+  - domaine/model
+  - domaine/payment
+  - domaine/role
+  - uc/UCAUT03
+  - rm/RM01
+  - rm/RM02
+  - rm/RM04
+  - rm/RM05
+  - rm/RM22
+  - enf/ENF12
+  - enf/ENF15
+  - enf/ENF30
 ---
 
 # Ajouter un modèle 3D depuis un logiciel CAO
@@ -183,3 +199,47 @@ end
 - La détection automatique des interfaces physiques dépend du format CAO (STEP, STL, FBX…) — les fichiers STL ne contiennent pas de métadonnées structurelles ; STEP/IGES en contiennent davantage
 - Question ouverte : quels logiciels CAO sont prioritaires pour le plugin ? Fusion 360, FreeCAD, SolidWorks ?
 - **Parité CLI :** ce use case recoupe `ModelService.AddFull`, exposé côté REST (`POST /api/components`) et côté CLI par `myr model add`, qui expose `Category`, `ParentID`, `LicenseID` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.1), comme pour UCCE01/03. Le plugin CAO constitue lui-même un canal non-GUI équivalent en esprit à un script CLI : il appelle l'API REST de façon programmatique — le principe de parité CLI/REST est donc respecté par construction ; aucune lacune de conception domaine ici, contrairement aux autres UC de ce lot.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAUT — Automatisation](../../Carte_des_specs.md#UCAUT%20—%20Automatisation)
+- [UCAUT03 — couche expression](../../1-Expression/UCAUT-Automatisation/UCAUT03.md)
+- [Traçabilité UCAUT03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAUT03)
+
+**Exigences fonctionnelles couvertes**
+- [EF46 — Intégrer un modèle 3D depuis un logiciel CAO (plugin)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCCE01 — Ajout d'un composant Physique](../UCCE-Composant_Ecriture/UCCE01.md)
+- [UCCE03 — Ajout d'un composant Numérique](../UCCE-Composant_Ecriture/UCCE03.md)
+- [UCPI06 — Déclarer un composant similaire](../UCPI-Propriete_Intellectuelle/UCPI06.md)
+
+**Règles métier**
+- [RM01 — Anti-plagiat obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM02 — Catégorie d'asset obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM04 — UUID unique](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM05 — ParentID obligatoire pour les dérivés](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF15 — Taille maximale d'un fichier CAO](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [DC_D9_Automatisation](../../3-Conception/DC_D9_Automatisation.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

@@ -5,6 +5,19 @@ probabilite: 4
 impact: 5
 importance: 20
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCAM
+  - domaine/model
+  - uc/UCAM01
+  - rm/RM09
+  - rm/RM10
+  - rm/RM11
+  - rm/RM12
+  - rm/RM13
+  - enf/ENF12
+  - enf/ENF18
 ---
 
 # Liaison entre interfaces
@@ -200,3 +213,59 @@ for _, c := range conns {
 **Route virtuel→physique :** `POST /api/virtual-connect` → `handleVirtualConnect()` dans `handlers.go`
 
 **Commande CLI équivalente :** `myr model link add --from <ifaceID> --to <ifaceID> [--fastener <assetID>] [--label <texte>] [--from-instance <id>] [--to-instance <id>]` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.4). Elle appelle la même méthode de service, `ModelService.AddAssemblyLink(fromIfaceID, toIfaceID, label, fromInstanceID, toInstanceID, fastenerAssetID)`, que le handler `POST /api/assembly-links` — même vérification de compatibilité (RM10/RM11), même unicité d'interface (RM09), mêmes messages d'erreur métier, quel que soit le canal. Le flux via slot virtuel (`POST /api/virtual-connect`) a pour équivalent `myr model link connect-virtual --virtual-iface <id> --physical-iface <id>`, appelant `ModelService.ConnectVirtualToPhysical()`. Seul le format de sortie change (texte terminal vs JSON HTTP) ; les écarts de code notés ci-dessus (RM09 à implémenter, HTTP 500 à affiner) s'appliquent identiquement quel que soit le canal, puisque la vérification est faite dans le service et non dans le handler.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
+- [UCAM01 — couche expression](../../1-Expression/UCAM-Assemblage_Module/UCAM01.md)
+- [Traçabilité UCAM01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM01)
+
+**Exigences fonctionnelles couvertes**
+- [EF18 — Créer des liaisons entre interfaces compatibles de composants](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM03 — Créer une interface sur un composant](UCAM03.md)
+- [UCAM07 — Choisir un asset d'accroche (Fastener)](UCAM07.md)
+
+**Règles métier**
+- [RM09 — Interface à usage unique](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM10 — Vérification de compatibilité automatique](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM11 — Critères de compatibilité d'interfaces](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM12 — Persistance des liaisons incompatibles](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCAM05 (expression)](../../1-Expression/UCAM-Assemblage_Module/UCAM05.md)
+- [UCAM07 (expression)](../../1-Expression/UCAM-Assemblage_Module/UCAM07.md)
+- [UCCE06 (expression)](../../1-Expression/UCCE-Composant_Ecriture/UCCE06.md)
+- [UCMOD01 (expression)](../../1-Expression/UCMOD-Module/UCMOD01.md)
+- [UCMOD02 (expression)](../../1-Expression/UCMOD-Module/UCMOD02.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCAM02 (analyse)](UCAM02.md)
+- [UCAM05 (analyse)](UCAM05.md)
+- [UCAM07 (analyse)](UCAM07.md)
+- [UCCE05 (analyse)](../UCCE-Composant_Ecriture/UCCE05.md)
+- [UCCE06 (analyse)](../UCCE-Composant_Ecriture/UCCE06.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [UCMOD02 (analyse)](../UCMOD-Module/UCMOD02.md)
+- [UCMOD03 (analyse)](../UCMOD-Module/UCMOD03.md)
+- [UCMOD06 (analyse)](../UCMOD-Module/UCMOD06.md)
+- [todo (analyse)](../todo.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

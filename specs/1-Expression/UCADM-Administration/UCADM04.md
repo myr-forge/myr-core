@@ -1,6 +1,16 @@
 ---
 categorie: Administration
 titre: "Retirer un nœud d'un réseau existant"
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCADM
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM04
+  - rm/RM06
+  - rm/RM27
 ---
 
 # Retirer un nœud d'un réseau existant
@@ -106,3 +116,35 @@ else (oui)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
+- [UCADM04 — couche analyse](../../2-Analyse/UCADM-Administration/UCADM04.md)
+- [Traçabilité UCADM04 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM04)
+
+**Exigences fonctionnelles couvertes**
+- [EF57 — Retirer administrativement un nœud d'un réseau existant](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCADM03 — Ajouter un nœud à un réseau existant](UCADM03.md)
+
+**Règles métier**
+- [RM06 — Immuabilité des transactions](../Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM27 — Nombre minimum de nœuds actifs](../Regles_Metier.md#8.%20Administration%20réseau)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCDEV02 (expression)](../UCDEV-Developpement/UCDEV02.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

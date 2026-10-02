@@ -5,6 +5,15 @@ probabilite: 3
 impact: 4
 importance: 12
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCREC
+  - domaine/model
+  - uc/UCREC04
+  - rm/RM16
+  - rm/RM19
+  - enf/ENF12
 ---
 
 # Rechercher les Modules qui utilisent un Composant
@@ -132,3 +141,41 @@ if usesComp := r.URL.Query().Get("uses_component"); usesComp != "" {
 **Cas des modules imbriqués :** Un Module peut contenir un sous-Module qui lui-même contient le Composant cible. Le filtrage actuel (direct `WorkspaceInstances`) ne détecte pas cette utilisation indirecte. La profondeur de recherche (directe vs récursive) est une décision de conception à soumettre au PO.
 
 **Commande CLI équivalente (point ouvert) :** `myr module list` (méthode `ListModules`) fournit la même base que le futur `GET /api/modules?uses_component=:id`, mais sans le paramètre de filtre — absent tant côté REST que côté CLI. En attendant, l'administrateur doit inspecter chaque module avec `myr module get <id>` pour vérifier manuellement la présence du composant dans ses `WorkspaceInstances`.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCREC — Recherche](../../Carte_des_specs.md#UCREC%20—%20Recherche)
+- [UCREC04 — couche expression](../../1-Expression/UCREC-Recherche/UCREC04.md)
+- [Traçabilité UCREC04 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCREC04)
+
+**Exigences fonctionnelles couvertes**
+- [EF42 — Identifier tous les modules qui intègrent un composant donné](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCA06 — Vérifier les possessions](../UCA-Compte_et_Acces/UCA06.md)
+
+**Règles métier**
+- [RM16 — État draft](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM19 — Fork d'un asset soumis](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [Securite](../../3-Conception/Securite.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

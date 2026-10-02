@@ -5,6 +5,18 @@ probabilite: 4
 impact: 4
 importance: 16
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCAM
+  - domaine/model
+  - uc/UCAM08
+  - rm/RM08
+  - rm/RM14
+  - rm/RM15
+  - rm/RM19
+  - enf/ENF12
+  - enf/ENF18
 ---
 
 # Retirer une instance de composant d'un Module
@@ -170,3 +182,42 @@ if idx := strings.Index(rest, "/instances/"); idx != -1 {
 **Double instance du même composant (RM15) :** Si le composant A est présent deux fois (instances `inst-1` et `inst-2`), retirer `inst-1` ne supprime que les connexions de `inst-1`. Les connexions de `inst-2` sont conservées. Cette indépendance est garantie par l'identification par `instanceID` et non par `assetID`.
 
 **Commande CLI équivalente :** `myr model instance remove <moduleID> <instanceID>` (voir `DC_CLI_Model.md` § 3.5), appelant `ModelService.RemoveAssetFromWorkspace(moduleID, instanceID)` — la même méthode que le handler `DELETE /api/modules/:moduleID/instances/:instanceID`. La cascade de suppression des connexions (RM14) et l'indépendance des instances (RM15) sont gérées identiquement par le service, quel que soit le canal. Conformément à DC-CLIM-03, aucune confirmation interactive n'est demandée : l'identifiant de l'instance est fourni explicitement, l'appelant est censé avoir vérifié au préalable les liaisons impactées via `myr model link list`.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
+- [UCAM08 — couche expression](../../1-Expression/UCAM-Assemblage_Module/UCAM08.md)
+- [Traçabilité UCAM08 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM08)
+
+**Exigences fonctionnelles couvertes**
+- [EF24 — Retirer une instance de composant d'un module (avec cascade des connexions)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Règles métier**
+- [RM08 — Masquage local, ledger jamais modifié](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM14 — Suppression en cascade des connexions](../../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+- [RM15 — Instance indépendante](../../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+- [RM19 — Fork d'un asset soumis](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [UCCE07 (analyse)](../UCCE-Composant_Ecriture/UCCE07.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

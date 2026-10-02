@@ -5,6 +5,19 @@ probabilite: 2
 impact: 3
 importance: 6
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCCE
+  - domaine/model
+  - uc/UCCE06
+  - rm/RM02
+  - rm/RM11
+  - rm/RM12
+  - rm/RM13
+  - rm/RM16
+  - rm/RM19
+  - enf/ENF12
 ---
 
 # Ajouter une interface à un Composant déjà créé
@@ -224,3 +237,56 @@ if a.Tag != "" && b.Tag != "" && a.Tag != b.Tag {
 **Slot virtuel :** Chaque asset possède automatiquement au moins un slot virtuel (`Virtual: true`) créé par `EnsureVirtualSlot()`. Ce slot devient une interface physique lors de la première liaison via `ConnectVirtualToPhysical()`.
 
 **Synchronisation Fabric :** Les interfaces restent en brouillon local tant que le composant n'est pas soumis — aucune écriture Fabric par action individuelle (ajout, mise à jour, matérialisation de slot virtuel). La synchronisation vers `Model3D.Interfaces` a lieu **une seule fois**, à la soumission du composant (sa création finale, ou celle d'un fork si le composant d'origine était déjà soumis) — jamais de façon facultative après coup.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCCE — Composant Ecriture](../../Carte_des_specs.md#UCCE%20—%20Composant%20Ecriture)
+- [UCCE06 — couche expression](../../1-Expression/UCCE-Composant_Ecriture/UCCE06.md)
+- [Traçabilité UCCE06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCE06)
+
+**Exigences fonctionnelles couvertes**
+- [EF14 — Ajouter une interface à un composant existant](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM01 — Liaison entre interfaces](../UCAM-Assemblage_Module/UCAM01.md)
+- [UCAM03 — Créer une interface sur un composant](../UCAM-Assemblage_Module/UCAM03.md)
+- [UCCE01 — Ajout d'un composant Physique](UCCE01.md)
+- [UCCE03 — Ajout d'un composant Numérique](UCCE03.md)
+- [UCCE04 — Améliorer un Composant](UCCE04.md)
+- [UCCE05 — Créer une extension de Composant](UCCE05.md)
+
+**Règles métier**
+- [RM02 — Catégorie d'asset obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM11 — Critères de compatibilité d'interfaces](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM12 — Persistance des liaisons incompatibles](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM16 — État draft](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM19 — Fork d'un asset soumis](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [Regles_Metier](../../1-Expression/Regles_Metier.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCCE01 (analyse)](UCCE01.md)
+- [UCCE05 (analyse)](UCCE05.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../todo.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_asset](../../3-Conception/Sequence_soumission_asset.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

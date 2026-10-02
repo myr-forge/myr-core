@@ -1,3 +1,10 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - enf/ENF18
+  - enf/ENF25
+---
 # Architecture Hexagonale — Myr System
 
 > Phase 3 — Arrington | Contrainte ENF18 vérifiée par CI : `scripts/ci/check-domain-imports.sh`
@@ -325,3 +332,24 @@ main.go
 |----------|--------|-------|
 | `REDIS_URL` | ❌ | Active les sessions REST partagées Redis (multi-instances) |
 | Variables Fabric | ✅ pour Fabric | Lues via `fabricadapter.ConfigFromEnv()` ou fichier `fabric.env` |
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Exigences non fonctionnelles**
+- [ENF18 — Isolation du domaine métier](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF25 — Licence du code source](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Admin](DC_CLI_Admin.md)
+
+**Cité par**
+- [UCCL01 (analyse)](../2-Analyse/UCCL-Composant_Lecture/UCCL01.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_CLI_Model](DC_CLI_Model.md)
+- [Deploiement](Deploiement.md)
+
+<!-- liens-obsidian:end -->

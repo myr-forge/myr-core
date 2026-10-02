@@ -5,6 +5,18 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCADM
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM01
+  - rm/RM06
+  - rm/RM07
+  - enf/ENF05
+  - enf/ENF18
 ---
 
 # Ajouter une organisation au réseau
@@ -170,3 +182,48 @@ end
 5. Mettre à jour le profil de connexion via `NetSvc` → `adapters/out/localstorage/`.
 
 **Lien avec UCADM06/UCADM07 :** L'attribution de rôles est réalisée séparément via `myr org role assign` après l'ajout de l'organisation.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
+- [UCADM01 — couche expression](../../1-Expression/UCADM-Administration/UCADM01.md)
+- [Traçabilité UCADM01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM01)
+
+**Exigences fonctionnelles couvertes**
+- [EF08 — Gérer les organisations membres d'un réseau (ajout, mise à jour)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCADM02 — Créer un réseau indépendant](UCADM02.md)
+- [UCADM06 — Attribuer des rôles à une organisation](UCADM06.md)
+- [UCADM07 — Gérer les rôles](UCADM07.md)
+
+**Règles métier**
+- [RM06 — Immuabilité des transactions](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+
+**Exigences non fonctionnelles**
+- [ENF05 — Disponibilité du serveur Myr (instance unique)](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCADM06 (expression)](../../1-Expression/UCADM-Administration/UCADM06.md)
+- [UCDEV02 (expression)](../../1-Expression/UCDEV-Developpement/UCDEV02.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCADM03 (analyse)](UCADM03.md)
+- [UCADM06 (analyse)](UCADM06.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

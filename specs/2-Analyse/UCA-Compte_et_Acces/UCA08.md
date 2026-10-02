@@ -5,6 +5,15 @@ probabilite: 4
 impact: 4
 importance: 16
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCA
+  - domaine/identity
+  - domaine/role
+  - uc/UCA08
+  - rm/RM22
+  - enf/ENF12
 ---
 
 # Demander un rôle
@@ -109,3 +118,38 @@ CLI --> ADM : "Rôle de alice@org1 mis à jour : contributor.\nLe nouveau rôle 
 **⚠️ Écart — déconnexion entre rôle CA et rôle de session REST :** tant que `handleIdentitySession` fixera le rôle de session à `"contributor"` en dur (écart documenté dans UCA02), ce use case n'aura aucun effet observable via l'API REST — seul un usage direct de l'identité CA (CLI Fabric, ou un futur code REST corrigé) en bénéficierait.
 
 **Pas d'auto-distribution configurée par réseau :** contrairement à un système de règles par réseau (auto vs validation), il n'existe qu'un seul mécanisme aujourd'hui : l'action manuelle de l'administrateur via `myr identity set-role`.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
+- [UCA08 — couche expression](../../1-Expression/UCA-Compte_et_Acces/UCA08.md)
+- [Traçabilité UCA08 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA08)
+
+**Use cases cités**
+- [UCA01 — Création d'un compte](UCA01.md)
+- [UCA02 — Se Connecter](UCA02.md)
+- [UCA05 — Vérification des accès du rôle attribué](UCA05.md)
+
+**Règles métier**
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [UCA01 (expression)](../../1-Expression/UCA-Compte_et_Acces/UCA01.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCA01 (analyse)](UCA01.md)
+- [UCA02 (analyse)](UCA02.md)
+- [UCA05 (analyse)](UCA05.md)
+- [UCA07 (analyse)](UCA07.md)
+- [todo (analyse)](../todo.md)
+- [DC_CLI_Identity](../../3-Conception/DC_CLI_Identity.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

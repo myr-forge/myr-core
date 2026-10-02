@@ -5,6 +5,21 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD06
+  - rm/RM07
+  - rm/RM17
+  - rm/RM18
+  - rm/RM19
+  - enf/ENF02
+  - enf/ENF12
+  - enf/ENF28
+  - enf/ENF30
+  - enf/ENF31
 ---
 
 # Soumettre un module à la blockchain
@@ -202,3 +217,53 @@ if m.Status == ModuleSubmitted {
 Et implémenter une fonction `ForkModule(moduleID string) (*Model3D, error)` qui clone le module en état `draft`.
 
 **BlockID en production :** `simModuleBlockID()` génère un ID aléatoire simulé. En production, le `blockID` doit être le numéro de bloc Fabric retourné par `StoreModelRecord()` — l'adapter Fabric doit être adapté pour retourner cette information.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD06 — couche expression](../../1-Expression/UCMOD-Module/UCMOD06.md)
+- [Traçabilité UCMOD06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD06)
+
+**Exigences fonctionnelles couvertes**
+- [EF16 — Vérifier la compatibilité de licence lors d'une dérivation](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+- [EF27 — Soumettre un module à la blockchain (ModuleVersion immuable)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM01 — Liaison entre interfaces](../UCAM-Assemblage_Module/UCAM01.md)
+- [UCMOD01 — Créer un Module](UCMOD01.md)
+
+**Règles métier**
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM17 — Assemblage requis pour soumission (module uniquement)](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM18 — ModuleVersion immuable (module uniquement)](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM19 — Fork d'un asset soumis](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Exigences non fonctionnelles**
+- [ENF02 — Temps de soumission d'une transaction Fabric](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF28 — Immuabilité des transactions blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF31 — Validation avant soumission](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCMOD01 (expression)](../../1-Expression/UCMOD-Module/UCMOD01.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [UCMOD01 (analyse)](UCMOD01.md)
+- [UCMOD03 (analyse)](UCMOD03.md)
+- [todo (analyse)](../todo.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

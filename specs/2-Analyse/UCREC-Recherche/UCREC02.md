@@ -5,6 +5,15 @@ probabilite: 3
 impact: 4
 importance: 12
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCREC
+  - domaine/model
+  - uc/UCREC02
+  - rm/RM10
+  - rm/RM11
+  - enf/ENF12
 ---
 
 # Rechercher les Composants compatibles
@@ -148,3 +157,35 @@ end
 **Écart E2 (tag manquant) :** L'algorithme actuel compare catégorie + type + sens + valeurs (4 critères). RM11 en définit 5. Le champ `Tag` doit être ajouté à `AssetInterface` avant l'implémentation complète.
 
 **Commande CLI équivalente (point ouvert) :** Aucune méthode `ModelService` de type `FindCompatibleAssets` n'existe aujourd'hui — ni l'endpoint REST ni une commande CLI ne peuvent donc offrir cette fonctionnalité tant que ce point n'est pas conçu au niveau du domaine. En attendant, `myr model interface list <assetID>` (méthode `ListInterfacesForAsset`) et `myr model list` permettent une reconstitution manuelle côté script, sans appliquer `ifacesCompatible()` automatiquement.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCREC — Recherche](../../Carte_des_specs.md#UCREC%20—%20Recherche)
+- [UCREC02 — couche expression](../../1-Expression/UCREC-Recherche/UCREC02.md)
+- [Traçabilité UCREC02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCREC02)
+
+**Exigences fonctionnelles couvertes**
+- [EF40 — Identifier les composants compatibles entre eux (interfaces)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Règles métier**
+- [RM10 — Vérification de compatibilité automatique](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM11 — Critères de compatibilité d'interfaces](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

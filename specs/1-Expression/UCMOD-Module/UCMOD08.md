@@ -5,6 +5,13 @@ probabilite: 3
 impact: 4
 importance: 12
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD08
+  - rm/RM06
 ---
 
 # Supprimer un Module
@@ -70,3 +77,30 @@ endif
 stop
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD08 — couche analyse](../../2-Analyse/UCMOD-Module/UCMOD08.md)
+- [Traçabilité UCMOD08 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD08)
+
+**Exigences fonctionnelles couvertes**
+- [EF62 — Supprimer un module (masquage local des listes, ledger jamais modifié)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCCE07 — Supprimer un Composant](../UCCE-Composant_Ecriture/UCCE07.md)
+- [UCMOD01 — Créer un Module](UCMOD01.md)
+
+**Règles métier**
+- [RM06 — Immuabilité des transactions](../Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+
+**Cité par**
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCCE07 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE07.md)
+- [UCMOD03 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD03.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

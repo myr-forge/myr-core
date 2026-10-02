@@ -1,3 +1,35 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - rm/RM01
+  - rm/RM02
+  - rm/RM03
+  - rm/RM04
+  - rm/RM05
+  - rm/RM09
+  - rm/RM10
+  - rm/RM11
+  - rm/RM12
+  - rm/RM13
+  - rm/RM14
+  - rm/RM15
+  - rm/RM16
+  - rm/RM17
+  - rm/RM18
+  - rm/RM19
+  - rm/RM21
+  - rm/RM22
+  - rm/RM23
+  - rm/RM24
+  - rm/RM25
+  - rm/RM26
+  - rm/RM39
+  - rm/RM40
+  - rm/RM41
+  - rm/RM42
+  - relecture/incoherence
+---
 # Modèle de domaine — Agrégats et relations
 
 > Phase 3 — Arrington | Référence : `specs/2-Analyse/Analyse_des_besoins.md` §6.3
@@ -309,3 +341,61 @@ Entité `Payment` implémentée (paiement manuel).
 - **Peer** : entité infrastructure Fabric (peer endpoint) — pas modélisée côté applicatif
 - **Adresse de livraison** : UCPI01 mentionne une adresse dans le profil consommateur — entité `ConsumerProfile` absente
 - **Repère géométrique sur `AssetInterface`** (écart E9) : position, orientation et référence à l'entité STEP d'origine (face/axe), nécessaires pour replacer et re-projeter une interface générée par une décomposition automatique (UCAM09) dans un visualiseur 3D — absents du code actuel, à ajouter sur `AssetInterface` ou une structure associée avant toute implémentation d'UCAM09
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCAM09 — Décomposition assistée d'un composant assemblage : [expression](../1-Expression/UCAM-Assemblage_Module/UCAM09.md)
+- UCAUT01 — Fabrication/Livraison d'un Composant : [expression](../1-Expression/UCAUT-Automatisation/UCAUT01.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT01.md)
+- UCCL03 — Vérifier la validité des emplacements externes d'un composant ou module : [expression](../1-Expression/UCCL-Composant_Lecture/UCCL03.md)
+- UCPI01 — Commander un Module complet : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md)
+- UCPI02 — Recevoir une commission sur l'utilisation d'un Module : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI02.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI02.md)
+
+**Règles métier**
+- [RM01 — Anti-plagiat obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM02 — Catégorie d'asset obligatoire](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM03 — Compatibilité de licence](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM04 — UUID unique](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM05 — ParentID obligatoire pour les dérivés](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM09 — Interface à usage unique](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM10 — Vérification de compatibilité automatique](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM11 — Critères de compatibilité d'interfaces](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM12 — Persistance des liaisons incompatibles](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM13 — Slot virtuel garanti](../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM14 — Suppression en cascade des connexions](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+- [RM15 — Instance indépendante](../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+- [RM16 — État draft](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM17 — Assemblage requis pour soumission (module uniquement)](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM18 — ModuleVersion immuable (module uniquement)](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM19 — Fork d'un asset soumis](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM21 — Rôle Lecteur par défaut à l'auto-enregistrement](../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM22 — Changement de rôle réservé à l'administrateur](../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM23 — Distribution automatique des commissions](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM24 — Répartition proportionnelle multi-auteurs](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM25 — Transfert de propriété définitif](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM26 — Traçabilité du clonage inter-réseaux](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM39 — Filiation d'un découpage](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM40 — Proposition de découpage non engageante](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM41 — Compatibilité toujours vérifiée pour une connexion suggérée](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM42 — Traçabilité et alerte des emplacements externes](../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+
+**Documents cités**
+- [Regles_Metier](../1-Expression/Regles_Metier.md)
+- [Analyse_des_besoins](../2-Analyse/Analyse_des_besoins.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_D1_Auth_Identity](DC_D1_Auth_Identity.md)
+- [Securite](Securite.md)
+- [roadmap_dev](../roadmap_dev.md)
+
+**Cité par**
+- [UCAM09 (expression)](../1-Expression/UCAM-Assemblage_Module/UCAM09.md)
+- [API_REST](API_REST.md)
+- [Architecture_Composition](Architecture_Composition.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_D9_Automatisation](DC_D9_Automatisation.md)
+
+<!-- liens-obsidian:end -->

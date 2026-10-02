@@ -5,6 +5,15 @@ probabilite: 3
 impact: 3
 importance: 9
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCA
+  - domaine/identity
+  - domaine/role
+  - uc/UCA06
+  - enf/ENF02
+  - enf/ENF18
 ---
 
 # Vérifier les possessions
@@ -102,3 +111,35 @@ Aucune règle métier dédiée à ce filtre — c'est une projection en lecture 
 **Pas de filtre équivalent sur les modules :** `GET /api/modules` ne connaît pas le paramètre `owner_id` — seule une recherche texte (`q`) est disponible.
 
 **Pas de vérification de wallet :** contrairement à ce qu'un ancien design aurait pu supposer, aucune vérification de wallet CA n'intervient dans ce flux — l'accès est conditionné uniquement par la session REST (`requireAuth`/`contrib`).
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
+- [UCA06 — couche expression](../../1-Expression/UCA-Compte_et_Acces/UCA06.md)
+- [Traçabilité UCA06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA06)
+
+**Exigences fonctionnelles couvertes**
+- [EF06 — Consulter les assets possédés par l'utilisateur](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Exigences non fonctionnelles**
+- [ENF02 — Temps de soumission d'une transaction Fabric](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [Securite](../../3-Conception/Securite.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCREC04 (analyse)](../UCREC-Recherche/UCREC04.md)
+- [todo (analyse)](../todo.md)
+- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
+- [Securite](../../3-Conception/Securite.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

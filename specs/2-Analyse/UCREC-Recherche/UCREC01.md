@@ -5,6 +5,14 @@ probabilite: 4
 impact: 5
 importance: 20
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCREC
+  - domaine/model
+  - uc/UCREC01
+  - rm/RM22
+  - enf/ENF12
 ---
 
 # Rechercher une référence existante
@@ -120,3 +128,38 @@ REST --> Client : 200 [{id, name, status, versions, ...}]
 **Accès Visiteur :** La spec D4 indique que l'accès public (sans session) devrait être possible pour les assets publics. Le code actuel applique `requireAuth` systématiquement — l'accès visiteur reste à implémenter (écart documenté dans l'analyse D4).
 
 **Commande CLI équivalente (alias limité) :** `myr model get <id>` (méthode `Get`) est l'équivalent direct d'une recherche par UUID/référence exacte. `myr model list [--channel <id>]` (méthode `List`) permet de parcourir les assets pour une recherche par nom partiel, en l'absence de méthode de filtre serveur dédiée dans `ModelService` (même limite que UCCL01). `myr module list` couvre le pendant module de `GET /api/modules?name=<ref>`.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCREC — Recherche](../../Carte_des_specs.md#UCREC%20—%20Recherche)
+- [UCREC01 — couche expression](../../1-Expression/UCREC-Recherche/UCREC01.md)
+- [Traçabilité UCREC01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCREC01)
+
+**Exigences fonctionnelles couvertes**
+- [EF39 — Rechercher un asset par référence ou filtre](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCCL01 — Faire une recherche par filtre](../UCCL-Composant_Lecture/UCCL01.md)
+
+**Règles métier**
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCMOD02 (expression)](../../1-Expression/UCMOD-Module/UCMOD02.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCMOD02 (analyse)](../UCMOD-Module/UCMOD02.md)
+- [todo (analyse)](../todo.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

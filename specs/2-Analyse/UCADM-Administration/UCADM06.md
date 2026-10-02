@@ -5,6 +5,17 @@ probabilite: 3
 impact: 4
 importance: 12
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCADM
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM06
+  - rm/RM34
+  - rm/RM37
+  - enf/ENF18
 ---
 
 # Attribuer des rôles à une organisation
@@ -159,3 +170,33 @@ end
 3. Définir `RoleStore` dans `domain/channel/ports.go` : port sortant vers localstorage.
 4. Implémenter `RoleStore` dans `adapters/out/localstorage/role_store.go` (JSON — `data/roles.json`).
 5. Créer `adapters/in/cli/org.go` : sous-commandes `myr org role assign` et `myr org role remove`.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
+- [UCADM06 — couche expression](../../1-Expression/UCADM-Administration/UCADM06.md)
+- [Traçabilité UCADM06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM06)
+
+**Use cases cités**
+- [UCADM01 — Ajouter une organisation au réseau](UCADM01.md)
+- [UCADM07 — Gérer les rôles](UCADM07.md)
+
+**Règles métier**
+- [RM34 — Rôle admin protégé](../../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM37 — Multi-rôles par organisation](../../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+
+**Exigences non fonctionnelles**
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [UCADM01 (expression)](../../1-Expression/UCADM-Administration/UCADM01.md)
+- [UCADM07 (expression)](../../1-Expression/UCADM-Administration/UCADM07.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCADM01 (analyse)](UCADM01.md)
+- [UCADM07 (analyse)](UCADM07.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+
+<!-- liens-obsidian:end -->

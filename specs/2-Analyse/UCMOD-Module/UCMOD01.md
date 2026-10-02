@@ -5,6 +5,22 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD01
+  - rm/RM03
+  - rm/RM04
+  - rm/RM10
+  - rm/RM11
+  - rm/RM13
+  - rm/RM16
+  - rm/RM19
+  - enf/ENF12
+  - enf/ENF18
+  - enf/ENF31
 ---
 
 # Créer un Module
@@ -217,3 +233,62 @@ end
 **Écart E2 à noter :** Le champ `Tag` est absent de `AssetInterface` dans `domain/model/entity.go`. La vérification RM11 ne comporte donc que 4 critères dans le code actuel (catégorie + type + sens + valeurs). Le champ `Tag` doit être ajouté pour la conformité complète à RM11.
 
 **Écart E5 (RM19) :** `AddAssemblyToModule()` ne vérifie pas `Status != ModuleSubmitted` — un module soumis reste modifiable dans le code actuel. Le comportement attendu (fork obligatoire pour tout module soumis) est décrit dans UCMOD06 et doit être corrigé.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD01 — couche expression](../../1-Expression/UCMOD-Module/UCMOD01.md)
+- [Traçabilité UCMOD01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD01)
+
+**Exigences fonctionnelles couvertes**
+- [EF16 — Vérifier la compatibilité de licence lors d'une dérivation](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+- [EF26 — Assembler plusieurs composants en module (état draft), y compris par dérivation d'un module existant (composition dupliquée depuis un `parent_id`)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCCE02 — Configurer un Composant](../UCCE-Composant_Ecriture/UCCE02.md)
+- [UCCE04 — Améliorer un Composant](../UCCE-Composant_Ecriture/UCCE04.md)
+- [UCMOD03 — Modifier les métadonnées d'un Module](UCMOD03.md)
+- [UCMOD06 — Soumettre un module à la blockchain](UCMOD06.md)
+
+**Règles métier**
+- [RM03 — Compatibilité de licence](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM04 — UUID unique](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM10 — Vérification de compatibilité automatique](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM11 — Critères de compatibilité d'interfaces](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM16 — État draft](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+- [RM19 — Fork d'un asset soumis](../../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF31 — Validation avant soumission](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCMOD03 (expression)](../../1-Expression/UCMOD-Module/UCMOD03.md)
+- [UCMOD06 (expression)](../../1-Expression/UCMOD-Module/UCMOD06.md)
+- [UCMOD08 (expression)](../../1-Expression/UCMOD-Module/UCMOD08.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCAM05 (analyse)](../UCAM-Assemblage_Module/UCAM05.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [UCMOD02 (analyse)](UCMOD02.md)
+- [UCMOD03 (analyse)](UCMOD03.md)
+- [UCMOD06 (analyse)](UCMOD06.md)
+- [UCMOD07 (analyse)](UCMOD07.md)
+- [UCMOD08 (analyse)](UCMOD08.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

@@ -5,6 +5,16 @@ probabilite: 2
 impact: 1
 importance: 2
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCPI
+  - domaine/model
+  - domaine/payment
+  - uc/UCPI10
+  - rm/RM07
+  - rm/RM22
+  - enf/ENF12
 ---
 
 # Norme de conception écoconception
@@ -161,3 +171,34 @@ end
 - La validation manuelle des critères non évaluables automatiquement implique un workflow admin hors périmètre de ce UC — à traiter dans un UC dédié si nécessaire
 - Ce UC est de faible priorité (importance = 2) — peut être différé après implémentation des UC de plus haute importance
 - **Parité CLI/REST :** conformément au principe de parité, la définition des normes d'écoconception par l'administrateur et la vérification de conformité devraient être exposables en CLI. Comme noté ci-dessus, aucun champ `EcoNorms` ni route REST n'existe — des commandes CLI (par ex. `myr network eco-norms set ...` / `myr model eco-check <id>`) ne pourront être ajoutées qu'une fois ce domaine conçu.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
+- [UCPI10 — couche expression](../../1-Expression/UCPI-Propriete_Intellectuelle/UCPI10.md)
+- [Traçabilité UCPI10 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI10)
+
+**Exigences fonctionnelles couvertes**
+- [EF38 — Respecter et vérifier une norme d'écoconception](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Règles métier**
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

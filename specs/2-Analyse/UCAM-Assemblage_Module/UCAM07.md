@@ -5,6 +5,17 @@ probabilite: 3
 impact: 3
 importance: 9
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCAM
+  - domaine/model
+  - uc/UCAM07
+  - rm/RM09
+  - rm/RM10
+  - rm/RM11
+  - enf/ENF12
+  - enf/ENF18
 ---
 
 # Choisir un asset d'accroche (Fastener)
@@ -181,3 +192,45 @@ end
 **Compatibilité de l'accroche avec Tag (E2) :** Quand le champ `Tag` sera ajouté à `AssetInterface`, `validateFastener()` bénéficiera automatiquement de la vérification étendue via `ifacesCompatible()` sans modification supplémentaire.
 
 **Commande CLI équivalente :** Il n'existe pas de commande CLI séparée pour l'asset d'accroche — c'est le flag optionnel `--fastener <assetID>` de `myr model link add` (voir `DC_CLI_Model.md` § 3.4). La commande appelle `ModelService.AddAssemblyLink(..., fastenerAssetID)`, la même méthode que le handler `POST /api/assembly-links` avec `fastener_asset_id` renseigné — `validateFastener()` s'exécute identiquement (RM10, RM11 partielle — Tag manquant E2). Omettre le flag équivaut à omettre `fastener_asset_id` (liaison directe, `FastenerAssetID` vide). La recherche par texte (`GET /api/components?q=...`) n'a pas d'équivalent CLI dédié : l'identifiant de l'asset d'accroche se retrouve via `myr model list` ou `myr model get` avant d'appeler `link add`.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
+- [UCAM07 — couche expression](../../1-Expression/UCAM-Assemblage_Module/UCAM07.md)
+- [Traçabilité UCAM07 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM07)
+
+**Exigences fonctionnelles couvertes**
+- [EF23 — Choisir un asset d'accroche (fastener) pour une liaison](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM01 — Liaison entre interfaces](UCAM01.md)
+
+**Règles métier**
+- [RM09 — Interface à usage unique](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM10 — Vérification de compatibilité automatique](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM11 — Critères de compatibilité d'interfaces](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCAM01 (expression)](../../1-Expression/UCAM-Assemblage_Module/UCAM01.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCAM01 (analyse)](UCAM01.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../todo.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

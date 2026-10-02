@@ -1,3 +1,28 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - domaine/payment
+  - uc/UCPI01
+  - uc/UCPI02
+  - uc/UCPI03
+  - uc/UCPI04
+  - uc/UCPI05
+  - uc/UCPI06
+  - uc/UCPI07
+  - uc/UCPI08
+  - uc/UCPI09
+  - uc/UCPI10
+  - rm/RM23
+  - rm/RM24
+  - rm/RM25
+  - rm/RM26
+  - rm/RM29
+  - rm/RM30
+  - rm/RM31
+  - rm/RM32
+  - rm/RM33
+---
 # DC — D7 : Propriété Intellectuelle & Paiements
 
 > Phase 3 — Arrington | Use cases : UCPI01–UCPI10 | Domaine : `payment`
@@ -331,3 +356,50 @@ interface ManufacturingPort {
 |-------|------|-------------|
 | `Status` | `CommissionStatus` | `pending` / `paid` / `sequestered` — suit le cycle de vie de la commission |
 | `SequesteredUntil` | `*time.Time` | Date limite avant redistribution (RM wallet inactif) |
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCADM01 — Ajouter une organisation au réseau : [expression](../1-Expression/UCADM-Administration/UCADM01.md) · [analyse](../2-Analyse/UCADM-Administration/UCADM01.md)
+- UCAUT01 — Fabrication/Livraison d'un Composant : [expression](../1-Expression/UCAUT-Automatisation/UCAUT01.md) · [analyse](../2-Analyse/UCAUT-Automatisation/UCAUT01.md)
+- UCPI01 — Commander un Module complet : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI01.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI01.md)
+- UCPI02 — Recevoir une commission sur l'utilisation d'un Module : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI02.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI02.md)
+- UCPI03 — [RECLASSIFIÉ] Paramètres de langue de l'interface : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI03.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI03.md)
+- UCPI04 — Définir un prix sur un Composant proprietaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI04.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI04.md)
+- UCPI05 — Définir un prix sur un Module proprietaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI05.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI05.md)
+- UCPI06 — Déclarer un composant similaire : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI06.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI06.md)
+- UCPI07 — Transfert de propriété intellectuelle : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI07.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI07.md)
+- UCPI08 — Cloner un Composant sur un réseau exterieur : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI08.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI08.md)
+- UCPI09 — Cloner un Module sur un réseau exterieur : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI09.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI09.md)
+- UCPI10 — Norme de conception écoconception : [expression](../1-Expression/UCPI-Propriete_Intellectuelle/UCPI10.md) · [analyse](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI10.md)
+
+**Règles métier**
+- [RM23 — Distribution automatique des commissions](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM24 — Répartition proportionnelle multi-auteurs](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM25 — Transfert de propriété définitif](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM26 — Traçabilité du clonage inter-réseaux](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM29 — Taux de commission défini par le réseau](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM30 — Calcul automatique du prix d'un module](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM31 — Modification de prix — effet sur les commandes futures uniquement](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM32 — Asset à prix nul — librement disponible](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+- [RM33 — Devise unique par réseau](../1-Expression/Regles_Metier.md#7.%20Propriété%20intellectuelle%20et%20commissions)
+
+**Documents cités**
+- [Conception_intro](Conception_intro.md)
+
+**Cité par**
+- [Regles_Metier](../1-Expression/Regles_Metier.md)
+- [UCAUT01 (analyse)](../2-Analyse/UCAUT-Automatisation/UCAUT01.md)
+- [UCPI04 (analyse)](../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI04.md)
+- [API_REST](API_REST.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_D8_Recherche](DC_D8_Recherche.md)
+- [DC_D9_Automatisation](DC_D9_Automatisation.md)
+- [todo (conception)](todo.md)
+- [roadmap_dev](../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

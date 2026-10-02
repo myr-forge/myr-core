@@ -2,6 +2,14 @@
 categorie: Administration
 titre: "Ajouter un nœud à un réseau existant"
 etat: "RELIRE"
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCADM
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM03
 ---
 
 # Ajouter un nœud à un réseau existant
@@ -108,3 +116,35 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
+- [UCADM03 — couche analyse](../../2-Analyse/UCADM-Administration/UCADM03.md)
+- [Traçabilité UCADM03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM03)
+
+**Exigences fonctionnelles couvertes**
+- [EF09 — Étendre un réseau avec de nouveaux nœuds (peer ou orderer)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCADM04 (expression)](UCADM04.md)
+- [UCDEV02 (expression)](../UCDEV-Developpement/UCDEV02.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCADM04 (analyse)](../../2-Analyse/UCADM-Administration/UCADM04.md)
+- [UCADM05 (analyse)](../../2-Analyse/UCADM-Administration/UCADM05.md)
+- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

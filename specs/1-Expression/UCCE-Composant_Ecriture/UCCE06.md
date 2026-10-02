@@ -5,6 +5,12 @@ probabilite: 2
 impact: 3
 importance: 6
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCCE
+  - domaine/model
+  - uc/UCCE06
 ---
 
 # Ajouter une interface à un Composant déjà créé
@@ -70,3 +76,34 @@ start
 stop
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCCE — Composant Ecriture](../../Carte_des_specs.md#UCCE%20—%20Composant%20Ecriture)
+- [UCCE06 — couche analyse](../../2-Analyse/UCCE-Composant_Ecriture/UCCE06.md)
+- [Traçabilité UCCE06 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCE06)
+
+**Exigences fonctionnelles couvertes**
+- [EF14 — Ajouter une interface à un composant existant](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM01 — Liaison entre interfaces](../UCAM-Assemblage_Module/UCAM01.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCCE01 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE01.md)
+- [UCCE05 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE05.md)
+- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_asset](../../3-Conception/Sequence_soumission_asset.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

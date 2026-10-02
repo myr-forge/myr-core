@@ -5,6 +5,12 @@ probabilite: 4
 impact: 4
 importance: 16
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCCL
+  - domaine/model
+  - uc/UCCL01
 ---
 
 # Faire une recherche par filtre
@@ -75,3 +81,32 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCCL — Composant Lecture](../../Carte_des_specs.md#UCCL%20—%20Composant%20Lecture)
+- [UCCL01 — couche analyse](../../2-Analyse/UCCL-Composant_Lecture/UCCL01.md)
+- [Traçabilité UCCL01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCL01)
+
+**Exigences fonctionnelles couvertes**
+- [EF17 — Rechercher et filtrer les composants disponibles sur le réseau](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCMOD02 (expression)](../UCMOD-Module/UCMOD02.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCMOD02 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD02.md)
+- [UCMOD07 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD07.md)
+- [UCREC01 (analyse)](../../2-Analyse/UCREC-Recherche/UCREC01.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D1_Auth_Identity](../../3-Conception/DC_D1_Auth_Identity.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

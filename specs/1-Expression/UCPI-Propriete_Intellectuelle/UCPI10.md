@@ -4,6 +4,13 @@ titre: "Norme de conception écoconception"
 probabilite: 2
 impact: 1
 importance: 2
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCPI
+  - domaine/model
+  - domaine/payment
+  - uc/UCPI10
 ---
 
 # Norme de conception écoconception
@@ -76,3 +83,27 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCPI — Propriete Intellectuelle](../../Carte_des_specs.md#UCPI%20—%20Propriete%20Intellectuelle)
+- [UCPI10 — couche analyse](../../2-Analyse/UCPI-Propriete_Intellectuelle/UCPI10.md)
+- [Traçabilité UCPI10 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCPI10)
+
+**Exigences fonctionnelles couvertes**
+- [EF38 — Respecter et vérifier une norme d'écoconception](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D7_Payment](../../3-Conception/DC_D7_Payment.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

@@ -5,6 +5,17 @@ probabilite: 2
 impact: 4
 importance: 8
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCADM
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM03
+  - rm/RM07
+  - rm/RM08
+  - enf/ENF18
 ---
 
 # Ajouter un nœud à un réseau existant
@@ -193,3 +204,46 @@ end
 **Seuil de déconnexion :** La valeur par défaut (ex : 48h) doit être configurable dans `config/`. Au-delà de ce seuil, le ledger du peer est trop désynchronisé pour un rattrapage automatique sur les nœuds Fabric standards.
 
 **Reconstruction d'un peer mort :** implique la regénération des certificats via Fabric CA (`domain/identity/`) et la resynchronisation complète depuis le genesis block — opération longue pour les réseaux anciens.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
+- [UCADM03 — couche expression](../../1-Expression/UCADM-Administration/UCADM03.md)
+- [Traçabilité UCADM03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM03)
+
+**Exigences fonctionnelles couvertes**
+- [EF09 — Étendre un réseau avec de nouveaux nœuds (peer ou orderer)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCADM01 — Ajouter une organisation au réseau](UCADM01.md)
+- [UCADM02 — Créer un réseau indépendant](UCADM02.md)
+
+**Règles métier**
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM08 — Masquage local, ledger jamais modifié](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+
+**Exigences non fonctionnelles**
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCADM04 (expression)](../../1-Expression/UCADM-Administration/UCADM04.md)
+- [UCDEV02 (expression)](../../1-Expression/UCDEV-Developpement/UCDEV02.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCADM04 (analyse)](UCADM04.md)
+- [UCADM05 (analyse)](UCADM05.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

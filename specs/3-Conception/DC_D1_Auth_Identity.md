@@ -1,3 +1,9 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - relecture/ecart
+---
 # DC — D1 : Identité, RBAC et Session
 
 ## 1. Objectif
@@ -341,3 +347,31 @@ note right : Implémentée par sessionStore (mémoire + JSON optionnel)\net redi
 **⚠️ Incohérence relevée entre deux documents d'analyse (ni l'un ni l'autre n'est corrigé ici — signalée pour arbitrage PO) :** `UCCL01.md` (composants) décrit l'accès visiteur comme **toujours ouvert**, sans condition. `specs/2-Analyse/UCMOD-Module/UCMOD04.md` (ligne 134, lecture d'un module) décrit au contraire un accès **conditionné par la configuration réseau** (« sauf si la configuration réseau autorise les Visiteurs »). DC-D1-06 ci-dessus ne couvre donc que `GET /api/components`, conformément à `UCCL01.md` — il ne s'étend pas à `GET /api/modules`, dont la lecture reste `Auth` par défaut (voir `API_REST.md` §6) tant que le PO n'a pas tranché si D4 doit avoir un comportement uniforme entre composants et modules, ou si cette différence (composant toujours public, module conditionnel) est intentionnelle. C'est aussi la question déjà notée `specs/2-Analyse/todo.md` (accès visiteur conditionné par un flag réseau) — elle ne semble concerner que les modules, pas les composants, au vu du texte actuel des deux UC.
 
 ---
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCA01 — Création d'un compte : [expression](../1-Expression/UCA-Compte_et_Acces/UCA01.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA01.md)
+- UCCL01 — Faire une recherche par filtre : [expression](../1-Expression/UCCL-Composant_Lecture/UCCL01.md) · [analyse](../2-Analyse/UCCL-Composant_Lecture/UCCL01.md)
+- UCMOD04 — Visualiser les composants d'un Module : [expression](../1-Expression/UCMOD-Module/UCMOD04.md) · [analyse](../2-Analyse/UCMOD-Module/UCMOD04.md)
+
+**Documents cités**
+- [API_REST](API_REST.md)
+- [Conception_intro](Conception_intro.md)
+- [roadmap_dev](../roadmap_dev.md)
+
+**Cité par**
+- [UCDEV01 (analyse)](../2-Analyse/UCDEV-Developpement/UCDEV01.md)
+- [API_REST](API_REST.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_CLI_Identity](DC_CLI_Identity.md)
+- [DC_D9_Automatisation](DC_D9_Automatisation.md)
+- [Modele_Domaine](Modele_Domaine.md)
+- [todo (conception)](todo.md)
+- [roadmap_dev](../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

@@ -5,6 +5,14 @@ probabilite: 2
 impact: 5
 importance: 10
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD04
+  - rm/RM13
+  - enf/ENF12
 ---
 
 # Visualiser les composants d'un Module
@@ -143,3 +151,39 @@ REST --> Client : 200 [Connection ...]
 **Récursivité `GetModuleInterfaces()` :** La fonction `getModuleInterfacesInto()` (service.go:~640) parcourt récursivement les `WorkspaceInstances` pour calculer les interfaces non connectées en interne. Un cache par `assetID` évite les appels blockchain redondants — mais ce cache sert uniquement à réutiliser le résultat déjà calculé pour un asset donné (résolution récursive de ses propres sous-instances) ; il ne doit jamais réduire le nombre d'instances traitées au niveau du module courant : quand plusieurs `WorkspaceInstances` du module référencent le même asset, chacune contribue séparément ses interfaces non connectées en interne à la liste exposée. Les modules profondément imbriqués peuvent générer de nombreux appels — un mécanisme de profondeur maximale est à envisager pour les cas extrêmes.
 
 **Commande CLI équivalente :** `myr module get <id>` (méthode `GetModule`) est le strict équivalent en lecture seule de `GET /api/modules/:id`. `myr module interfaces <id>` (méthode `GetModuleInterfaces`) couvre `GET /api/modules/:id/interfaces`. Voir `specs/3-Conception/DC_CLI_Model.md` § 5.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD04 — couche expression](../../1-Expression/UCMOD-Module/UCMOD04.md)
+- [Traçabilité UCMOD04 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD04)
+
+**Exigences fonctionnelles couvertes**
+- [EF29 — Visualiser la composition d'un module](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Règles métier**
+- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D1_Auth_Identity](../../3-Conception/DC_D1_Auth_Identity.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

@@ -5,6 +5,16 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD02
+  - rm/RM13
+  - rm/RM15
+  - enf/ENF12
+  - enf/ENF28
 ---
 
 # Ajouter un Module existant
@@ -146,3 +156,47 @@ REST --> Client : 200 moduleDTO
 **RM15 — Détection de doublon :** `AddAssetToWorkspace()` inspecte `m.WorkspaceInstances` avant de créer l'instance et retourne un indicateur `already_present` dans la réponse si le même asset y figure déjà, sans bloquer l'ajout — à charge du client (script, CLI ou GUI) de décider s'il force une seconde instance.
 
 **Note architecture :** L'instance créée est une référence (`AssetID`), pas une copie de l'entité — les modifications du Module source sur la blockchain n'affectent pas les snapshots `ModuleVersion` déjà soumis, mais sont reflétées à la prochaine lecture du module hôte.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD02 — couche expression](../../1-Expression/UCMOD-Module/UCMOD02.md)
+- [Traçabilité UCMOD02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD02)
+
+**Exigences fonctionnelles couvertes**
+- [EF28 — Ajouter un module existant à l'espace de travail](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM01 — Liaison entre interfaces](../UCAM-Assemblage_Module/UCAM01.md)
+- [UCCL01 — Faire une recherche par filtre](../UCCL-Composant_Lecture/UCCL01.md)
+- [UCMOD01 — Créer un Module](UCMOD01.md)
+- [UCREC01 — Rechercher une référence existante](../UCREC-Recherche/UCREC01.md)
+
+**Règles métier**
+- [RM13 — Slot virtuel garanti](../../1-Expression/Regles_Metier.md#3.%20Interfaces%20et%20liaisons)
+- [RM15 — Instance indépendante](../../1-Expression/Regles_Metier.md#4.%20Composition%20d'un%20Module%20%28instances%29)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF28 — Immuabilité des transactions blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCAM08 (expression)](../../1-Expression/UCAM-Assemblage_Module/UCAM08.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCDEV02 (analyse)](../UCDEV-Developpement/UCDEV02.md)
+- [UCMOD03 (analyse)](UCMOD03.md)
+- [todo (analyse)](../todo.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [Sequence_soumission_module](../../3-Conception/Sequence_soumission_module.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

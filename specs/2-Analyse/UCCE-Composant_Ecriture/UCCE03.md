@@ -5,6 +5,20 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCCE
+  - domaine/model
+  - uc/UCCE03
+  - rm/RM01
+  - rm/RM02
+  - rm/RM03
+  - rm/RM04
+  - rm/RM05
+  - rm/RM07
+  - enf/ENF12
+  - enf/ENF30
 ---
 
 # Ajout d'un composant Numérique
@@ -185,3 +199,50 @@ end
 **Écart E4 (RM01 incomplet) :** Identique à UCCE01 — la comparaison de hash avec les assets existants n'est pas encore implémentée dans `service.AddFull()`.
 
 **Champ `version` :** La spec Expression mentionne une métadonnée `version` pour les composants numériques. Dans le code actuel, la version est portée par `Versions[]` (tableau de `Version{Number, Hash, CreatedAt}`). La version sémantique (ex : `v1.2.3`) peut être ajoutée dans les `Tags` ou dans `Description` en attendant un champ dédié.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCCE — Composant Ecriture](../../Carte_des_specs.md#UCCE%20—%20Composant%20Ecriture)
+- [UCCE03 — couche expression](../../1-Expression/UCCE-Composant_Ecriture/UCCE03.md)
+- [Traçabilité UCCE03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCE03)
+
+**Exigences fonctionnelles couvertes**
+- [EF11 — Enregistrer un composant numérique sur la blockchain](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCCE01 — Ajout d'un composant Physique](UCCE01.md)
+
+**Règles métier**
+- [RM01 — Anti-plagiat obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM02 — Catégorie d'asset obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM03 — Compatibilité de licence](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM04 — UUID unique](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM05 — ParentID obligatoire pour les dérivés](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM07 — Validation préalable obligatoire](../../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF30 — Intégrité en cas d'échec blockchain](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCAUT03 (expression)](../../1-Expression/UCAUT-Automatisation/UCAUT03.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCAUT03 (analyse)](../UCAUT-Automatisation/UCAUT03.md)
+- [UCCE06 (analyse)](UCCE06.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

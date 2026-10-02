@@ -5,6 +5,18 @@ probabilite: 3
 impact: 4
 importance: 12
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCADM
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM07
+  - rm/RM34
+  - rm/RM35
+  - rm/RM36
+  - enf/ENF18
 ---
 
 # Gérer les rôles
@@ -177,3 +189,33 @@ end
 5. Créer `adapters/in/cli/role.go` : commandes `myr role list`, `myr role create`, `myr role edit <id>`, `myr role delete <id>`.
 
 **Initialisation du rôle admin :** Le rôle `admin` est créé (ou vérifié) lors de l'appel à `NewService(...)` dans `domain/channel/service.go`. Si absent du store, il est inséré automatiquement avec `ID: "admin"`, `Rights: ["*"]`.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
+- [UCADM07 — couche expression](../../1-Expression/UCADM-Administration/UCADM07.md)
+- [Traçabilité UCADM07 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM07)
+
+**Use cases cités**
+- [UCADM06 — Attribuer des rôles à une organisation](UCADM06.md)
+
+**Règles métier**
+- [RM34 — Rôle admin protégé](../../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM35 — Révocation en cascade à la suppression d'un rôle](../../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+- [RM36 — Nom de rôle unique](../../1-Expression/Regles_Metier.md#8.%20Administration%20réseau)
+
+**Exigences non fonctionnelles**
+- [ENF18 — Isolation du domaine métier](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [UCADM01 (expression)](../../1-Expression/UCADM-Administration/UCADM01.md)
+- [UCADM06 (expression)](../../1-Expression/UCADM-Administration/UCADM06.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCADM01 (analyse)](UCADM01.md)
+- [UCADM06 (analyse)](UCADM06.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+
+<!-- liens-obsidian:end -->

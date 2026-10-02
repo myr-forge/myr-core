@@ -4,6 +4,13 @@ titre: "Ajout d'un composant Numérique"
 probabilite: 3
 impact: 5
 importance: 15
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCCE
+  - domaine/model
+  - uc/UCCE03
+  - rm/RM01
 ---
 
 # Ajout d'un composant Numérique
@@ -78,3 +85,35 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCCE — Composant Ecriture](../../Carte_des_specs.md#UCCE%20—%20Composant%20Ecriture)
+- [UCCE03 — couche analyse](../../2-Analyse/UCCE-Composant_Ecriture/UCCE03.md)
+- [Traçabilité UCCE03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCE03)
+
+**Exigences fonctionnelles couvertes**
+- [EF11 — Enregistrer un composant numérique sur la blockchain](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Règles métier**
+- [RM01 — Anti-plagiat obligatoire](../Regles_Metier.md#1.%20Assets%20et%20composants)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCAUT03 (expression)](../UCAUT-Automatisation/UCAUT03.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCAUT03 (analyse)](../../2-Analyse/UCAUT-Automatisation/UCAUT03.md)
+- [UCCE06 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE06.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

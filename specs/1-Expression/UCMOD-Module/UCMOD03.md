@@ -5,6 +5,12 @@ probabilite: 3
 impact: 5
 importance: 15
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCMOD
+  - domaine/model
+  - uc/UCMOD03
 ---
 
 # Modifier les métadonnées d'un Module
@@ -80,3 +86,35 @@ endif
 stop
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCMOD — Module](../../Carte_des_specs.md#UCMOD%20—%20Module)
+- [UCMOD03 — couche analyse](../../2-Analyse/UCMOD-Module/UCMOD03.md)
+- [Traçabilité UCMOD03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCMOD03)
+
+**Exigences fonctionnelles couvertes**
+- [EF61 — Modifier les métadonnées d'un module (nom, description, licence, tags, liens)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCCE02 — Configurer un Composant](../UCCE-Composant_Ecriture/UCCE02.md)
+- [UCMOD01 — Créer un Module](UCMOD01.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCMOD01 (expression)](UCMOD01.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCCE02 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE02.md)
+- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [UCMOD01 (analyse)](../../2-Analyse/UCMOD-Module/UCMOD01.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

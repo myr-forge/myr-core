@@ -1,3 +1,15 @@
+---
+tags:
+  - couche/conception
+  - type/conception
+  - rm/RM07
+  - rm/RM19
+  - enf/ENF10
+  - enf/ENF12
+  - enf/ENF18
+  - enf/ENF27
+  - enf/ENF28
+---
 # Modèle de sécurité — Myr System
 
 > Phase 3 — Arrington | Référence : ENF10, ENF12, ENF18, ENF27, ENF28
@@ -208,3 +220,38 @@ Au-delà, `HTTP 429` est retourné.
 | Module immuable | Un module `submitted` ne doit plus être modifiable directement | Garde `Status != submitted`, fork obligatoire (RM19) |
 
 État de suivi de ces écarts : `specs/roadmap_dev.md` § Écarts Identité & Session et § Bugs bloquants.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs](../Carte_des_specs.md)
+
+**Use cases cités**
+- UCA06 — Vérifier les possessions : [expression](../1-Expression/UCA-Compte_et_Acces/UCA06.md) · [analyse](../2-Analyse/UCA-Compte_et_Acces/UCA06.md)
+
+**Règles métier**
+- [RM07 — Validation préalable obligatoire](../1-Expression/Regles_Metier.md#2.%20Blockchain%20et%20immuabilité)
+- [RM19 — Fork d'un asset soumis](../1-Expression/Regles_Metier.md#5.%20Modules%20et%20cycle%20de%20vie%20des%20assets)
+
+**Exigences non fonctionnelles**
+- [ENF10 — Chiffrement des wallets Fabric](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF18 — Isolation du domaine métier](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF27 — Protection des données personnelles (RGPD)](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF28 — Immuabilité des transactions blockchain](../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [Conception_intro](Conception_intro.md)
+- [roadmap_dev](../roadmap_dev.md)
+
+**Cité par**
+- [UCA06 (analyse)](../2-Analyse/UCA-Compte_et_Acces/UCA06.md)
+- [UCREC04 (analyse)](../2-Analyse/UCREC-Recherche/UCREC04.md)
+- [API_REST](API_REST.md)
+- [Conception_intro](Conception_intro.md)
+- [DC_D8_Recherche](DC_D8_Recherche.md)
+- [Deploiement](Deploiement.md)
+- [Modele_Domaine](Modele_Domaine.md)
+
+<!-- liens-obsidian:end -->

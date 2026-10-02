@@ -5,6 +5,15 @@ probabilite: 3
 impact: 4
 importance: 12
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCREC
+  - domaine/model
+  - uc/UCREC03
+  - rm/RM02
+  - rm/RM05
+  - enf/ENF12
 ---
 
 # Rechercher les versions des Composants
@@ -141,3 +150,38 @@ REST --> Client : 200 {root: {...}, tree: {...}}
 **Distinction `Versions []Version` vs arbre `ParentID` :** `Model3D.Versions` liste les fichiers CAO successifs d'un même asset (historique de fichier IPFS). L'arbre de cet UC est basé sur `ParentID` (généalogie inter-assets). Le contrat REST doit garder les deux structures clairement distinctes dans sa réponse.
 
 **Commande CLI équivalente (alias limité) :** `myr model children <parentID>` (méthode `GetChildren`, déjà exposée par `ModelService`) couvre la branche descendante. La remontée ascendante n'a pas de méthode dédiée côté service — ni le REST ni le CLI n'offrent aujourd'hui de commande unique pour l'arbre complet ; elle se reconstitue par appels itérés à `myr model get <parentID>`, à l'image de ce que ferait le futur handler REST (voir Notes d'implémentation ci-dessus).
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCREC — Recherche](../../Carte_des_specs.md#UCREC%20—%20Recherche)
+- [UCREC03 — couche expression](../../1-Expression/UCREC-Recherche/UCREC03.md)
+- [Traçabilité UCREC03 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCREC03)
+
+**Exigences fonctionnelles couvertes**
+- [EF41 — Consulter l'arbre de versions d'un composant](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM05 — Transformation d'un composant en module](../UCAM-Assemblage_Module/UCAM05.md)
+
+**Règles métier**
+- [RM02 — Catégorie d'asset obligatoire](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+- [RM05 — ParentID obligatoire pour les dérivés](../../1-Expression/Regles_Metier.md#1.%20Assets%20et%20composants)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D8_Recherche](../../3-Conception/DC_D8_Recherche.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

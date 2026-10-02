@@ -5,6 +5,17 @@ probabilite: 5
 impact: 5
 importance: 25
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCA
+  - domaine/identity
+  - domaine/role
+  - uc/UCA02
+  - rm/RM20
+  - rm/RM22
+  - enf/ENF01
+  - enf/ENF12
 ---
 
 # Se Connecter
@@ -141,3 +152,46 @@ end
 **Pas de JWT :** malgré des commentaires de code encore présents ailleurs (`handlers.go`, `handlers_network.go`) mentionnant « JWT Bearer », il n'y a aucune bibliothèque JWT, aucun claim signé. Le seul mécanisme réel est le token opaque + en-tête `X-Myr-Token`.
 
 **Durée de session :** `sessionTTL = 7 * 24 * time.Hour`, constante dans `adapters/in/rest/session.go`.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
+- [UCA02 — couche expression](../../1-Expression/UCA-Compte_et_Acces/UCA02.md)
+- [Traçabilité UCA02 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA02)
+
+**Exigences fonctionnelles couvertes**
+- [EF02 — Authentifier une identité (enrôlement CA + token de session opaque)](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCA01 — Création d'un compte](UCA01.md)
+- [UCA04 — Vérification de la connexion](UCA04.md)
+- [UCA07 — Vérification du rôle attribué](UCA07.md)
+- [UCA08 — Demander un rôle](UCA08.md)
+
+**Règles métier**
+- [RM20 — Identité = enrôlement CA, pas un compte séparé](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM22 — Changement de rôle réservé à l'administrateur](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+
+**Exigences non fonctionnelles**
+- [ENF01 — Temps de réponse des endpoints REST](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCA01 (expression)](../../1-Expression/UCA-Compte_et_Acces/UCA01.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCA01 (analyse)](UCA01.md)
+- [UCA04 (analyse)](UCA04.md)
+- [UCA05 (analyse)](UCA05.md)
+- [UCA07 (analyse)](UCA07.md)
+- [UCA08 (analyse)](UCA08.md)
+- [todo (analyse)](../todo.md)
+- [DC_CLI_Identity](../../3-Conception/DC_CLI_Identity.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

@@ -5,6 +5,15 @@ probabilite: 5
 impact: 5
 importance: 25
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCA
+  - domaine/identity
+  - domaine/role
+  - uc/UCA01
+  - relecture/incoherence
+  - relecture/remarque
 ---
 
 # Création d'un compte
@@ -93,3 +102,39 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
+- [UCA01 — couche analyse](../../2-Analyse/UCA-Compte_et_Acces/UCA01.md)
+- [Traçabilité UCA01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA01)
+
+**Exigences fonctionnelles couvertes**
+- [EF01 — Permettre à un visiteur de créer un compte sur un réseau](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCA02 — Se Connecter](UCA02.md)
+- [UCA08 — Demander un rôle](UCA08.md)
+
+**Documents cités**
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCA02 (expression)](UCA02.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCA02 (analyse)](../../2-Analyse/UCA-Compte_et_Acces/UCA02.md)
+- [UCA08 (analyse)](../../2-Analyse/UCA-Compte_et_Acces/UCA08.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Identity](../../3-Conception/DC_CLI_Identity.md)
+- [DC_D1_Auth_Identity](../../3-Conception/DC_D1_Auth_Identity.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

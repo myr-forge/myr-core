@@ -5,6 +5,17 @@ probabilite: 5
 impact: 5
 importance: 25
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCA
+  - domaine/identity
+  - domaine/role
+  - uc/UCA01
+  - rm/RM20
+  - rm/RM21
+  - enf/ENF12
+  - relecture/incoherence
 ---
 
 # Création d'un compte
@@ -143,3 +154,46 @@ end
 **Écart — pas de flux d'approbation *a posteriori*:** Il n'existe toujours aucun endpoint REST (`POST /api/identity/requests/{id}/approve`) ni commande CLI équivalente pour transformer une `AccountRequest` déjà en attente en identité CA active. C'est un vrai manque fonctionnel, pas une simplification de cette spec : `myr identity request` ne fait qu'imiter la logique d'auto-approbation *au moment de la soumission* (comme l'endpoint REST) — il ne rejoue rien pour une demande déjà stockée avec le statut `pending`. `myr identity` propose par ailleurs `set-role` (UCA08) et `re-enroll`, qui supposent tous deux une identité déjà enregistrée auprès de la CA.
 
 **Rôle par défaut :** `RegisterRequest.Role` vide → la Fabric CA applique son propre défaut (probablement `reader` au niveau de la configuration CA, pas garanti par le code `myr`) — à vérifier côté configuration CA plutôt que côté application.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCA — Compte et Acces](../../Carte_des_specs.md#UCA%20—%20Compte%20et%20Acces)
+- [UCA01 — couche expression](../../1-Expression/UCA-Compte_et_Acces/UCA01.md)
+- [Traçabilité UCA01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCA01)
+
+**Exigences fonctionnelles couvertes**
+- [EF01 — Permettre à un visiteur de créer un compte sur un réseau](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCA02 — Se Connecter](UCA02.md)
+- [UCA08 — Demander un rôle](UCA08.md)
+
+**Règles métier**
+- [RM20 — Identité = enrôlement CA, pas un compte séparé](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+- [RM21 — Rôle Lecteur par défaut à l'auto-enregistrement](../../1-Expression/Regles_Metier.md#6.%20Compte%20et%20accès)
+
+**Exigences non fonctionnelles**
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCA02 (expression)](../../1-Expression/UCA-Compte_et_Acces/UCA02.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCA02 (analyse)](UCA02.md)
+- [UCA08 (analyse)](UCA08.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Identity](../../3-Conception/DC_CLI_Identity.md)
+- [DC_D1_Auth_Identity](../../3-Conception/DC_D1_Auth_Identity.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

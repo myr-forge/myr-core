@@ -1,6 +1,14 @@
 ---
 categorie: Administration
 titre: "Gérer les rôles"
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCADM
+  - domaine/channel
+  - domaine/identity
+  - domaine/network
+  - uc/UCADM07
 ---
 # Gérer les rôles
 
@@ -100,3 +108,25 @@ else (supprimer)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCADM — Administration](../../Carte_des_specs.md#UCADM%20—%20Administration)
+- [UCADM07 — couche analyse](../../2-Analyse/UCADM-Administration/UCADM07.md)
+- [Traçabilité UCADM07 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCADM07)
+
+**Use cases cités**
+- [UCADM06 — Attribuer des rôles à une organisation](UCADM06.md)
+
+**Cité par**
+- [UCADM01 (expression)](UCADM01.md)
+- [UCADM06 (expression)](UCADM06.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCADM01 (analyse)](../../2-Analyse/UCADM-Administration/UCADM01.md)
+- [UCADM06 (analyse)](../../2-Analyse/UCADM-Administration/UCADM06.md)
+- [DC_CLI_Admin](../../3-Conception/DC_CLI_Admin.md)
+- [DC_D2_Administration](../../3-Conception/DC_D2_Administration.md)
+
+<!-- liens-obsidian:end -->

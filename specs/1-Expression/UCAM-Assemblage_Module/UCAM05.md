@@ -5,6 +5,12 @@ probabilite: 1
 impact: 4
 importance: 4
 etat: relire
+tags:
+  - couche/expression
+  - type/use-case
+  - famille/UCAM
+  - domaine/model
+  - uc/UCAM05
 ---
 
 # Transformation d'un composant en module
@@ -84,3 +90,38 @@ else (non)
 endif
 @enduml
 ```
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCAM — Assemblage Module](../../Carte_des_specs.md#UCAM%20—%20Assemblage%20Module)
+- [UCAM05 — couche analyse](../../2-Analyse/UCAM-Assemblage_Module/UCAM05.md)
+- [Traçabilité UCAM05 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCAM05)
+
+**Exigences fonctionnelles couvertes**
+- [EF22 — Transformer un composant en module (découpage en sous-systèmes)](../Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Use cases cités**
+- [UCAM01 — Liaison entre interfaces](UCAM01.md)
+- [UCAM03 — Créer une interface sur un composant](UCAM03.md)
+- [UCAM09 — Décomposition assistée d'un composant assemblage](UCAM09.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../Matrice_Tracabilite.md)
+- [UCAM09 (expression)](UCAM09.md)
+- [todo (expression)](../todo.md)
+- [Analyse_des_besoins](../../2-Analyse/Analyse_des_besoins.md)
+- [UCCE01 (analyse)](../../2-Analyse/UCCE-Composant_Ecriture/UCCE01.md)
+- [UCDEV02 (analyse)](../../2-Analyse/UCDEV-Developpement/UCDEV02.md)
+- [UCREC03 (analyse)](../../2-Analyse/UCREC-Recherche/UCREC03.md)
+- [todo (analyse)](../../2-Analyse/todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Architecture_Composition](../../3-Conception/Architecture_Composition.md)
+- [Conception_intro](../../3-Conception/Conception_intro.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [todo (conception)](../../3-Conception/todo.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->

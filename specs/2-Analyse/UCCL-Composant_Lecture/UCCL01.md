@@ -5,6 +5,15 @@ probabilite: 4
 impact: 4
 importance: 16
 etat: analyse
+tags:
+  - couche/analyse
+  - type/use-case
+  - famille/UCCL
+  - domaine/model
+  - uc/UCCL01
+  - enf/ENF01
+  - enf/ENF12
+  - enf/ENF14
 ---
 
 # Faire une recherche par filtre
@@ -207,3 +216,41 @@ mux.HandleFunc("/api/components", func(w http.ResponseWriter, r *http.Request) {
 **Connexions :** Seules les connexions dont `From` ET `To` font partie des assets filtrés sont incluses dans la réponse — évite les connexions orphelines côté client.
 
 **Commande CLI équivalente (alias limité) :** `myr model list [--channel <id>]` appelle la même méthode `List(channelID)` que `GET /api/components` avant filtrage. Le filtrage par critère (`q`, `categories`, `owner_id`, `parent_id`, `hash`, `tags`) est effectué aujourd'hui dans le handler REST (`adapters/in/rest/`), pas dans `ModelService` — il n'existe donc pas de méthode de filtre serveur réutilisable directement par le CLI. Une commande `myr model search --filter <critère>` est documentée comme cible ouverte : elle devra reproduire côté adaptateur CLI la même logique de filtrage que `listGraph`, sans changement de domaine requis (voir `specs/3-Conception/DC_CLI_Model.md` § 6 point 2). En l'absence de cette commande, `myr model search` reste un simple alias de `myr model list`. En mode dégradé, `myr model list` affiche le même avertissement explicite que la réponse REST (`degraded`/`warning`), suivi du tableau des brouillons locaux disponibles.
+
+<!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
+## Liens
+
+**Navigation**
+- [Carte des specs › UCCL — Composant Lecture](../../Carte_des_specs.md#UCCL%20—%20Composant%20Lecture)
+- [UCCL01 — couche expression](../../1-Expression/UCCL-Composant_Lecture/UCCL01.md)
+- [Traçabilité UCCL01 vers le code](../../../docs/code/Tracabilite_UC_Code.md#UCCL01)
+
+**Exigences fonctionnelles couvertes**
+- [EF17 — Rechercher et filtrer les composants disponibles sur le réseau](../../1-Expression/Matrice_Tracabilite.md#1.%20Exigences%20fonctionnelles%20et%20UC%20couvrant)
+
+**Exigences non fonctionnelles**
+- [ENF01 — Temps de réponse des endpoints REST](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF12 — Contrôle d'accès par rôle](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+- [ENF14 — Nombre d'assets par réseau](../../1-Expression/Exigences_Non_Fonctionnelles.md#Tableau%20des%20exigences%20non-fonctionnelles)
+
+**Documents cités**
+- [Architecture_Hexagonale](../../3-Conception/Architecture_Hexagonale.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+
+**Cité par**
+- [Expression_des_besoins_Intro](../../1-Expression/Expression_des_besoins_Intro.md)
+- [Matrice_Tracabilite](../../1-Expression/Matrice_Tracabilite.md)
+- [UCMOD02 (expression)](../../1-Expression/UCMOD-Module/UCMOD02.md)
+- [todo (expression)](../../1-Expression/todo.md)
+- [Analyse_des_besoins](../Analyse_des_besoins.md)
+- [UCMOD02 (analyse)](../UCMOD-Module/UCMOD02.md)
+- [UCMOD07 (analyse)](../UCMOD-Module/UCMOD07.md)
+- [UCREC01 (analyse)](../UCREC-Recherche/UCREC01.md)
+- [todo (analyse)](../todo.md)
+- [API_REST](../../3-Conception/API_REST.md)
+- [Chaincode](../../3-Conception/Chaincode.md)
+- [DC_CLI_Model](../../3-Conception/DC_CLI_Model.md)
+- [DC_D1_Auth_Identity](../../3-Conception/DC_D1_Auth_Identity.md)
+- [roadmap_dev](../../roadmap_dev.md)
+
+<!-- liens-obsidian:end -->
