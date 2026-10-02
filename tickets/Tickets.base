@@ -1,0 +1,54 @@
+filters:
+  and:
+    - file.inFolder("dev/myr-core/tickets")
+    - file.name.startsWith("FT-")
+properties:
+  note.titre:
+    displayName: Titre
+  note.type:
+    displayName: Type
+  note.statut:
+    displayName: Statut
+  note.severite:
+    displayName: Sévérité
+  note.uc:
+    displayName: Use cases
+  note.maj:
+    displayName: Mis à jour
+views:
+  - type: table
+    name: À traiter
+    filters:
+      and:
+        - statut != "resolu"
+        - statut != "ferme"
+    order:
+      - file.name
+      - titre
+      - type
+      - severite
+      - statut
+      - uc
+      - maj
+    sort:
+      - property: severite
+        direction: ASC
+  - type: table
+    name: Décisions PO
+    filters:
+      and:
+        - statut == "a-trancher"
+    order:
+      - file.name
+      - titre
+      - severite
+      - uc
+  - type: table
+    name: Tous
+    order:
+      - file.name
+      - titre
+      - type
+      - severite
+      - statut
+      - maj
