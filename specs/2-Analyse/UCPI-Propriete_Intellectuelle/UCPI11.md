@@ -69,11 +69,21 @@ Conformément au principe de parité CLI/REST, la modification doit être exposa
 4. Le nouveau prix est persisté localement avec horodatage (`AssetPrice.UpdatedAt`)
 5. Réponse : "Prix mis à jour — applicable aux prochaines commandes"
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — Passage à gratuit (prix = 0)
 
 1. Le nouveau prix transmis est 0
 2. Le service avertit : "Prix nul — aucune commission ne sera générée pour les commandes futures (RM32)"
 3. L'asset passe en libre accès pour toute commande future
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux alternatif — Commandes en cours pour cet asset
 
@@ -81,15 +91,30 @@ Conformément au principe de parité CLI/REST, la modification doit être exposa
 2. Le service retourne un avertissement informatif : "X commande(s) en cours conserveront l'ancien prix"
 3. La modification est appliquée malgré tout — aucune commande en cours n'est bloquée ni recalculée (RM31)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur A — Utilisateur non propriétaire
 
 1. `OwnerID != identityID` détecté côté serveur
 2. Erreur `ErrForbidden` — "Vous n'êtes pas propriétaire de cet asset"
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur B — Prix invalide (négatif)
 
 1. Le montant transmis est strictement négatif
 2. Erreur de validation — aucune écriture effectuée
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

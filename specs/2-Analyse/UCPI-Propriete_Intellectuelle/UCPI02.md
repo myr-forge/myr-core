@@ -78,6 +78,11 @@ Ce use case est déclenché par UCAUT01 (livraison confirmée) et non directemen
 5. La commission est créditée sur le wallet de l'auteur
 6. L'auteur reçoit une notification de commission reçue (événement blockchain)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Répartition entre plusieurs co-auteurs (RM24)
 
 1. Le smart contract analyse les composants constitutifs du module
@@ -88,6 +93,11 @@ Ce use case est déclenché par UCAUT01 (livraison confirmée) et non directemen
 6. Chaque co-auteur reçoit sa part et est notifié individuellement
 7. L'historique complet des distributions est enregistré sur la blockchain
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur A — Wallet d'un auteur inexistant ou inactif
 
 1. Le smart contract détecte que le wallet d'un auteur n'est plus actif
@@ -95,12 +105,22 @@ Ce use case est déclenché par UCAUT01 (livraison confirmée) et non directemen
 3. L'auteur peut réclamer sa commission ultérieurement après réactivation de son wallet
 4. La livraison est confirmée malgré ce cas — les autres commissions sont distribuées normalement
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur B — Échec blockchain lors de la distribution
 
 1. Une transaction de commission échoue (endorsement refusé)
 2. Toutes les transactions de la distribution sont annulées (atomicité garantie par Fabric)
 3. La commande reste en statut `pending` — la livraison n'est pas confirmée
 4. Une alerte est émise vers l'administrateur du réseau
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

@@ -72,15 +72,32 @@ Quatre rôles **intégrés** existent toujours et ne peuvent pas être modifiés
 2. `requireAuth` retrouve la session ; `requireRole` vérifie `roleSvc.HasPermission(sess.Role, permission_requise)`
 3. La permission est accordée — l'action est exécutée normalement
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestHasPermission_BuiltinDefaults](../../../docs/tests/domain-role/TestHasPermission_BuiltinDefaults.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestHasPermission_UnknownRole](../../../docs/tests/domain-role/TestHasPermission_UnknownRole.md) — déduit : teste `RoleService.HasPermission`
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Session absente ou invalide (401)
 
 1. Aucun token, ou token inconnu/expiré
 2. `requireAuth` retourne `HTTP 401` avec `{"error": "authentification requise"}`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Permission insuffisante (403)
 
 1. La session est valide mais `HasPermission` retourne `false` pour la permission requise (ou repli sur `legacyRoleRank` si aucun `RoleService` injecté)
 2. `requireRole` retourne `HTTP 403` avec `{"error": "droits insuffisants"}`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestHasPermission_BuiltinDefaults](../../../docs/tests/domain-role/TestHasPermission_BuiltinDefaults.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestHasPermission_UnknownRole](../../../docs/tests/domain-role/TestHasPermission_UnknownRole.md) — déduit : teste `RoleService.HasPermission`
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

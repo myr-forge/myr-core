@@ -85,12 +85,26 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 4. La réponse confirme : "Module soumis — Version N ancrée"
 5. Le Module passe en lecture seule (RM19)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
+> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/modules/`
+> - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules/`
+> - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules/`
+> - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules/`
+> - 🟡 [TestModules_Verify_OK](../../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : teste route `/api/modules/`
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Module avec composants dérivés (licences parentales)
 
 1. Le Module contient des Composants dérivés d'assets avec `ParentID` et `LicenseID`
 2. Avant la soumission, le système vérifie la compatibilité de licence : `CheckModuleLicenseCompatibility(componentLicenseIDs, m.LicenseID)`
 3. Toutes les licences compatibles → soumission se poursuit normalement (flux nominal à partir de l'étape 3b)
 4. La `ModuleVersion` inclut la liste des dépendances de licences vérifiées
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux alternatif — Fork d'un module déjà soumis (RM19 — comportement cible)
 
@@ -104,12 +118,22 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 6. Le fork est modifié par les mêmes actions directes que UCAM01/UCMOD01
 7. Le fork peut être soumis à son tour → nouvelle `ModuleVersion` indépendante
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Aucun assemblage (RM17)
 
 1. `len(m.Assemblies) == 0` détecté dans `SubmitModule()`
 2. Réponse : `400 Bad Request`
 3. Message : "Le module doit contenir au moins une liaison pour être soumis"
 4. Le Module reste en état `draft` — des liaisons peuvent être ajoutées avant une nouvelle tentative
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Incompatibilité de licences
 
@@ -118,6 +142,11 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 3. La soumission est annulée — le Module reste en état `draft`
 4. Le Concepteur doit corriger les licences avant de soumettre
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Échec transaction Fabric (ENF30)
 
 1. La transaction Fabric échoue (timeout > 30 s, endorsement refusé, orderer indisponible)
@@ -125,6 +154,11 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 3. Message : "Soumission échouée — `<motif>` — le module reste en état draft"
 4. **Aucune donnée perdue** : le Module reste en état `draft` avec tous ses assemblages (ENF30)
 5. Les `ModuleVersions` partiellement créées ne sont **pas** persistées (atomicité de `StoreModelRecord`)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

@@ -78,6 +78,11 @@ Cette opération est la généralisation à un module de UCCE02 (« Configurer u
 6. Si le module est déjà soumis : la transaction est soumise (`StoreModelRecord`)
 7. L'API retourne `200 OK` avec le `Model3D` mis à jour
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — URL ajoutée avec succès
 
 1. L'URL de référence est transmise : `{links: [...existant, nouvelleURL]}`
@@ -86,11 +91,21 @@ Cette opération est la généralisation à un module de UCCE02 (« Configurer u
 4. L'adapter blockchain met à jour le record `Model3D` si le module est déjà soumis
 5. La réponse confirme — l'URL apparaît dans la liste des liens du Module
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Patch partiel (un seul champ à la fois)
 
 1. Seul un champ est transmis (nom, description, licence, tags ou liens)
 2. Le service applique uniquement ce champ — les autres restent inchangés (`UpdateAsset` est un patch partiel)
 3. Si `license_id` change et que le module a un `ParentID` : la compatibilité de licence avec le parent est vérifiée (RM03)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
+<!-- tests-obsidian:end -->
 
 ### Flux alternatif — Module en état draft
 
@@ -98,11 +113,21 @@ Cette opération est la généralisation à un module de UCCE02 (« Configurer u
 2. La mise à jour s'effectue de la même façon via `UpdateAsset()`, mais reste dans `DraftStore`
 3. Aucune transaction Fabric n'est créée — la modification sera incluse dans la `ModuleVersion` lors de la soumission (UCMOD06)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — URL déjà présente
 
 1. L'URL saisie est identique à une URL déjà dans `m.Links`
 2. Le système détecte le doublon et n'ajoute pas d'entrée dupliquée
 3. Message informatif : "Ce lien est déjà associé à ce module"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Incompatibilité de licence avec le parent (RM03)
 
@@ -111,11 +136,21 @@ Cette opération est la généralisation à un module de UCCE02 (« Configurer u
 3. Le service retourne l'erreur avant toute soumission Fabric
 4. L'API retourne `422 Unprocessable Entity` : `{ "error": "Incompatibilité de licence : <raison>." }`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Format URL invalide
 
 1. La chaîne transmise ne respecte pas le format HTTP/HTTPS
 2. Le serveur retourne `400 Bad Request`
 3. Aucune modification persistée
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Droits insuffisants
 
@@ -123,11 +158,21 @@ Cette opération est la généralisation à un module de UCCE02 (« Configurer u
 2. Le serveur retourne `403 Forbidden`
 3. Message : "Vous n'êtes pas propriétaire de ce module"
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Échec transaction blockchain
 
 1. La transaction de mise à jour échoue (réseau Fabric indisponible, endorsement refusé)
 2. Message : "Impossible de mettre à jour le module — réessayez"
 3. Le Module reste dans son état précédent (ENF30)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

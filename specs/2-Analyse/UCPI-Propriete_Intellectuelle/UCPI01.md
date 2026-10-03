@@ -75,6 +75,11 @@ Ce use case est le point d'entrée du cycle commercial — il crée la commande,
 5. La boutique reçoit l'ordre de préparation
 6. Le consommateur reçoit une confirmation avec délai de livraison estimé
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux nominal B — Fabrication nécessaire (aucun stock disponible)
 
 1. Le système interroge la blockchain pour obtenir les métadonnées et le fichier CAO du module
@@ -85,6 +90,11 @@ Ce use case est le point d'entrée du cycle commercial — il crée la commande,
 6. Le fichier CAO est transmis au manufactureur via la blockchain
 7. Le consommateur reçoit une confirmation avec délai de fabrication estimé
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Quantité > 1 avec capacité partielle
 
 1. Le consommateur saisit une quantité > 1
@@ -93,11 +103,21 @@ Ce use case est le point d'entrée du cycle commercial — il crée la commande,
 4. Le consommateur accepte la répartition
 5. Les ordres de fabrication sont soumis en parallèle sur la blockchain
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur A — Fonds insuffisants
 
 1. Le Payment Service retourne une erreur de solde insuffisant
 2. Message affiché : "Solde insuffisant pour effectuer cette commande"
 3. La commande n'est pas créée
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur B — Aucun manufactureur disponible
 
@@ -105,11 +125,21 @@ Ce use case est le point d'entrée du cycle commercial — il crée la commande,
 2. Message affiché : "Aucun manufactureur disponible — vous pouvez rejoindre la liste d'attente"
 3. Le consommateur est placé en liste d'attente (enregistré localement)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur C — Échec de soumission blockchain
 
 1. La transaction blockchain échoue (endorsement ou commit error)
 2. Le draft de commande local est conservé intact
 3. Message affiché : "Erreur réseau blockchain — réessayez ultérieurement"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

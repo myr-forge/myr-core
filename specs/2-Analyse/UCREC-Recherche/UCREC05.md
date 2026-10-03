@@ -75,6 +75,11 @@ La BOM inclut aussi les fichiers 3D des Composants (référence IPFS via `Model3
 4. La BOM est générée avec les colonnes : quantité, référence (ID), nom, catégorie, hash SHA-256, URL IPFS
 5. Le fichier est retourné avec l'en-tête `Content-Disposition: attachment`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Composants avec fichiers IPFS indisponibles
 
 1. Pour un Composant, `Versions[last].Hash` référence un fichier non accessible sur le réseau IPFS
@@ -83,22 +88,42 @@ La BOM inclut aussi les fichiers 3D des Composants (référence IPFS via `Model3
 4. Avertissement dans la réponse : "X composant(s) sans fichier accessible — BOM partielle"
 5. L'export est proposé avec les données disponibles
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Module avec instances multiples du même Composant (RM15)
 
 1. Un Composant est instancié plusieurs fois dans le Module (RM15 — instances indépendantes)
 2. La BOM agrège les instances : quantité = nombre d'instances du même `AssetID`
 3. Les informations du Composant (nom, hash, URL IPFS) sont dédupliquées
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Module introuvable
 
 1. L'ID du Module ne correspond à aucun record
 2. Réponse `404 Not Found`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Timeout de génération (ENF03)
 
 1. La génération de la BOM dépasse 5 secondes (module très profond ou blockchain lente)
 2. Le handler retourne `503 Service Unavailable` avec message : "Génération trop longue — réessayez"
 3. Aucun fichier partiel exporté
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

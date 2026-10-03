@@ -76,6 +76,11 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 8. Fabric valide et ancre le nouveau bloc.
 9. L'API retourne `200 OK` avec le `Model3D` mis à jour.
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Patch partiel (mise à jour d'un seul champ)
 
 1. Seule la licence est transmise (ex : passe de CC BY à CC BY-SA).
@@ -84,6 +89,11 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 4. La compatibilité de licence avec le parent est vérifiée si applicable.
 5. La transaction est soumise normalement.
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Incompatibilité de licence avec le parent (RM03)
 
 1. L'asset a un `ParentID` et la nouvelle licence est incompatible avec la licence du parent.
@@ -91,16 +101,31 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 3. Le service retourne l'erreur avant toute soumission Fabric.
 4. L'API retourne `422 Unprocessable Entity` : `{ "error": "Incompatibilité de licence : <raison>." }`.
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Asset introuvable
 
 1. `blockchain.GetModelRecord(req.ID, "")` retourne une erreur (ID inexistant sur le canal).
 2. L'API retourne `404 Not Found` : `{ "error": "asset introuvable" }`.
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Échec endorsement Fabric
 
 1. `blockchain.StoreModelRecord(m)` retourne une erreur Fabric.
 2. L'état de l'asset en mémoire n'est pas persisté.
 3. L'API retourne `500 Internal Server Error` : `{ "error": "Erreur blockchain : <message>." }`.
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

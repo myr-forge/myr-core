@@ -79,6 +79,11 @@ Ce use case est à faible probabilité (1) car il est irréversible — les util
 4. Le destinataire reçoit une notification et doit accepter le transfert (`PUT /api/transfers/{id}/accept`)
 5. Après acceptation, l'`OwnerID` est finalisé sur la blockchain
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Transfert vers un réseau externe
 
 1. L'identifiant du destinataire est sur un réseau Myr externe (format `identityID@reseauExterne`)
@@ -88,6 +93,11 @@ Ce use case est à faible probabilité (1) car il est irréversible — les util
 5. Le destinataire accepte en présentant le token sur son réseau — la transaction est soumise sur les deux réseaux
 6. Les deux réseaux enregistrent le transfert avec le même UUID (RM26 — traçabilité inter-réseaux)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Destinataire qui refuse le transfert
 
 1. Le destinataire reçoit la notification de transfert
@@ -96,21 +106,41 @@ Ce use case est à faible probabilité (1) car il est irréversible — les util
 4. L'`OwnerID` reste inchangé — le propriétaire d'origine conserve la propriété
 5. Le propriétaire d'origine est notifié du refus
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur A — Destinataire introuvable sur le réseau
 
 1. L'IdentityID saisi n'existe pas sur le réseau Myr courant
 2. Message : "Destinataire introuvable sur ce réseau — vérifiez l'identifiant"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur B — Token de transfert expiré (réseau externe)
 
 1. Le destinataire présente un token expiré (délai > 48h par défaut)
 2. Message : "Token de transfert expiré — le propriétaire doit initier un nouveau transfert"
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur C — Échec de soumission blockchain
 
 1. La transaction échoue lors de l'enregistrement
 2. L'`OwnerID` n'est pas modifié — l'ancien propriétaire conserve ses droits
 3. Message : "Erreur réseau blockchain — le transfert n'a pas été effectué"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

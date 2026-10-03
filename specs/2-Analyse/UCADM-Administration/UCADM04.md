@@ -84,11 +84,21 @@ Le seuil minimum de 3 nœuds actifs est imposé par RM27 pour garantir la résil
 11. Le profil mis à jour est persisté via `adapters/out/localstorage/`.
 12. Le CLI retourne : `Nœud <adresse> retiré du canal <canal>. <N> nœuds actifs restants.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Nombre de nœuds insuffisant
 
 1. La vérification (étape 5) détecte que le canal dispose de 3 nœuds actifs ou moins.
 2. Aucune transaction n'est soumise.
 3. Le CLI retourne : `Erreur : le réseau doit conserver au moins 3 nœuds actifs. Retrait impossible (actuellement <N> nœuds actifs).`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Nœud non membre du canal
 
@@ -96,12 +106,22 @@ Le seuil minimum de 3 nœuds actifs est imposé par RM27 pour garantir la résil
 2. Aucune transaction n'est soumise.
 3. Le CLI retourne : `Erreur : <adresse> n'est pas membre actif du canal <canal>.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Endorsement insuffisant
 
 1. La politique d'endorsement du canal requiert plusieurs signatures d'administrateurs d'organisation.
 2. L'administrateur ne peut pas satisfaire seul la politique.
 3. Le service retourne `ErrEndorsementPolicy`.
 4. Le CLI retourne : `Erreur : politique d'endorsement non satisfaite. Contacter les autres administrateurs d'organisation.`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

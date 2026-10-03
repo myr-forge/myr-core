@@ -68,6 +68,11 @@ Le rôle `admin` est natif et protégé : il ne peut pas être attribué à d'au
 5. Le service crée la liaison organisation ↔ rôle et la persiste localement.
 6. Le CLI retourne : `Rôle "<roleNom>" attribué à l'organisation "<orgID>".`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Retrait d'un rôle
 
 1. L'administrateur exécute `myr org role remove --org <orgID> --role <roleNom>`.
@@ -75,11 +80,21 @@ Le rôle `admin` est natif et protégé : il ne peut pas être attribué à d'au
 3. La liaison est supprimée du stockage local.
 4. Le CLI retourne : `Rôle "<roleNom>" retiré de l'organisation "<orgID>".`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Organisation introuvable
 
 1. L'identifiant fourni ne correspond à aucune organisation connue du système.
 2. Le service retourne `ErrOrgNotFound`.
 3. Le CLI retourne : `Erreur : organisation "<orgID>" introuvable sur le réseau.`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Rôle introuvable
 
@@ -87,11 +102,21 @@ Le rôle `admin` est natif et protégé : il ne peut pas être attribué à d'au
 2. Le service retourne `ErrRoleNotFound`.
 3. Le CLI retourne : `Erreur : rôle "<roleNom>" introuvable. Créez-le avec "myr role create".`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Tentative d'attribution du rôle admin
 
 1. L'administrateur tente d'attribuer le rôle `admin` à une organisation.
 2. Le service refuse l'opération (RM34).
 3. Le CLI retourne : `Erreur : le rôle "admin" est protégé et ne peut pas être attribué via cette commande.`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

@@ -81,6 +81,11 @@ Le développeur de la boutique intègre l'API MYR pour récupérer les prix à j
 9. La boutique affiche la confirmation au consommateur avec le numéro de commande MYR
 10. La commande suit ensuite le flux de UCAUT01 (fabrication/livraison)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Prix mis à jour entre l'affichage et la validation
 
 1. Entre l'étape 2 et l'étape 5, le prix du composant a été mis à jour sur la blockchain (via UCPI04)
@@ -88,11 +93,21 @@ Le développeur de la boutique intègre l'API MYR pour récupérer les prix à j
 3. La boutique affiche : "Le prix de cet article a changé : {ancien prix} → {nouveau prix}. Confirmez-vous ?"
 4. Le consommateur confirme avec le nouveau prix — la commande est soumise avec le prix actualisé
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur A — Token API invalide ou expiré
 
 1. La boutique présente un token API expiré ou révoqué
 2. L'API retourne : `401 Unauthorized — Token API invalide`
 3. La boutique doit renouveler son token API (hors périmètre de ce UC)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur B — Asset non disponible à la commande
 
@@ -100,11 +115,21 @@ Le développeur de la boutique intègre l'API MYR pour récupérer les prix à j
 2. L'API retourne : `409 Asset non disponible à la commande`
 3. La boutique affiche un message d'indisponibilité
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur C — Fonds insuffisants côté consommateur
 
 1. Le Payment Service détecte que le consommateur n'a pas les fonds suffisants sur son wallet MYR
 2. L'API retourne : `402 Fonds insuffisants`
 3. La boutique gère le refus de paiement selon ses propres règles (paiement fiat alternatif hors périmètre)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

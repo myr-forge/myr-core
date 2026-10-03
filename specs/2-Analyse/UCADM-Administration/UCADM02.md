@@ -81,6 +81,11 @@ Les services domaine `domain/channel/`, `domain/network/` et `domain/identity/` 
 10. Le profil de connexion (`gateway-connection.json`) est généré et sauvegardé dans `connection-profiles/`.
 11. Le CLI retourne : `Réseau "<nom>" créé avec succès. <N> nœuds synchronisés.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Import d'un profil de connexion existant
 
 1. L'administrateur fournit un fichier de profil existant (`--profile <chemin>.json` ou `.yaml`).
@@ -90,11 +95,21 @@ Les services domaine `domain/channel/`, `domain/network/` et `domain/identity/` 
 5. Le réseau est initialisé à partir du profil importé (étapes 6–10 du flux nominal).
 6. Le CLI retourne : `Réseau initialisé depuis le profil importé. <N> nœuds synchronisés.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Nombre de nœuds insuffisant
 
 1. L'administrateur déclare moins de 3 nœuds.
 2. Le service valide la topologie et détecte l'insuffisance.
 3. Le CLI retourne : `Erreur : au moins 3 nœuds sont requis pour un réseau résilient (consensus Raft).`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Nœud inaccessible
 
@@ -103,11 +118,21 @@ Les services domaine `domain/channel/`, `domain/network/` et `domain/identity/` 
 3. Le CLI retourne : `Avertissement : <N> nœud(s) non synchronisé(s). Réseau partiellement opérationnel.`
 4. L'administrateur peut relancer la synchronisation manuellement (commande `myr network sync`).
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Profil de connexion invalide (flux alternatif)
 
 1. Le fichier importé ne respecte pas le schéma JSON/YAML Fabric.
 2. Le parser retourne les erreurs de validation avec les chemins JSON concernés.
 3. Le CLI retourne : `Erreur : profil invalide — <champ> manquant ou incorrect.`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

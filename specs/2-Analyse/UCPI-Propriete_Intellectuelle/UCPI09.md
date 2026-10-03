@@ -80,11 +80,21 @@ C'est une généralisation de UCPI08 (clonage d'un composant) appliquée à un a
 7. La transaction de réception du module est enregistrée sur le réseau cible
 8. Confirmation : "Module et {N} composant(s) clonés sur {réseau cible}"
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Certains composants déjà présents sur le réseau cible
 
 1. Lors de l'étape 5, le système détecte que certains composants existent déjà sur le réseau cible (même UUID)
 2. Ces composants sont ignorés (pas re-clonés) — seuls les composants manquants sont ajoutés
 3. Le clonage continue avec les composants manquants uniquement
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur A — Une ou plusieurs licences incompatibles
 
@@ -93,11 +103,21 @@ C'est une généralisation de UCPI08 (clonage d'un composant) appliquée à un a
 3. Message : "Le clonage est bloqué — {N} composant(s) avec une licence incompatible : [liste]"
 4. Le clonage ne peut pas avoir lieu — aucune transaction n'est soumise
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur B — Réseau cible inaccessible
 
 1. Connexion au réseau cible échoue
 2. Message : "Réseau de destination inaccessible — vérifiez le profil de connexion"
 3. Aucune transaction soumise
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur C — Échec partiel lors du clonage des composants
 
@@ -106,6 +126,11 @@ C'est une généralisation de UCPI08 (clonage d'un composant) appliquée à un a
 3. Le module lui-même n'est pas encore transmis sur le réseau cible
 4. Message : "Clonage partiel — {X}/{N} composants clonés. Le module n'a pas été transmis. Réessayez pour compléter."
 5. Un état de "clonage en cours" est enregistré localement pour permettre la reprise
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

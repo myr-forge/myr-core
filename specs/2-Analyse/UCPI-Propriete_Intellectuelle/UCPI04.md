@@ -75,6 +75,11 @@ Le prix de chaque composant contribue à l'agrégation du prix des modules qui l
 6. La réponse confirme : prix unitaire, devise du réseau, taux de commission réseau
 7. Le prix est actif immédiatement pour toute commande créée après l'enregistrement (RM31)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Mise à jour d'un prix existant
 
 1. Le composant possède déjà un prix enregistré localement
@@ -82,10 +87,20 @@ Le prix de chaque composant contribue à l'agrégation du prix des modules qui l
 3. Le service avertit : "La modification du prix ne s'applique qu'aux commandes futures — les commandes en cours conservent le prix d'origine (RM31)"
 4. Le nouveau prix remplace l'ancien dans le store local (`AssetPrice.UpdatedAt` mis à jour) — voir UCPI11 pour le détail de cette modification
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur A — Utilisateur non propriétaire
 
 1. Le système détecte que `OwnerID != identityID de l'appelant`
 2. Réponse `403 Forbidden` : "Vous n'êtes pas propriétaire de ce composant"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur B — Prix invalide (négatif)
 
@@ -94,11 +109,21 @@ Le prix de chaque composant contribue à l'agrégation du prix des modules qui l
 
 > Un prix de 0 est valide : il rend le composant librement disponible, sans commission (RM32) — voir flux nominal.
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur C — Échec d'écriture locale
 
 1. L'écriture dans le store local échoue (ex. erreur disque, verrou concurrent)
 2. Le prix précédent reste actif
 3. Message affiché : "Erreur serveur — le prix n'a pas été enregistré"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

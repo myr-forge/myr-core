@@ -79,6 +79,11 @@ Les services domaine concernés (`domain/channel/`, `domain/network/`) existent 
 9. Le CLI retourne : `Organisation "<nom>" (ID: <orgID>) ajoutée au réseau.`
 10. L'organisation peut désormais créer des identités et rejoindre le réseau.
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Organisation déjà membre du réseau
 
 1. La vérification (étape 4) détecte l'identifiant existant.
@@ -87,17 +92,32 @@ Les services domaine concernés (`domain/channel/`, `domain/network/`) existent 
 4. Une transaction de mise à jour de configuration est soumise (pas de recréation de l'organisation).
 5. Le CLI retourne : `Organisation "<orgID>" mise à jour sur le réseau.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Format identifiant invalide
 
 1. La validation (étape 3) échoue : format non conforme au backend actif.
 2. Le service retourne une erreur de validation sans soumettre de transaction.
 3. Le CLI retourne : `Erreur : identifiant d'organisation invalide — format non conforme au backend <type>.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Échec soumission réseau
 
 1. La transaction de configuration est soumise mais échoue (politique d'endorsement non satisfaite, nœud indisponible).
 2. Le service retourne l'erreur sans modifier l'état local.
 3. Le CLI retourne : `Erreur réseau : <message>. Aucune modification appliquée.`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

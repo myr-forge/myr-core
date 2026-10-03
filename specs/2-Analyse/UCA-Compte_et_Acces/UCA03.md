@@ -59,11 +59,21 @@ C'est un écart fonctionnel significatif par rapport à un comportement attendu 
 2. Aucun appel serveur n'est nécessaire ni possible pour cette action
 3. Le token reste valide côté serveur jusqu'à expiration (7 jours) — toute requête le portant encore sera acceptée pendant ce délai
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Révocation par l'administrateur
 
 1. L'administrateur appelle `GET /api/admin/sessions` (rôle `admin` requis) — reçoit `{token_prefix, role, pseudo, network_id, expires_at}` pour chaque session active
 2. L'administrateur appelle `DELETE /api/admin/sessions/{token}` avec le token **complet** de la session à révoquer
 3. La session est supprimée immédiatement du store — la requête suivante portant ce token reçoit `HTTP 401`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

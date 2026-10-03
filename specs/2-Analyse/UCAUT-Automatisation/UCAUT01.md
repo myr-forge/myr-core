@@ -87,6 +87,11 @@ La livraison confirmée → distribution des commissions est une opération **at
 8. Chaque auteur reçoit une notification de commission créditée
 9. Le consommateur reçoit une notification de livraison confirmée
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Fabricant partenaire industriel externe (canal `external_adapter`)
 
 1. La commande est confiée à un fabricant partenaire déjà établi (ex. Sculpteo, Xometry, PCBWay), intégré à Myr via un port sortant dédié (`ManufacturingPort`) plutôt que comme organisation du réseau — il n'a ni rôle RBAC `manufacturer` ni nœud blockchain propre
@@ -95,6 +100,11 @@ La livraison confirmée → distribution des commissions est une opération **at
 4. Sa confirmation de livraison arrive par webhook vers un endpoint Myr dédié ; après vérification de l'authenticité du webhook, **c'est le backend myr-core lui-même** qui soumet `ConfirmDelivery` au smart contract — la suite (calcul et distribution des commissions, étape 6 du flux nominal) est identique
 5. Le partenaire n'a jamais d'accès direct à la blockchain ni au RBAC Myr — la confiance repose sur l'intégration (secret partagé propre à l'adapter), pas sur une identité CA Fabric
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Commande en lot (quantité > 1) avec répartition multi-manufactureurs
 
 1. La commande a été répartie entre N manufactureurs (voir UCPI01 flux alternatif)
@@ -102,17 +112,32 @@ La livraison confirmée → distribution des commissions est une opération **at
 3. La distribution des commissions est déclenchée au fur et à mesure des livraisons partielles
 4. Quand toutes les livraisons partielles sont confirmées, la commande globale passe à `delivered`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Aucun manufactureur disponible
 
 1. Le système ne trouve aucun manufactureur agréé disponible sur le réseau
 2. Le consommateur est notifié et placé en liste d'attente
 3. La commande reste en statut `pending_manufacturer` jusqu'à qu'un manufactureur soit disponible
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur A — Fichier CAO inaccessible sur la blockchain
 
 1. Le hash du fichier CAO ne correspond à aucun fichier disponible (IPFS ou stockage distribué)
 2. Le manufactureur est notifié : "Fichier CAO inaccessible — contacter le concepteur"
 3. La commande est suspendue (statut `suspended`) en attente de correction par le concepteur
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur B — Échec de la distribution des commissions
 
@@ -123,12 +148,22 @@ La livraison confirmée → distribution des commissions est une opération **at
 5. Une alerte est émise vers l'administrateur du réseau
 6. La livraison physique est confirmée côté consommateur malgré l'échec des commissions (les deux sont découplés)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur C — Livraison impossible (adresse invalide ou refus de livraison)
 
 1. Le manufactureur signale une impossibilité de livraison
 2. La commande passe au statut `delivery_failed`
 3. Le consommateur et l'administrateur sont notifiés
 4. Le remboursement (si applicable) est hors périmètre système — à gérer manuellement
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

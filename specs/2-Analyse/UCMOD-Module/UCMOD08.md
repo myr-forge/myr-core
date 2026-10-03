@@ -65,6 +65,11 @@ Un module en état `draft` est réellement retiré (`DraftStore`). Un module dé
 3. Le module est retiré du stockage local
 4. L'API retourne `204 No Content`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — Suppression (masquage) d'un module soumis
 
 1. Le module est retrouvé sur la blockchain (déjà soumis, avec ses `ModuleVersion`)
@@ -73,15 +78,34 @@ Un module en état `draft` est réellement retiré (`DraftStore`). Un module dé
 4. L'API retourne `204 No Content`
 5. Le module disparaît de `GET /api/modules` mais reste accessible via `GET /api/modules/:id` — notamment pour toute dérivation ultérieure (`parent_id`, UCMOD01) ou pour un module hôte qui l'a déjà instancié
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
+> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/modules/`
+> - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules/`
+> - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules/`
+> - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules/`
+> - 🟡 [TestModules_Verify_OK](../../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : teste route `/api/modules/`
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Module introuvable
 
 1. Aucun module ne correspond à l'identifiant fourni
 2. L'API retourne `404 Not Found`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Droits insuffisants
 
 1. L'identité n'est pas propriétaire du module
 2. L'API retourne `403 Forbidden`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

@@ -73,6 +73,11 @@ Le retrait d'un composant d'un module supprime une **instance spécifique** (`Wo
    e. Sauvegarde le module mis à jour (`blockchain.StoreModelRecord`)
 2. La réponse `200 OK` retourne le module mis à jour
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — Retrait avec liaisons en cascade
 
 1. `RemoveAssetFromWorkspace(moduleID, instanceID)` :
@@ -83,17 +88,32 @@ Le retrait d'un composant d'un module supprime une **instance spécifique** (`Wo
    c. Sauvegarde le module (`blockchain.StoreModelRecord`)
 2. La réponse retourne le module sans l'instance et sans ses connexions
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> - 🟡 [TestRemoveConnection](../../../docs/tests/adapters-out-localstorage/TestRemoveConnection.md) — déduit : teste `ConnectionStore.RemoveConnection`
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Module non trouvé
 
 1. `blockchain.GetModelRecord(moduleID)` retourne une erreur (module supprimé ou Fabric indisponible)
 2. `RemoveAssetFromWorkspace` retourne l'erreur
 3. Le handler retourne HTTP 500
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Instance introuvable dans le module
 
 1. `RemoveAssetFromWorkspace` ne trouve pas `instanceID` dans `WorkspaceInstances`
 2. Le module est sauvegardé sans modification (comportement silencieux actuel)
 3. La réponse retourne le module inchangé — **à améliorer** : retourner HTTP 404 si l'instance est introuvable
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

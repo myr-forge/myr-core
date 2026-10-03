@@ -65,20 +65,40 @@ Un Module "utilise" un Composant si son `WorkspaceInstances` contient une instan
 2. Les Modules dont `WorkspaceInstances` contient au moins une entrée avec `AssetID == componentID` sont filtrés
 3. La liste des Modules correspondants est retournée, avec pour chacun : nom, statut (`draft`/`submitted`), nombre de liaisons
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — Aucun Module utilisant ce Composant
 
 1. Aucun Module ne contient d'instance du Composant
 2. Message : "Aucun module n'utilise ce composant"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux alternatif — Filtrage par statut
 
 1. Un filtre par statut `submitted` (Modules publics uniquement) est transmis
 2. Les Modules en état `draft` (non publiés, appartenant à d'autres) sont exclus de la réponse
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Composant utilisé dans un Module non accessible (draft d'un autre utilisateur)
 
 1. Un Module contient le Composant mais est en état `draft` appartenant à un autre utilisateur
 2. Ce Module n'apparaît pas dans les résultats (non visible sur le réseau tant que non soumis)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

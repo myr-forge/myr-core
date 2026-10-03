@@ -68,6 +68,11 @@ La suppression d'un rôle entraîne automatiquement sa révocation pour toutes l
 3. Le rôle est créé avec un ID généré et persisté localement via `adapters/out/localstorage/`.
 4. Le CLI retourne : `Rôle "<nom>" créé avec les droits : <liste>.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — Rôle édité
 
 1. L'administrateur fournit l'identifiant du rôle et les champs à modifier.
@@ -75,6 +80,11 @@ La suppression d'un rôle entraîne automatiquement sa révocation pour toutes l
 3. Les champs fournis sont mis à jour (merge — seuls les champs explicitement fournis sont écrasés).
 4. Le rôle persisté est remplacé, les droits effectifs des organisations possédant ce rôle sont immédiatement mis à jour.
 5. Le CLI retourne : `Rôle "<nom>" mis à jour.`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux nominal — Rôle supprimé
 
@@ -84,17 +94,32 @@ La suppression d'un rôle entraîne automatiquement sa révocation pour toutes l
 4. Le rôle est supprimé du stockage.
 5. Le CLI retourne : `Rôle "<nom>" supprimé. Retiré de <N> organisation(s).`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Nom de rôle déjà utilisé (création)
 
 1. Le nom fourni correspond à un rôle existant.
 2. Le service retourne `ErrRoleNameConflict` (RM36).
 3. Le CLI retourne : `Erreur : un rôle avec le nom "<nom>" existe déjà.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Tentative de modification du rôle admin
 
 1. L'administrateur tente d'éditer ou de supprimer le rôle d'ID `"admin"`.
 2. Le service retourne `ErrAdminRoleProtected` (RM34).
 3. Le CLI retourne : `Erreur : le rôle "admin" est protégé et ne peut pas être modifié ni supprimé.`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

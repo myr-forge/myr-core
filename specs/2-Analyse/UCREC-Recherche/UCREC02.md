@@ -67,10 +67,21 @@ La compatibilité est déterminée par l'algorithme `ifacesCompatible()` (RM11) 
 3. Pour chaque Composant candidat, il récupère ses Interfaces et applique `ifacesCompatible()` entre chaque paire (source libre ↔ candidat libre)
 4. La liste des Composants ayant au moins une Interface compatible est retournée, avec pour chacun : nom, catégorie, type d'interface compatible
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestListInterfacesForAsset](../../../docs/tests/adapters-out-localstorage/TestListInterfacesForAsset.md) — déduit : teste `InterfaceStore.ListInterfacesForAsset`
+> - 🟡 [TestList_MergesDraftsAndBlockchain](../../../docs/tests/domain-model/TestList_MergesDraftsAndBlockchain.md) — déduit : teste `ModelService.List`
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — Aucun Composant compatible
 
 1. Aucun Composant du réseau n'a d'Interface compatible avec les interfaces libres du Composant source
 2. Message : "Aucun composant compatible trouvé sur ce réseau"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux alternatif — Filtrage par catégorie d'interface
 
@@ -78,16 +89,31 @@ La compatibilité est déterminée par l'algorithme `ifacesCompatible()` (RM11) 
 2. Seuls les Composants avec une compatibilité dans cette catégorie sont retournés
 3. Plusieurs catégories peuvent être combinées
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Composant sans interface définie
 
 1. Le Composant source n'a aucune Interface définie (seulement un slot virtuel)
 2. Aucune interface réelle à comparer — la recherche retourne une liste vide
 3. Message informatif : "Ce composant n'a pas encore d'interface physique définie — ajoutez des interfaces pour trouver des composants compatibles"
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Blockchain indisponible
 
 1. L'appel à `ListModelRecords(channelID)` échoue
 2. Message : "Impossible de contacter la blockchain — réessayez"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

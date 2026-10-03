@@ -77,6 +77,12 @@ La commande est exposée **uniquement via le CLI admin** (`myr`). Elle n'est jam
 5. Le CLI Handler appelle `Network Service.Delete(id)` pour supprimer le profil local.
 6. Le CLI retourne : `Réseau "<nom>" démantelé. Toutes les données locales ont été supprimées.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestDelete_NotFound](../../../docs/tests/domain-network/TestDelete_NotFound.md) — déduit : teste `NetworkService.Delete`, `Repo.Delete`
+> - 🟡 [TestDelete_Success](../../../docs/tests/domain-network/TestDelete_Success.md) — déduit : teste `NetworkService.Delete`, `Repo.Delete`
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Flag --confirm absent
 
 1. L'administrateur exécute la commande sans `--confirm`.
@@ -88,11 +94,21 @@ La commande est exposée **uniquement via le CLI admin** (`myr`). Elle n'est jam
    Utilisez --confirm pour confirmer : myr network destroy <id> --confirm
    ```
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Réseau marqué en production
 
 1. Le `NetworkProfile` chargé a `IsProduction: true`.
 2. Le service refuse l'opération.
 3. Le CLI retourne : `Erreur : "<nom>" est marqué comme réseau de production. Démantèlement refusé.`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Processus Fabric non arrêtables
 
@@ -100,6 +116,11 @@ La commande est exposée **uniquement via le CLI admin** (`myr`). Elle n'est jam
 2. Le CLI Handler journalise les PIDs concernés et poursuit.
 3. Message partiel : `Avertissement : processus <pid> (peer) non arrêté. Poursuite de la suppression des données.`
 4. La suppression des fichiers et le retrait du profil sont exécutés malgré l'échec d'arrêt.
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

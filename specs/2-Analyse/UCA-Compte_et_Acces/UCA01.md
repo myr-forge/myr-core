@@ -77,6 +77,17 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 6. Réponse `HTTP 201` avec `{id, status:"approved", pseudo, org_id, secret}`
 7. Le visiteur conserve ce secret : il lui servira à se connecter (UCA02)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
+> - 🟡 [TestHandleIdentityRequest_InvalidJSON](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidJSON.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_MissingFields](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_MissingFields.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_ServiceError](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_ServiceError.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_Success](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_Success.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestAutoRegister_NoCA](../../../docs/tests/domain-identity/TestAutoRegister_NoCA.md) — déduit : teste `IdentityService.AutoRegister`
+> - 🟡 [TestAutoRegister_RoleForwarded](../../../docs/tests/domain-identity/TestAutoRegister_RoleForwarded.md) — déduit : teste `IdentityService.AutoRegister`
+> - 🟡 [TestAutoRegister_Success](../../../docs/tests/domain-identity/TestAutoRegister_Success.md) — déduit : teste `IdentityService.AutoRegister`
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Demande en attente (`AllowAutoRegister=false`)
 
 1. Étapes 1 à 3 identiques
@@ -84,15 +95,32 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 3. Réponse `HTTP 201` avec `{id, pseudo, display_name, email, org_id, message, status:"pending", created_at}`
 4. **Écart connu** : aucun endpoint REST ni commande CLI ne permet à l'administrateur d'approuver une demande déjà en attente et de déclencher l'enregistrement CA correspondant après coup. Seule la consultation (`GET /api/identity/requests`, `myr identity requests`) existe. Le traitement réel se fait aujourd'hui hors `myr` (CA tooling + communication manuelle du secret).
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> - 🟡 [TestHandleIdentityRequests_Admin_EmptyList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_EmptyList.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequests_Admin_ReturnsList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_ReturnsList.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequests_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Champs requis manquants
 
 1. `pseudo`, `email` ou `org_id` absent du corps JSON
 2. Réponse `HTTP 400` avec `{"error": "pseudo, email et org_id sont requis"}`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Trop de tentatives
 
 1. Le client dépasse le quota du rate limiter (`authLimiter`) sur cet endpoint
 2. Réponse `HTTP 429` avec `{"error": "trop de tentatives, réessayez dans une minute"}`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

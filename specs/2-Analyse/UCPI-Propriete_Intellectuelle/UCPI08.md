@@ -75,6 +75,11 @@ La licence du composant doit autoriser le clonage — certaines licences peuvent
 5. La transaction de réception est enregistrée sur le **réseau cible** : `{assetID, clonedFromNetwork, originalOwnerID, timestamp}`
 6. Confirmation : "Composant cloné — disponible sur {réseau cible}"
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux nominal B — Réseau cible non encore référencé (saisie manuelle)
 
 1. Les informations de connexion du nouveau réseau sont transmises (URL gateway, MSP ID, certificat CA)
@@ -82,11 +87,21 @@ La licence du composant doit autoriser le clonage — certaines licences peuvent
 3. Connexion réussie — le nouveau profil est enregistré localement dans `connection-profiles/`
 4. La suite suit le flux nominal A à partir de l'étape 2
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur A — Licence incompatible
 
 1. La vérification de licence (étape 3) échoue — la licence du composant interdit le clonage externe
 2. Message : "La licence du composant ne permet pas le clonage vers ce réseau"
 3. Le concepteur peut demander une dérogation à l'auteur de la licence (hors périmètre système)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur B — Réseau cible inaccessible
 
@@ -94,11 +109,21 @@ La licence du composant doit autoriser le clonage — certaines licences peuvent
 2. Message : "Réseau de destination inaccessible — vérifiez le profil de connexion"
 3. Le clonage n'est pas initié — aucune transaction soumise
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur C — Composant déjà présent sur le réseau cible (même UUID)
 
 1. Le réseau cible contient déjà un asset avec le même UUID
 2. Message : "Ce composant existe déjà sur le réseau de destination (UUID : {id})"
 3. Le système propose de consulter la version existante sur le réseau cible
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur D — Échec partiel (source OK, cible KO)
 
@@ -106,6 +131,11 @@ La licence du composant doit autoriser le clonage — certaines licences peuvent
 2. La transaction sur le réseau cible échoue
 3. Message : "Transaction partielle — clonage enregistré sur le réseau source, échec sur le réseau cible. Réessayez ultérieurement."
 4. La transaction source n'est pas annulée (immuabilité blockchain)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

@@ -66,6 +66,18 @@ Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/ident
 5. Réponse `HTTP 200` avec `{token, role, pseudo, channel}`
 6. Le client conserve ce token et l'envoie dans l'en-tête `X-Myr-Token` de chaque requête protégée suivante — c'est aussi la seule occasion où le client reçoit son rôle (voir UCA04/UCA07)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> - 🟡 [TestChannels_PUT_SwitchesChannel](../../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_EnrollError](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_EnrollError.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_InvalidJSON](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_InvalidJSON.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_MethodNotAllowed](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MethodNotAllowed.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_MissingFields](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MissingFields.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_NoIdentityService](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_NoIdentityService.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_Success](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_Success.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestRequireAuth_BlockchainWithValidToken](../../../docs/tests/adapters-in-rest/TestRequireAuth_BlockchainWithValidToken.md) — déduit : teste route `/api/identity/session`
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — Accès invité (réseau public)
 
 1. Le client soumet `POST /api/identity/guest` (corps optionnel : `{pseudo, display_name, email, org_id, message}`)
@@ -73,26 +85,52 @@ Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/ident
 3. Une session est créée immédiatement avec le rôle `reader`, pseudo `"guest"` par défaut (ou celui fourni)
 4. Réponse `HTTP 200` avec `{token, role:"reader", pseudo, channel, guest:true}` — aucun enrôlement CA n'a lieu
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestHandleIdentityGuest_AllowedDeliversToken](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_AllowedDeliversToken.md) — déduit : teste route `/api/identity/guest`
+> - 🟡 [TestHandleIdentityGuest_DisallowedReturnsForbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_DisallowedReturnsForbidden.md) — déduit : teste route `/api/identity/guest`
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Accès invité refusé (réseau privé)
 
 1. `AllowAutoGuest=false`
 2. Si `pseudo`, `email` et `org_id` sont fournis dans le corps : une `AccountRequest` est enregistrée en best-effort (voir UCA01)
 3. Réponse `HTTP 403` avec `{"error": "ce réseau ne permet pas l'accès automatique — contactez l'administrateur"}`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Secret invalide ou identité inconnue
 
 1. `identitySvc.Enroll` échoue (secret incorrect, identité inexistante ou déjà consommée selon la configuration CA)
 2. Réponse `HTTP 401` avec le message d'erreur renvoyé par la CA
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Champs requis manquants
 
 1. `name`, `secret` ou `org_id` absent
 2. Réponse `HTTP 400` avec `{"error": "name, secret et org_id sont requis"}`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Trop de tentatives
 
 1. Rate limiter (`authLimiter`) dépassé pour l'IP cliente
 2. Réponse `HTTP 429`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

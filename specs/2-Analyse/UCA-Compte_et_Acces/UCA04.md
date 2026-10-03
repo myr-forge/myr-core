@@ -60,16 +60,31 @@ Le seul moment où le client apprend son rôle, son pseudo et son canal est la r
 2. `requireAuth` retrouve la session dans le store et vérifie qu'elle n'a pas expiré
 3. La requête aboutit normalement — le client en déduit que sa session est active
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — Aucun token disponible
 
 1. Le client n'a pas (ou plus) de token en cache
 2. Il doit passer par UCA02 (connexion ou accès invité) avant tout appel protégé
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Token expiré ou invalide
 
 1. Le client envoie une requête protégée avec un token absent du store ou expiré
 2. `requireAuth` répond `HTTP 401` avec `{"error": "authentification requise"}`
 3. Le client doit se reconnecter (UCA02) pour obtenir un nouveau token — il n'y a pas de rafraîchissement automatique (pas de refresh token, le token opaque est valide 7 jours en bloc)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

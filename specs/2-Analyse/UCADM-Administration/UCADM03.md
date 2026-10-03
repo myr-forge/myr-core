@@ -81,6 +81,11 @@ Un peer déconnecté trop longtemps devient inutilisable (ledger désynchronisé
 9. Le profil de connexion est mis à jour avec le nouvel endpoint peer.
 10. Le CLI retourne : `Peer <adresse> ajouté au réseau. Synchronisation terminée à hauteur <N>.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Nœud de type orderer
 
 1. L'administrateur spécifie le type `orderer`.
@@ -90,12 +95,22 @@ Un peer déconnecté trop longtemps devient inutilisable (ledger désynchronisé
 5. Le nœud orderer rejoint le canal système et se synchronise.
 6. Le CLI retourne : `Nœud orderer <adresse> ajouté au réseau. Raft cluster : <N> membres.`
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Peer déconnecté temporairement (délai dans les limites)
 
 1. Le peer se déconnecte après son ajout.
 2. Le service de surveillance détecte l'indisponibilité.
 3. À la reconnexion (dans le délai maximum configurable), le peer lance un rattrapage automatique des blocs manquants.
 4. Le CLI retourne : `Peer <adresse> reconnecté. Rattrapage de <N> blocs en cours.`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Peer déconnecté trop longtemps
 
@@ -105,11 +120,21 @@ Un peer déconnecté trop longtemps devient inutilisable (ledger désynchronisé
 4. À la reconnexion, le CLI propose : `Peer mort depuis <durée>. Reconstruire le peer ? (o/N)`.
 5. Si confirmé : procédure de reconstruction (regénération des certificats + resynchronisation complète du ledger).
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Adresse ou port inaccessible
 
 1. La validation (étape 3) ne peut pas atteindre le serveur cible.
 2. Le service retourne une erreur de connectivité sans soumettre de transaction.
 3. Le CLI retourne : `Erreur : impossible de joindre <adresse>:<port>. Vérifier firewall et disponibilité réseau.`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

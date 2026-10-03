@@ -75,6 +75,13 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 5. La `Connection` est créée avec `FastenerAssetID` vide et persistée dans `connStore`
 6. La réponse `201 Created` retourne le DTO de la connexion créée
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddAssemblyLink`
+> - 🟡 [TestAddAssemblyLink_MissingStore](../../../docs/tests/domain-model/TestAddAssemblyLink_MissingStore.md) — déduit : teste `ModelService.AddAssemblyLink`
+> - 🟡 [TestAddAssemblyLink_UnknownInterface](../../../docs/tests/domain-model/TestAddAssemblyLink_UnknownInterface.md) — déduit : teste `ModelService.AddAssemblyLink`
+<!-- tests-obsidian:end -->
+
 ### Flux nominal B — Liaison via asset d'accroche
 
 1. Étapes 1 à 3 identiques au flux A
@@ -82,11 +89,31 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 3. Le service valide l'accroche via `validateFastener()` : l'asset d'accroche doit avoir au moins une interface compatible avec chacun des deux endpoints
 4. La `Connection` est créée avec `FastenerAssetID` renseigné (voir UCAM07)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Liaison via slot virtuel (UCAM03)
 
 1. Le client appelle `POST /api/virtual-connect` avec `{ virtual_iface_id, physical_iface_id, ... }`
 2. Le service appelle `ConnectVirtualToPhysical()` : matérialise le slot virtuel en interface physique complémentaire, puis crée la liaison
 3. Un nouveau slot virtuel est recréé sur l'asset source (RM13 — `EnsureVirtualSlot`)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 11 déduit(s)
+> - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_NilConnStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilConnStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+<!-- tests-obsidian:end -->
 
 ### Flux — Liaison devenue incompatible après modification
 
@@ -96,11 +123,28 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 4. La liaison reste consultable, marquée `Incompatible: true`
 5. Elle peut être supprimée manuellement — le système ne la supprime jamais automatiquement
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 6 déduit(s)
+> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/interfaces/`
+> - 🟡 [TestInterface_DELETE](../../../docs/tests/adapters-in-rest/TestInterface_DELETE.md) — déduit : teste route `/api/interfaces/`
+> - 🟡 [TestInterface_PATCH_NotFound](../../../docs/tests/adapters-in-rest/TestInterface_PATCH_NotFound.md) — déduit : teste route `/api/interfaces/`
+> - 🟡 [TestInterface_PATCH_OK](../../../docs/tests/adapters-in-rest/TestInterface_PATCH_OK.md) — déduit : teste route `/api/interfaces/`
+> - 🟡 [TestUpdateConnection](../../../docs/tests/adapters-out-localstorage/TestUpdateConnection.md) — déduit : teste `ConnectionStore.UpdateConnection`
+> - 🟡 [TestUpdateConnection_NotFound](../../../docs/tests/adapters-out-localstorage/TestUpdateConnection_NotFound.md) — déduit : teste `ConnectionStore.UpdateConnection`
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Interface déjà utilisée (RM09)
 
 1. Le client tente de créer une liaison avec une interface déjà engagée
 2. `AddAssemblyLink` ne vérifie pas RM09 directement dans le code actuel — **à implémenter** : vérifier dans `AddAssemblyLink` que `fromIfaceID` et `toIfaceID` ne sont pas déjà présents dans une connexion existante
 3. Message d'erreur attendu : `"Cette interface est déjà utilisée dans une liaison"`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddAssemblyLink`
+> - 🟡 [TestAddAssemblyLink_MissingStore](../../../docs/tests/domain-model/TestAddAssemblyLink_MissingStore.md) — déduit : teste `ModelService.AddAssemblyLink`
+> - 🟡 [TestAddAssemblyLink_UnknownInterface](../../../docs/tests/domain-model/TestAddAssemblyLink_UnknownInterface.md) — déduit : teste `ModelService.AddAssemblyLink`
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Interfaces incompatibles
 
@@ -108,11 +152,21 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 2. Le service retourne une erreur
 3. Le handler renvoie HTTP 500 (à améliorer : retourner HTTP 422 avec message métier explicite)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Asset d'accroche invalide
 
 1. `validateFastener()` retourne une erreur : l'accroche n'a pas d'interface compatible avec l'un des endpoints
 2. Le handler renvoie HTTP 500 avec le message de l'erreur
 3. La liaison n'est pas créée
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

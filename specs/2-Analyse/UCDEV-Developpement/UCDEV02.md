@@ -84,6 +84,11 @@ Les groupes `model`, `channel`, `payment` et `peer` sont **implémentés** (`ada
 4. Le service domaine exécute l'opération (lecture blockchain ou écriture via `adapters/out/fabric/`)
 5. Le résultat est affiché en sortie texte dans le terminal
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — Commandes d'administration réseau (UCADM01–05)
 
 1. L'administrateur configure un réseau :
@@ -102,6 +107,11 @@ Les groupes `model`, `channel`, `payment` et `peer` sont **implémentés** (`ada
 
 > La référence complète des commandes UCADM (flags, sorties, erreurs, services appelés) est dans `specs/3-Conception/DC_CLI_Admin.md`.
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux nominal — Vérification d'intégrité d'un modèle
 
 1. `myr model verify <id>`
@@ -109,10 +119,20 @@ Les groupes `model`, `channel`, `payment` et `peer` sont **implémentés** (`ada
 3. Comparaison avec le hash enregistré sur la blockchain
 4. Affichage : "OK modele [id] : integrité vérifiée" ou "KO modele [id] : integrité compromise"
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Adapter Fabric non configuré
 
 1. Fabric n'est pas disponible (pas de réseau configuré)
 2. Les commandes `myr org add`, `myr node add`, `myr node remove` retournent `ErrFabricUnavailable` — elles nécessitent un adapter Fabric configuré, sans repli vers un autre stockage.
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Commande invalide ou arguments manquants
 
@@ -121,12 +141,22 @@ Les groupes `model`, `channel`, `payment` et `peer` sont **implémentés** (`ada
 3. Un message d'aide est affiché avec la syntaxe correcte
 4. Exemple : `Error: required flag(s) "name" not set` suivi de la syntaxe de la commande
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Erreur Fabric (peer indisponible)
 
 1. La commande tente d'interagir avec Fabric
 2. Le peer est inaccessible
 3. Une erreur est affichée sur stderr : `Error: fabric gateway: ...`
 4. Le code de sortie est non-zéro (exploitable dans les scripts CI/CD)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 

@@ -81,12 +81,22 @@ La différence avec UCPI04 : le module est un agrégat — son prix est la somme
 7. Le prix final du module = prix plancher + marge transmise
 8. Le prix est enregistré localement (`adapters/out/localstorage/`)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Un ou plusieurs composants sans prix défini
 
 1. Lors de l'étape 3, certains composants n'ont pas de prix défini (RM30 : comptés pour 0 dans le prix plancher)
 2. Le système avertit : "X composant(s) sans prix — le prix plancher est incomplet"
 3. Le prix plancher partiel peut être accepté, ou une valeur globale manuelle transmise à la place
 4. Un indicateur "prix incomplet" est enregistré localement aux côtés du prix du module (pas sur la blockchain)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux alternatif — Mise à jour d'un prix existant
 
@@ -95,20 +105,40 @@ La différence avec UCPI04 : le module est un agrégat — son prix est la somme
 3. Le nouveau prix est recalculé et transmis
 4. Le nouveau prix remplace l'ancien dans le store local (`AssetPrice.UpdatedAt` mis à jour) — la modification ne s'applique qu'aux commandes futures (RM31, voir UCPI11)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur A — Module non soumis (encore en draft)
 
 1. Le système détecte `Status != submitted`
 2. Message : "Le module doit être soumis sur la blockchain avant de définir un prix"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur B — Utilisateur non propriétaire
 
 1. `OwnerID != identityID` détecté côté serveur
 2. Message : "Vous n'êtes pas propriétaire de ce module"
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur C — Échec d'écriture locale
 
 1. L'écriture dans le store local échoue
 2. Message : "Erreur serveur — le prix n'a pas été enregistré"
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ## Post-conditions
 
