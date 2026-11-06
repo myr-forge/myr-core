@@ -220,6 +220,7 @@ Au-delà, `HTTP 429` est retourné.
 | Module immuable | Un module `submitted` ne doit plus être modifiable directement | Garde `Status != submitted`, fork obligatoire (RM19) |
 | Identité bootstrap de la Fabric CA | Un identifiant connu (ex. `admin:adminpw`) permet à quiconque joint le port de la CA de s'enrôler comme registrar et d'émettre des identités arbitraires | Aucun identifiant par défaut : le secret est généré aléatoirement à chaque création de réseau (`myr network create`) et conservé uniquement sur le serveur, en fichier `0600` à côté du certificat de l'admin bootstrap |
 | Base d'état CouchDB des peers | Un CouchDB joignable permet de modifier l'état du ledger sans passer par l'endorsement | Port CouchDB jamais publié hors du réseau Docker interne ; mot de passe généré aléatoirement à chaque création de réseau |
+| Miniature dérivée d'un lien (`og:image`) | Le serveur télécharge une URL choisie par l'utilisateur, puis par la page elle-même, et restitue le contenu en miniature : lecture de services internes (SSRF) | Seuls `http`/`https` vers des adresses publiques d'Internet ; contrôle à chaque connexion, résolution DNS et redirections comprises ; adresses du serveur lui-même exclues ; réponse retenue seulement si c'est une image matricielle (SVG exclu) |
 
 État de suivi de ces écarts : `specs/roadmap_dev.md` § Écarts Identité & Session et § Bugs bloquants.
 
