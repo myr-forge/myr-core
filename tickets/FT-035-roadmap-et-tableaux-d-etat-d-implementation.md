@@ -5,7 +5,7 @@ type: dette
 statut: ouvert
 severite: mineure
 detecte: 2026-10-02
-maj: 2026-10-02
+maj: 2026-11-06
 composants: [specs]
 uc: [UCA02]
 rm: []
@@ -26,7 +26,7 @@ tags:
 
 `specs/roadmap_dev.md` contient des constats dépassés :
 - bug « rôle initial » situé dans `domain/auth/service.go`, fichier inexistant (le défaut réel est FT-002) ;
-- « Chaincode : entity seulement (7 champs) » et « IPFS : adapter vide », alors que le chaincode (4 fonctions, 27 champs) et l'adapter IPFS existent ;
+- « Chaincode : entity seulement (7 champs) », alors que le chaincode (4 fonctions, 27 champs) existe ;
 - UCA02 décrit comme « connexion JWT » (il n'y a jamais eu de JWT) ;
 - fusion composant/module (ADR-11) : retrait de `moduleDTO`, de l'arbre `myr module` et dispatch de la soumission déjà réalisés, mais cases non cochées ;
 - items « Post-V1 » obsolètes : révocation JWT, rotation de `WALLET_ENCRYPT_KEY` des « wallets SQLite », migration SQLite → PostgreSQL (aucune base SQL par principe) ;
@@ -57,9 +57,10 @@ Rafraîchir la roadmap et la limiter au backlog fonctionnel ; renvoyer les faits
 
 - **Use cases** : [UCA02](../specs/2-Analyse/UCA-Compte_et_Acces/UCA02.md)
 - **Specs** : [roadmap_dev](../specs/roadmap_dev.md)
-- **Code** : `chaincode/model/contract.go` · `adapters/out/ipfs/storage.go` · `adapters/in/rest/server.go:25` · `adapters/in/rest/handlers_identity.go:391`
+- **Code** : `chaincode/model/contract.go` · `adapters/in/rest/server.go:25` · `adapters/in/rest/handlers_identity.go:391`
 - **Tickets liés** : [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md) · [FT-008 — Wallets non chiffrés au repos](FT-008-wallets-non-chiffres-au-repos.md) · [FT-024 — Chaincode myrcc absent du canal de production](FT-024-chaincode-myrcc-absent-du-canal-de-production.md) · [FT-031 — Les specs citent des commandes et routes qui n'existent pas](FT-031-les-specs-citent-des-commandes-et-routes.md)
 
 ## Historique
 
 - 2026-10-02 — Ticket créé
+- 2026-11-06 — Décision PO : le stockage des fichiers 3D est jugé prématuré, le projet se concentre sur la traçabilité (empreinte SHA-256 et emplacements externes, RM42). Ce stockage est retiré de `develop` et conservé sur une branche feature dédiée ; le constat est restreint au chaincode sur ce point.

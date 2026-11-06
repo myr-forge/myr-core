@@ -17,7 +17,6 @@ tags:
 | `auth` | 🔶 | ❌ | partiel | REST basique, bug rôle initial |
 | `payment` | 🔶 | ❌ | ❌ | Entité anémique, pas connectée |
 | Chaincode | ❌ | — | — | Entity seulement (7 champs vs 20+), fonctions manquantes |
-| IPFS | ❌ | — | — | Adapter vide |
 
 ---
 
@@ -168,16 +167,14 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 
 ---
 
-## Beta — "IPFS, recherche avancée, publication"
+## Beta — "Recherche avancée, publication"
 
-> **Objectif :** Les fichiers 3D sont stockés décentralisés. La recherche est complète. L'anti-plagiat structurel fonctionne. Les premières notions tarifaires sont disponibles.
+> **Objectif :** La traçabilité des fichiers 3D repose sur leur empreinte SHA-256 et leurs emplacements externes, sans copie conservée (RM42). La recherche est complète. L'anti-plagiat structurel fonctionne. Les premières notions tarifaires sont disponibles.
 
 > **Bilan Arrington ⚠️ — Specs partiellement prêtes.** 4 décisions PO bloquantes non résolues (algorithme SCM anti-plagiat RM01, modèle économique UCPI01/02, répartition commissions RM24, UCAM05 nouvel UUID vs mutation). UCPI11 non encore analysé (phase 2 manquante). Documents conception `Architecture_Atelier.md`, `Architecture_PI.md` et les diagrammes de séquence soumission asset/module à produire avant d'attaquer ces UC.
 
-### IPFS — Stockage 3D distribué
+### Fichiers 3D — traçabilité (RM42)
 
-- [ ] `adapters/out/ipfs/` — upload fichier 3D → CID, download par CID, pin local
-- [ ] Lier le CID au champ `Model3DIPFS` de l'asset on-chain (Fabric stocke le CID, pas le fichier)
 - [ ] UCCE01 flux alternatif — import depuis formats CAO non natifs (STL, STEP, OBJ) avec extraction automatique des métadonnées géométriques
 
 ### Anti-plagiat structurel *(RM01)*
@@ -259,7 +256,7 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 ### Tests
 
 - [ ] `domain/*/tests/` — tests unitaires pour tous les domaines (UC + RM)
-- [ ] `adapters/*/integration/` — tests d'intégration Fabric et IPFS
+- [ ] `adapters/*/integration/` — tests d'intégration Fabric
 - [ ] `tests/e2e/` — tests Playwright (auth, navigation)
 - [ ] `scripts/load/rest_load.js` — tests de charge k6
 - [ ] `scripts/ci/check-domain-imports.sh` — vérification imports interdits dans `domain/`
@@ -300,7 +297,7 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 | Phase | ENF à valider |
 |-------|--------------|
 | **Alpha** | ENF08 (HTTPS/TLS), ENF09 (JWT ≤24h + révocation), ENF11 (secrets absents des logs), ENF12 (contrôle rôle serveur), ENF13 (validation entrées), ENF22 (navigateurs), ENF23 (binaires Linux+Win), ENF24 (pas de logiciel client) |
-| **Beta** | ENF04 (SPA ≤3s), ENF15 (fichier CAO ≤100Mo via IPFS), ENF25 (AGPL — `check-licenses.sh`), ENF26 (compat licence auto), ENF27 (RGPD — audit champs perso), ENF28 (immuabilité), ENF29 (anti-plagiat obligatoire), ENF30 (draft préservé sur échec Fabric), ENF31 (validation avant soumission) |
+| **Beta** | ENF04 (SPA ≤3s), ENF15 (fichier CAO ≤100Mo, empreinte sans copie conservée), ENF25 (AGPL — `check-licenses.sh`), ENF26 (compat licence auto), ENF27 (RGPD — audit champs perso), ENF28 (immuabilité), ENF29 (anti-plagiat obligatoire), ENF30 (draft préservé sur échec Fabric), ENF31 (validation avant soumission) |
 | **V1** | ENF01 (REST ≤500ms — k6), ENF02 (Fabric ≤30s), ENF03 (BOM ≤5s/100 composants), ENF05 (dispo ≥99%), ENF06 (blockchain ≥99,9%), ENF07 (restart ≤60s), ENF10 (AES-256 wallets), ENF14 (10k assets), ENF16 (50 users simultanés), ENF18 (isolation domaine — `check-domain-imports.sh`), ENF19 (couverture ≥80%), ENF20 (deploy ≤10min), ENF21 (adapter multi-blockchain interchangeable) |
 | **Post-V1** | ENF17 (Redis multi-instances) |
 

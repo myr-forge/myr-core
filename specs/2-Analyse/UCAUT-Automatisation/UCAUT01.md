@@ -130,7 +130,7 @@ La livraison confirmée → distribution des commissions est une opération **at
 
 ### Flux erreur A — Fichier CAO inaccessible sur la blockchain
 
-1. Le hash du fichier CAO ne correspond à aucun fichier disponible (IPFS ou stockage distribué)
+1. Le fichier CAO n'est récupérable depuis aucun emplacement externe déclaré, ou le fichier récupéré ne correspond pas au hash enregistré (RM42)
 2. Le manufactureur est notifié : "Fichier CAO inaccessible — contacter le concepteur"
 3. La commande est suspendue (statut `suspended`) en attente de correction par le concepteur
 

@@ -43,7 +43,7 @@ Chaque Composant peut avoir une généalogie : il peut dériver d'un parent (via
 
 Cette fonctionnalité permet au Concepteur de naviguer dans la lignée d'un Composant pour trouver la version la plus adaptée (plus récente, plus légère, adaptée à une contrainte spécifique…). Elle permet aussi de tracer l'impact d'une modification : "quels Composants dépendent de celui-ci ?"
 
-**Note :** Le champ `Model3D.Versions []Version` porte l'historique des fichiers CAO d'un même Composant (SHA-256 + référence IPFS), distinct de la généalogie `ParentID` qui représente la relation entre Composants différents. Cet UC traite la **généalogie `ParentID`** (relations entre assets), pas les versions de fichier.
+**Note :** Le champ `Model3D.Versions []Version` porte l'historique des fichiers CAO d'un même Composant (empreinte SHA-256 de chaque version), distinct de la généalogie `ParentID` qui représente la relation entre Composants différents. Cet UC traite la **généalogie `ParentID`** (relations entre assets), pas les versions de fichier.
 
 **Statut d'implémentation :** `GetChildren(parentID)` est implémenté dans le service (service.go:~251). Aucun endpoint dédié à l'arbre de versions n'existe — à implémenter.
 
@@ -183,7 +183,7 @@ REST --> Client : 200 {root: {...}, tree: {...}}
 
 **Catégorie `decoupage` absente (E1) :** La catégorie `decoupage` (RM02) n'est pas définie dans `entity.go`. Les Composants créés via UCAM05 n'auront pas cette catégorie dans le code actuel. L'arbre doit prévoir ce cas.
 
-**Distinction `Versions []Version` vs arbre `ParentID` :** `Model3D.Versions` liste les fichiers CAO successifs d'un même asset (historique de fichier IPFS). L'arbre de cet UC est basé sur `ParentID` (généalogie inter-assets). Le contrat REST doit garder les deux structures clairement distinctes dans sa réponse.
+**Distinction `Versions []Version` vs arbre `ParentID` :** `Model3D.Versions` liste les fichiers CAO successifs d'un même asset (historique des empreintes de fichier). L'arbre de cet UC est basé sur `ParentID` (généalogie inter-assets). Le contrat REST doit garder les deux structures clairement distinctes dans sa réponse.
 
 **Commande CLI équivalente (alias limité) :** `myr model children <parentID>` (méthode `GetChildren`, déjà exposée par `ModelService`) couvre la branche descendante. La remontée ascendante n'a pas de méthode dédiée côté service — ni le REST ni le CLI n'offrent aujourd'hui de commande unique pour l'arbre complet ; elle se reconstitue par appels itérés à `myr model get <parentID>`, à l'image de ce que ferait le futur handler REST (voir Notes d'implémentation ci-dessus).
 

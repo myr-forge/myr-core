@@ -535,11 +535,10 @@ note bottom of FileStoragePort
   RM42/UCCL03) plutôt qu'à l'hébergement.
   Le port reste défini pour l'interchangeabilité
   technologique : adapters/out/localstorage/
-  (LocalStorage) et adapters/out/ipfs/ (IPFSStorage)
-  l'implémentent et restent disponibles pour un
-  câblage explicite futur, mais aucun n'est
-  instancié dans cmd/api/main.go ni cmd/cli/main.go
-  aujourd'hui.
+  (LocalStorage) l'implémente et reste disponible
+  pour un câblage explicite futur, mais n'est
+  instancié ni dans cmd/api/main.go ni dans
+  cmd/cli/main.go.
 end note
 
 note bottom of ConnectionStore

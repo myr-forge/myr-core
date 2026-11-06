@@ -170,7 +170,6 @@ rectangle "Dépôt GUI\n(externe, hors périmètre myr)" as GUI
 
 rectangle "Infrastructure" {
     rectangle "Blockchain\nHyperLedger Fabric" as BC
-    rectangle "Dépôt distribué 3D\n(IPFS)" as IPFS
     rectangle "Base locale\n(SQLite / JSON)" as DB
 }
 
@@ -185,7 +184,6 @@ GUI ..> REST : appels HTTP
 ADM --> CLI : terminal
 
 App --> BC : adapters/out/fabric/
-App --> IPFS : adapters/out/ipfs/
 App --> DB : adapters/out/sqlite/\nadapters/out/localstorage/
 
 CAO ..> REST : UCAUT03
@@ -437,9 +435,9 @@ Ces contraintes s'appliquent à **tous** les use cases. Chaque UC doit les respe
 
 ### 6.1 Architecture hexagonale
 
-Le domaine (`domain/`) ne connaît que des interfaces Go. Aucune dépendance à Fabric, Redis, SQLite ou IPFS dans le domaine. Cette règle est non négociable (ENF18) et vérifiée par script CI (`scripts/ci/check-domain-imports.sh`).
+Le domaine (`domain/`) ne connaît que des interfaces Go. Aucune dépendance à Fabric, Redis ou SQLite dans le domaine. Cette règle est non négociable (ENF18) et vérifiée par script CI (`scripts/ci/check-domain-imports.sh`).
 
-Flux obligatoire : `adapter in (REST/CLI)` → `service domaine` → `adapter out (Fabric/IPFS/SQLite)`.
+Flux obligatoire : `adapter in (REST/CLI)` → `service domaine` → `adapter out (Fabric/SQLite)`.
 
 ### 6.2 Blockchain et immuabilité
 

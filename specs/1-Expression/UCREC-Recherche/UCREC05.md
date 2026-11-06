@@ -57,9 +57,9 @@ Exporter une "Bill Of Material" (liste des matériaux) d'un Module, listant tous
 2. La BOM est générée avec tous les composants et leurs quantités
 3. Le fichier BOM est retourné
 
-### Flux alternatif — Composants avec données IPFS indisponibles
+### Flux alternatif — Composants sans emplacement externe accessible
 
-1. La BOM contient des composants dont les fichiers IPFS ne sont pas accessibles (nœud hors ligne ou données non pinnées)
+1. La BOM contient des composants dont aucun emplacement externe déclaré n'est accessible (RM42)
 2. La BOM est générée avec un placeholder pour chaque composant concerné (`fichier: "indisponible"`)
 3. Un avertissement est retourné : "X composant(s) sans fichier accessible — BOM partielle"
 4. L'export est proposé avec les données disponibles
@@ -83,7 +83,7 @@ title Exporter BOM Module
 start
 :Transmettre le format d'export (myr module bom export);
 :Générer la BOM avec tous les composants et leurs quantités;
-if (Données IPFS partiellement indisponibles?) then (oui)
+if (Emplacements externes partiellement inaccessibles?) then (oui)
   :Générer la BOM avec placeholders pour les composants inaccessibles;
   :Retourner "BOM partielle — X composant(s) sans fichier accessible";
   stop

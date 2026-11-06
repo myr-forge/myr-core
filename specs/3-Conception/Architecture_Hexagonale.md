@@ -13,7 +13,7 @@ tags:
 
 ## 1. Principes
 
-L'architecture hexagonale (Ports & Adapters) garantit que la logique métier (`domain/`) est indépendante de toute technologie d'infrastructure. Le domaine ne connaît que des **interfaces Go** — jamais de références à Fabric, Redis ou IPFS.
+L'architecture hexagonale (Ports & Adapters) garantit que la logique métier (`domain/`) est indépendante de toute technologie d'infrastructure. Le domaine ne connaît que des **interfaces Go** — jamais de références à Fabric ou Redis.
 
 **Règle de dépendance :** les dépendances pointent toujours **vers l'intérieur** (vers le domaine). Le domaine ne dépend de rien d'externe.
 
@@ -45,7 +45,7 @@ Cela vaut pour toutes les couches d'infrastructure :
 | Port sortant | Implémentation(s) | Ce que l'admin choisit |
 |---|---|---|
 | `BlockchainPort` | Fabric, JSON local, *(futur : Ethereum, Substrate…)* | Backend blockchain du réseau |
-| `FileStoragePort` | IPFS, stockage local, *(futur : S3, Filecoin…)* | Stockage des fichiers 3D |
+| `FileStoragePort` | Stockage local | Aucun choix : Myr ne conserve aucune copie des fichiers 3D, seule leur empreinte SHA-256 est retenue (RM42) |
 | `IdentityPort` / `CAPort` | Fabric CA (certificats + fichiers wallet PEM locaux, non chiffrés — ADR-03) | Identité cryptographique — pas de base de données, pas de secret partagé |
 | `SessionService` | Fichier local / JSON, Redis | Sessions REST (mono vs multi-instances) |
 
@@ -54,13 +54,12 @@ Cela vaut pour toutes les couches d'infrastructure :
 ```
 // cmd/api/main.go — seul endroit qui connaît les implémentations concrètes
 blockchain := selectBlockchain(activeProfile)   // lit BlockchainType du profil réseau
-fileStore  := selectFileStorage(env)            // lit FILE_STORAGE_TYPE ou IPFS_URL
-model.NewService(blockchain, fileStore, ...)
+model.NewService(blockchain, nil, ...)          // aucun FileStoragePort : empreinte seule (RM42)
 ```
 
 **Conséquence pratique :** ajouter un nouveau backend = créer `adapters/out/<technologie>/` qui implémente les ports concernés + enregistrer le cas dans `cmd/`. Aucun fichier dans `domain/`, `adapters/in/` ni dans les autres adapters `out` n'a besoin de changer.
 
-Le CLI admin expose la sélection du backend blockchain via `myr network add --blockchain <type>` (cf. [DC_CLI_Admin.md](DC_CLI_Admin.md)). Les autres couches sont configurables via variables d'environnement (`IPFS_URL`, `REDIS_URL`, etc.).
+Le CLI admin expose la sélection du backend blockchain via `myr network add --blockchain <type>` (cf. [DC_CLI_Admin.md](DC_CLI_Admin.md)). Les autres couches sont configurables via variables d'environnement (`REDIS_URL`, etc.).
 
 ---
 
@@ -134,7 +133,6 @@ package "Domaine métier\n(domain/)" #fff9c4 {
 package "Adapters sortants" #f0f4e8 {
   [FabricBlockchain\nadapters/out/fabric/\nblockchain.go] as AdFabric
   [JSONBlockchain (fallback)\nadapters/out/localstorage/\njson_blockchain.go] as AdJSON
-  [IPFSStorage\nadapters/out/ipfs/] as AdIPFS
   [LocalStore\nadapters/out/localstorage/\nrole_store.go, request_store.go,\nsession_store.go, network_store.go...] as AdLocal
   [Fetcher\nadapters/out/webimage/] as AdWebImg
 }
@@ -142,7 +140,6 @@ package "Adapters sortants" #f0f4e8 {
 ' ── Infrastructure ───────────────────────────────────
 package "Infrastructure" {
   database "HyperLedger Fabric\n(Ledger)" as HLF
-  database "IPFS\n(Fichiers 3D)" as IPFSdb
   database "JSON files\ndata/, ~/.Myr/" as JSONdb
   database "Fichiers MSP\n~/.Myr/wallets/ (non chiffrés)" as MSPFiles
   cloud "Pages web tierces\n(og:image)" as WebPages
@@ -186,7 +183,7 @@ SvcSession --> PSess
 
 PBC <|.. AdFabric
 PBC <|.. AdJSON
-PFS <|.. AdIPFS
+PFS <|.. AdLocal
 PConn <|.. AdLocal
 PIface <|.. AdLocal
 PThumb <|.. AdLocal
@@ -199,7 +196,6 @@ PCA <|.. AdFabric
 PPay <|.. AdFabric
 
 AdFabric --> HLF
-AdIPFS --> IPFSdb
 AdJSON --> JSONdb
 AdLocal --> JSONdb
 AdWebImg --> WebPages
@@ -257,8 +253,7 @@ done
 |---------|---------|-----------|--------------|
 | `FabricBlockchain` | `adapters/out/fabric/` | `BlockchainPort`, `CAPort`, `PaymentPort` | HyperLedger Fabric Gateway SDK v2 |
 | `JSONBlockchain` | `adapters/out/localstorage/` | `BlockchainPort` | JSON files (fallback sans Fabric) |
-| `IPFSStorage` | `adapters/out/ipfs/` | `FileStoragePort` | IPFS (stockage fichiers 3D) |
-| `LocalStore` | `adapters/out/localstorage/` | `ConnectionStore`, `InterfaceStore`, `ThumbnailStore`, `NetworkStore`, `RequestStore`, `role.Repo`, `session.Store` | JSON files (`data/`) + fichiers MSP non chiffrés (wallets, `~/.Myr/wallets/`) |
+| `LocalStore` | `adapters/out/localstorage/` | `FileStoragePort`, `ConnectionStore`, `InterfaceStore`, `ThumbnailStore`, `NetworkStore`, `RequestStore`, `role.Repo`, `session.Store` | JSON files (`data/`) + fichiers MSP non chiffrés (wallets, `~/.Myr/wallets/`) |
 | `Fetcher` | `adapters/out/webimage/` | `OGImageFetcher` | Requêtes HTTP sortantes vers la page web du premier lien externe d'un asset (`Model3D.Links`) — dérive sa miniature depuis la balise `og:image` |
 
 > **`AssetInterface` (ADR-02) :** `InterfaceStore` est un **brouillon** — l'état de travail d'une interface tant que l'asset qui la porte n'est pas soumis. À la soumission (création d'un composant ou `SubmitModule`), les interfaces du brouillon sont embarquées dans `Model3D.Interfaces` et écrites une seule fois via `BlockchainPort` (`FabricBlockchain` ou son fallback `JSONBlockchain`). `InterfaceStore` n'est donc pas une persistance parallèle définitive : c'est la source de vérité avant soumission, la blockchain devenant la source de vérité après.
@@ -313,7 +308,7 @@ BlockchainPort <|.. JSONBlockchain : dev/test fallback
 ```
 main.go
 ├── Crée FabricBlockchain(networkProfile) — laisse le port nil si Fabric est indisponible (aucun repli automatique)
-├── Crée IPFSStorage() ou LocalStorage()
+├── Aucun FileStoragePort : seule l'empreinte SHA-256 des fichiers est retenue (RM42)
 ├── Crée LocalStore(dataDir) — connexions, interfaces (brouillon), rôles, requêtes de compte...
 ├── Injecte dans model.NewService(blockchain, storage).WithConnStore(...).WithIfaceStore(...) — les interfaces ne rejoignent `blockchain` (Model3D.Interfaces) qu'à la soumission de l'asset
 ├── Crée identity.NewService(walletDir, caPort).WithRequestStore(requestStore)

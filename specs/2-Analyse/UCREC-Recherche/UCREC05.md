@@ -49,7 +49,7 @@ La **BOM** (Bill of Materials — Nomenclature) liste tous les Composants consti
 
 La BOM est **récursive** : un Module peut contenir des sous-Modules, qui contiennent eux-mêmes des Composants. La BOM finale doit descendre jusqu'aux Composants feuilles (sans sous-modules).
 
-La BOM inclut aussi les fichiers 3D des Composants (référence IPFS via `Model3D.Versions`). Si un fichier IPFS est indisponible (nœud hors ligne), la BOM reste exportable avec un placeholder.
+La BOM inclut aussi, pour chaque Composant, l'empreinte SHA-256 de son fichier 3D (`Model3D.Versions`) et ses emplacements externes déclarés — Myr ne conserve aucune copie des fichiers (RM42). Si aucun emplacement externe d'un Composant n'est accessible, la BOM reste exportable avec un placeholder.
 
 **ENF03 :** La génération de la BOM doit se terminer en **≤ 5 secondes** pour 100 composants.
 
@@ -71,8 +71,8 @@ La BOM inclut aussi les fichiers 3D des Composants (référence IPFS via `Model3
 2. Handler : résout récursivement la BOM via `WorkspaceInstances` :
    - Pour chaque instance : si Composant → ajoute à la BOM (quantité incrémentée si même AssetID)
    - Si sous-Module → récursion dans ses `WorkspaceInstances`
-3. Pour chaque Composant feuille : récupère le nom, catégorie, hash, référence IPFS (`Versions[last].Hash`)
-4. La BOM est générée avec les colonnes : quantité, référence (ID), nom, catégorie, hash SHA-256, URL IPFS
+3. Pour chaque Composant feuille : récupère le nom, la catégorie, l'empreinte SHA-256 (`Versions[last].Hash`) et les emplacements externes déclarés (RM42)
+4. La BOM est générée avec les colonnes : quantité, référence (ID), nom, catégorie, hash SHA-256, emplacements externes
 5. Le fichier est retourné avec l'en-tête `Content-Disposition: attachment`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
@@ -80,11 +80,11 @@ La BOM inclut aussi les fichiers 3D des Composants (référence IPFS via `Model3
 > [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
-### Flux alternatif — Composants avec fichiers IPFS indisponibles
+### Flux alternatif — Composants sans emplacement externe accessible
 
-1. Pour un Composant, `Versions[last].Hash` référence un fichier non accessible sur le réseau IPFS
-2. Le handler tente de vérifier l'accessibilité (optionnel selon config) — timeout court (1 s)
-3. Le Composant est inclus dans la BOM avec `fichier: "indisponible"` à la place de l'URL IPFS
+1. Pour un Composant, aucun des emplacements externes déclarés ne répond (RM42)
+2. Le handler vérifie l'accessibilité de chaque emplacement (optionnel selon config) — timeout court (1 s)
+3. Le Composant est inclus dans la BOM avec `fichier: "indisponible"` à la place de ses emplacements
 4. Avertissement dans la réponse : "X composant(s) sans fichier accessible — BOM partielle"
 5. L'export est proposé avec les données disponibles
 
@@ -97,7 +97,7 @@ La BOM inclut aussi les fichiers 3D des Composants (référence IPFS via `Model3
 
 1. Un Composant est instancié plusieurs fois dans le Module (RM15 — instances indépendantes)
 2. La BOM agrège les instances : quantité = nombre d'instances du même `AssetID`
-3. Les informations du Composant (nom, hash, URL IPFS) sont dédupliquées
+3. Les informations du Composant (nom, hash, emplacements externes) sont dédupliquées
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!warning] Tests — aucun test ne couvre cette exigence
@@ -129,7 +129,7 @@ La BOM inclut aussi les fichiers 3D des Composants (référence IPFS via `Model3
 
 - Le fichier BOM est généré et retourné dans la réponse
 - Aucune modification de la blockchain
-- Les composants sans fichier IPFS sont signalés mais n'empêchent pas l'export
+- Les composants sans emplacement externe accessible sont signalés mais n'empêchent pas l'export
 
 ## Diagramme de séquence
 
@@ -139,7 +139,7 @@ participant "Client\n(CLI ou API REST)" as Browser
 participant "REST Handler\n(adapters/in/rest/)\n[cible — à implémenter]" as REST
 participant "Model Service\n(domain/model/)" as Service
 database "Fabric\n(adapters/out/fabric/)" as Fabric
-database "IPFS\n(adapters/out/ipfs/)" as IPFS
+collections "Emplacements externes\n(sites tiers — RM42)" as Ext
 
 Browser -> REST : GET /api/modules/:id/bom?format=csv
 note right of REST : Endpoint non implémenté\narchitecture cible
@@ -157,7 +157,7 @@ loop Pour chaque WorkspaceInstance
     Fabric --> Service : *Model3D
 
     alt Composant feuille (IsModule()==false)
-        REST -> REST : Ajouter à bomLines :\n{qty, id, name, category, hash, ipfsURL}
+        REST -> REST : Ajouter à bomLines :\n{qty, id, name, category, hash, locations}
     else Sous-Module (IsModule()==true)
         REST -> REST : Récursion dans WorkspaceInstances
     end
@@ -165,10 +165,10 @@ end
 
 REST -> REST : Agréger par AssetID :\nqty = count d'instances
 
-opt Vérification IPFS (optionnel)
-    loop Pour chaque composant avec Version.Hash
-        REST -> IPFS : Vérifier accessibilité (timeout 1s)
-        alt Inaccessible
+opt Vérification des emplacements externes (optionnel — RM42)
+    loop Pour chaque composant
+        REST -> Ext : Vérifier l'accessibilité de chaque emplacement (timeout 1s)
+        alt Aucun emplacement accessible
             REST -> REST : Marquer fichier="indisponible"
         end
     end
@@ -211,11 +211,11 @@ if strings.HasSuffix(rest, "/bom") {
 **Récursion avec cache :** Pour respecter ENF03 (≤ 5 s / 100 composants), utiliser un cache `map[string]*Model3D` pour éviter les appels Fabric redondants. Le même pattern que `getModuleInterfacesInto()` (service.go:~640) peut être reproduit.
 
 **Formats d'export :**
-- **CSV** : simple, recommandé en priorité (colonnes : qty, id, name, category, hash, ipfs_url, file_status)
+- **CSV** : simple, recommandé en priorité (colonnes : qty, id, name, category, hash, locations, file_status)
 - **XML** : structure hiérarchique (arbre de sous-modules possible)
 - **PDF** : nécessite une bibliothèque Go de génération PDF (ex: `github.com/jung-kurt/gofpdf`) — priorité basse
 
-**Champ `Versions` :** La référence IPFS du fichier CAO est dans `Model3D.Versions[len-1].Hash` (dernière version du fichier). Si `Versions` est vide (Composant sans fichier), la colonne IPFS est vide.
+**Champ `Versions` :** L'empreinte SHA-256 du fichier CAO est dans `Model3D.Versions[len-1].Hash` (dernière version du fichier). Si `Versions` est vide (Composant sans fichier), la colonne hash est vide.
 
 **ENF03 — Stratégie de performance :** Paralléliser les appels `GetModelRecord` avec des goroutines + `sync.WaitGroup` pour les instances indépendantes au même niveau de l'arbre. Un cache par `assetID` évite les appels redondants pour les instances multiples (RM15).
 

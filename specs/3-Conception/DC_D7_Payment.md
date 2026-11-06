@@ -274,7 +274,7 @@ interface PaymentPort {
 
 ### Port sortant — ManufacturingPort (à créer, canal `external_adapter` — ADR-09)
 
-Un adapter par partenaire industriel externe (`adapters/out/manufacturing/<partenaire>/`), chacun implémentant ce même port — pattern identique à `adapters/out/fabric`/`ipfs` (un adapter par technologie/fournisseur, domaine et CLI inchangés).
+Un adapter par partenaire industriel externe (`adapters/out/manufacturing/<partenaire>/`), chacun implémentant ce même port — pattern identique à `adapters/out/fabric` (un adapter par technologie/fournisseur, domaine et CLI inchangés).
 
 ```plantuml
 @startuml

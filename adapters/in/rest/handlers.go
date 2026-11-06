@@ -1046,7 +1046,7 @@ func (h *Handler) saveComponentThumbnail(w http.ResponseWriter, r *http.Request,
 // verifyAsset vérifie l'intégrité d'un asset : cohérence blockchain des
 // métadonnées, puis — si l'asset porte un fichier ressource — présence et
 // intégrité de ce fichier dans le stockage actif, quel que soit l'adapter
-// out/ (local, IPFS...) — voir ModelService.Verify, RM38.
+// out/ — voir ModelService.Verify, RM38.
 //
 //	@Summary		Vérifier l'intégrité d'un asset et la localisation de son fichier source
 //	@Description	Vérifie la cohérence blockchain des métadonnées puis, si l'asset porte un fichier ressource, sa présence et son intégrité dans le stockage actif. Répond toujours 200 avec un statut explicite ("ok", "reason", "location") — un résultat négatif est un résultat métier, pas une erreur de transport.

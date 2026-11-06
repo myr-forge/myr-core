@@ -36,7 +36,7 @@ rectangle "Application MYR" {
     usecase "Vérifier le hash (anti-doublon)" as UC2
     usecase "Vérifier compatibilité de licence" as UC3
     usecase "Enregistrer sur la blockchain" as UC4
-    usecase "Stocker le fichier numérique (IPFS)" as UC5
+    usecase "Enregistrer l'empreinte du fichier numérique" as UC5
 }
 
 C --> UC1
@@ -76,7 +76,7 @@ L'entité produite est identique à un composant physique : un `Model3D` avec `H
 5. Le handler appelle `service.AddFull(AddRequest{...})`.
 6. Le service calcule le SHA-256 du fichier.
 7. **[Cible RM01]** Le service interroge Fabric et compare le hash avec les assets existants.
-8. Si aucun doublon : le service téléverse le fichier vers IPFS.
+8. Si aucun doublon : le service ne retient que l'empreinte SHA-256 — aucune copie du fichier n'est conservée (RM42).
 9. Le service construit le `Model3D` et soumet `StoreModel` sur Fabric.
 10. L'API retourne `201 Created` avec le `Model3D` JSON.
 
@@ -140,7 +140,7 @@ L'entité produite est identique à un composant physique : un `Model3D` avec `H
 
 - Le `Model3D` est inscrit sur la blockchain Fabric (immuable — RM07).
 - Un UUID unique est attribué au composant (généré par le service — RM04).
-- Le fichier numérique est stocké dans IPFS avec une référence dans `Versions[0].Hash`.
+- L'empreinte SHA-256 du fichier numérique est enregistrée dans `Hash` et `Versions[0].Hash` ; aucune copie du fichier n'est conservée (RM42).
 - Le droit d'auteur est enregistré via `OwnerID`.
 
 ## Diagramme de séquence
@@ -150,7 +150,6 @@ L'entité produite est identique à un composant physique : un `Model3D` avec `H
 participant "Client\n(CLI ou API REST)" as Browser
 participant "REST Handler\n(adapters/in/rest/)" as REST
 participant "Model Service\n(domain/model/)" as ModelSvc
-database "IPFS\n(adapters/out/ipfs/)" as IPFS
 database "Fabric\n(adapters/out/fabric/)" as Fabric
 
 Browser -> REST : POST /api/components\n(multipart: name, file, category=base, tags=software, license_id, ...)
@@ -181,9 +180,7 @@ else Champs valides
         ModelSvc --> REST : ErrHashDuplicate
         REST --> Browser : 409 Doublon détecté
     else Pas de doublon
-        ModelSvc -> IPFS : Upload(FilePath)
-        IPFS --> ModelSvc : storageRef
-        ModelSvc -> ModelSvc : buildModel3D(UUID, hash, storageRef)
+        ModelSvc -> ModelSvc : buildModel3D(UUID, hash)
         ModelSvc -> Fabric : StoreModelRecord(model3D)
 
         alt Échec Fabric

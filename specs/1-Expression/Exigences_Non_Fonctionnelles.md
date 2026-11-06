@@ -163,7 +163,7 @@ Ce document structure les contraintes non-fonctionnelles du projet Myr selon les
 #### ENF15 — Taille maximale d'un fichier CAO
 
 - **Catégorie** : Scalabilité
-- **Critère d'acceptance** : Jusqu'à 100 Mo par fichier asset (stocké via le dépôt distribué 3D)
+- **Critère d'acceptance** : Jusqu'à 100 Mo par fichier asset, dont l'empreinte SHA-256 est calculée sans qu'aucune copie du fichier ne soit conservée (RM42)
 - **Priorité** : MOYENNE
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
@@ -198,7 +198,7 @@ Ce document structure les contraintes non-fonctionnelles du projet Myr selon les
 #### ENF18 — Isolation du domaine métier
 
 - **Catégorie** : Maintenabilité
-- **Critère d'acceptance** : Le domaine (`domain/`) ne contient aucune dépendance directe à Fabric, Redis, SQLite ou IPFS — vérifié par revue de code
+- **Critère d'acceptance** : Le domaine (`domain/`) ne contient aucune dépendance directe à Fabric, Redis ou SQLite — vérifié par revue de code
 - **Priorité** : HAUTE
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
@@ -336,7 +336,7 @@ Ce document structure les contraintes non-fonctionnelles du projet Myr selon les
 #### ENF32 — Traçabilité et intégrité du fichier source
 
 - **Catégorie** : Fiabilité
-- **Critère d'acceptance** : Pour tout asset possédant un fichier ressource, l'emplacement de stockage effectif et la correspondance de son hash sont vérifiables à la demande, quelle que soit la technologie de stockage sous-jacente (adapter `out/` local, IPFS, ou autre) ; toute divergence (fichier introuvable, hash différent) est signalée explicitement, jamais masquée silencieusement
+- **Critère d'acceptance** : Pour tout asset possédant un fichier ressource, l'emplacement de stockage effectif et la correspondance de son hash sont vérifiables à la demande, quelle que soit la technologie de stockage sous-jacente (adapter `out/` local ou autre) ; toute divergence (fichier introuvable, hash différent) est signalée explicitement, jamais masquée silencieusement
 - **Priorité** : HAUTE
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->

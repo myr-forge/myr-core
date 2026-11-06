@@ -101,15 +101,15 @@ ResolveBOM(moduleID, channelID string) (*BOM, error)
 type BOM struct {
     ModuleID string
     Lines    []BOMLine
-    Warnings []string // ex: "fichier IPFS indisponible pour <assetID>"
+    Warnings []string // ex: "aucun emplacement externe accessible pour <assetID>"
 }
 type BOMLine struct {
     AssetID   string
     Name      string
     Category  string
     Quantity  int    // agrégation des instances multiples — RM15
-    Hash      string // Model3D.Versions[last].Hash
-    IPFSURL   string // vide si fichier indisponible
+    Hash      string   // Model3D.Versions[last].Hash — empreinte SHA-256
+    Locations []string // emplacements externes déclarés (RM42) — vide si aucun accessible
 }
 ```
 

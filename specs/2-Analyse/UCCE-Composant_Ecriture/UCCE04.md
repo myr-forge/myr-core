@@ -73,7 +73,7 @@ Ce use case crée un nouvel asset `Model3D` avec `ParentID` renseigné — il ne
 3. `service.AddFull()` vérifie la compatibilité de licence avec le parent (RM03).
 4. Le service calcule le SHA-256 de la version améliorée.
 5. Le service compare les interfaces du fichier amélioré avec celles du parent : aucune nouvelle interface détectée → catégorie `amelioration` confirmée.
-6. Le service téléverse le fichier vers IPFS.
+6. Le service ne retient que l'empreinte SHA-256 — aucune copie du fichier n'est conservée (RM42).
 7. Le service construit le `Model3D` (`amelioration`, `ParentID`) et soumet `StoreModel` sur Fabric.
 8. L'API retourne `201 Created` avec le nouvel asset.
 
@@ -157,7 +157,6 @@ Ce use case crée un nouvel asset `Model3D` avec `ParentID` renseigné — il ne
 participant "Client\n(CLI ou API REST)" as Browser
 participant "REST Handler\n(adapters/in/rest/)" as REST
 participant "Model Service\n(domain/model/)" as ModelSvc
-database "IPFS\n(adapters/out/ipfs/)" as IPFS
 database "Fabric\n(adapters/out/fabric/)" as Fabric
 
 Browser -> REST : POST /api/components\n(multipart: category=amelioration, parent_id=<uuid>, file, license_id, ...)
@@ -192,9 +191,7 @@ else Champs valides
             REST -> ModelSvc : AddFull(Category=derivation, ...)
         end
 
-        ModelSvc -> IPFS : Upload(FilePath)
-        IPFS --> ModelSvc : storageRef
-        ModelSvc -> ModelSvc : buildModel3D(Category, ParentID, hash, storageRef)
+        ModelSvc -> ModelSvc : buildModel3D(Category, ParentID, hash)
         ModelSvc -> Fabric : StoreModelRecord(model3D)
 
         alt Échec Fabric

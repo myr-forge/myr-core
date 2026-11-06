@@ -25,7 +25,7 @@ type FileStoragePort interface {
 	// (Model3D.Hash, calculé par le domaine à l'upload). location est
 	// l'emplacement effectif du fichier — vide uniquement si le fichier est
 	// introuvable, renseigné même en cas de divergence de hash. Chaque adapter
-	// (local, IPFS...) implémente sa propre stratégie de résolution — voir RM38.
+	// implémente sa propre stratégie de résolution — voir RM38.
 	Verify(ref, expectedHash string) (location string, ok bool, err error)
 }
 

@@ -76,7 +76,7 @@ La particularité de l'extension est que les **interfaces du composant de base s
 4. Le service récupère les interfaces du composant de base via `service.ListInterfacesForAsset(parentID)`.
 5. Le service copie les interfaces du parent comme interfaces de référence sur le nouvel asset.
 6. Le service calcule le SHA-256 du fichier d'extension.
-7. Le service téléverse le fichier vers IPFS.
+7. Le service ne retient que l'empreinte SHA-256 — aucune copie du fichier n'est conservée (RM42).
 8. Le service construit le `Model3D` (`extension`, `ParentID`) et soumet `StoreModel` sur Fabric.
 9. Les interfaces copiées et les interfaces complémentaires sont sauvegardées via `service.AddInterface()` pour chaque interface.
 10. L'API retourne `201 Created` avec le nouvel asset.
@@ -162,7 +162,6 @@ La particularité de l'extension est que les **interfaces du composant de base s
 participant "Client\n(CLI ou API REST)" as Browser
 participant "REST Handler\n(adapters/in/rest/)" as REST
 participant "Model Service\n(domain/model/)" as ModelSvc
-database "IPFS\n(adapters/out/ipfs/)" as IPFS
 database "Fabric\n(adapters/out/fabric/)" as Fabric
 database "LocalStorage\n(adapters/out/localstorage/)" as Local
 
@@ -192,10 +191,8 @@ else Champs valides
         Local --> ModelSvc : parentInterfaces[]
 
         ModelSvc -> ModelSvc : hashFile(FilePath)
-        ModelSvc -> IPFS : Upload(FilePath)
-        IPFS --> ModelSvc : storageRef
 
-        ModelSvc -> ModelSvc : buildModel3D(extension, ParentID, hash, storageRef)
+        ModelSvc -> ModelSvc : buildModel3D(extension, ParentID, hash)
         ModelSvc -> Fabric : StoreModelRecord(model3D)
 
         alt Échec Fabric

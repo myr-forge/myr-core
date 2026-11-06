@@ -174,7 +174,7 @@ Le plugin détecte les interfaces physiques et les métadonnées du modèle, pui
 - Le composant est enregistré sur la blockchain MYR avec un UUID unique
 - Les interfaces physiques détectées ou saisies manuellement sont enregistrées
 - Le composant est consultable via l'API MYR (`GET /api/components/:id`) par tout client autorisé
-- Le fichier CAO est stocké dans le dépôt distribué (IPFS) et référencé par son hash sur la blockchain
+- Le fichier CAO est référencé par son empreinte SHA-256 sur la blockchain ; Myr n'en conserve aucune copie (RM42)
 
 ## Diagramme de séquence
 
@@ -183,7 +183,6 @@ Le plugin détecte les interfaces physiques et les métadonnées du modèle, pui
 participant "Logiciel CAO\n+ Plugin MYR" as Plugin
 participant "REST Handler\n(adapters/in/rest/)" as REST
 participant "Model Service\n(domain/model/)" as ModelSvc
-database "IPFS\n(adapters/out/ipfs/)" as IPFS
 database "Fabric\n(adapters/out/fabric/)" as Fabric
 database "Smart Contract\n(chaincode/)" as CC
 
@@ -193,10 +192,7 @@ Plugin -> REST : POST /api/components\n{name, hash, interfaces[], license, categ
 REST -> REST : Vérifier session + permission write (RM22)
 REST -> REST : Valider données (catégorie, licence, ParentID si requis — RM05)
 
-REST -> IPFS : StoreFile(caoFile)
-IPFS --> REST : caoFileRef (CID)
-
-REST -> ModelSvc : AddFull(componentData + caoFileRef)
+REST -> ModelSvc : AddFull(componentData + caoFile)
 ModelSvc -> ModelSvc : Calculer hash SHA-256 (RM01)
 ModelSvc -> Fabric : QuerySimilarAssets(hash, category=base)
 Fabric --> ModelSvc : assets similaires ?
@@ -206,7 +202,7 @@ alt Hash identique (même composant)
 else Similarité SCM > 50%
     REST --> Plugin : 409 {similarAssetID, similarity: "0.72", message: "Plagiat potentiel"}
 else Aucun plagiat
-    REST -> Fabric : SubmitAsset{UUID, name, hash, caoRef, OwnerID, interfaces[], license}
+    REST -> Fabric : SubmitAsset{UUID, name, hash, OwnerID, interfaces[], license}
     Fabric -> CC : CreateAsset(...)
     CC --> Fabric : tx confirmée
     Fabric --> REST : {UUID, blockHeight}
@@ -232,8 +228,8 @@ end
 | ENF | Description |
 |-----|-------------|
 | ENF12 | Authentification par token de session vérifiée côté serveur |
-| ENF15 | Stockage IPFS du fichier CAO avec CID retourné |
-| ENF30 | En cas d'échec blockchain, le fichier IPFS est conservé (reprise possible) |
+| ENF15 | Fichier CAO jusqu'à 100 Mo, empreinte SHA-256 calculée sans copie conservée (RM42) |
+| ENF30 | En cas d'échec blockchain, le brouillon local est conservé (reprise possible) |
 
 ## Notes d'implémentation
 

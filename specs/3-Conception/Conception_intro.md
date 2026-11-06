@@ -28,9 +28,9 @@ Ce document **ne remplace pas** les specs d'expression ou d'analyse — il les c
 
 ### 2.1 Architecture hexagonale stricte
 
-Le domaine (`domain/`) contient uniquement la logique métier et des interfaces Go. Aucune dépendance à des technologies concrètes (Fabric, Redis, SQLite, IPFS) ne peut apparaître dans le domaine. Cette règle est vérifiée par script CI (`scripts/ci/check-domain-imports.sh`) et constitue une contrainte d'architecture non négociable (ENF18).
+Le domaine (`domain/`) contient uniquement la logique métier et des interfaces Go. Aucune dépendance à des technologies concrètes (Fabric, Redis, SQLite) ne peut apparaître dans le domaine. Cette règle est vérifiée par script CI (`scripts/ci/check-domain-imports.sh`) et constitue une contrainte d'architecture non négociable (ENF18).
 
-Flux obligatoire : `adapter in (REST/CLI)` → `service domaine` → `adapter out (Fabric/IPFS/JSON)`.
+Flux obligatoire : `adapter in (REST/CLI)` → `service domaine` → `adapter out (Fabric/JSON)`.
 
 ### 2.2 Immuabilité blockchain
 
@@ -45,7 +45,7 @@ Trois niveaux de persistance coexistent avec des responsabilités distinctes :
 | Blockchain | HyperLedger Fabric | Assets soumis, interfaces physiques et virtuelles au moment de la soumission (`AssetInterface`, embarquées dans `Model3D.Interfaces` — ADR-02), ModuleVersions, transactions PI | Immuable |
 | Persistance locale (wallets) | Fichiers MSP (PEM), **non chiffrés au repos** ⚠️ (voir ADR-03) | Certificats X.509 + clés privées Fabric CA | Mutable |
 | Persistance locale légère (brouillon) | JSON files | Connexions entre instances (liaisons, ADR-05), interfaces physiques en cours d'édition avant soumission (ADR-02), profils réseau, rôles RBAC | Mutable |
-| Stockage fichiers | IPFS | Fichiers CAO (modèles 3D) | Immuable (CID) |
+| Fichiers CAO (modèles 3D) | Aucun — Myr n'en conserve pas de copie (RM42) | Empreinte SHA-256 inscrite sur la blockchain ; localisation par les emplacements externes déclarés | — |
 | Éphémère | Mémoire / Redis optionnel | Sessions actives | Volatile |
 
 ### 2.4 Licence AGPL 3.0
@@ -91,7 +91,6 @@ package "Domaine métier" {
 package "Adapters OUT" {
   [adapters/out/fabric\nGateway SDK v2] as Fabric
   [adapters/out/localstorage\nWallets, Rôles, Connexions, Profils JSON] as LocalStorage
-  [adapters/out/ipfs\nFichiers 3D] as IPFS
 }
 
 CmdAPI --> REST
@@ -113,7 +112,6 @@ CLI --> DomPayment
 
 DomModel --> Fabric
 DomModel --> LocalStorage
-DomModel --> IPFS
 DomIdentity --> Fabric
 DomIdentity --> LocalStorage
 DomRole --> LocalStorage
@@ -137,7 +135,7 @@ DomPayment --> Fabric
 | D1 — Session locale CLI | `Session` (`domain/session`, distinct de la session REST) | `SessionStore` | `localstorage` |
 | D2 — Réseau | `NetworkProfile`, `ChaincodeConfig` | `NetworkStore` | `localstorage` |
 | D2 — Canal | `Channel` | `ChannelPort` | `fabric` |
-| D3/D4 — Composant | `Model3D`, `Version`, `AssetInterface` (brouillon local jusqu'à soumission, puis embarquée dans `Model3D.Interfaces` — ADR-02) | `BlockchainPort`, `FileStoragePort`, `InterfaceStore` | `fabric`, `ipfs`, `localstorage` |
+| D3/D4 — Composant | `Model3D`, `Version`, `AssetInterface` (brouillon local jusqu'à soumission, puis embarquée dans `Model3D.Interfaces` — ADR-02) | `BlockchainPort`, `FileStoragePort`, `InterfaceStore` | `fabric`, `localstorage` |
 | D5 — Composition de Module | `WorkspaceInstance`, `Connection` | `ConnectionStore`, `InterfaceStore` | `localstorage` |
 | D6 — Module | `Model3D` (module), `ModuleVersion` | `BlockchainPort` | `fabric` |
 | D7 — PI & Paiement | `Payment` ; `Order`, `OrderItem`, `Commission`, `AssetPrice`, `PITransfer`, `CloneRecord` (`DC_D7_Payment.md`) | `PaymentPort` | `fabric` |
@@ -176,7 +174,6 @@ package "Domaine" #fff9c4 {
 
 package "Couche secondaire (Driven)" #f0f4e8 {
   [adapters/out/fabric] as AdFabric
-  [adapters/out/ipfs] as AdIPFS
   [adapters/out/localstorage] as AdLocal
 }
 
@@ -193,7 +190,7 @@ Svc --> PortRole
 Svc --> PortSession
 
 PortBC <|.. AdFabric
-PortFS <|.. AdIPFS
+PortFS <|.. AdLocal
 PortConn <|.. AdLocal
 PortIface <|.. AdLocal
 PortIdentity <|.. AdFabric
@@ -203,7 +200,7 @@ PortSession <|.. AdLocal
 
 note bottom of Svc
   Ne connaît QUE des interfaces Go.
-  Aucun import fabric/redis/ipfs — et aucune BDD
+  Aucun import fabric/redis — et aucune BDD
   relationnelle (ni sqlite ni autre).
 end note
 
@@ -309,7 +306,7 @@ end note
 **Décision :** UCAUT01 (fabrication/livraison) et UCPI01 (commande) sont servis par **deux canaux distincts et coexistants** :
 
 1. **Fabricant réseau natif** — un atelier qui rejoint réellement le réseau décentralisé Myr comme organisation Fabric (`myr org add --role manufacturer`, éventuellement son propre nœud via `myr node add`/`node provision`, UCADM03). Il confirme la livraison lui-même, depuis son propre nœud, via `POST /api/orders/:id/deliver` (rôle RBAC `manufacturer`) — c'est le canal déjà documenté par `DC-D7-08` (`DC_D7_Payment.md`).
-2. **Fabricant partenaire externe** — un acteur industriel déjà établi (ex. Sculpteo, Xometry, PCBWay) qui expose sa propre API commerciale mais n'a ni raison ni intérêt à opérer un pair blockchain pour rejoindre le réseau Myr. Myr intègre son API via un nouveau port sortant `ManufacturingPort`, avec un adapter dédié par partenaire (`adapters/out/manufacturing/<partenaire>/`, même pattern que `adapters/out/fabric`/`ipfs` — un adapter par technologie/partenaire implémentant le même port). Myr transmet la commande (fichier CAO + spécifications + adresse de livraison) via l'API propre du partenaire ; la confirmation de livraison revient par webhook vers un endpoint Myr dédié, et c'est **le backend Myr lui-même** (pas le partenaire) qui soumet alors `ConfirmDelivery` au smart contract — Myr agit ici comme tiers de confiance (oracle) attestant qu'un événement hors-chaîne a eu lieu.
+2. **Fabricant partenaire externe** — un acteur industriel déjà établi (ex. Sculpteo, Xometry, PCBWay) qui expose sa propre API commerciale mais n'a ni raison ni intérêt à opérer un pair blockchain pour rejoindre le réseau Myr. Myr intègre son API via un nouveau port sortant `ManufacturingPort`, avec un adapter dédié par partenaire (`adapters/out/manufacturing/<partenaire>/`, même pattern que `adapters/out/fabric` — un adapter par technologie/partenaire implémentant le même port). Myr transmet la commande (fichier CAO + spécifications + adresse de livraison) via l'API propre du partenaire ; la confirmation de livraison revient par webhook vers un endpoint Myr dédié, et c'est **le backend Myr lui-même** (pas le partenaire) qui soumet alors `ConfirmDelivery` au smart contract — Myr agit ici comme tiers de confiance (oracle) attestant qu'un événement hors-chaîne a eu lieu.
 
 **Justification :** Exiger un nœud ou un compte blockchain de tout fabricant (modèle initial de `DC-D7-08`) est réaliste pour un petit atelier qui souhaite réellement participer au réseau décentralisé, mais irréaliste pour un acteur industriel qui ne changera pas son système d'information pour intégrer Myr. Les deux canaux coexistent : aucun n'est retiré, le second s'ajoute pour ne pas fermer la porte aux gros volumes de fabrication externalisée.
 
@@ -331,7 +328,7 @@ end note
 2. **Tests unitaires** — `make test` (`go test ./...`).
 3. **Analyse statique** — `go vet ./...`. Le standard MISRA évoqué initialement ne s'applique qu'au C/C++ et n'a pas d'équivalent pour ce projet (Go) ; `go vet` est retenu car déjà intégré au toolchain Go standard, sans dépendance supplémentaire (cohérent avec la règle 20 — aucune nouvelle techno à valider pour ce choix précis).
 4. **Vérifications d'isolation hexagonale et de licences** — `make ci` (`scripts/ci/check-domain-imports.sh` + `check-licenses.sh`, déjà existants).
-5. **Tests d'intégration et déploiement** — exécutés depuis le runner via une connexion SSH vers le serveur Ubuntu distant, seule infrastructure exposant un peer Fabric et un daemon IPFS réels (même contrainte que `scripts/test_remote.ps1`, voir `CLAUDE.md` § Tests d'intégration à distance). L'authentification utilise une clé SSH dédiée stockée en secret GitHub Actions (ex. `secrets.MYR_DEPLOY_SSH_KEY`) — pas de runner self-hosted installé sur/à proximité du serveur.
+5. **Tests d'intégration et déploiement** — exécutés depuis le runner via une connexion SSH vers le serveur Ubuntu distant, seule infrastructure exposant un peer Fabric réel (même contrainte que `scripts/test_remote.ps1`, voir `CLAUDE.md` § Tests d'intégration à distance). L'authentification utilise une clé SSH dédiée stockée en secret GitHub Actions (ex. `secrets.MYR_DEPLOY_SSH_KEY`) — pas de runner self-hosted installé sur/à proximité du serveur.
 
 **Justification :** Le développement se fait sur Windows (`CLAUDE.md` § Commandes dev) alors que les tests d'intégration et le déploiement ne peuvent s'exécuter que sur l'infrastructure Linux réelle du serveur — un runner GitHub hébergé classique n'a par nature aucun accès réseau à ce serveur ; l'authentification par clé SSH en secret est le mécanisme le plus direct pour combler cet écart sans opérer d'infrastructure CI supplémentaire (pas de runner self-hosted à maintenir).
 
@@ -377,7 +374,7 @@ Adopter l'option `myr-web` demanderait de réécrire la post-condition d'UCAM09 
 | Pas de base relationnelle | Aucune BDD SQL, ni dans le domaine ni dans les adapters | Toute persistance mutable passe par fichiers JSON (`adapters/out/localstorage/`) ; l'identité est cryptographique, récupérable depuis la CA Fabric sans BDD locale |
 | Sessions distribuées | `REDIS_URL` optionnel | Multi-instances : sessions REST partagées via Redis (`session_redis.go`) au lieu de mémoire/JSON |
 | mTLS Fabric | Certificats X.509 (CA Fabric) | Toute interaction Fabric exige un wallet valide |
-| IPFS CID | Adresse de contenu immuable | Le CID d'un fichier CAO change si le fichier change — versionnement explicite requis |
+| Empreinte SHA-256 | Identifiant de contenu du fichier CAO, seule trace conservée (RM42) | L'empreinte change si le fichier change — versionnement explicite requis (`Versions`) |
 | AGPL 3.0 | `go-licenses` CI | Toute dépendance doit être compatible AGPL 3.0 |
 | Isolation hexagonale | Script CI `check-domain-imports.sh` | Aucun import infra dans `domain/` |
 

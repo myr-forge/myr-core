@@ -190,7 +190,7 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 ### Flux erreur — Échec endorsement Fabric
 
 1. `blockchain.StoreModelRecord(m)` retourne une erreur Fabric (nœud indisponible, politique non satisfaite).
-2. Le fichier uploadé sur IPFS reste (orphelin temporaire — acceptable).
+2. Aucun fichier n'a été conservé — seule son empreinte avait été calculée (RM42) : il n'y a rien à nettoyer.
 3. L'API retourne `500 Internal Server Error` : `{ "error": "Erreur blockchain : <message>. Aucune donnée enregistrée." }`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
@@ -202,7 +202,7 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 
 - Le `Model3D` est inscrit sur la blockchain Fabric (immuable — RM07).
 - Un UUID unique est attribué au composant (généré par le service, non par le client — RM04).
-- Le fichier 3D est stocké dans IPFS avec une référence dans `Versions[0].Hash`.
+- L'empreinte SHA-256 du fichier 3D est enregistrée dans `Hash` et `Versions[0].Hash` ; aucune copie du fichier n'est conservée (RM42).
 - Le droit d'auteur est enregistré via `OwnerID`.
 
 ## Diagramme de séquence
@@ -212,7 +212,6 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 participant "Client\n(CLI ou API REST)" as Browser
 participant "REST Handler\n(adapters/in/rest/)" as REST
 participant "Model Service\n(domain/model/)" as ModelSvc
-database "IPFS\n(adapters/out/ipfs/)" as IPFS
 database "Fabric\n(adapters/out/fabric/)" as Fabric
 
 Browser -> REST : POST /api/components\n(multipart: name, file, category, license_id, parent_id, tags)
@@ -249,9 +248,7 @@ else Champs valides
             ModelSvc --> REST : ErrSimilarityTooHigh
             REST --> Browser : 409 Similarité trop élevée
         else
-            ModelSvc -> IPFS : Upload(FilePath)
-            IPFS --> ModelSvc : storageRef
-            ModelSvc -> ModelSvc : buildModel3D(UUID, hash, storageRef)
+            ModelSvc -> ModelSvc : buildModel3D(UUID, hash)
             ModelSvc -> Fabric : StoreModelRecord(model3D)
             alt Échec Fabric
                 Fabric --> ModelSvc : ErrEndorsement
