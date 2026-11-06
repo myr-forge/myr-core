@@ -9,6 +9,7 @@ package fabric
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
 	"net"
 	"os"
@@ -28,7 +29,11 @@ func NewFabricNetworkBootstrapper() *FabricNetworkBootstrapper {
 
 const (
 	bootstrapCAAdminUser = "admin"
-	bootstrapCAAdminPwd  = "adminpw"
+
+	// caAdminSecretFile conserve, à côté du certificat et de la clé de l'admin
+	// bootstrap (même niveau de protection, 0600), le secret de cet admin : il reste
+	// nécessaire pour le ré-enrôler une fois son certificat expiré.
+	caAdminSecretFile = "bootstrap-secret"
 
 	caHostPort           = 7054
 	ordererHostPort      = 7050
@@ -36,7 +41,6 @@ const (
 	ordererOpHostPort    = 9443
 	peerBasePort         = 7051
 	peerPortStep         = 10
-	couchdbBasePort      = 5984
 )
 
 // Bootstrap crée un réseau blockchain from scratch : démarre la CA, provisionne
@@ -83,20 +87,26 @@ func (b *FabricNetworkBootstrapper) Bootstrap(req network.CreateNetworkRequest) 
 			ChaincodePort: peerBasePort + 1 + i*peerPortStep,
 			OperationPort: 9444 + i,
 			CouchDBName:   fmt.Sprintf("couchdb%d", i),
-			CouchDBPort:   couchdbBasePort + i,
 		}
 	}
+
+	// Secrets propres à ce réseau : un identifiant par défaut (ex. admin:adminpw)
+	// donnerait à quiconque joint la CA les droits de registrar, et à quiconque
+	// joint CouchDB un accès direct à l'état du ledger.
+	caAdminPwd := rand.Text()
+	couchDBAdminPwd := rand.Text()
 
 	// ── 1. Générer et démarrer le conteneur CA ────────────────────────────────
 	composePath := filepath.Join(base, "docker-compose.yaml")
 	composeYAML, err := renderDockerCompose(dockerComposeParams{
-		NetworkName: networkDockerName,
-		CryptoDir:   cryptoDir,
-		CAName:      caName,
-		CAAdminID:   bootstrapCAAdminUser,
-		CAAdminPwd:  bootstrapCAAdminPwd,
-		CAPort:      caHostPort,
-		OrgMSPID:    req.OrgMSPID,
+		NetworkName:     networkDockerName,
+		CryptoDir:       cryptoDir,
+		CAName:          caName,
+		CAAdminID:       bootstrapCAAdminUser,
+		CAAdminPwd:      caAdminPwd,
+		CAPort:          caHostPort,
+		CouchDBAdminPwd: couchDBAdminPwd,
+		OrgMSPID:        req.OrgMSPID,
 		Orderers: []dcOrdererParams{
 			{Name: ordererName, Port: ordererHostPort, AdminPort: ordererAdminHostPort, OpPort: ordererOpHostPort},
 		},
@@ -105,7 +115,8 @@ func (b *FabricNetworkBootstrapper) Bootstrap(req network.CreateNetworkRequest) 
 	if err != nil {
 		return nil, fmt.Errorf("génération docker-compose.yaml : %w", err)
 	}
-	if err := os.WriteFile(composePath, []byte(composeYAML), 0o644); err != nil {
+	// 0600 : le fichier contient les secrets de la CA et de CouchDB.
+	if err := os.WriteFile(composePath, []byte(composeYAML), 0o600); err != nil {
 		return nil, fmt.Errorf("écriture docker-compose.yaml : %w", err)
 	}
 
@@ -117,7 +128,7 @@ func (b *FabricNetworkBootstrapper) Bootstrap(req network.CreateNetworkRequest) 
 		return nil, fmt.Errorf("CA non prête après démarrage : %w", err)
 	}
 
-	// ── 2. Enrôler l'admin bootstrap de la CA (auth basique admin:adminpw) ────
+	// ── 2. Enrôler l'admin bootstrap de la CA (auth basique, secret généré) ───
 	// /cainfo répond dès que le serveur HTTP écoute, mais /enroll peut encore
 	// échouer pendant un très court instant (initialisation interne) — quelques
 	// tentatives supplémentaires absorbent cette marge sans être excessives.
@@ -125,7 +136,7 @@ func (b *FabricNetworkBootstrapper) Bootstrap(req network.CreateNetworkRequest) 
 	var adminCert, adminKey, caCert string
 	err = retry(5, 3*time.Second, func() error {
 		var enrollErr error
-		adminCert, adminKey, caCert, enrollErr = bootstrapClient.enroll(ctx, bootstrapCAAdminUser, bootstrapCAAdminPwd, "", nil)
+		adminCert, adminKey, caCert, enrollErr = bootstrapClient.enroll(ctx, bootstrapCAAdminUser, caAdminPwd, "", nil)
 		return enrollErr
 	})
 	if err != nil {
@@ -133,9 +144,10 @@ func (b *FabricNetworkBootstrapper) Bootstrap(req network.CreateNetworkRequest) 
 	}
 	caAdminDir := filepath.Join(cryptoDir, "ca-admin")
 	if err := writeFiles(caAdminDir, map[string]string{
-		"cert.pem":    adminCert,
-		"key.pem":     adminKey,
-		"ca-cert.pem": caCert,
+		"cert.pem":        adminCert,
+		"key.pem":         adminKey,
+		"ca-cert.pem":     caCert,
+		caAdminSecretFile: caAdminPwd,
 	}); err != nil {
 		return nil, err
 	}

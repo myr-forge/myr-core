@@ -218,6 +218,8 @@ Au-delà, `HTTP 429` est retourné.
 | Révocation de session | `DELETE /api/admin/sessions/{token}` doit pouvoir être ciblée depuis `GET /api/admin/sessions` sans recherche annexe | Identifiant de session exploitable exposé par la liste |
 | Injection chaincode | Arguments Fabric | Validation stricte côté serveur avant soumission (RM07) |
 | Module immuable | Un module `submitted` ne doit plus être modifiable directement | Garde `Status != submitted`, fork obligatoire (RM19) |
+| Identité bootstrap de la Fabric CA | Un identifiant connu (ex. `admin:adminpw`) permet à quiconque joint le port de la CA de s'enrôler comme registrar et d'émettre des identités arbitraires | Aucun identifiant par défaut : le secret est généré aléatoirement à chaque création de réseau (`myr network create`) et conservé uniquement sur le serveur, en fichier `0600` à côté du certificat de l'admin bootstrap |
+| Base d'état CouchDB des peers | Un CouchDB joignable permet de modifier l'état du ledger sans passer par l'endorsement | Port CouchDB jamais publié hors du réseau Docker interne ; mot de passe généré aléatoirement à chaque création de réseau |
 
 État de suivi de ces écarts : `specs/roadmap_dev.md` § Écarts Identité & Session et § Bugs bloquants.
 

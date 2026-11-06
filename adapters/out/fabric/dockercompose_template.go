@@ -16,7 +16,6 @@ type dcPeerParams struct {
 	ChaincodePort int    // 7052, 7062, ...
 	OperationPort int    // 9444, 9445, ...
 	CouchDBName   string
-	CouchDBPort   int
 }
 
 type dcOrdererParams struct {
@@ -32,8 +31,12 @@ type dockerComposeParams struct {
 
 	CAName     string
 	CAAdminID  string
-	CAAdminPwd string
+	CAAdminPwd string // secret aléatoire généré à chaque bootstrap — jamais de valeur par défaut
 	CAPort     int
+
+	// CouchDBAdminPwd est partagé par toutes les bases d'état CouchDB du réseau et par
+	// les peers qui s'y connectent. Généré aléatoirement à chaque bootstrap.
+	CouchDBAdminPwd string
 
 	OrgMSPID string
 
@@ -102,15 +105,17 @@ services:
     networks:
       - {{$.NetworkName}}
 {{end}}
-{{range .Peers}}
+{{range .Peers}}{{/*
+  CouchDB ne publie aucun port : seul le peer, sur le réseau Docker interne, accède
+  à sa base d'état — un CouchDB joignable depuis l'hôte permettrait de modifier
+  l'état du ledger sans passer par l'endorsement.
+*/}}
   {{.CouchDBName}}:
     image: couchdb:3.3
     container_name: {{.CouchDBName}}
     environment:
       - COUCHDB_USER=admin
-      - COUCHDB_PASSWORD=adminpw
-    ports:
-      - "{{.CouchDBPort}}:5984"
+      - COUCHDB_PASSWORD={{$.CouchDBAdminPwd}}
     networks:
       - {{$.NetworkName}}
 
@@ -137,7 +142,7 @@ services:
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS={{.CouchDBName}}:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD={{$.CouchDBAdminPwd}}
       - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:{{.OperationPort}}
     ports:
       - "{{.Port}}:{{.Port}}"
