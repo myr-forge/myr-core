@@ -18,8 +18,9 @@ tags:
 
 ## 1. Objectif
 
-Le chaincode est le composant exécuté dans HyperLedger Fabric qui garantit :
-- L'**immuabilité** des assets enregistrés (RM06)
+Le chaincode est le composant exécuté dans HyperLedger Fabric qui garantit, pour toutes les organisations du réseau et quel que soit le nœud qui soumet (ADR-12) :
+- L'**immuabilité** des assets enregistrés (RM06, RM19) et l'**unicité** de leur fichier (empreinte SHA-256)
+- La **propriété** et l'**autorisation**, d'après l'identité et les attributs du certificat du signataire (§4.1)
 - La **vérification d'intégrité** par hash SHA-256 (RM01, UCCE03)
 - La **distribution automatique des commissions** à la livraison (RM23, RM24)
 - La **traçabilité des transferts PI** et du clonage inter-réseaux (RM25, RM26)
@@ -120,6 +121,25 @@ type Version struct {
 | `VerifyModel` | `id, hash, channelID string` | `bool, err` | UCCE03 |
 | `UpdateModelOwner` | `id, newOwnerID string` | `txID string, err` | UCPI07 (transfert PI) |
 | `CloneModel` | `model3dJSON, sourceNetworkID string` | `txID string, err` | UCPI08 |
+| `IndexHashes` | — | `{indexed, duplicates[]}` JSON | Mise en service (ADR-12) — construit l'index empreinte → identifiant des assets déjà enregistrés ; idempotent |
+
+### 4.1 Invariants appliqués par `StoreModel` (ADR-12)
+
+Une transaction `StoreModel` est refusée, sans aucune écriture, si l'une de ces conditions n'est pas remplie :
+
+| Invariant | Règle | Vérification |
+|-----------|-------|--------------|
+| Asset soumis | RM16, RM19 | `Status` vaut `submitted` |
+| Identifiant valide | RM04 | `ID` non vide, caractères `[A-Za-z0-9_.-]`, 128 au plus |
+| Canal cohérent | — | `ChannelID` est le canal de la transaction |
+| Écriture unique | RM06, RM19 | Aucun asset n'est déjà enregistré sous cet `ID` |
+| Fichier unique | RM01 (préalable) | Si `Hash` est renseigné, aucun autre asset n'est enregistré avec la même empreinte |
+| Parent existant | RM05 | Si `ParentID` est renseigné, ce parent est enregistré sur le ledger |
+| Propriétaire = signataire | ADR-12 | `OwnerID` est l'identifiant d'enrôlement du certificat signataire (`pseudo@org`), et le MSP du signataire est `<org>MSP` |
+| Signataire actif | ADR-12 | Attribut de certificat `Myr.status` = `active` |
+| Rôle autorisé | ADR-12 | Le rôle du signataire (attribut de certificat `Myr.role`) porte la permission d'écriture dans la table des rôles du réseau publiée sur le ledger ; le rôle `admin`, immuable, les porte toutes |
+
+L'index des empreintes est stocké sous des clés composites (`hash`, empreinte) qui n'apparaissent jamais dans `ListModels`.
 
 ---
 

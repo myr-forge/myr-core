@@ -251,6 +251,8 @@ end note
 
 ### ADR-04 — Identité CA comme source unique, RBAC dynamique séparé
 
+> **Remplacé pour le stockage des rôles par l'ADR-12** : le certificat porte le rôle et le statut de l'utilisateur, et la table des rôles et de leurs permissions est publiée sur le ledger au lieu d'un fichier propre à chaque nœud. Restent valables : l'unicité de la source d'identité (Fabric CA), des rôles éditables par l'administrateur, et l'accès invité sans certificat.
+
 **Décision :** Il n'existe qu'une seule source d'identité (`domain/identity`, adossée à la Fabric CA) — pas de second système d'authentification web (email/mot de passe/JWT). L'autorisation (RBAC) est un domaine séparé (`domain/role`), découplé du rôle porté par le certificat CA.
 
 **Justification :** Un accès invité (`POST /api/identity/guest`) peut être délivré sans aucune identité CA (cas : rôle Lecteur automatique sur réseau public). Séparer le RBAC de l'identité CA permet de faire évoluer les permissions (`myr role create/update`) sans dépendre du cycle de vie des certificats.
@@ -362,6 +364,29 @@ Cette option « même id » se heurte en outre à RM19 dès que le composant cib
 Adopter l'option `myr-web` demanderait de réécrire la post-condition d'UCAM09 (« composant d'origine inchangé »), RM39 (filiation par nouvel id systématique) et UCAM05, et de documenter explicitement l'exception RM19 pour le cas `submitted`. Garder le comportement déjà spécifié (nouvel id systématique) ne remet rien en cause de ce qui précède dans cet ADR — la fusion REST/CLI décidée ci-dessus reste valable dans les deux cas, puisqu'un id supplémentaire reste résolu par la même ressource `/api/components/{id}`, quel que soit leur nombre. **Recommandation non engageante :** conserver le comportement déjà spécifié (nouvel id systématique), qui ne demande aucune réécriture de RM39/UCAM05/UCAM09 et reste cohérent avec RM19 dans tous les cas — la décision finale revient au product owner ; `myr-web` doit être informé de la limite ci-dessus avant confirmation.
 
 **Catégorie `decoupage` (RM02, RM39–RM41, UCAM05, UCAM09) : non affectée par cet ADR.** Contrairement à l'hypothèse du document de handoff `myr-web` (point 6), la fusion du contrat REST/CLI ne rend pas cette catégorie obsolète — dans les deux options ci-dessus, elle reste le type d'évolution qui distingue une décomposition d'une `amelioration`/`extension`/etc. L'écart E1 (constante `CategoryDecoupage` absente d'`entity.go`) reste un prérequis d'implémentation ouvert, indépendant de cet ADR — voir `specs/roadmap_dev.md`.
+
+---
+
+### ADR-12 — Invariants portés par le chaincode, signature par l'utilisateur, autorisation par le certificat
+
+**Contexte :** dans un réseau décentralisé, chaque organisation exploite son propre nœud. Une règle qui n'existe que dans le domaine (`domain/`) d'un nœud n'engage que ce nœud : tout autre membre du canal peut soumettre directement une transaction au chaincode. Si le chaincode enregistre tout ce qu'il reçoit, l'immuabilité (RM06, RM19), la propriété et l'unicité d'un asset ne sont garanties par rien. Par ailleurs, une transaction signée par une identité partagée d'organisation ne dit pas qui l'a soumise. Enfin, un contrôle d'accès dont la table rôle → permissions est stockée sur chaque nœud n'est pas partagé par le réseau, et ajoute une couche que Fabric fournit déjà : les attributs du certificat émis par la CA (`Myr.role`, `Myr.status`), lisibles par le chaincode.
+
+**Décision (product owner, 2026-11-07) :**
+
+1. **Écriture unique.** `StoreModel` refuse tout identifiant déjà enregistré (RM06, RM19). Un asset soumis n'est jamais réécrit : toute évolution, y compris une nouvelle version d'un module, passe par un fork (nouvel identifiant, `ParentID` vers l'asset d'origine).
+2. **Fichier unique.** Le ledger refuse un asset dont l'empreinte SHA-256 (`Hash`) est déjà enregistrée sous un autre identifiant, quelle que soit la catégorie. Il tient pour cela un index empreinte → identifiant. C'est le préalable minimal à l'anti-plagiat (RM01), dont l'analyse de similarité n'est pas portée par le chaincode.
+3. **Parent existant.** Un asset qui déclare un `ParentID` n'est accepté que si ce parent est enregistré sur le ledger. La compatibilité de licence (RM03) reste vérifiée par le domaine.
+4. **Signature par l'utilisateur.** Toute écriture sur le ledger est signée avec le certificat de l'utilisateur qui l'initie (son wallet), jamais avec une identité d'organisation partagée. Le chaincode vérifie que `OwnerID` est l'identifiant d'enrôlement du signataire (`pseudo@org`) et que l'organisation de cet identifiant est celle qui a émis le certificat (MSP `<org>MSP`). Le CLI signe avec le wallet du compte de sa session locale (`myr session`) ; sans wallet, il ne peut pas écrire.
+5. **Autorisation par le certificat, rôles partagés sur le ledger.** Le certificat de l'utilisateur porte le nom de son rôle (`Myr.role`) et son statut (`Myr.status`). Les rôles et leurs permissions sont définis par l'administrateur du réseau : ils sont créés, modifiés ou supprimés, à l'exception du rôle administrateur, qui est immuable (Expression des besoins §3). Ils sont publiés sur le ledger, si bien que tous les nœuds appliquent la même table. Le chaincode n'accepte une écriture que d'un signataire `active` dont le rôle porte la permission d'écriture. Le serveur applique la même table aux actions hors ledger (brouillons, interfaces en cours d'édition, administration). L'accès invité, sans certificat, n'accorde que la lecture. Cette décision remplace le stockage local des rôles de l'ADR-04 (`roles.json`, propre à chaque nœud) : la logique des rôles (`domain/role`) reste dans le domaine, seul son stockage passe sur le ledger.
+6. **Inscription selon le réseau.** L'administrateur du réseau décide : sans auto-enregistrement (`AllowAutoRegister=false`), aucune demande d'inscription n'est acceptée et seul l'administrateur crée des comptes. Avec auto-enregistrement, le réglage d'approbation (`RequireApproval`) décide : approbation requise → l'identité est créée `pending` et devient `active` quand l'administrateur l'approuve ; sans approbation → l'identité est créée `active` avec le rôle par défaut du réseau (`AutoRegisterRole`, `reader` à défaut — RM21).
+
+**Justification :** le ledger devient la garantie commune à toutes les organisations. Les contrôles sont exécutés par les pairs qui endossent la transaction : un nœud défaillant ou malveillant ne peut ni réécrire un asset, ni usurper un propriétaire, ni contourner rôle et statut. Toute l'autorisation repose sur des mécanismes natifs de Hyperledger Fabric (CA, attributs de certificat, chaincode), sans couche supplémentaire à maintenir sur la durée.
+
+**Conséquences :**
+- Re-soumettre un module déjà soumis et modifier un asset soumis sont refusés par le ledger. Le domaine doit refuser ces actions en amont, avec une erreur explicite (RM19).
+- Le serveur détient et utilise les clés privées des utilisateurs (wallets, voir ADR-03) : la signature par l'utilisateur reste à la garde du nœud de son organisation.
+- La table des rôles est lue depuis le ledger par le chaincode comme par chaque serveur : une modification des permissions d'un rôle par l'administrateur s'applique à tout le réseau, sans réémettre de certificat. Changer le rôle d'un utilisateur reste soumis au cycle de vie de son certificat (ré-enrôlement, RM22).
+- Les identités, rôles et assets existants doivent être mis en conformité avant la mise en service : index des empreintes construit pour les assets déjà enregistrés (`IndexHashes`, opération ponctuelle et idempotente), rôles actuels publiés sur le ledger, statut `active` attribué aux identités autorisées.
 
 ---
 
