@@ -11,7 +11,8 @@ import (
 
 // SmartContract implémente le chaincode myrcc — périmètre minimal couvrant
 // exactement les 4 fonctions attendues par domain/model/ports.go BlockchainPort
-// (StoreModelRecord/GetModelRecord/ListModelRecords/VerifyIntegrity). Les noms
+// (StoreModelRecord/GetModelRecord/ListModelRecords/VerifyIntegrity), plus
+// IndexHashes, opération de mise en service de l'index des empreintes. Les noms
 // de fonction et le nombre d'arguments reproduisent exactement ce qu'invoque
 // adapters/out/fabric/blockchain.go côté client — ce fichier-là fait foi, pas
 // les signatures indicatives de specs/3-Conception/Chaincode.md §4.
@@ -32,13 +33,18 @@ func (s *SmartContract) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return s.listModels(stub, args)
 	case "VerifyModel":
 		return s.verifyModel(stub, args)
+	case "IndexHashes":
+		return s.indexHashes(stub)
 	default:
 		return shim.Error(fmt.Sprintf("fonction chaincode inconnue : %s", fn))
 	}
 }
 
 // storeModel enregistre le Model3D reçu tel quel (aucune reformulation du JSON
-// soumis), indexé par son ID — voir FabricBlockchain.StoreModelRecord.
+// soumis), indexé par son ID — voir FabricBlockchain.StoreModelRecord — après
+// vérification des invariants de specs/3-Conception/Chaincode.md §4.1 : un
+// asset déjà enregistré n'est jamais réécrit, son fichier est unique, son
+// parent existe et son propriétaire est le signataire de la transaction.
 func (s *SmartContract) storeModel(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error("StoreModel attend 1 argument (model3dJSON)")
@@ -47,13 +53,117 @@ func (s *SmartContract) storeModel(stub shim.ChaincodeStubInterface, args []stri
 	if err := json.Unmarshal([]byte(args[0]), &m); err != nil {
 		return shim.Error(fmt.Sprintf("StoreModel : JSON invalide : %v", err))
 	}
-	if m.ID == "" {
-		return shim.Error("StoreModel : ID vide")
+	if err := validateModel(stub, &m); err != nil {
+		return shim.Error("StoreModel : " + err.Error())
 	}
+	if err := checkSubmitter(stub, m.OwnerID); err != nil {
+		return shim.Error("StoreModel : " + err.Error())
+	}
+
+	existing, err := stub.GetState(m.ID)
+	if err != nil {
+		return shim.Error(fmt.Sprintf("StoreModel : lecture ledger : %v", err))
+	}
+	if existing != nil {
+		return shim.Error(fmt.Sprintf("StoreModel : l'asset %s est déjà enregistré — un asset soumis est immuable, toute évolution passe par un fork (RM06, RM19)", m.ID))
+	}
+
+	if m.ParentID != "" {
+		parent, err := stub.GetState(m.ParentID)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("StoreModel : lecture ledger : %v", err))
+		}
+		if parent == nil {
+			return shim.Error(fmt.Sprintf("StoreModel : asset parent %s introuvable sur le ledger", m.ParentID))
+		}
+	}
+
+	if m.Hash != "" {
+		key, err := hashIndexKey(stub, m.Hash)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("StoreModel : clé d'index : %v", err))
+		}
+		holder, err := stub.GetState(key)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("StoreModel : lecture ledger : %v", err))
+		}
+		if holder != nil {
+			return shim.Error(fmt.Sprintf("StoreModel : le fichier %s est déjà enregistré sous l'asset %s", m.Hash, holder))
+		}
+		if err := stub.PutState(key, []byte(m.ID)); err != nil {
+			return shim.Error(fmt.Sprintf("StoreModel : écriture index : %v", err))
+		}
+	}
+
 	if err := stub.PutState(m.ID, []byte(args[0])); err != nil {
 		return shim.Error(fmt.Sprintf("StoreModel : écriture ledger : %v", err))
 	}
 	return shim.Success([]byte(stub.GetTxID()))
+}
+
+// hashDuplicate signale, lors de IndexHashes, un asset déjà enregistré dont
+// l'empreinte était déjà indexée pour un autre asset (enregistré avant que
+// l'unicité du fichier ne soit vérifiée).
+type hashDuplicate struct {
+	Hash      string `json:"hash"`
+	Kept      string `json:"kept"`
+	Duplicate string `json:"duplicate"`
+}
+
+// indexHashes construit l'index empreinte → ID pour les assets enregistrés
+// avant l'introduction de l'unicité du fichier. Idempotent : une empreinte
+// déjà indexée n'est jamais réattribuée. En cas de doublon existant, le
+// premier asset dans l'ordre des clés conserve l'empreinte ; les autres sont
+// signalés, jamais modifiés (RM06).
+func (s *SmartContract) indexHashes(stub shim.ChaincodeStubInterface) peer.Response {
+	iter, err := stub.GetStateByRange("", "")
+	if err != nil {
+		return shim.Error(fmt.Sprintf("IndexHashes : itération ledger : %v", err))
+	}
+	defer iter.Close()
+
+	indexed := 0
+	duplicates := make([]hashDuplicate, 0)
+	// Fabric ne rend pas visibles, dans une transaction, ses propres PutState
+	// à GetState : les empreintes indexées ici sont donc suivies en mémoire.
+	indexedNow := map[string]string{}
+	for iter.HasNext() {
+		kv, err := iter.Next()
+		if err != nil {
+			return shim.Error(fmt.Sprintf("IndexHashes : lecture ledger : %v", err))
+		}
+		var m Model3D
+		if json.Unmarshal(kv.Value, &m) != nil || m.Hash == "" {
+			continue
+		}
+		holder, ok := indexedNow[m.Hash]
+		key, err := hashIndexKey(stub, m.Hash)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("IndexHashes : clé d'index : %v", err))
+		}
+		if !ok {
+			stored, err := stub.GetState(key)
+			if err != nil {
+				return shim.Error(fmt.Sprintf("IndexHashes : lecture ledger : %v", err))
+			}
+			holder = string(stored)
+		}
+		switch {
+		case holder == "":
+			if err := stub.PutState(key, []byte(kv.Key)); err != nil {
+				return shim.Error(fmt.Sprintf("IndexHashes : écriture index : %v", err))
+			}
+			indexedNow[m.Hash] = kv.Key
+			indexed++
+		case holder != kv.Key:
+			duplicates = append(duplicates, hashDuplicate{Hash: m.Hash, Kept: holder, Duplicate: kv.Key})
+		}
+	}
+	out, err := json.Marshal(map[string]any{"indexed": indexed, "duplicates": duplicates})
+	if err != nil {
+		return shim.Error(fmt.Sprintf("IndexHashes : sérialisation : %v", err))
+	}
+	return shim.Success(out)
 }
 
 // getModel retourne le JSON stocké tel quel — FabricBlockchain.GetModelRecord
