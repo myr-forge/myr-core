@@ -376,7 +376,7 @@ func (h *Handler) handleIdentitySession(w http.ResponseWriter, r *http.Request) 
 		jsonError(w, "service identité non configuré", http.StatusServiceUnavailable)
 		return
 	}
-	_, err := h.identitySvc.Enroll(context.Background(), req.Name, req.Secret, req.OrgID)
+	entry, err := h.identitySvc.Enroll(context.Background(), req.Name, req.Secret, req.OrgID)
 	if err != nil {
 		jsonError(w, err.Error(), http.StatusUnauthorized)
 		return
@@ -388,7 +388,9 @@ func (h *Handler) handleIdentitySession(w http.ResponseWriter, r *http.Request) 
 	// #question rôle codé en dur — ignore l'attribut Myr.role du certificat CA
 	// réellement enrôlé (voir UCA02.md, écart documenté). Faut-il le lire depuis
 	// WalletEntry/attributs CA plutôt que de le figer ici ?
-	sess, err := h.sessions.create(req.Name, "contributor", channel)
+	// La session retient l'identité enrôlée : son wallet signera les écritures
+	// de l'utilisateur sur le ledger (ADR-12).
+	sess, err := h.sessions.create(req.Name, entry.Handle, "contributor", channel)
 	if err != nil {
 		jsonError(w, "erreur interne", http.StatusInternalServerError)
 		return
@@ -450,7 +452,7 @@ func (h *Handler) handleIdentityGuest(w http.ResponseWriter, r *http.Request) {
 			orgID = strings.TrimSpace(body.OrgID)
 		}
 		_ = orgID // utilisé comme contexte, le token est suffisant
-		sess, err := h.sessions.create(pseudo, "reader", h.netInfo.Channel)
+		sess, err := h.sessions.create(pseudo, "", "reader", h.netInfo.Channel) // invité : aucune identité, lecture seule
 		if err != nil {
 			jsonError(w, "erreur interne", http.StatusInternalServerError)
 			return

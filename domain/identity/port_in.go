@@ -7,6 +7,10 @@ import "context"
 // Implémenté par le service, consommé par les adapters in (CLI, REST).
 type IdentityService interface {
 	ListLocalWallets() ([]WalletEntry, error)
+	// Wallet retourne le wallet local de l'identité handle (« pseudo@org »,
+	// voir Handle) — celui qui signe ses écritures sur le ledger (ADR-12).
+	// Retourne ErrWalletNotFound si l'identité n'a pas de wallet sur ce nœud.
+	Wallet(handle string) (WalletEntry, error)
 	Register(ctx context.Context, req RegisterRequest) (secret string, err error)
 	Enroll(ctx context.Context, name, secret, orgID string) (WalletEntry, error)
 	GetStatus(ctx context.Context, wallet WalletEntry) (string, error)

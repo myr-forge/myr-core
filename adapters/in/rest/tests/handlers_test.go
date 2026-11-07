@@ -812,7 +812,7 @@ func TestComponents_MethodNotAllowed(t *testing.T) {
 
 /// @brief  Vérifie que POST /api/components avec un fichier STL renseigne correctement FilePath
 /// @input  POST /api/components, multipart avec name="Engrenage", owner_id="user1", fichier STL sous le champ "stl"
-/// @expect HTTP 201, AddFull appelé avec FilePath non vide, Name="Engrenage", OwnerID="user1", id="c1" dans la réponse
+/// @expect HTTP 201, AddFull appelé avec FilePath non vide, Name="Engrenage", OwnerID = identité de la session ("test@TestMSP", owner_id du formulaire ignoré — ADR-12), id="c1" dans la réponse
 func TestComponents_POST_WithSTLFile(t *testing.T) {
 	var capturedReq model.AddRequest
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
@@ -841,8 +841,8 @@ func TestComponents_POST_WithSTLFile(t *testing.T) {
 	if capturedReq.Name != "Engrenage" {
 		t.Errorf("Name: got %q, want Engrenage", capturedReq.Name)
 	}
-	if capturedReq.OwnerID != "user1" {
-		t.Errorf("OwnerID: got %q, want user1", capturedReq.OwnerID)
+	if capturedReq.OwnerID != "test@TestMSP" {
+		t.Errorf("OwnerID: got %q, want test@TestMSP (identité de la session)", capturedReq.OwnerID)
 	}
 	var dto struct {
 		ID string `json:"id"`
@@ -1008,7 +1008,7 @@ func buildMultipartFormBatchWithThumbnails(t *testing.T, fields map[string]strin
 
 /// @brief  Vérifie que POST /api/components/batch crée un composant par fichier et partage les champs communs
 /// @input  POST /api/components/batch, 2 fichiers sous "files", owner_id partagé, mockSvc.addFull réussit toujours
-/// @expect HTTP 200, 2 résultats avec "component" renseigné, succeeded=2, failed=0, OwnerID partagé sur chaque appel
+/// @expect HTTP 200, 2 résultats avec "component" renseigné, succeeded=2, failed=0, OwnerID = identité de la session sur chaque appel (owner_id du formulaire ignoré — ADR-12)
 func TestComponentsBatch_POST_AllSucceed(t *testing.T) {
 	var capturedReqs []model.AddRequest
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
@@ -1059,8 +1059,8 @@ func TestComponentsBatch_POST_AllSucceed(t *testing.T) {
 		t.Fatalf("AddFull appelé %d fois, want 2", len(capturedReqs))
 	}
 	for _, r := range capturedReqs {
-		if r.OwnerID != "user1" {
-			t.Errorf("OwnerID: got %q, want user1 (champ partagé)", r.OwnerID)
+		if r.OwnerID != "test@TestMSP" {
+			t.Errorf("OwnerID: got %q, want test@TestMSP (identité de la session)", r.OwnerID)
 		}
 		if r.Name == "" {
 			t.Error("Name doit être dérivé du nom de fichier")

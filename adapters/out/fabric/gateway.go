@@ -21,6 +21,9 @@ type GatewayClient struct {
 	gw   *client.Gateway
 	conn *grpc.ClientConn
 	cfg  Config
+	// ownsConn est faux pour une passerelle dérivée (ForIdentity) : la
+	// connexion gRPC appartient à la passerelle d'origine, qui la ferme.
+	ownsConn bool
 }
 
 // NewGatewayClient ouvre la connexion vers le peer Fabric et retourne un GatewayClient.
@@ -49,21 +52,36 @@ func NewGatewayClient(cfg Config) (*GatewayClient, error) {
 		return nil, fmt.Errorf("fabric gateway: connexion gRPC : %w", err)
 	}
 
-	// 2. Identité cliente X.509
+	// 2. Passerelle signée par l'identité de cfg
+	gc, err := connectGateway(cfg, conn)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+	gc.ownsConn = true
+	return gc, nil
+}
+
+// ForIdentity retourne une passerelle qui partage la connexion gRPC de g mais
+// signe avec une autre identité — celle de l'utilisateur qui initie
+// l'opération (ADR-12). La passerelle dérivée ne ferme jamais la connexion.
+func (g *GatewayClient) ForIdentity(mspID, certPath, keyPath string) (*GatewayClient, error) {
+	cfg := g.cfg
+	cfg.MSPID, cfg.CertPath, cfg.KeyPath = mspID, certPath, keyPath
+	return connectGateway(cfg, g.conn)
+}
+
+// connectGateway ouvre sur conn une passerelle signée par l'identité de cfg
+// (certificat X.509 + clé privée).
+func connectGateway(cfg Config, conn *grpc.ClientConn) (*GatewayClient, error) {
 	id, err := newIdentity(cfg)
 	if err != nil {
-		conn.Close()
 		return nil, fmt.Errorf("fabric gateway: identité : %w", err)
 	}
-
-	// 3. Fonction de signature (clé privée)
 	sign, err := newSign(cfg)
 	if err != nil {
-		conn.Close()
 		return nil, fmt.Errorf("fabric gateway: signature : %w", err)
 	}
-
-	// 4. Gateway
 	gw, err := client.Connect(
 		id,
 		client.WithSign(sign),
@@ -74,17 +92,18 @@ func NewGatewayClient(cfg Config) (*GatewayClient, error) {
 		client.WithCommitStatusTimeout(1*time.Minute),
 	)
 	if err != nil {
-		conn.Close()
 		return nil, fmt.Errorf("fabric gateway: Connect : %w", err)
 	}
-
 	return &GatewayClient{gw: gw, conn: conn, cfg: cfg}, nil
 }
 
-// Close libère les ressources.
+// Close libère les ressources ; la connexion gRPC n'est fermée que par la
+// passerelle qui l'a ouverte.
 func (g *GatewayClient) Close() {
 	g.gw.Close()
-	g.conn.Close()
+	if g.ownsConn {
+		g.conn.Close()
+	}
 }
 
 // Contract retourne le contrat chaincode sur le canal par défaut.

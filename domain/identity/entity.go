@@ -1,7 +1,11 @@
 // domain/identity/entity.go
 package identity
 
-import "time"
+import (
+	"path/filepath"
+	"strings"
+	"time"
+)
 
 // MyrIdentity représente l'identité d'un auteur dans le réseau Myr.
 // Les attributs Myr.status, Myr.role et Myr.channels sont écrits dans
@@ -28,6 +32,32 @@ type WalletEntry struct {
 	OrgID  string // Org1MSP, Org2MSP, Org3MSP
 	Status string // pending | active | suspended (lu depuis le cert)
 	MSPDir string // chemin absolu vers le répertoire MSP
+}
+
+// Disposition d'un wallet sous son répertoire MSP — seule définition, partagée
+// par l'écriture (saveWallet) et par les adapters qui signent avec le wallet.
+const (
+	walletCertFile   = "signcerts/cert.pem"
+	walletKeyFile    = "keystore/key.pem"
+	walletCACertFile = "cacerts/ca.pem"
+)
+
+// CertPath retourne le chemin du certificat de signature du wallet.
+func (w WalletEntry) CertPath() string {
+	return filepath.Join(w.MSPDir, filepath.FromSlash(walletCertFile))
+}
+
+// KeyPath retourne le chemin de la clé privée du wallet.
+func (w WalletEntry) KeyPath() string {
+	return filepath.Join(w.MSPDir, filepath.FromSlash(walletKeyFile))
+}
+
+// Handle construit l'identifiant d'une identité, « pseudo@org » : c'est à la
+// fois son identifiant d'enrôlement auprès de la CA, le nom de son wallet et
+// le propriétaire (OwnerID) des assets qu'elle soumet (ADR-12). orgID est le
+// MSP (Org1MSP) ou l'organisation seule (Org1).
+func Handle(name, orgID string) string {
+	return name + "@" + strings.TrimSuffix(orgID, "MSP")
 }
 
 // RegisterRequest contient les informations pour enregistrer une nouvelle identité

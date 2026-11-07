@@ -294,12 +294,12 @@ func TestFabricAdapter_VerifyIntegrity_EvaluateError(t *testing.T) {
 
 // / @brief  Vérifie que StoreModelRecord route vers le bon canal et soumet StoreModel avec le JSON de l'asset
 // / @details Chemin nominal : ContractFor est appelé avec channelID de l'asset ; le JSON soumis est valide.
-// / @input  stubGateway wrappant un stubContract vide ; asset Model3D id="b1", channelID="chan-alpha"
+// / @input  stubGateway (signé par l'utilisateur) wrappant un stubContract vide ; asset Model3D id="b1", channelID="chan-alpha"
 // / @expect retourne nil ; lastSubmitName == "StoreModel" ; lastContractForChan == "chan-alpha" ; JSON décodé avec ID "b1"
 func TestFabricBlockchain_StoreModelRecord_Success(t *testing.T) {
 	stub := &stubContract{}
 	gw := &stubGateway{contract: stub}
-	bc := fabric.NewFabricBlockchain(gw)
+	bc := fabric.NewUserFabricBlockchain(gw)
 
 	asset := newAsset("b1", "chan-alpha")
 	if err := bc.StoreModelRecord(asset); err != nil {
@@ -324,6 +324,21 @@ func TestFabricBlockchain_StoreModelRecord_Success(t *testing.T) {
 	}
 }
 
+// / @brief  Un accès en lecture seule (identité d'organisation) n'écrit jamais sur le ledger (ADR-12)
+// / @input  NewFabricBlockchain sur un stubContract qui accepterait la transaction ; asset id="b1"
+// / @expect StoreModelRecord retourne model.ErrSignerRequired ; aucune transaction n'est soumise
+func TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected(t *testing.T) {
+	stub := &stubContract{}
+	bc := fabric.NewFabricBlockchain(&stubGateway{contract: stub})
+
+	if err := bc.StoreModelRecord(newAsset("b1", "ch1")); !errors.Is(err, model.ErrSignerRequired) {
+		t.Fatalf("err = %v, want model.ErrSignerRequired", err)
+	}
+	if stub.lastSubmitName != "" {
+		t.Errorf("transaction %q soumise par un accès en lecture seule", stub.lastSubmitName)
+	}
+}
+
 // / @brief  Vérifie que StoreModelRecord propage l'erreur retournée par SubmitTransaction
 // / @input  stubContract dont submitFn retourne errors.New("fabric: submit rejected")
 // / @expect retourne une erreur non nil wrappant expectedErr via errors.Is
@@ -332,7 +347,7 @@ func TestFabricBlockchain_StoreModelRecord_SubmitError(t *testing.T) {
 	stub := &stubContract{
 		submitFn: func(_ string, _ ...string) ([]byte, error) { return nil, expectedErr },
 	}
-	bc := fabric.NewFabricBlockchain(&stubGateway{contract: stub})
+	bc := fabric.NewUserFabricBlockchain(&stubGateway{contract: stub})
 
 	err := bc.StoreModelRecord(newAsset("b1", "ch1"))
 	if err == nil {

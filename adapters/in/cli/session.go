@@ -10,10 +10,26 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+	"myr-core/domain/identity"
 	"myr-core/domain/session"
 )
 
 var sessionSvc session.SessionService
+
+// SessionIdentity retourne l'identité (« pseudo@org », voir identity.Handle)
+// du compte local CLI : celle dont le wallet signe les écritures du CLI sur le
+// ledger et qui possède les assets créés en ligne de commande (ADR-12).
+// Absente sans compte local ou si celui-ci n'a pas d'organisation.
+func SessionIdentity(ss session.SessionService) (string, bool) {
+	if ss == nil {
+		return "", false
+	}
+	s, err := ss.Current()
+	if err != nil || s == nil || s.Name == "" || s.OrgID == "" {
+		return "", false
+	}
+	return identity.Handle(s.Name, s.OrgID), true
+}
 
 var sessionCmd = &cobra.Command{
 	Use:   "session",

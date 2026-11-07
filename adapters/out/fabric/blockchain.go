@@ -45,14 +45,30 @@ var _ model.BlockchainPort = (*FabricBlockchain)(nil)
 // FabricBlockchain implémente model.BlockchainPort via le chaincode myrcc.
 type FabricBlockchain struct {
 	gc GatewayProvider
+	// userSigned indique que gc signe avec l'identité de l'utilisateur qui
+	// initie l'opération : seule une telle passerelle écrit sur le ledger.
+	userSigned bool
 }
 
+// NewFabricBlockchain retourne un accès au ledger en lecture seule : gc signe
+// avec une identité d'organisation partagée, qui n'écrit jamais sur le ledger
+// (ADR-12) — StoreModelRecord retourne model.ErrSignerRequired.
 func NewFabricBlockchain(gc GatewayProvider) *FabricBlockchain {
 	return &FabricBlockchain{gc: gc}
 }
 
+// NewUserFabricBlockchain retourne un accès au ledger en lecture et en
+// écriture : gc signe avec l'identité de l'utilisateur qui initie les
+// écritures (ADR-12, voir GatewayClient.ForIdentity).
+func NewUserFabricBlockchain(gc GatewayProvider) *FabricBlockchain {
+	return &FabricBlockchain{gc: gc, userSigned: true}
+}
+
 // StoreModelRecord soumet une transaction sur le canal de l'asset (m.ChannelID).
 func (f *FabricBlockchain) StoreModelRecord(m *model.Model3D) error {
+	if !f.userSigned {
+		return model.ErrSignerRequired
+	}
 	if err := validateID(m.ChannelID, "channelID"); err != nil {
 		return err
 	}

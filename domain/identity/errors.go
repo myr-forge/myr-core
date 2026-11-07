@@ -15,6 +15,10 @@ var ErrNoAdminCredentials = errors.New(
 		"éditez le réseau (e) et renseignez Cert path + Key path",
 )
 
+// ErrWalletNotFound est retourné quand aucun wallet local n'existe pour une
+// identité — elle n'a jamais été enrôlée sur ce nœud.
+var ErrWalletNotFound = errors.New("identity: aucun wallet local pour cette identité")
+
 // IsNoAdminCredentials rapporte si err est ou enveloppe ErrNoAdminCredentials.
 func IsNoAdminCredentials(err error) bool {
 	return errors.Is(err, ErrNoAdminCredentials)

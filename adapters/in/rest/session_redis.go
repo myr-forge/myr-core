@@ -42,7 +42,7 @@ func (s *redisSessionStore) key(token string) string {
 	return redisKeyPrefix + token
 }
 
-func (s *redisSessionStore) create(pseudo, role, channel string) (*myrSession, error) {
+func (s *redisSessionStore) create(pseudo, handle, role, channel string) (*myrSession, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		return nil, fmt.Errorf("génération token impossible : %w", err)
@@ -51,6 +51,7 @@ func (s *redisSessionStore) create(pseudo, role, channel string) (*myrSession, e
 		Token:     hex.EncodeToString(b),
 		Role:      role,
 		Pseudo:    pseudo,
+		Handle:    handle,
 		Channel:   channel,
 		ExpiresAt: time.Now().Add(sessionTTL),
 	}

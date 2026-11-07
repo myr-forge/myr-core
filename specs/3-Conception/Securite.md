@@ -212,7 +212,7 @@ Au-delà, `HTTP 429` est retourné.
 |---------|--------|-----------|
 | Enrôlement/connexion | Brute force du secret CA sur `POST /api/identity/session` | Rate limiting 10/min/IP (`authLimiter`, § 8) |
 | Token de session | Vol de token (`X-Myr-Token`) | Pas de recommandation de stockage client imposée par `myr` ; comparaison serveur en temps constant |
-| `owner_id` | Client peut forger n'importe quel `owner_id` en lecture (`GET /api/components?owner_id=`) et en écriture (`POST /api/components`) | `owner_id` validé/dérivé de `sess.Pseudo` (OWASP A01, `UCA06`) |
+| `owner_id` | Client peut forger n'importe quel `owner_id` en lecture (`GET /api/components?owner_id=`) et en écriture (`POST /api/components`) | À la création, le propriétaire est l'identité de la session (`pseudo@org`), jamais la valeur fournie par le client ; à la soumission, le chaincode n'accepte l'asset que si son propriétaire est le signataire de la transaction (ADR-12, OWASP A01, `UCA06`) |
 | Wallets | Clés privées en fichiers PEM (permissions `0600`) | Chiffrement au repos requis par ENF10 — voir §4 et `Conception_intro.md` ADR-03 |
 | Rôle de session | Rôle REST doit refléter le rôle CA réel de l'identité enrôlée | Lecture du rôle depuis l'identité plutôt qu'une valeur fixe — voir §5 |
 | Révocation de session | `DELETE /api/admin/sessions/{token}` doit pouvoir être ciblée depuis `GET /api/admin/sessions` sans recherche annexe | Identifiant de session exploitable exposé par la liste |

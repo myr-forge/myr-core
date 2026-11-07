@@ -50,28 +50,46 @@ func (s *Service) ListLocalWallets() ([]WalletEntry, error) {
 		if !e.IsDir() {
 			continue
 		}
-		handle := e.Name() // ex: alice@Org1
-		mspDir := filepath.Join(s.walletDir, handle, "msp")
-
-		// Lire le statut depuis le certificat local
-		status := StatusPending
-		certPath := filepath.Join(mspDir, "signcerts", "cert.pem")
-		if data, err := os.ReadFile(certPath); err == nil {
-			if st := statusFromCert(data); st != "" {
-				status = st
-			}
-		}
-
-		name, orgID := parseHandle(handle)
-		wallets = append(wallets, WalletEntry{
-			Handle: handle,
-			Name:   name,
-			OrgID:  orgID,
-			Status: status,
-			MSPDir: mspDir,
-		})
+		wallets = append(wallets, s.walletEntry(e.Name())) // ex: alice@Org1
 	}
 	return wallets, nil
+}
+
+// Wallet retourne le wallet local de l'identité handle (« pseudo@org », voir
+// Handle). Retourne ErrWalletNotFound si l'identité n'a pas de wallet sur ce
+// nœud. handle doit être un nom simple : il ne peut pas désigner un chemin
+// hors du répertoire des wallets.
+func (s *Service) Wallet(handle string) (WalletEntry, error) {
+	if handle == "" || handle == "." || handle == ".." || strings.ContainsAny(handle, `/\`) {
+		return WalletEntry{}, fmt.Errorf("identifiant de wallet invalide %q", handle)
+	}
+	w := s.walletEntry(handle)
+	if _, err := os.Stat(w.CertPath()); err != nil {
+		if os.IsNotExist(err) {
+			return WalletEntry{}, fmt.Errorf("%w : %s", ErrWalletNotFound, handle)
+		}
+		return WalletEntry{}, err
+	}
+	return w, nil
+}
+
+// walletEntry décrit le wallet de handle sous walletDir, statut lu depuis son
+// certificat local s'il est lisible.
+func (s *Service) walletEntry(handle string) WalletEntry {
+	name, orgID := parseHandle(handle)
+	w := WalletEntry{
+		Handle: handle,
+		Name:   name,
+		OrgID:  orgID,
+		Status: StatusPending,
+		MSPDir: filepath.Join(s.walletDir, handle, "msp"),
+	}
+	if data, err := os.ReadFile(w.CertPath()); err == nil {
+		if st := statusFromCert(data); st != "" {
+			w.Status = st
+		}
+	}
+	return w
 }
 
 // Register enregistre une nouvelle identité auprès de la CA.
@@ -91,7 +109,7 @@ func (s *Service) Enroll(ctx context.Context, name, secret, orgID string) (Walle
 	// AutoRegister) — l'authentification HTTP Basic de l'enrollment doit viser
 	// ce même identifiant, pas le pseudo seul, sous peine de "user not found"
 	// côté CA dès que le client suit la forme documentée {name, secret, org_id}.
-	handle := name + "@" + strings.TrimSuffix(orgID, "MSP")
+	handle := Handle(name, orgID)
 	certPEM, keyPEM, caCertPEM, err := s.ca.Enroll(ctx, handle, secret)
 	if err != nil {
 		return WalletEntry{}, fmt.Errorf("enrollment : %w", err)
@@ -142,8 +160,7 @@ func (s *Service) LoadGuestWallet(certPath, keyPath, caCertPath, orgID string) (
 		}
 	}
 
-	org := strings.TrimSuffix(orgID, "MSP")
-	handle := "guest@" + org
+	handle := Handle("guest", orgID)
 	mspDir := filepath.Join(s.walletDir, handle, "msp")
 	if err := saveWallet(mspDir, string(certPEM), string(keyPEM), caCertPEM); err != nil {
 		return WalletEntry{}, fmt.Errorf("sauvegarde wallet invité : %w", err)
@@ -162,8 +179,8 @@ func (s *Service) ReEnroll(ctx context.Context, wallet WalletEntry) (WalletEntry
 	if s.ca == nil {
 		return WalletEntry{}, fmt.Errorf("aucun CA configuré")
 	}
-	certPath := filepath.Join(wallet.MSPDir, "signcerts", "cert.pem")
-	keyPath, err := findKeyFile(filepath.Join(wallet.MSPDir, "keystore"))
+	certPath := wallet.CertPath()
+	keyPath, err := findKeyFile(filepath.Dir(wallet.KeyPath()))
 	if err != nil {
 		return WalletEntry{}, fmt.Errorf("clé privée introuvable : %w", err)
 	}
@@ -221,9 +238,8 @@ func (s *Service) AutoRegister(ctx context.Context, req *AccountRequest, role st
 	if s.ca == nil {
 		return "", fmt.Errorf("aucun CA configuré — impossible d'enregistrer automatiquement")
 	}
-	org := strings.TrimSuffix(req.OrgID, "MSP")
 	regReq := RegisterRequest{
-		Name:        req.Pseudo + "@" + org,
+		Name:        Handle(req.Pseudo, req.OrgID),
 		OrgID:       req.OrgID,
 		Role:        role,
 		DisplayName: req.DisplayName,
@@ -271,22 +287,16 @@ func (s *Service) ListRequests() ([]*AccountRequest, error) {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 func saveWallet(mspDir, certPEM, keyPEM, caCertPEM string) error {
-	dirs := []string{
-		filepath.Join(mspDir, "signcerts"),
-		filepath.Join(mspDir, "keystore"),
-		filepath.Join(mspDir, "cacerts"),
+	writes := map[string]string{
+		walletCertFile:   certPEM,
+		walletKeyFile:    keyPEM,
+		walletCACertFile: caCertPEM,
 	}
-	for _, d := range dirs {
-		if err := os.MkdirAll(d, 0700); err != nil {
+	for rel, data := range writes {
+		path := filepath.Join(mspDir, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
 			return err
 		}
-	}
-	writes := map[string]string{
-		filepath.Join(mspDir, "signcerts", "cert.pem"): certPEM,
-		filepath.Join(mspDir, "keystore", "key.pem"):   keyPEM,
-		filepath.Join(mspDir, "cacerts", "ca.pem"):     caCertPEM,
-	}
-	for path, data := range writes {
 		if err := os.WriteFile(path, []byte(data), 0600); err != nil {
 			return err
 		}

@@ -19,6 +19,12 @@ var ErrBlockchainUnavailable = errors.New("model: adapter blockchain non configu
 // le même traitement côté appelant (retry, message "réessayez plus tard").
 var ErrBlockchainUnreachable = errors.New("model: infrastructure blockchain injoignable")
 
+// ErrSignerRequired est retournée par BlockchainPort.StoreModelRecord quand
+// aucune identité d'utilisateur n'est disponible pour signer l'écriture :
+// toute écriture sur le ledger est signée par le certificat de l'utilisateur
+// qui l'initie, jamais par une identité d'organisation partagée (ADR-12).
+var ErrSignerRequired = errors.New("model: écriture sur le ledger impossible sans identité signataire de l'utilisateur (wallet)")
+
 // ErrNoThumbnailSource est retournée par Service.RegenerateThumbnail quand l'asset
 // n'a aucun lien externe (Links) — seule source de miniature régénérable côté serveur.
 var ErrNoThumbnailSource = errors.New("model: aucun lien externe enregistré pour régénérer la miniature")

@@ -13,6 +13,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"myr-core/domain/model"
+	"myr-core/domain/session"
 )
 
 var modelCmd = &cobra.Command{
@@ -62,6 +63,10 @@ Examples:
 		if tagsStr != "" {
 			tags = strings.Split(tagsStr, ",")
 		}
+		ownerID, err := resolveOwner(sessionSvc, ownerID)
+		if err != nil {
+			return err
+		}
 
 		return runModelAdd(cmd.OutOrStdout(), modelSvc, model.AddRequest{
 			FilePath:    args[0],
@@ -77,6 +82,21 @@ Examples:
 	},
 }
 
+// resolveOwner retourne le propriétaire d'un asset créé en ligne de commande :
+// l'identité du compte local CLI (SessionIdentity), dont le wallet signera sa
+// soumission sur le ledger (ADR-12). --owner-id, s'il est donné, doit désigner
+// cette identité ; sans compte local, il est repris tel quel.
+func resolveOwner(ss session.SessionService, ownerFlag string) (string, error) {
+	handle, ok := SessionIdentity(ss)
+	if !ok {
+		return ownerFlag, nil
+	}
+	if ownerFlag != "" && ownerFlag != handle {
+		return "", fmt.Errorf("--owner-id %q ne désigne pas l'identité du compte local %q : un asset appartient à l'identité qui le soumet", ownerFlag, handle)
+	}
+	return handle, nil
+}
+
 // ── submit ────────────────────────────────────────────────────────────────────
 
 // runModelSubmit soumet n'importe quel asset (composant simple ou décomposé) à
@@ -86,6 +106,9 @@ Examples:
 // specs/3-Conception/Conception_intro.md). note n'est utilisée que dans ce cas.
 func runModelSubmit(w io.Writer, svc model.ModelService, id, note string) error {
 	m, err := svc.Submit(id, note)
+	if errors.Is(err, model.ErrSignerRequired) {
+		return fmt.Errorf("%w — créez le compte local de votre identité enrôlée : myr session create --name <pseudo> --org-id <org>", err)
+	}
 	if err != nil {
 		return err
 	}
@@ -420,7 +443,7 @@ func init() {
 	modelAddCmd.Flags().String("category", "", "Catégorie (base, amelioration, variation, adaptation, derivation, extension, regression)")
 	modelAddCmd.Flags().String("parent", "", "ID du composant parent (lignée)")
 	modelAddCmd.Flags().String("license", "", "ID de licence dans le catalogue")
-	modelAddCmd.Flags().String("owner-id", "", "ID de l'identité propriétaire")
+	modelAddCmd.Flags().String("owner-id", "", "Identité propriétaire (pseudo@org) — par défaut celle du compte local (myr session), seule autorisée à soumettre l'asset")
 	modelAddCmd.Flags().String("tags", "", "Tags separes par des virgules")
 	modelAddCmd.MarkFlagRequired("name")
 

@@ -55,16 +55,42 @@ func main() {
 
 	active, _ := networkSvc.GetActive()
 
+	var caPort identity.CAPort
+	if active != nil && active.CAEndpoint != "" {
+		cfg := fabricadapter.ConfigFromProfile(active)
+		if ca, err := fabricadapter.NewCAClient(cfg); err == nil {
+			caPort = ca
+		}
+	}
+	walletDir := filepath.Join(data, "wallets")
+	_ = os.MkdirAll(walletDir, 0700)
+	identitySvc := identity.NewService(walletDir, caPort)
+
+	sessionStore := localstorage.NewJSONSessionStore(filepath.Join(data, "session.json"))
+	sessionSvc := session.NewService(sessionStore)
+
 	// ── Connexion Gateway Fabric (non bloquante) ──────────────────────────────
 	// bc reste nil si Fabric est indisponible — pas de repli silencieux vers un
 	// autre stockage : les opérations sur les modèles retournent alors
 	// model.ErrBlockchainUnavailable (voir domain/model/service.go).
+	// L'identité du profil réseau ne fait que lire : les écritures sont signées
+	// par le wallet de l'identité du compte local CLI (myr session, ADR-12).
 	var bc model.BlockchainPort
 	if active != nil {
 		cfg := fabricadapter.ConfigFromProfile(active)
 		if gw, err := fabricadapter.NewGatewayClient(cfg); err == nil {
 			defer gw.Close()
 			bc = fabricadapter.NewFabricBlockchain(gw)
+			if handle, ok := cli.SessionIdentity(sessionSvc); ok {
+				if w, err := identitySvc.Wallet(handle); err == nil {
+					if ugw, err := gw.ForIdentity(w.OrgID, w.CertPath(), w.KeyPath()); err == nil {
+						defer ugw.Close()
+						bc = fabricadapter.NewUserFabricBlockchain(ugw)
+					} else {
+						fmt.Fprintf(os.Stderr, "myr: wallet %s inutilisable, accès au ledger en lecture seule : %v\n", handle, err)
+					}
+				}
+			}
 		}
 	}
 	// store partage le même fichier assets.json que myr-api (voir dataDir ci-dessus) —
@@ -89,21 +115,7 @@ func main() {
 	roleStore := localstorage.NewJSONRoleStore(filepath.Join(data, "roles.json"))
 	roleSvc := role.NewService(roleStore)
 
-	var caPort identity.CAPort
-	if active != nil && active.CAEndpoint != "" {
-		cfg := fabricadapter.ConfigFromProfile(active)
-		if ca, err := fabricadapter.NewCAClient(cfg); err == nil {
-			caPort = ca
-		}
-	}
-	walletDir := filepath.Join(data, "wallets")
-	_ = os.MkdirAll(walletDir, 0700)
-	identitySvc := identity.NewService(walletDir, caPort)
-
 	paymentSvc := payment.NewService(noopPaymentGateway{})
-
-	sessionStore := localstorage.NewJSONSessionStore(filepath.Join(data, "session.json"))
-	sessionSvc := session.NewService(sessionStore)
 
 	cli.Version = version
 	cli.Execute(modelSvc, channelSvc, paymentSvc, networkSvc, roleSvc, identitySvc, sessionSvc)

@@ -9,6 +9,7 @@ import (
 
 type mockIdentitySvc struct {
 	listLocalWallets func() ([]identity.WalletEntry, error)
+	wallet           func(handle string) (identity.WalletEntry, error)
 	register         func(ctx context.Context, req identity.RegisterRequest) (string, error)
 	enroll           func(ctx context.Context, name, secret, orgID string) (identity.WalletEntry, error)
 	getStatus        func(ctx context.Context, wallet identity.WalletEntry) (string, error)
@@ -26,6 +27,12 @@ func (m *mockIdentitySvc) ListLocalWallets() ([]identity.WalletEntry, error) {
 		return m.listLocalWallets()
 	}
 	return nil, nil
+}
+func (m *mockIdentitySvc) Wallet(handle string) (identity.WalletEntry, error) {
+	if m.wallet != nil {
+		return m.wallet(handle)
+	}
+	return identity.WalletEntry{}, identity.ErrWalletNotFound
 }
 func (m *mockIdentitySvc) Register(ctx context.Context, req identity.RegisterRequest) (string, error) {
 	if m.register != nil {

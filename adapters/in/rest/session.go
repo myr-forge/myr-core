@@ -21,6 +21,7 @@ type myrSession struct {
 	Token     string    `json:"token"`
 	Role      string    `json:"role"`                 // "reader" | "contributor" | "admin"
 	Pseudo    string    `json:"pseudo"`
+	Handle    string    `json:"handle,omitempty"`     // identité « pseudo@org » dont le wallet signe les écritures (ADR-12) ; vide pour un invité
 	Channel   string    `json:"channel"`              // canal Fabric actif
 	NetworkID string    `json:"network_id,omitempty"` // réseau Fabric actif (multi-réseau)
 	ExpiresAt time.Time `json:"expires_at"`
@@ -29,7 +30,7 @@ type myrSession struct {
 // sessionBackend est l'interface du store de sessions — implémentée par sessionStore (mémoire)
 // et redisSessionStore (Redis).
 type sessionBackend interface {
-	create(pseudo, role, channel string) (*myrSession, error)
+	create(pseudo, handle, role, channel string) (*myrSession, error)
 	get(token string) *myrSession
 	setNetwork(token, networkID string) bool
 	setChannel(token, channel string) bool
@@ -91,7 +92,7 @@ func (s *sessionStore) saveToFile() {
 	os.WriteFile(s.filePath, data, 0600) //nolint:errcheck
 }
 
-func (s *sessionStore) create(pseudo, role, channel string) (*myrSession, error) {
+func (s *sessionStore) create(pseudo, handle, role, channel string) (*myrSession, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		return nil, fmt.Errorf("génération token impossible : %w", err)
@@ -100,6 +101,7 @@ func (s *sessionStore) create(pseudo, role, channel string) (*myrSession, error)
 		Token:     hex.EncodeToString(b),
 		Role:      role,
 		Pseudo:    pseudo,
+		Handle:    handle,
 		Channel:   channel,
 		ExpiresAt: time.Now().Add(sessionTTL),
 	}

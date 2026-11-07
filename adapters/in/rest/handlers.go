@@ -105,7 +105,11 @@ func clientIP(r *http.Request) string {
 // Implémenté par fabric.NetworkPool — défini ici pour éviter l'import circulaire
 // entre adapters/in et adapters/out.
 type blockchainRouter interface {
+	// BlockchainFor retourne un accès au réseau en lecture seule.
 	BlockchainFor(networkID string) model.BlockchainPort
+	// BlockchainForSigner retourne un accès au réseau dont les écritures sont
+	// signées par l'identité (MSP, certificat, clé) de l'utilisateur (ADR-12).
+	BlockchainForSigner(networkID, mspID, certPath, keyPath string) model.BlockchainPort
 }
 
 type Handler struct {
@@ -262,7 +266,8 @@ func (h *Handler) networkFor(r *http.Request) string {
 
 // svcFor retourne un model.ModelService configuré pour le réseau actif de la requête.
 // En mode legacy (bcRouter non configuré ou networkID vide), retourne le modelSvc pré-wired.
-// En mode multi-réseau, crée une instance légère par requête avec le bon blockchain.
+// En mode multi-réseau, crée une instance légère par requête avec le bon blockchain,
+// signé par le wallet de l'utilisateur de la session (voir blockchainFor).
 func (h *Handler) svcFor(r *http.Request) model.ModelService {
 	if h.bcRouter == nil {
 		return h.modelSvc
@@ -272,7 +277,7 @@ func (h *Handler) svcFor(r *http.Request) model.ModelService {
 		// Pas de réseau configuré dans le pool — utilise le service wired au démarrage
 		return h.modelSvc
 	}
-	bc := h.bcRouter.BlockchainFor(networkID)
+	bc := h.blockchainFor(r, networkID)
 	svc := model.NewService(bc, h.fileStore)
 	if h.connStore != nil {
 		svc = svc.WithConnStore(h.connStore)
@@ -281,6 +286,31 @@ func (h *Handler) svcFor(r *http.Request) model.ModelService {
 		svc = svc.WithOGImageFetcher(h.ogImageFetcher)
 	}
 	return svc.WithThumbStore(h.thumbStore).WithIfaceStore(h.ifaceStore).WithDraftStore(h.draftStore).WithRemovedStore(h.removedStore)
+}
+
+// blockchainFor retourne l'accès au réseau networkID pour la requête : signé
+// par le wallet de l'identité de la session (ADR-12) s'il est disponible sur
+// ce nœud, en lecture seule sinon (invité, session sans identité).
+func (h *Handler) blockchainFor(r *http.Request, networkID string) model.BlockchainPort {
+	if sess := sessionFromCtx(r); sess != nil && sess.Handle != "" && h.identitySvc != nil {
+		w, err := h.identitySvc.Wallet(sess.Handle)
+		if err == nil {
+			return h.bcRouter.BlockchainForSigner(networkID, w.OrgID, w.CertPath(), w.KeyPath())
+		}
+		log.Printf("wallet de %s indisponible, accès au ledger en lecture seule : %v", sess.Handle, err)
+	}
+	return h.bcRouter.BlockchainFor(networkID)
+}
+
+// ownerFor retourne le propriétaire des assets créés par la requête :
+// l'identité de la session (« pseudo@org »), celle dont le wallet signera leur
+// soumission sur le ledger (ADR-12) — la valeur owner_id du formulaire n'est
+// retenue que pour une session sans identité.
+func ownerFor(r *http.Request, formOwner string) string {
+	if sess := sessionFromCtx(r); sess != nil && sess.Handle != "" {
+		return sess.Handle
+	}
+	return formOwner
 }
 
 // channelFor retourne le canal actif de la session, ou le canal par défaut du réseau.
@@ -617,7 +647,7 @@ func assetMatchesQuery(m *model.Model3D, q string) bool {
 //	@Param			name		formData	string	true	"nom du composant (max 256 caractères)"
 //	@Param			description	formData	string	false	"description (max 10000 caractères)"
 //	@Param			category	formData	string	false	"catégorie (défaut: base)"
-//	@Param			owner_id	formData	string	false	"propriétaire"
+//	@Param			owner_id	formData	string	false	"propriétaire — ignoré quand la session est liée à une identité : le propriétaire est alors cette identité (pseudo@org), qui signera la soumission"
 //	@Param			parent_id	formData	string	false	"asset parent (dérivation)"
 //	@Param			channel_id	formData	string	false	"canal cible (défaut: canal de la session)"
 //	@Param			license_id	formData	string	false	"licence"
@@ -656,6 +686,7 @@ func (h *Handler) createAsset(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "owner_id invalide", http.StatusBadRequest)
 		return
 	}
+	ownerID = ownerFor(r, ownerID)
 	if channelID != "" && !validFieldID.MatchString(channelID) {
 		jsonError(w, "channel_id invalide", http.StatusBadRequest)
 		return
@@ -768,7 +799,7 @@ func (h *Handler) applyThumbnailFallback(r *http.Request, assetID, thumb string,
 //	@Accept			multipart/form-data
 //	@Produce		json
 //	@Param			files		formData	file	true	"un ou plusieurs fichiers CAO 3D"
-//	@Param			owner_id	formData	string	false	"propriétaire, partagé par tous les fichiers"
+//	@Param			owner_id	formData	string	false	"propriétaire, partagé par tous les fichiers — ignoré quand la session est liée à une identité (pseudo@org), qui devient le propriétaire"
 //	@Param			channel_id	formData	string	false	"canal cible (défaut: canal de la session)"
 //	@Param			category	formData	string	false	"catégorie, partagée par tous les fichiers (défaut: base)"
 //	@Param			parent_id	formData	string	false	"asset parent, partagé par tous les fichiers"
@@ -799,6 +830,7 @@ func (h *Handler) createComponentsBatch(w http.ResponseWriter, r *http.Request) 
 		jsonError(w, "owner_id invalide", http.StatusBadRequest)
 		return
 	}
+	ownerID = ownerFor(r, ownerID)
 	if channelID != "" && !validFieldID.MatchString(channelID) {
 		jsonError(w, "channel_id invalide", http.StatusBadRequest)
 		return
@@ -2056,11 +2088,16 @@ func jsonError(w http.ResponseWriter, msg string, code int) {
 // internalErr logue l'erreur complète côté serveur et renvoie un message générique au client.
 // Distingue l'indisponibilité de la blockchain — non configurée (ErrBlockchainUnavailable) ou
 // injoignable (ErrBlockchainUnreachable), toutes deux transitoires et non des erreurs de
-// données — des autres échecs du service domaine (500).
+// données — des autres échecs du service domaine (500). Une écriture sur le ledger
+// sans identité signataire (ErrSignerRequired, ADR-12) est un refus d'autorisation (403).
 func internalErr(w http.ResponseWriter, err error) {
 	log.Printf("erreur interne : %v", err)
 	if errors.Is(err, model.ErrBlockchainUnavailable) || errors.Is(err, model.ErrBlockchainUnreachable) {
 		jsonError(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+	if errors.Is(err, model.ErrSignerRequired) {
+		jsonError(w, err.Error()+" — reconnectez-vous avec votre identité (POST /api/identity/session)", http.StatusForbidden)
 		return
 	}
 	jsonError(w, err.Error(), http.StatusInternalServerError)
