@@ -676,13 +676,19 @@ func openNetwork(requireApproval bool, defaultRole string) *mockNetworkSvc {
 	}}
 }
 
+// withCertRole fait porter le rôle role au certificat actif enrôlé par svc —
+// la session ouverte par loginToken porte alors ce rôle.
+func withCertRole(svc *mockIdentitySvc, role string) *mockIdentitySvc {
+	svc.enroll = func(_ context.Context, name, _, orgID string) (identity.WalletEntry, error) {
+		return identity.WalletEntry{Handle: name + "@" + orgID, Name: name, OrgID: orgID, Status: identity.StatusActive, Role: role}, nil
+	}
+	return svc
+}
+
 // asAdmin fait porter le rôle admin au certificat enrôlé par svc — la session
 // ouverte par loginToken dispose alors de identity.admin.
 func asAdmin(svc *mockIdentitySvc) *mockIdentitySvc {
-	svc.enroll = func(_ context.Context, name, _, orgID string) (identity.WalletEntry, error) {
-		return identity.WalletEntry{Handle: name + "@" + orgID, Name: name, OrgID: orgID, Status: identity.StatusActive, Role: identity.RoleAdmin}, nil
-	}
-	return svc
+	return withCertRole(svc, identity.RoleAdmin)
 }
 
 // / @brief  POST /api/identity/request transmet la demande et les règles du réseau actif
@@ -1164,6 +1170,20 @@ func TestHandleIdentitySession_RoleFromCertificate(t *testing.T) {
 	}
 	if w := do(t, mux, http.MethodGet, "/api/identity/requests", ""); w.Code != http.StatusOK {
 		t.Errorf("code 200 attendu sur une route identity.admin, obtenu %d", w.Code)
+	}
+}
+
+// / @brief  Une session ouverte avec un certificat reader ne peut pas écrire (RM21)
+// / @input  certificat actif portant Myr.role=reader ; lecture puis création d'un composant
+// / @expect lecture 200 ; écriture 403 (permission write absente)
+func TestHandleIdentitySession_ReaderCannotWrite(t *testing.T) {
+	mux := newIdentityMux(t, withCertRole(&mockIdentitySvc{}, identity.RoleReader))
+	if w := do(t, mux, http.MethodGet, "/api/refs", ""); w.Code != http.StatusOK {
+		t.Fatalf("lecture : code 200 attendu, obtenu %d", w.Code)
+	}
+	w := do(t, mux, http.MethodPost, "/api/components", `{"name":"bracket","category":"base"}`)
+	if w.Code != http.StatusForbidden || !strings.Contains(w.Body.String(), "droits insuffisants") {
+		t.Errorf("écriture : 403 « droits insuffisants » attendu pour un reader, obtenu %d — body: %s", w.Code, w.Body.String())
 	}
 }
 
