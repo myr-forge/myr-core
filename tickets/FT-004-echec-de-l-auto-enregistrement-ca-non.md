@@ -2,7 +2,7 @@
 id: FT-004
 titre: "Échec de l'auto-enregistrement CA non journalisé"
 type: anomalie
-statut: resolu
+statut: en-cours
 severite: majeure
 detecte: 2026-07-17
 maj: 2026-11-08
@@ -13,7 +13,7 @@ enf: [ENF11]
 tags:
   - ticket
   - ticket/anomalie
-  - statut/resolu
+  - statut/en-cours
   - severite/majeure
   - domaine/identity
   - uc/UCA01
@@ -21,7 +21,7 @@ tags:
 ---
 # FT-004 — Échec de l'auto-enregistrement CA non journalisé
 
-> **Anomalie** · sévérité **majeure** · statut **Résolu** · détecté le 2026-07-17
+> **Anomalie** · sévérité **majeure** · statut **En cours** · détecté le 2026-07-17
 > Source : roadmap_dev.md § Écart connexe — échec AutoRegister avalé sans trace
 
 ## Constat
@@ -62,3 +62,4 @@ Journaliser l'échec sans données sensibles (pseudo et cause, jamais le secret)
 - 2026-07-17 — Écart documenté dans la roadmap
 - 2026-10-02 — Ticket créé ; constat revérifié au commit `2aa69c1`
 - 2026-11-08 — Corrigé — commit `e2724c9` : `AutoRegister` est remplacé par `RequestAccess`, qui ne masque plus l'échec CA — la demande est conservée au statut `failed` et l'erreur est retournée (500, journalisée par `internalErr` ; message d'erreur en CLI) ; commit `e8498f3` : le message nomme l'identité `pseudo@org`, sans secret ni e-mail (test `TestRequestAccess_CAError_Failed`). La cause racine FT-003 reste ouverte. Branche `feature/ledger-invariants`, ni fusionnée ni déployée
+- 2026-11-08 — Repassé en cours : la correction est sur la branche `feature/ledger-invariants`, pas encore fusionnée dans `develop` (règle du cycle de vie, `_Index_tickets.md`) — passera à `resolu` à la fusion

@@ -19,13 +19,15 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | À vérifier | 2 |
 | À trancher (PO) | 13 |
 | Différé | 1 |
-| Résolu | 5 |
+| En cours | 4 |
+| Résolu | 1 |
 
 ## Critiques à traiter en premier
 
 | Ticket | Type | Sévérité | Statut | Use cases |
 |--------|------|----------|--------|-----------|
 | [FT-001 — Propriété des assets non contrôlée côté serveur](FT-001-propriete-des-assets-non-controlee-cote-serveur.md) | Sécurité | critique | Ouvert | UCCE01, UCCE02, UCCE07, UCMOD03, UCMOD04, UCMOD08, UCPI07 |
+| [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md) | Sécurité | critique | En cours | UCA02, UCA05, UCA07 |
 | [FT-003 — Le client CA du serveur REST ignore le profil réseau actif](FT-003-le-client-ca-du-serveur-rest-ignore.md) | Anomalie | critique | À trancher (PO) | UCA01 |
 | [FT-024 — Chaincode myrcc absent du canal de production](FT-024-chaincode-myrcc-absent-du-canal-de-production.md) | Anomalie | critique | À vérifier | UCCL01, UCCE01, UCMOD06 |
 
@@ -82,15 +84,20 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 |--------|------|----------|--------|-----------|
 | [FT-023 — Décomposition STEP assistée : prérequis non réunis](FT-023-decomposition-step-assistee-prerequis-non-reunis.md) | Écart spec ↔ code | mineure | Différé | UCAM09 |
 
+## En cours
+
+| Ticket | Type | Sévérité | Statut | Use cases |
+|--------|------|----------|--------|-----------|
+| [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md) | Sécurité | critique | En cours | UCA02, UCA05, UCA07 |
+| [FT-004 — Échec de l'auto-enregistrement CA non journalisé](FT-004-echec-de-l-auto-enregistrement-ca-non.md) | Anomalie | majeure | En cours | UCA01 |
+| [FT-005 — Aucune approbation manuelle des demandes de compte](FT-005-aucune-approbation-manuelle-des-demandes-de-compte.md) | Écart spec ↔ code | majeure | En cours | UCA01, UCA08 |
+| [FT-034 — Modèle de domaine : ligne RM22 décrivant un écart](FT-034-modele-de-domaine-ligne-rm22-decrivant-un.md) | Incohérence documentaire | mineure | En cours | UCA02 |
+
 ## Résolu
 
 | Ticket | Type | Sévérité | Statut | Use cases |
 |--------|------|----------|--------|-----------|
 | [FT-017 — GetModuleInterfaces n'exposait qu'une interface par asset partagé](FT-017-getmoduleinterfaces-n-exposait-qu-une-interface-par.md) | Anomalie | majeure | Résolu | UCMOD04, UCAM02 |
-| [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md) | Sécurité | critique | Résolu | UCA02, UCA05, UCA07 |
-| [FT-004 — Échec de l'auto-enregistrement CA non journalisé](FT-004-echec-de-l-auto-enregistrement-ca-non.md) | Anomalie | majeure | Résolu | UCA01 |
-| [FT-005 — Aucune approbation manuelle des demandes de compte](FT-005-aucune-approbation-manuelle-des-demandes-de-compte.md) | Écart spec ↔ code | majeure | Résolu | UCA01, UCA08 |
-| [FT-034 — Modèle de domaine : ligne RM22 décrivant un écart](FT-034-modele-de-domaine-ligne-rm22-decrivant-un.md) | Incohérence documentaire | mineure | Résolu | UCA02 |
 
 ## Fonctionnement
 
@@ -103,8 +110,13 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 
 ### Faire vivre un ticket
 
-- Changer `statut` (et le tag `statut/…`) et `maj` dans le frontmatter, puis ajouter une ligne datée à l'**Historique** (décision prise, commit de correction, vérification serveur).
-- Un ticket n'est jamais supprimé : une fois corrigé, il passe à `resolu` avec le commit en historique ; abandonné ou sans objet, il passe à `ferme` avec la raison.
+- Changer `statut` (et le tag `statut/…`) et `maj` dans le frontmatter, ainsi que la ligne d'en-tête, puis ajouter une ligne datée à l'**Historique** (décision prise, commit de correction, vérification serveur) et déplacer la ligne du ticket dans le tableau de son nouveau statut ci-dessus, compteurs de la synthèse compris.
+- Cycle de vie d'une correction :
+  1. `ouvert` — constat établi ; `a-trancher` s'il attend une décision du PO, `a-verifier` s'il doit être revérifié, `differe` s'il est volontairement reporté ;
+  2. `en-cours` — la correction est commitée sur une branche feature, pas encore fusionnée (commit en historique, critères de clôture cochés au fil de l'eau) ;
+  3. `resolu` — la branche est fusionnée dans `develop` (commit de fusion en historique) ;
+  4. la vérification en production (déploiement, contrôle sur le serveur) s'ajoute en ligne d'historique, sans changer le statut.
+- Un ticket n'est jamais supprimé : abandonné ou sans objet, il passe à `ferme` avec la raison.
 - Un message de commit qui corrige un ticket cite son identifiant (ex. `fix(identity): rôle de session lu depuis le certificat (FT-002)`).
 
 ### Valeurs

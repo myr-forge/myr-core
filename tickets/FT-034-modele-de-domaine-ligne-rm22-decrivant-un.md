@@ -2,7 +2,7 @@
 id: FT-034
 titre: "Modèle de domaine : ligne RM22 décrivant un écart"
 type: incoherence
-statut: resolu
+statut: en-cours
 severite: mineure
 detecte: 2026-10-02
 maj: 2026-11-08
@@ -13,7 +13,7 @@ enf: []
 tags:
   - ticket
   - ticket/incoherence
-  - statut/resolu
+  - statut/en-cours
   - severite/mineure
   - domaine/identity
   - uc/UCA02
@@ -21,7 +21,7 @@ tags:
 ---
 # FT-034 — Modèle de domaine : ligne RM22 décrivant un écart
 
-> **Incohérence documentaire** · sévérité **mineure** · statut **Résolu** · détecté le 2026-10-02
+> **Incohérence documentaire** · sévérité **mineure** · statut **En cours** · détecté le 2026-10-02
 > Source : Annotations #incoherence de Modele_Domaine.md
 
 ## Constat
@@ -61,3 +61,4 @@ Réécrire la ligne RM22 selon la règle cible, retirer l'annotation « non vali
 
 - 2026-10-02 — Ticket créé
 - 2026-11-08 — Corrigé — commit `b86eb54` : ligne RM22 réécrite selon la règle (changement de rôle par l'administrateur, effectif au prochain ré-enrôlement), relation « owns » décrite par la cible ADR-12 (`OwnerID` = identité signataire), les deux annotations `#incoherence` et le tag `relecture/incoherence` levés ; lignes RM43 à RM46 ajoutées. FT-001 reste ouvert pour le contrôle de propriété côté domaine. Branche `feature/ledger-invariants`, ni fusionnée ni déployée
+- 2026-11-08 — Repassé en cours : la correction est sur la branche `feature/ledger-invariants`, pas encore fusionnée dans `develop` (règle du cycle de vie, `_Index_tickets.md`) — passera à `resolu` à la fusion
