@@ -77,7 +77,7 @@ func (h *Handler) handleIdentityWallets(w http.ResponseWriter, r *http.Request) 
 	}
 	wallets, err := h.identitySvc.ListLocalWallets()
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	sess := sessionFromCtx(r)
@@ -175,7 +175,7 @@ func (h *Handler) handleIdentityStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	status, err := h.identitySvc.GetStatus(context.Background(), we)
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	jsonOK(w, map[string]string{"handle": handle, "status": status})
@@ -248,7 +248,7 @@ func (h *Handler) handleIdentityRequest(w http.ResponseWriter, r *http.Request) 
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		return
 	case err != nil:
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -317,7 +317,7 @@ func (h *Handler) handleIdentityRequestDecision(w http.ResponseWriter, r *http.R
 	case errors.Is(err, identity.ErrRequestNotPending):
 		jsonError(w, err.Error(), http.StatusConflict)
 	case err != nil:
-		internalErr(w, err)
+		h.internalErr(w, err)
 	default:
 		jsonOK(w, req)
 	}
@@ -368,7 +368,7 @@ func (h *Handler) handleIdentityAccounts(w http.ResponseWriter, r *http.Request)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		return
 	case err != nil:
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -399,7 +399,7 @@ func (h *Handler) handleIdentityRequests(w http.ResponseWriter, r *http.Request)
 	}
 	reqs, err := h.identitySvc.ListRequests()
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	if reqs == nil {

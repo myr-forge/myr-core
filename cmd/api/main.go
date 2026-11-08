@@ -185,6 +185,13 @@ func main() {
 		WithBuildDate(BuildDate).
 		WithVersion(version)
 
+	// MYR_DEBUG_ERRORS=1 (serveurs de test uniquement) : le détail des erreurs
+	// internes est renvoyé au client, en plus de la référence toujours présente.
+	if os.Getenv("MYR_DEBUG_ERRORS") == "1" {
+		handler = handler.WithDebugErrors(true)
+		log.Printf("⚠  MYR_DEBUG_ERRORS=1 : le détail des erreurs internes est renvoyé aux clients — à réserver aux serveurs de test")
+	}
+
 	// Redis optionnel — si REDIS_URL est défini, les sessions sont partagées entre instances.
 	if redisURL := os.Getenv("REDIS_URL"); redisURL != "" {
 		handler = handler.WithRedisSession(redisURL)

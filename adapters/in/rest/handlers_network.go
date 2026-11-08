@@ -28,7 +28,7 @@ func (h *Handler) handleNetworks(w http.ResponseWriter, r *http.Request) {
 	}
 	profiles, err := h.networkSvc.List()
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 
@@ -102,7 +102,7 @@ func (h *Handler) getNetworkActive(w http.ResponseWriter, r *http.Request) {
 	}
 	profiles, err := h.networkSvc.List()
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	for _, p := range profiles {
@@ -171,7 +171,7 @@ func (h *Handler) putNetworkActive(w http.ResponseWriter, r *http.Request) {
 	}
 	profiles, err := h.networkSvc.List()
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	var found bool

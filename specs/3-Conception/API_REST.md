@@ -33,7 +33,8 @@ tags:
 - **Base URL :** `http(s)://<host>:<port>/api/`
 - **Format :** JSON — `Content-Type: application/json`
 - **Auth :** token opaque de session — en-tête `X-Myr-Token: <token>` ( voir `specs/3-Conception/DC_D1_Auth_Identity.md`)
-- **Erreurs :** `{ "error": "<code>", "message": "<description>" }`
+- **Erreurs :** `{ "error": "<code>", "message": "<description>" }` #remarque les handlers renvoient `{ "error": "<message>" }`, sans code distinct du message — format à trancher
+- **Erreurs internes :** toute erreur interne porte une référence courte (`"ref"`, 8 caractères hexadécimaux, répétée dans l'en-tête `X-Myr-Error-Ref`) qui la relie à sa ligne du journal serveur. Pour une `500`, le client ne reçoit que `erreur interne (réf. <ref>)` ; le détail n'est renvoyé que si le serveur est démarré avec `MYR_DEBUG_ERRORS=1`, réservé aux serveurs de test. L'indisponibilité de la blockchain (`503`) et l'écriture sans identité signataire (`403`) restent explicites
 - **Succès :** objet ou tableau JSON directement (pas d'enveloppe `{ data: ... }`)
 
 ### Niveaux d'accès

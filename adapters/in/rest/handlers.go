@@ -3,6 +3,8 @@ package rest
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -135,6 +137,7 @@ type Handler struct {
 	fabricConnected bool   // vrai si le gateway Fabric a démarré correctement
 	buildDate       string // injecté via ldflags à la compilation
 	version         string // injecté via ldflags à la compilation
+	debugErrors     bool   // vrai : le détail des erreurs internes est renvoyé au client (serveurs de test)
 }
 
 func NewHandler(svc model.ModelService, ts model.ThumbnailStore, is model.InterfaceStore) *Handler {
@@ -150,6 +153,14 @@ func NewHandler(svc model.ModelService, ts model.ThumbnailStore, is model.Interf
 // WithIdentityService attache le service d'identité au handler (requis en mode blockchain).
 func (h *Handler) WithIdentityService(svc identity.IdentityService) *Handler {
 	h.identitySvc = svc
+	return h
+}
+
+// WithDebugErrors renvoie au client le détail des erreurs internes en plus de
+// leur référence — réservé aux serveurs de test : le détail peut révéler l'état
+// interne du serveur (identités existantes, chemins, erreurs d'infrastructure).
+func (h *Handler) WithDebugErrors(on bool) *Handler {
+	h.debugErrors = on
 	return h
 }
 
@@ -537,7 +548,7 @@ func (h *Handler) listGraph(w http.ResponseWriter, r *http.Request) {
 	degraded := false
 	if err != nil {
 		if !model.IsDegradedListErr(err) || len(all) == 0 {
-			internalErr(w, err)
+			h.internalErr(w, err)
 			return
 		}
 		// Mode dégradé : la blockchain est injoignable mais des brouillons locaux
@@ -724,7 +735,7 @@ func (h *Handler) createAsset(w http.ResponseWriter, r *http.Request) {
 
 	m, err := h.createOneComponent(r, req, file, header)
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 
@@ -1034,7 +1045,7 @@ func (h *Handler) regenerateThumbnail(w http.ResponseWriter, r *http.Request, id
 	}
 	dataURL, err := h.svcFor(r).RegenerateThumbnail(id)
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	jsonOK(w, map[string]string{"thumbnail": dataURL})
@@ -1069,7 +1080,7 @@ func (h *Handler) saveComponentThumbnail(w http.ResponseWriter, r *http.Request,
 		return
 	}
 	if err := h.svcFor(r).SaveThumbnail(id, body.Thumbnail); err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -1103,7 +1114,7 @@ func (h *Handler) verifyAsset(w http.ResponseWriter, r *http.Request, id string)
 		jsonOK(w, map[string]any{"ok": false, "reason": "hash_mismatch", "location": location})
 		return
 	case err != nil:
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	resp := map[string]any{"ok": ok}
@@ -1145,7 +1156,7 @@ func (h *Handler) submitComponent(w http.ResponseWriter, r *http.Request, id str
 	_ = json.NewDecoder(r.Body).Decode(&body)
 	m, err := h.svcFor(r).Submit(id, body.Note)
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
@@ -1203,12 +1214,12 @@ func (h *Handler) handleComponentAssemblies(w http.ResponseWriter, r *http.Reque
 			return
 		}
 		if err := h.svcFor(r).AddAssemblyToModule(id, body.ConnectionID); err != nil {
-			internalErr(w, err)
+			h.internalErr(w, err)
 			return
 		}
 		m, err := h.svcFor(r).Get(id, h.channelFor(r))
 		if err != nil {
-			internalErr(w, err)
+			h.internalErr(w, err)
 			return
 		}
 		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
@@ -1237,12 +1248,12 @@ func (h *Handler) removeComponentAssembly(w http.ResponseWriter, r *http.Request
 		return
 	}
 	if err := h.svcFor(r).RemoveAssemblyFromModule(id, connID); err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	m, err := h.svcFor(r).Get(id, h.channelFor(r))
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
@@ -1289,7 +1300,7 @@ func (h *Handler) handleComponentInstances(w http.ResponseWriter, r *http.Reques
 		}
 		m, err := h.svcFor(r).AddAssetToWorkspace(id, body.AssetID)
 		if err != nil {
-			internalErr(w, err)
+			h.internalErr(w, err)
 			return
 		}
 		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
@@ -1320,7 +1331,7 @@ func (h *Handler) handleComponentInstance(w http.ResponseWriter, r *http.Request
 	case http.MethodDelete:
 		m, err := h.svcFor(r).RemoveAssetFromWorkspace(id, instanceID)
 		if err != nil {
-			internalErr(w, err)
+			h.internalErr(w, err)
 			return
 		}
 		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
@@ -1336,7 +1347,7 @@ func (h *Handler) handleComponentInstance(w http.ResponseWriter, r *http.Request
 		}
 		m, err := h.svcFor(r).UpdateInstancePosition(id, instanceID, body.X, body.Y)
 		if err != nil {
-			internalErr(w, err)
+			h.internalErr(w, err)
 			return
 		}
 		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
@@ -1368,7 +1379,7 @@ func (h *Handler) patchComponent(w http.ResponseWriter, r *http.Request, id stri
 	}
 	m, err := h.svcFor(r).UpdateAsset(req)
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
@@ -1427,7 +1438,7 @@ func (h *Handler) getComponent(w http.ResponseWriter, r *http.Request, id string
 //	@Router			/components/{id} [delete]
 func (h *Handler) deleteComponent(w http.ResponseWriter, r *http.Request, id string) {
 	if err := h.svcFor(r).Remove(id); err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -1451,7 +1462,7 @@ func (h *Handler) handleComponentTree(w http.ResponseWriter, r *http.Request, id
 	}
 	all, err := h.svcFor(r).List(h.channelFor(r))
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 
@@ -1556,7 +1567,7 @@ func (h *Handler) createConnection(w http.ResponseWriter, r *http.Request) {
 	}
 	conn, err := h.svcFor(r).AddConnection(body.From, body.To, body.Label)
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -1585,7 +1596,7 @@ func (h *Handler) handleConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.svcFor(r).RemoveConnection(id); err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -1630,7 +1641,7 @@ func (h *Handler) handleAssemblyLinks(w http.ResponseWriter, r *http.Request) {
 	}
 	conn, err := h.svcFor(r).AddAssemblyLink(body.FromIfaceID, body.ToIfaceID, body.Label, body.FromInstanceID, body.ToInstanceID, body.FastenerAssetID)
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -1690,7 +1701,7 @@ func (h *Handler) handleVirtualConnect(w http.ResponseWriter, r *http.Request) {
 	}
 	conn, err := h.svcFor(r).ConnectVirtualToPhysical(body.VirtualIfaceID, body.PhysicalIfaceID, popup, body.FromInstanceID, body.ToInstanceID)
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -1859,7 +1870,7 @@ func (h *Handler) handleComponentInterfaces(w http.ResponseWriter, r *http.Reque
 	case http.MethodGet:
 		ifaces, err := h.svcFor(r).GetModuleInterfaces(assetID)
 		if err != nil {
-			internalErr(w, err)
+			h.internalErr(w, err)
 			return
 		}
 		if ifaces == nil {
@@ -1874,7 +1885,7 @@ func (h *Handler) handleComponentInterfaces(w http.ResponseWriter, r *http.Reque
 		}
 		iface.AssetID = assetID
 		if err := h.svcFor(r).AddInterface(&iface); err != nil {
-			internalErr(w, err)
+			h.internalErr(w, err)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
@@ -1913,7 +1924,7 @@ func (h *Handler) handleInterface(w http.ResponseWriter, r *http.Request) {
 		// Récupérer l'interface avant suppression pour connaître l'assetID
 		existing, _ := h.svcFor(r).GetInterface(id)
 		if err := h.svcFor(r).RemoveInterface(id); err != nil {
-			internalErr(w, err)
+			h.internalErr(w, err)
 			return
 		}
 		// Maintenir l'invariant : au moins un slot virtuel par asset
@@ -1933,7 +1944,7 @@ func (h *Handler) handleInterface(w http.ResponseWriter, r *http.Request) {
 		}
 		existing.ID = id // prevent ID overwrite
 		if err := h.svcFor(r).UpdateInterface(existing); err != nil {
-			internalErr(w, err)
+			h.internalErr(w, err)
 			return
 		}
 		jsonOK(w, existing)
@@ -1960,7 +1971,7 @@ func (h *Handler) handleRefs(w http.ResponseWriter, r *http.Request) {
 	}
 	refs, err := h.svcFor(r).GetRefs()
 	if err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	jsonOK(w, refs)
@@ -1990,7 +2001,7 @@ func (h *Handler) handleRefCategories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.svcFor(r).AddRefCategory(body.Name); err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -2023,7 +2034,7 @@ func (h *Handler) handleRefTypes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.svcFor(r).AddRefType(body.Category, body.Name); err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -2056,7 +2067,7 @@ func (h *Handler) handleRefUnits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.svcFor(r).AddRefUnit(body.Category, body.Name); err != nil {
-		internalErr(w, err)
+		h.internalErr(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -2085,22 +2096,41 @@ func jsonError(w http.ResponseWriter, msg string, code int) {
 	json.NewEncoder(w).Encode(map[string]string{"error": msg})
 }
 
-// internalErr logue l'erreur complète côté serveur et renvoie un message générique au client.
-// Distingue l'indisponibilité de la blockchain — non configurée (ErrBlockchainUnavailable) ou
-// injoignable (ErrBlockchainUnreachable), toutes deux transitoires et non des erreurs de
-// données — des autres échecs du service domaine (500). Une écriture sur le ledger
-// sans identité signataire (ErrSignerRequired, ADR-12) est un refus d'autorisation (403).
-func internalErr(w http.ResponseWriter, err error) {
-	log.Printf("erreur interne : %v", err)
-	if errors.Is(err, model.ErrBlockchainUnavailable) || errors.Is(err, model.ErrBlockchainUnreachable) {
-		jsonError(w, err.Error(), http.StatusServiceUnavailable)
-		return
+// internalErr journalise l'erreur complète côté serveur sous une référence courte,
+// renvoyée au client (champ "ref" et en-tête X-Myr-Error-Ref) : le testeur la
+// communique, l'erreur se retrouve dans le journal du serveur. Distingue
+// l'indisponibilité de la blockchain — non configurée (ErrBlockchainUnavailable)
+// ou injoignable (ErrBlockchainUnreachable), toutes deux transitoires et non des
+// erreurs de données (503) — et l'écriture sur le ledger sans identité signataire
+// (ErrSignerRequired, ADR-12, 403) des autres échecs du service domaine (500).
+// Pour une 500, le client ne reçoit le détail de l'erreur que si le serveur a été
+// démarré avec WithDebugErrors.
+func (h *Handler) internalErr(w http.ResponseWriter, err error) {
+	ref := errorRef()
+	log.Printf("erreur interne [%s] : %v", ref, err)
+	w.Header().Set("X-Myr-Error-Ref", ref)
+	code, msg := http.StatusInternalServerError, "erreur interne"
+	switch {
+	case errors.Is(err, model.ErrBlockchainUnavailable), errors.Is(err, model.ErrBlockchainUnreachable):
+		code, msg = http.StatusServiceUnavailable, err.Error()
+	case errors.Is(err, model.ErrSignerRequired):
+		code, msg = http.StatusForbidden, err.Error()+" — reconnectez-vous avec votre identité (POST /api/identity/session)"
+	case h.debugErrors:
+		msg = err.Error()
 	}
-	if errors.Is(err, model.ErrSignerRequired) {
-		jsonError(w, err.Error()+" — reconnectez-vous avec votre identité (POST /api/identity/session)", http.StatusForbidden)
-		return
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("%s (réf. %s)", msg, ref), "ref": ref})
+}
+
+// errorRef retourne une référence aléatoire courte (8 caractères hexadécimaux)
+// qui relie une réponse d'erreur à sa ligne du journal serveur.
+func errorRef() string {
+	b := make([]byte, 4)
+	if _, err := rand.Read(b); err != nil {
+		return "00000000"
 	}
-	jsonError(w, err.Error(), http.StatusInternalServerError)
+	return hex.EncodeToString(b)
 }
 
 func parseTags(raw string) []string {

@@ -218,6 +218,7 @@ Au-delà, `HTTP 429` est retourné.
 | Surface | Risque | Mitigation attendue |
 |---------|--------|-----------|
 | Enrôlement/connexion | Brute force du secret CA sur `POST /api/identity/session` | Rate limiting 10/min/IP (`authLimiter`, § 8) |
+| Messages d'erreur interne | Le détail d'une erreur révèle l'état interne au client : identités déjà enregistrées (énumération des pseudos par `POST /api/identity/request`), chemins, erreurs d'infrastructure | Réponse `500` générique portant une référence (`ref`, en-tête `X-Myr-Error-Ref`) ; détail dans le journal serveur sous cette référence, renvoyé au client seulement sur un serveur de test démarré avec `MYR_DEBUG_ERRORS=1` (OWASP A05) |
 | Token de session | Vol de token (`X-Myr-Token`) | Pas de recommandation de stockage client imposée par `myr` ; comparaison serveur en temps constant |
 | `owner_id` | Client peut forger n'importe quel `owner_id` en lecture (`GET /api/components?owner_id=`) et en écriture (`POST /api/components`) | À la création, le propriétaire est l'identité de la session (`pseudo@org`), jamais la valeur fournie par le client ; à la soumission, le chaincode n'accepte l'asset que si son propriétaire est le signataire de la transaction (ADR-12, OWASP A01, `UCA06`) |
 | Wallets | Clés privées en fichiers PEM (permissions `0600`) | Chiffrement au repos requis par ENF10 — voir §4 et `Conception_intro.md` ADR-03 |
