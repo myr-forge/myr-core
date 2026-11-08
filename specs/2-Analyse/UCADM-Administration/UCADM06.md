@@ -15,6 +15,7 @@ tags:
   - uc/UCADM06
   - rm/RM34
   - rm/RM37
+  - rm/RM48
   - enf/ENF18
 ---
 
@@ -45,7 +46,9 @@ UC1 ..> UC3 : <<include>>
 
 Après qu'une organisation a été ajoutée au réseau (UCADM01), l'administrateur peut lui attribuer un ou plusieurs rôles. Un **rôle** est un ensemble nommé de droits d'accès défini séparément (UCADM07). L'attribution d'un rôle à une organisation confère à tous ses membres les droits correspondants (RM37).
 
-L'attribution est stockée **localement** dans l'application MYR via `adapters/out/localstorage/`. Elle n'impacte pas la configuration blockchain — elle est réversible à tout moment.
+L'attribution est publiée sur le ledger avec la table des rôles (un exemplaire par canal, RM48) : le chaincode comme chaque serveur l'appliquent à toute identité de l'organisation (MSP). Elle est réversible à tout moment.
+
+Un rôle s'attribue à la fois à une identité — par son certificat (`Myr.role`, `myr identity register|set-role` ou demande de rôle, UCA08) — et à une organisation (UCADM06) : les droits effectifs d'une identité sont l'union des droits de son rôle et de ceux des rôles attribués à son organisation (RM37, RM48). Décision du product owner du 2026-11-08, à réévaluer lors de la phase alpha.
 
 Le rôle `admin` est natif et protégé : il ne peut pas être attribué à d'autres organisations via cette interface (RM34).
 
@@ -120,7 +123,7 @@ Le rôle `admin` est natif et protégé : il ne peut pas être attribué à d'au
 
 ## Post-conditions
 
-- **Attribution :** La liaison organisation ↔ rôle est persistée localement. Les droits associés au rôle sont effectifs pour l'organisation (RM37).
+- **Attribution :** La liaison organisation ↔ rôle est publiée sur le ledger. Les droits associés au rôle sont effectifs pour toutes les identités de l'organisation, en plus de ceux de leur propre rôle (RM37).
 - **Retrait :** La liaison est supprimée, les droits correspondants sont révoqués.
 
 ## Diagramme de séquence
@@ -187,19 +190,17 @@ end
 
 ## Notes d'implémentation
 
-**État actuel :** Non implémenté. Entité `Role` et service `RoleService` à créer dans `domain/channel/`.
-
-**Chemin d'implémentation cible :**
-1. Ajouter les entités `Role`, `OrgRole` dans `domain/channel/entity.go`.
-2. Étendre `ChannelService` dans `domain/channel/port_in.go` : méthodes `AssignRole(orgID, roleName string) error`, `RemoveRole(orgID, roleName string) error`, `GetOrgRoles(orgID string) ([]*Role, error)`.
-3. Définir `RoleStore` dans `domain/channel/ports.go` : port sortant vers localstorage.
-4. Implémenter `RoleStore` dans `adapters/out/localstorage/role_store.go` (JSON — `data/roles.json`).
-5. Créer `adapters/in/cli/org.go` : sous-commandes `myr org role assign` et `myr org role remove`.
+**Composants :**
+- Attribution organisation ↔ rôles : `domain/role` (même service que la table des rôles, `RoleService`), publiée sur le ledger par `adapters/out/fabric/role_store.go` avec la table, sur chaque canal du réseau.
+- Contrôle des écritures : le chaincode accorde une permission si le rôle du certificat du signataire ou l'un des rôles de son organisation (MSP du signataire) la porte (`specs/3-Conception/Chaincode.md` §4.3) ; le serveur applique la même union aux actions hors ledger.
+- CLI : `myr org role assign --org <orgID> --role <rôle>` et `myr org role remove --org <orgID> --role <rôle>` (`adapters/in/cli/org.go`).
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
 **Étape suivante — conception**
+- **Chaincode** : [§ 4.1 Invariants appliqués par `StoreModel` (ADR-12)](../../3-Conception/Chaincode.md#4.1%20Invariants%20appliqués%20par%20`StoreModel`%20%28ADR-12%29) · [§ 4.3 Table des rôles (ADR-12, RM48)](../../3-Conception/Chaincode.md#4.3%20Table%20des%20rôles%20%28ADR-12,%20RM48%29)
+- **Conception_intro** : [§ ADR-12 — Invariants portés par le chaincode, signature par l'utilisateur, autorisation par le certificat](../../3-Conception/Conception_intro.md#ADR-12%20—%20Invariants%20portés%20par%20le%20chaincode,%20signature%20par%20l'utilisateur,%20autorisation%20par%20le%20certificat)
 - **DC_CLI_Admin** : [§ 4.2 `myr org role assign` *(UCADM06)*](../../3-Conception/DC_CLI_Admin.md#4.2%20`myr%20org%20role%20assign`%20*%28UCADM06%29*) · [§ 4.3 `myr org role remove` *(UCADM06)*](../../3-Conception/DC_CLI_Admin.md#4.3%20`myr%20org%20role%20remove`%20*%28UCADM06%29*) · [§ 7.2 `RoleService` (port_in) *(UCADM06/07)*](../../3-Conception/DC_CLI_Admin.md#7.2%20`RoleService`%20%28port_in%29%20*%28UCADM06/07%29*) · [§ 7.5 `RoleStore` (port_out) *(UCADM06/07)*](../../3-Conception/DC_CLI_Admin.md#7.5%20`RoleStore`%20%28port_out%29%20*%28UCADM06/07%29*) · [§ 11. Écarts code → specs](../../3-Conception/DC_CLI_Admin.md#11.%20Écarts%20code%20→%20specs)
 - **DC_D2_Administration** : [§ DC — D2 : Administration réseau](../../3-Conception/DC_D2_Administration.md#DC%20—%20D2%20:%20Administration%20réseau) · [§ OrgRole (domain/channel)](../../3-Conception/DC_D2_Administration.md#OrgRole%20%28domain/channel%29) · [§ Entités à concevoir (non présentes dans le code)](../../3-Conception/DC_D2_Administration.md#Entités%20à%20concevoir%20%28non%20présentes%20dans%20le%20code%29) · [§ 8. Écarts code → specs](../../3-Conception/DC_D2_Administration.md#8.%20Écarts%20code%20→%20specs)
 

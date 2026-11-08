@@ -15,7 +15,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 
 | Statut | Nombre |
 |--------|--------|
-| Ouvert | 16 |
+| Ouvert | 17 |
 | À vérifier | 2 |
 | À trancher (PO) | 14 |
 | Différé | 1 |
@@ -44,6 +44,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-030 — Parité CLI et REST incomplète](FT-030-parite-cli-et-rest-incomplete.md) | Écart spec ↔ code | majeure | Ouvert | UCADM01, UCADM03, UCADM04, UCPI01, UCPI02, UCADM07 |
 | [FT-031 — Les specs citent des commandes et routes qui n'existent pas](FT-031-les-specs-citent-des-commandes-et-routes.md) | Incohérence documentaire | majeure | Ouvert | UCAM08, UCMOD01, UCMOD04, UCDEV02, UCADM07, UCA03, UCA04 |
 | [FT-009 — Registrar CA unique par organisation](FT-009-registrar-ca-unique-par-organisation.md) | Risque | mineure | Ouvert | UCA01 |
+| [FT-041 — Rôles attribués aux organisations non implémentés](FT-041-roles-attribues-aux-organisations-non-implementes.md) | Écart spec ↔ code | mineure | Ouvert | UCADM06, UCADM07 |
 | [FT-011 — Commentaires JWT obsolètes dans les handlers REST](FT-011-commentaires-jwt-obsoletes-dans-les-handlers-rest.md) | Dette technique | mineure | Ouvert | — |
 | [FT-015 — Critère tag absent des interfaces](FT-015-critere-tag-absent-des-interfaces.md) | Écart spec ↔ code | mineure | Ouvert | UCAM01, UCREC02 |
 | [FT-020 — LocalStorage.Upload renvoie un chemin présenté comme un hash](FT-020-localstorage-upload-renvoie-un-chemin-presente-comme.md) | Dette technique | mineure | Ouvert | UCCL03 |

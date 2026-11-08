@@ -13,6 +13,7 @@ tags:
   - rm/RM24
   - rm/RM25
   - rm/RM26
+  - rm/RM37
   - rm/RM48
 ---
 # Chaincode — Smart Contracts Fabric
@@ -146,7 +147,7 @@ Une transaction `StoreModel` est refusée, sans aucune écriture, si l'une de ce
 | Parent existant | RM05 | Si `ParentID` est renseigné, ce parent est enregistré sur le ledger |
 | Propriétaire = signataire | ADR-12 | `OwnerID` est l'identifiant d'enrôlement du certificat signataire (`pseudo@org`), et le MSP du signataire est `<org>MSP` |
 | Signataire actif | ADR-12 | Attribut de certificat `Myr.status` = `active` |
-| Rôle autorisé | ADR-12 | Le rôle du signataire (attribut de certificat `Myr.role`) porte la permission d'écriture dans la table des rôles du réseau publiée sur le ledger ; le rôle `admin`, immuable, les porte toutes |
+| Rôle autorisé | ADR-12, RM37 | Le rôle du signataire (attribut de certificat `Myr.role`), ou l'un des rôles attribués à son organisation (MSP du signataire, UCADM06), porte la permission d'écriture dans la table des rôles du réseau publiée sur le ledger ; le rôle `admin`, immuable, les porte toutes |
 
 L'index des empreintes est stocké sous des clés composites (`hash`, empreinte) qui n'apparaissent jamais dans `ListModels`.
 
@@ -182,7 +183,7 @@ Une transaction `PutRole` ou `DeleteRole` est refusée, sans aucune écriture, s
 | Le rôle à supprimer est absent de la table (`DeleteRole`) | — |
 | Le signataire n'est pas actif, n'appartient pas à l'organisation de son identifiant, ou son rôle ne porte pas `role.admin` | ADR-12, mêmes contrôles d'identité que `StoreModel` |
 
-La première publication part de la table initiale : les rôles qu'elle ne touche pas y restent. Le chaincode ne lit d'un rôle que son nom et ses permissions ; les autres champs publiés (réglage d'attribution sur demande `auto_grant`, date de création…) sont conservés tels quels. Le contrôle « Rôle autorisé » de `StoreModel` et `UpdateMetadata` lit cette table.
+La première publication part de la table initiale : les rôles qu'elle ne touche pas y restent. Le chaincode ne lit d'un rôle que son nom et ses permissions ; les autres champs publiés (réglage d'attribution sur demande `auto_grant`, date de création…) sont conservés tels quels. La table porte aussi les rôles attribués à chaque organisation (UCADM06). Le contrôle « Rôle autorisé » de `StoreModel` et `UpdateMetadata`, comme celui de `PutRole` et `DeleteRole`, lit cette table : une permission est accordée si le rôle du certificat du signataire ou l'un des rôles de son organisation la porte (RM37).
 
 La table initiale est définie deux fois, dans le domaine (`domain/role`) et dans le chaincode, module distinct qui ne peut pas l'importer : les deux définitions doivent rester identiques.
 

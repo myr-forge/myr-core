@@ -16,10 +16,10 @@ tags:
   - rm/RM34
   - rm/RM35
   - rm/RM36
+  - rm/RM37
   - rm/RM47
   - rm/RM48
   - enf/ENF18
-  - relecture/incoherence
 ---
 
 # Gérer les rôles
@@ -50,9 +50,9 @@ UC3 ..> UC4 : <<include>>
 
 ## Contexte
 
-L'administrateur gère les **rôles** disponibles dans le système MYR. La table des rôles est publiée sur le ledger, un exemplaire par canal du réseau, et appliquée à l'identique par le chaincode et par chaque serveur (RM48, ADR-12) ; seule une identité dont le rôle porte `role.admin` la modifie, avec la signature de son wallet. Un rôle y est représenté par un nom unique, une liste de droits d'accès (permissions) et un réglage d'attribution sur demande (UCA08, RM47). Tant qu'aucune table n'est publiée, la table initiale s'applique (`reader`, `contributor`, `auditor`, `admin`). Les rôles sont ensuite attribués aux organisations (UCADM06).
+L'administrateur gère les **rôles** disponibles dans le système MYR. La table des rôles est publiée sur le ledger, un exemplaire par canal du réseau, et appliquée à l'identique par le chaincode et par chaque serveur (RM48, ADR-12) ; seule une identité dont le rôle porte `role.admin` la modifie, avec la signature de son wallet. Un rôle y est représenté par un nom unique, une liste de droits d'accès (permissions) et un réglage d'attribution sur demande (UCA08, RM47). Tant qu'aucune table n'est publiée, la table initiale s'applique (`reader`, `contributor`, `auditor`, `admin`). Les rôles sont ensuite attribués aux identités et aux organisations.
 
-#incoherence Ce use case et UCADM06 attribuent les rôles aux organisations (`OrgRole`, RM35), alors que l'ADR-12 porte le rôle dans le certificat de chaque identité (`Myr.role`, UCA08) et que la table des rôles ne comporte ni identifiant généré ni description. À trancher : attribution par organisation, par identité, ou les deux.
+Un rôle s'attribue à la fois à une identité — par son certificat (`Myr.role`, `myr identity register|set-role` ou demande de rôle, UCA08) — et à une organisation (UCADM06) : les droits effectifs d'une identité sont l'union des droits de son rôle et de ceux des rôles attribués à son organisation (RM37, RM48). Décision du product owner du 2026-11-08, à réévaluer lors de la phase alpha. Un rôle est identifié par son nom ; la table ne porte pas de description.
 
 Le rôle `admin` est natif au système : il est initialisé automatiquement au démarrage du service et ne peut pas être modifié ni supprimé (RM34). Son `ID` est la valeur constante `"admin"`.
 

@@ -9,9 +9,9 @@ tags:
   - domaine/identity
   - domaine/network
   - uc/UCADM07
+  - rm/RM37
   - rm/RM47
   - rm/RM48
-  - relecture/incoherence
 ---
 # Gérer les rôles
 
@@ -44,7 +44,7 @@ Le rôle administrateur est natif au système : il ne peut pas être modifié ni
 
 La table des rôles est publiée sur le ledger, un exemplaire par canal du réseau, et appliquée à l'identique par tous les nœuds (RM48). Tant que l'administrateur n'en a publié aucune, la table initiale s'applique (`reader`, `contributor`, `auditor`, `admin`) ; ses rôles se modifient et se suppriment comme les autres, sauf `admin`. Chaque rôle porte aussi un réglage d'attribution sur demande : automatique, ou sur approbation de l'administrateur (UCA08, RM47).
 
-#incoherence Ce use case attribue les rôles aux organisations (UCADM06), alors que l'ADR-12 porte le rôle dans le certificat de chaque identité (`Myr.role`, attribué par `myr identity register|set-role` ou une demande de rôle, UCA08). La table des rôles ne comporte pas non plus de description. À trancher : attribution par organisation, par identité, ou les deux.
+Un rôle s'attribue à la fois à une identité — par son certificat (`Myr.role`, `myr identity register|set-role` ou demande de rôle, UCA08) — et à une organisation (UCADM06) : les droits effectifs d'une identité sont l'union des droits de son rôle et de ceux des rôles attribués à son organisation (RM37, RM48). Décision du product owner du 2026-11-08, à réévaluer lors de la phase alpha.
 
 ## Pré-conditions
 

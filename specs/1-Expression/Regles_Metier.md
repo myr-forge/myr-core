@@ -518,8 +518,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 
 - **Déclencheur** : Création, modification ou suppression d'un rôle (`myr role create|update|delete`) ; tout contrôle d'accès
 - **Condition** : Toujours
-- **Conséquence** : La table des rôles et de leurs permissions est publiée sur le ledger, un exemplaire par canal du réseau, et appliquée par le chaincode comme par chaque serveur. Seule une identité dont le rôle porte `role.admin` la modifie. Tous les rôles se modifient ou se suppriment, sauf `admin`, qui porte toujours toutes les permissions. Tant qu'aucune table n'est publiée, la table initiale s'applique (`reader`, `contributor`, `auditor`, `admin`) ; si la table devient illisible, un serveur applique la dernière table lue, à défaut la table initiale. Une identité dont le rôle a été supprimé n'a plus aucune permission
-- **Use cases** : UCA05, UCADM07
+- **Conséquence** : La table des rôles et de leurs permissions est publiée sur le ledger, un exemplaire par canal du réseau, et appliquée par le chaincode comme par chaque serveur. Seule une identité dont le rôle porte `role.admin` la modifie. Tous les rôles se modifient ou se suppriment, sauf `admin`, qui porte toujours toutes les permissions. Tant qu'aucune table n'est publiée, la table initiale s'applique (`reader`, `contributor`, `auditor`, `admin`) ; si la table devient illisible, un serveur applique la dernière table lue, à défaut la table initiale. Une identité dont le rôle a été supprimé n'a plus aucune permission. Les droits effectifs d'une identité sont l'union des permissions de son rôle (certificat) et de celles des rôles attribués à son organisation (RM37, UCADM06)
+- **Use cases** : UCA05, UCADM06, UCADM07
 
 ---
 
