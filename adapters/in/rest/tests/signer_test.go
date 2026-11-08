@@ -20,6 +20,7 @@ import (
 type emptyLedger struct{}
 
 func (emptyLedger) StoreModelRecord(*model.Model3D) error { return nil }
+func (emptyLedger) UpdateModelMetadata(_, _ string, _ model.AssetMetadata) error { return nil }
 func (emptyLedger) GetModelRecord(_, _ string) (*model.Model3D, error) {
 	return nil, model.ErrNotFound
 }

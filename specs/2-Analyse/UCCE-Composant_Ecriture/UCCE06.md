@@ -51,7 +51,7 @@ Une **interface** (`AssetInterface`) est un point de connexion physique d'un com
 
 Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsque la géométrie le permet. Quand la détection automatique est insuffisante ou absente, le Concepteur les ajoute manuellement via ce use case.
 
-**Les interfaces suivent le cycle brouillon → soumission (ADR-02, `specs/3-Conception/Conception_intro.md`), généralisé du module (RM16/RM19) à tout asset.** Tant que le composant qui les porte est en brouillon, ses interfaces sont éditées librement en local (`InterfaceStore`, `adapters/out/localstorage/`) — aucune transaction Fabric par édition. Elles ne rejoignent la blockchain (`Model3D.Interfaces`) qu'à la soumission du composant. **Un composant déjà soumis est immuable (règle 7, RM19)** : ce use case ne peut alors pas lui ajouter directement une interface — l'opération doit passer par un **fork** (nouveau `Model3D` en brouillon, `ParentID` = composant d'origine, catégorie `amelioration`/`extension`/… selon RM02) qui démarre avec les interfaces copiées du parent et reçoit la nouvelle interface, avant sa propre soumission ultérieure.
+**Les interfaces suivent le cycle brouillon → soumission (ADR-02, `specs/3-Conception/Conception_intro.md`), généralisé du module (RM16/RM19) à tout asset.** Tant que le composant qui les porte est en brouillon, ses interfaces sont éditées librement en local (`InterfaceStore`, `adapters/out/localstorage/`) — aucune transaction Fabric par édition. Elles ne rejoignent la blockchain (`Model3D.Interfaces`) qu'à la soumission du composant. **Un composant déjà soumis est immuable (RM19)** : ce use case ne peut alors pas lui ajouter directement une interface — l'opération doit passer par un **fork** (nouveau `Model3D` en brouillon, `ParentID` = composant d'origine, catégorie `amelioration`/`extension`/… selon RM02) qui démarre avec les interfaces copiées du parent et reçoit la nouvelle interface, avant sa propre soumission ultérieure.
 
 **Décision de conception (RM16/RM19 généralisées, `Regles_Metier.md` §5 ; ADR-02, `Conception_intro.md`) :** un composant est `submitted` par défaut dès sa création (UCCE01 nominal, comportement actuel inchangé) — ce use case ne s'applique alors qu'en créant un **fork** (flux alternatif ci-dessous). Il ne s'applique directement, sans fork, que si le composant a été créé avec `draft: true` (UCCE01, « Flux alternatif — Création en brouillon ») et n'a pas encore été soumis. **Écart de code restant (E8, `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus) :** `domain/model/entity.go`/`service.go` ne portent pas encore cette distinction — c'est une tâche d'implémentation, la décision de conception est prise.
 
@@ -98,7 +98,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 10. L'API retourne `201 Created` avec l'`AssetInterface` créée (en brouillon). Elle rejoindra la blockchain à la prochaine soumission du composant.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
 > - 🟡 [TestInterface_Persistence](../../../docs/tests/adapters-out-localstorage/TestInterface_Persistence.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestListInterfacesForAsset](../../../docs/tests/adapters-out-localstorage/TestListInterfacesForAsset.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestRemoveInterface](../../../docs/tests/adapters-out-localstorage/TestRemoveInterface.md) — déduit : teste `InterfaceStore.SaveInterface`
@@ -113,12 +113,13 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 > - 🟡 [TestInterface_AddListRemove](../../../docs/tests/domain-model/TestInterface_AddListRemove.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestInterface_IDPreservedIfGiven](../../../docs/tests/domain-model/TestInterface_IDPreservedIfGiven.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestInterface_NilStore_ReturnsError](../../../docs/tests/domain-model/TestInterface_NilStore_ReturnsError.md) — déduit : teste `ModelService.AddInterface`
-> - 🟡 [TestSubmit_CommitsDraftWithInterfaces](../../../docs/tests/domain-model/TestSubmit_CommitsDraftWithInterfaces.md) — déduit : teste `ModelService.AddInterface`
+> - 🟡 [TestInterfaces_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestInterfaces_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.AddInterface`
+> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Composant déjà soumis : création d'un fork
 
-1. Le composant identifié par `:id` a `Status: submitted` — il est immuable (règle 7, RM19).
+1. Le composant identifié par `:id` a `Status: submitted` — il est immuable (RM19).
 2. Le service refuse la mutation directe et propose de créer un fork : un nouveau `Model3D` en brouillon avec `ParentID = <id>` et une catégorie parmi `amelioration`, `extension`, `variation`, `adaptation`, `derivation`, `regression` (RM02).
 3. Le fork démarre avec les interfaces du parent dupliquées localement (nouveaux `ID`, `AssetID` du fork).
 4. La nouvelle interface est ajoutée au brouillon du fork (flux nominal ci-dessus, appliqué au fork).
@@ -162,7 +163,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 5. L'API retourne `200 OK` avec l'interface mise à jour.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 72 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 74 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -178,7 +179,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 57 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 59 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Champ obligatoire absent

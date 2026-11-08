@@ -32,6 +32,18 @@ func (m *mockBC) StoreModelRecord(mod *model.Model3D) error {
 	return nil
 }
 
+// UpdateModelMetadata remplace les métadonnées descriptives, comme le chaincode.
+func (m *mockBC) UpdateModelMetadata(id, _ string, meta model.AssetMetadata) error {
+	rec, ok := m.records[id]
+	if !ok {
+		return fmt.Errorf("modèle introuvable: %s", id)
+	}
+	cp := *rec
+	cp.Name, cp.Description, cp.Tags, cp.Links = meta.Name, meta.Description, meta.Tags, meta.Links
+	m.records[id] = &cp
+	return nil
+}
+
 func (m *mockBC) GetModelRecord(id, _ string) (*model.Model3D, error) {
 	mod, ok := m.records[id]
 	if !ok {
@@ -1296,25 +1308,9 @@ func TestModule_Submit_NoAssembly(t *testing.T) {
 	}
 }
 
-func TestModule_SubmitTwice_VersionIncrement(t *testing.T) {
-	svc := newFullSvc(t)
-
-	p, _ := svc.CreateModule(model.ModuleRequest{Name: "P1", ChannelID: "ch1", OwnerID: "o1"})
-	conn, _ := svc.AddConnection("a1", "a2", "lien")
-	svc.AddAssemblyToModule(p.ID, conn.ID)
-	svc.SubmitModule(p.ID, "v1")
-	svc.AddAssemblyToModule(p.ID, conn.ID)
-	submitted, err := svc.SubmitModule(p.ID, "v2")
-	if err != nil {
-		t.Fatalf("SubmitProduct v2: %v", err)
-	}
-	if len(submitted.ModuleVersions) != 2 {
-		t.Errorf("attendu 2 versions, got %d", len(submitted.ModuleVersions))
-	}
-	if submitted.ModuleVersions[1].Number != 2 {
-		t.Errorf("Version 2 Number: got %d", submitted.ModuleVersions[1].Number)
-	}
-}
+// La re-soumission d'un module (nouvelle ModuleVersion sous le même
+// identifiant) est refusée : voir TestSubmitModule_RM19_AlreadySubmitted_Rejected
+// et TestCreateModule_RM19_ForkOfSubmitted_Submittable (immutability_test.go).
 
 func TestModule_Remove(t *testing.T) {
 	svc := newFullSvc(t)

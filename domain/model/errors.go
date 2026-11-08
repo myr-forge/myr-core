@@ -25,6 +25,21 @@ var ErrBlockchainUnreachable = errors.New("model: infrastructure blockchain injo
 // qui l'initie, jamais par une identité d'organisation partagée (ADR-12).
 var ErrSignerRequired = errors.New("model: écriture sur le ledger impossible sans identité signataire de l'utilisateur (wallet)")
 
+// ErrAssetSubmitted est retournée par toute modification d'un asset déjà
+// soumis — licence, interfaces, composition, re-soumission : il est immuable
+// sur le ledger (RM19, ADR-12). Toute évolution passe par un nouvel asset
+// dérivé (fork, ParentID vers l'asset d'origine) ; seules ses métadonnées
+// descriptives restent modifiables par son propriétaire (UpdateAsset).
+var ErrAssetSubmitted = errors.New("model: asset soumis, immuable — créez un asset dérivé (fork) pour le faire évoluer")
+
+// ErrUnknownLicense est retournée quand la licence proposée pour un asset
+// n'existe pas dans le catalogue.
+var ErrUnknownLicense = errors.New("model: licence absente du catalogue")
+
+// ErrLicenseIncompatible est retournée quand la licence proposée pour un
+// asset dérivé n'est pas compatible avec celle de son parent (RM03).
+var ErrLicenseIncompatible = errors.New("model: incompatibilité de licence avec l'asset parent")
+
 // ErrNoThumbnailSource est retournée par Service.RegenerateThumbnail quand l'asset
 // n'a aucun lien externe (Links) — seule source de miniature régénérable côté serveur.
 var ErrNoThumbnailSource = errors.New("model: aucun lien externe enregistré pour régénérer la miniature")

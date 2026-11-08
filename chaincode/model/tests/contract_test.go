@@ -381,3 +381,51 @@ func TestListModels_HashIndexHidden(t *testing.T) {
 		t.Errorf("ListModels = %d éléments, want 2", len(list))
 	}
 }
+
+// ── UpdateMetadata ────────────────────────────────────────────────────────────
+
+// / @brief  UpdateMetadata change les métadonnées descriptives d'un asset enregistré, à la demande de son propriétaire (ADR-12)
+// / @input  a1 enregistré par alice@Org1 avec un champ inconnu du chaincode ; UpdateMetadata nom, description, tags, liens
+// / @expect transaction acceptée ; les quatre champs changent, empreinte et propriétaire restent, le champ inconnu est conservé
+func TestUpdateMetadata_ByOwner_DescriptiveFieldsOnly(t *testing.T) {
+	stub := newStub(t, contributor(t, "alice@Org1"))
+	if resp := stub.invoke("StoreModel", storeJSON(t, asset("a1", "alice@Org1", "sha256:h1"))); resp.Status != shim.OK {
+		t.Fatalf("StoreModel refusé : %s", resp.Message)
+	}
+	var withExtra map[string]any
+	_ = json.Unmarshal(stub.state["a1"], &withExtra)
+	withExtra["FutureField"] = "conservé"
+	stub.state["a1"], _ = json.Marshal(withExtra)
+
+	resp := stub.invoke("UpdateMetadata", "a1", `{"Name":"vis M4","Description":"inox","Tags":["vis"],"Links":["https://shop.example/vis"]}`)
+	if resp.Status != shim.OK {
+		t.Fatalf("UpdateMetadata refusé : %s", resp.Message)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(stub.state["a1"], &got); err != nil {
+		t.Fatalf("enregistrement illisible : %v", err)
+	}
+	if got["Name"] != "vis M4" || got["Description"] != "inox" || got["Hash"] != "sha256:h1" || got["OwnerID"] != "alice@Org1" || got["FutureField"] != "conservé" {
+		t.Errorf("enregistrement inattendu : %v", got)
+	}
+}
+
+// / @brief  Seul le propriétaire modifie les métadonnées, et seulement les champs descriptifs (ADR-12)
+// / @input  a1 d'alice@Org1 ; UpdateMetadata signé par bob@Org1, puis par alice sur la licence, puis sur un asset absent
+// / @expect trois refus ; a1 inchangé
+func TestUpdateMetadata_NotOwnerOrFrozenField_Rejected(t *testing.T) {
+	stub := newStub(t, contributor(t, "alice@Org1"))
+	if resp := stub.invoke("StoreModel", storeJSON(t, asset("a1", "alice@Org1", "sha256:h1"))); resp.Status != shim.OK {
+		t.Fatalf("StoreModel refusé : %s", resp.Message)
+	}
+	original := string(stub.state["a1"])
+
+	stub.creator = contributor(t, "bob@Org1")
+	expectRejected(t, stub.invoke("UpdateMetadata", "a1", `{"Name":"volé"}`), "différent du signataire")
+	stub.creator = contributor(t, "alice@Org1")
+	expectRejected(t, stub.invoke("UpdateMetadata", "a1", `{"license_id":"mit"}`), "ne change pas après soumission")
+	expectRejected(t, stub.invoke("UpdateMetadata", "absent", `{"Name":"x"}`), "introuvable")
+	if string(stub.state["a1"]) != original {
+		t.Error("a1 a été modifié")
+	}
+}

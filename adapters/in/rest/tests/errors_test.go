@@ -95,3 +95,32 @@ func TestInternalErr_BlockchainUnavailable_Explicit(t *testing.T) {
 		t.Errorf("message explicite et référence attendus, obtenu %v", resp)
 	}
 }
+
+// / @brief  Un asset soumis renvoie 409 et une licence refusée 400, au lieu d'une erreur interne (RM19, RM03)
+// / @input  PATCH et POST /submit sur un asset soumis (ErrAssetSubmitted) ; PATCH avec licence inconnue puis incompatible
+// / @expect 409 pour l'asset soumis, 400 pour la licence, message explicite
+func TestDomainErrors_SubmittedAndLicense_MappedToHTTP(t *testing.T) {
+	var next error
+	svc := &mockSvc{
+		updateAsset: func(model.UpdateRequest) (*model.Model3D, error) { return nil, next },
+		submit:      func(string, string) (*model.Model3D, error) { return nil, next },
+	}
+	mux := newTestMux(t, svc)
+	cases := []struct {
+		err          error
+		method, path string
+		want         int
+	}{
+		{model.ErrAssetSubmitted, http.MethodPatch, "/api/components/c1", http.StatusConflict},
+		{model.ErrAssetSubmitted, http.MethodPost, "/api/components/c1/submit", http.StatusConflict},
+		{model.ErrUnknownLicense, http.MethodPatch, "/api/components/c1", http.StatusBadRequest},
+		{model.ErrLicenseIncompatible, http.MethodPatch, "/api/components/c1", http.StatusBadRequest},
+	}
+	for _, c := range cases {
+		next = c.err
+		w := do(t, mux, c.method, c.path, `{"name":"x"}`)
+		if w.Code != c.want || !strings.Contains(w.Body.String(), strings.TrimPrefix(c.err.Error(), "model: ")) {
+			t.Errorf("%s %s (%v) : code %d attendu, obtenu %d — %s", c.method, c.path, c.err, c.want, w.Code, w.Body.String())
+		}
+	}
+}

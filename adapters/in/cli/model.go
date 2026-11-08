@@ -106,11 +106,8 @@ func resolveOwner(ss session.SessionService, ownerFlag string) (string, error) {
 // specs/3-Conception/Conception_intro.md). note n'est utilisée que dans ce cas.
 func runModelSubmit(w io.Writer, svc model.ModelService, id, note string) error {
 	m, err := svc.Submit(id, note)
-	if errors.Is(err, model.ErrSignerRequired) {
-		return fmt.Errorf("%w — créez le compte local de votre identité enrôlée : myr session create --name <pseudo> --org-id <org>", err)
-	}
 	if err != nil {
-		return err
+		return withSignerHint(err)
 	}
 	fmt.Fprintf(w, "Modèle %s soumis à la blockchain (status=%s).\n", m.ID, m.Status)
 	return nil
@@ -238,10 +235,20 @@ Example:
 func runModelUpdate(w io.Writer, svc model.ModelService, req model.UpdateRequest) error {
 	m, err := svc.UpdateAsset(req)
 	if err != nil {
-		return err
+		return withSignerHint(err)
 	}
 	fmt.Fprintf(w, "Modèle %s mis à jour.\n", m.ID)
 	return nil
+}
+
+// withSignerHint complète ErrSignerRequired (écriture ledger sans wallet de
+// l'utilisateur) par la commande qui y remédie ; les autres erreurs passent
+// telles quelles.
+func withSignerHint(err error) error {
+	if errors.Is(err, model.ErrSignerRequired) {
+		return fmt.Errorf("%w — créez le compte local de votre identité enrôlée : myr session create --name <pseudo> --org-id <org>", err)
+	}
+	return err
 }
 
 var modelUpdateCmd = &cobra.Command{
@@ -249,6 +256,10 @@ var modelUpdateCmd = &cobra.Command{
 	Short: "Update the metadata of an existing asset",
 	Long: `Patch the metadata of an existing component or module. Only flags
 explicitly provided are changed — everything else is left untouched.
+
+A draft asset is updated locally. On a submitted asset only the name,
+description, tags and links can change (written to the blockchain, by its
+owner only); its license is frozen — derive a new asset to change it (RM19).
 
 Example:
   myr model update abc123def456 --description "Nouvelle description" --tags "3dprint,mechanical"`,

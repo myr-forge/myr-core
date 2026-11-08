@@ -120,6 +120,7 @@ type Version struct {
 | Fonction | Arguments | Retour | UC déclencheur |
 |----------|-----------|--------|---------------|
 | `StoreModel` | `model3dJSON string` | `txID string, err` | UCCE01, UCMOD06 |
+| `UpdateMetadata` | `id, metadataJSON string` (`Name`, `Description`, `Tags`, `Links`) | `txID string, err` | UCCE02, UCMOD03 |
 | `GetModel` | `id, channelID string` | `model3dJSON string, err` | UCCL01, UCMOD04 |
 | `ListModels` | `channelID string` | `[]model3dJSON, err` | UCREC01 |
 | `VerifyModel` | `id, hash, channelID string` | `bool, err` | UCCE03 |
@@ -144,6 +145,18 @@ Une transaction `StoreModel` est refusée, sans aucune écriture, si l'une de ce
 | Rôle autorisé | ADR-12 | Le rôle du signataire (attribut de certificat `Myr.role`) porte la permission d'écriture dans la table des rôles du réseau publiée sur le ledger ; le rôle `admin`, immuable, les porte toutes |
 
 L'index des empreintes est stocké sous des clés composites (`hash`, empreinte) qui n'apparaissent jamais dans `ListModels`.
+
+### 4.2 Invariants appliqués par `UpdateMetadata` (ADR-12)
+
+Seule modification d'un asset enregistré : ses métadonnées descriptives. Une transaction `UpdateMetadata` est refusée, sans aucune écriture, si :
+
+| Condition de refus | Règle |
+|--------------------|-------|
+| Aucun asset n'est enregistré sous cet `ID` | — |
+| Le signataire n'est pas le propriétaire (`OwnerID`), n'est pas actif ou n'a pas de rôle autorisé à écrire | ADR-12, mêmes contrôles que `StoreModel` |
+| Le document de métadonnées contient un autre champ que `Name`, `Description`, `Tags`, `Links` | RM19 : empreinte, propriétaire, licence, parent, interfaces et composition sont figés |
+
+Les champs absents du document restent inchangés ; tous les autres champs de l'enregistrement sont recopiés tels quels, y compris ceux que le chaincode ne connaît pas.
 
 ---
 

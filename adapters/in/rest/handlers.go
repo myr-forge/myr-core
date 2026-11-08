@@ -1134,7 +1134,7 @@ func (h *Handler) verifyAsset(w http.ResponseWriter, r *http.Request, id string)
 // des instances (IsModule()) — ce handler n'a pas à connaître cette distinction.
 //
 //	@Summary		Soumettre un composant en brouillon
-//	@Description	Committe en une transaction les métadonnées et les interfaces locales du composant, puis passe "status" à "submitted". Pour un asset décomposé, vérifie qu'au moins un assemblage existe (RM17) et crée une ModuleVersion horodatée — le champ "note" optionnel du corps de la requête n'est utilisé que dans ce cas. Échoue si l'asset n'est pas un brouillon local (déjà soumis — sauf ré-soumission d'un asset décomposé pour une nouvelle version — ou inexistant).
+//	@Description	Committe en une transaction les métadonnées et les interfaces locales du composant, puis passe "status" à "submitted". Pour un asset décomposé, vérifie qu'au moins un assemblage existe (RM17) et crée une ModuleVersion horodatée — le champ "note" optionnel du corps de la requête n'est utilisé que dans ce cas. Un asset déjà soumis n'est jamais re-soumis (RM19, 409) : une nouvelle version est un asset dérivé (parent_id).
 //	@Tags			components
 //	@Accept			json
 //	@Produce		json
@@ -1142,6 +1142,7 @@ func (h *Handler) verifyAsset(w http.ResponseWriter, r *http.Request, id string)
 //	@Param			body	body	object	false	"note optionnelle, utilisée uniquement pour un asset décomposé (ModuleVersion.Note)"
 //	@Success		200	{object}	componentDTO
 //	@Failure		400	{object}	map[string]string
+//	@Failure		409	{object}	map[string]string	"asset déjà soumis"
 //	@Failure		503	{object}	map[string]string	"blockchain indisponible"
 //	@Security		MyrToken
 //	@Router			/components/{id}/submit [post]
@@ -1360,14 +1361,15 @@ func (h *Handler) handleComponentInstance(w http.ResponseWriter, r *http.Request
 // patchComponent modifie un composant existant (champs partiels).
 //
 //	@Summary		Modifier un composant
-//	@Description	Champs modifiables : name, description, license_id, tags, links. Le contenu blockchain déjà soumis reste immuable (règle 7) — seuls les champs hors ledger sont mis à jour.
+//	@Description	Modifie un composant en brouillon. Champs modifiables : name, description, license_id (présente au catalogue, compatible avec la licence du parent — RM03), tags, links. Un composant soumis est immuable (RM19) : 409, toute évolution passe par un composant dérivé (parent_id).
 //	@Tags			components
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		string							true	"identifiant du composant"
 //	@Param			body	body		object	true	"champs à modifier (name, description, license_id, tags, links)"
 //	@Success		200	{object}	componentDTO
-//	@Failure		400	{object}	map[string]string
+//	@Failure		400	{object}	map[string]string	"licence absente du catalogue ou incompatible avec le parent"
+//	@Failure		409	{object}	map[string]string	"composant déjà soumis"
 //	@Failure		500	{object}	map[string]string
 //	@Security		MyrToken
 //	@Router			/components/{id} [patch]
@@ -2101,8 +2103,10 @@ func jsonError(w http.ResponseWriter, msg string, code int) {
 // communique, l'erreur se retrouve dans le journal du serveur. Distingue
 // l'indisponibilité de la blockchain — non configurée (ErrBlockchainUnavailable)
 // ou injoignable (ErrBlockchainUnreachable), toutes deux transitoires et non des
-// erreurs de données (503) — et l'écriture sur le ledger sans identité signataire
-// (ErrSignerRequired, ADR-12, 403) des autres échecs du service domaine (500).
+// erreurs de données (503) —, l'écriture sur le ledger sans identité signataire
+// (ErrSignerRequired, ADR-12, 403), la modification d'un asset soumis
+// (ErrAssetSubmitted, RM19, 409) et la licence refusée (catalogue ou RM03, 400)
+// des autres échecs du service domaine (500).
 // Pour une 500, le client ne reçoit le détail de l'erreur que si le serveur a été
 // démarré avec WithDebugErrors.
 func (h *Handler) internalErr(w http.ResponseWriter, err error) {
@@ -2115,6 +2119,10 @@ func (h *Handler) internalErr(w http.ResponseWriter, err error) {
 		code, msg = http.StatusServiceUnavailable, err.Error()
 	case errors.Is(err, model.ErrSignerRequired):
 		code, msg = http.StatusForbidden, err.Error()+" — reconnectez-vous avec votre identité (POST /api/identity/session)"
+	case errors.Is(err, model.ErrAssetSubmitted):
+		code, msg = http.StatusConflict, err.Error()
+	case errors.Is(err, model.ErrUnknownLicense), errors.Is(err, model.ErrLicenseIncompatible):
+		code, msg = http.StatusBadRequest, err.Error()
 	case h.debugErrors:
 		msg = err.Error()
 	}

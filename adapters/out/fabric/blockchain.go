@@ -85,6 +85,29 @@ func (f *FabricBlockchain) StoreModelRecord(m *model.Model3D) error {
 	return nil
 }
 
+// UpdateModelMetadata soumet le remplacement des métadonnées descriptives d'un
+// asset enregistré — signé par l'utilisateur, que le chaincode vérifie être le
+// propriétaire (ADR-12).
+func (f *FabricBlockchain) UpdateModelMetadata(id, channelID string, meta model.AssetMetadata) error {
+	if !f.userSigned {
+		return model.ErrSignerRequired
+	}
+	if err := validateID(channelID, "channelID"); err != nil {
+		return err
+	}
+	if err := validateID(id, "model ID"); err != nil {
+		return err
+	}
+	data, err := json.Marshal(meta)
+	if err != nil {
+		return fmt.Errorf("fabric UpdateModelMetadata marshal : %w", err)
+	}
+	if _, err := f.gc.ContractFor(channelID).SubmitTransaction("UpdateMetadata", id, string(data)); err != nil {
+		return wrapGatewayErr("UpdateModelMetadata submit", err)
+	}
+	return nil
+}
+
 // GetModelRecord évalue une query sur le canal spécifié.
 // channelID="" utilise le canal par défaut de la configuration.
 func (f *FabricBlockchain) GetModelRecord(id, channelID string) (*model.Model3D, error) {

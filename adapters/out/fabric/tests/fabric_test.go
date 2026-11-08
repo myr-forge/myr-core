@@ -339,6 +339,33 @@ func TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected(t *testing.T) {
 	}
 }
 
+// / @brief  UpdateModelMetadata soumet UpdateMetadata (id, métadonnées) signé par l'utilisateur, jamais en lecture seule (ADR-12)
+// / @input  accès signé puis accès en lecture seule ; métadonnées nom/description/tags/liens de l'asset b1 sur chan-alpha
+// / @expect accès signé : UpdateMetadata("b1", JSON des quatre champs) sur chan-alpha ; lecture seule : ErrSignerRequired, rien n'est soumis
+func TestFabricBlockchain_UpdateModelMetadata(t *testing.T) {
+	stub := &stubContract{}
+	gw := &stubGateway{contract: stub}
+	meta := model.AssetMetadata{Name: "vis M4", Description: "inox", Tags: []string{"vis"}, Links: []string{"https://shop.example/vis"}}
+	if err := fabric.NewUserFabricBlockchain(gw).UpdateModelMetadata("b1", "chan-alpha", meta); err != nil {
+		t.Fatalf("UpdateModelMetadata : %v", err)
+	}
+	if stub.lastSubmitName != "UpdateMetadata" || gw.lastContractForChan != "chan-alpha" || len(stub.lastSubmitArgs) != 2 || stub.lastSubmitArgs[0] != "b1" {
+		t.Fatalf("soumission inattendue : %s %v sur %q", stub.lastSubmitName, stub.lastSubmitArgs, gw.lastContractForChan)
+	}
+	var decoded model.AssetMetadata
+	if err := json.Unmarshal([]byte(stub.lastSubmitArgs[1]), &decoded); err != nil || decoded.Name != "vis M4" || len(decoded.Links) != 1 {
+		t.Errorf("métadonnées soumises : %+v (%v)", decoded, err)
+	}
+
+	ro := &stubContract{}
+	if err := fabric.NewFabricBlockchain(&stubGateway{contract: ro}).UpdateModelMetadata("b1", "chan-alpha", meta); !errors.Is(err, model.ErrSignerRequired) {
+		t.Errorf("lecture seule : ErrSignerRequired attendu, obtenu %v", err)
+	}
+	if ro.lastSubmitName != "" {
+		t.Errorf("transaction %q soumise en lecture seule", ro.lastSubmitName)
+	}
+}
+
 // / @brief  Vérifie que StoreModelRecord propage l'erreur retournée par SubmitTransaction
 // / @input  stubContract dont submitFn retourne errors.New("fabric: submit rejected")
 // / @expect retourne une erreur non nil wrappant expectedErr via errors.Is

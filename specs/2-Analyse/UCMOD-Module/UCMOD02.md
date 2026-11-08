@@ -69,7 +69,7 @@ La clé de cette opération est la gestion des **instances indépendantes** (RM1
 5. Le Module source est instancié dans le module hôte, avec ses interfaces exposées
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 18 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 19 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
@@ -78,14 +78,14 @@ La clé de cette opération est la gestion des **instances indépendantes** (RM1
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed](../../../docs/tests/domain-model/TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed.md) — déduit : teste `ModelService.AddAssetToWorkspace`
+> - 🟡 [TestModuleComposition_RM19_Submitted_Rejected](../../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_AddRemoveInstance](../../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterAdd](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterAdd.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_NilStore_ReturnsError](../../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_ThreeAssets_AllPresent](../../../docs/tests/domain-model/TestWorkspace_ThreeAssets_AllPresent.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_TwoDifferentAssets_BothPresent](../../../docs/tests/domain-model/TestWorkspace_TwoDifferentAssets_BothPresent.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - 🟡 [TestWorkspace_VirtualIsClickable](../../../docs/tests/domain-model/TestWorkspace_VirtualIsClickable.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - … et 3 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 4 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Module déjà instancié dans le module hôte (RM15)

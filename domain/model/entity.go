@@ -96,6 +96,16 @@ type UpdateRequest struct {
 	Links       []string
 }
 
+// AssetMetadata regroupe les métadonnées descriptives d'un asset, seules
+// modifiables après sa soumission, par son propriétaire (ADR-12) : empreinte,
+// propriétaire, licence, parent, interfaces et composition restent figés.
+type AssetMetadata struct {
+	Name        string
+	Description string
+	Tags        []string
+	Links       []string
+}
+
 // AddRequest regroupe tous les paramètres de création d'un asset.
 type AddRequest struct {
 	FilePath    string

@@ -3,6 +3,7 @@ tags:
   - couche/conception
   - type/conception
   - rm/RM01
+  - rm/RM03
   - rm/RM08
   - rm/RM14
   - rm/RM17
@@ -102,7 +103,7 @@ tags:
 | POST | `/api/components` | Contributor | Créer un composant (`AddFull`), un fichier CAO par appel ; `parent_id` optionnel pour dériver d'un asset existant (composant ou déjà décomposé), avec copie de sa composition le cas échéant (UCMOD01) |
 | POST | `/api/components/batch` | Contributor | Créer plusieurs composants en un seul appel, un fichier CAO par composant (UCCE01, voir note ci-dessous) — sans garantie transactionnelle : chaque fichier réussit ou échoue indépendamment |
 | GET | `/api/components/{id}` | Auth | Détail d'un composant, décomposé ou non |
-| PATCH | `/api/components/{id}` | Contributor | Modifier les métadonnées (patch : name, description, tags, locations, license_id — UCCE02/UCMOD03, mêmes champs quel que soit le nombre d'instances) — #incoherence la méthode documentée ici était PUT, mais le handler (`adapters/in/rest/handlers.go`, `patchComponent`) répond uniquement à PATCH ; corrigé pour refléter le comportement réel, à confirmer que PUT n'était pas l'intention initiale |
+| PATCH | `/api/components/{id}` | Contributor | Modifier les métadonnées (patch : name, description, tags, locations, license_id — UCCE02/UCMOD03, mêmes champs quel que soit le nombre d'instances). Brouillon : modification locale, licence vérifiée contre le catalogue et le parent (RM03, `400` si refusée). Asset soumis (RM19) : seuls name, description, tags et liens changent, sur le ledger via l'opération chaincode `UpdateMetadata` signée par le propriétaire ; un changement de licence est refusé (`409`) — #incoherence la méthode documentée ici était PUT, mais le handler (`adapters/in/rest/handlers.go`, `patchComponent`) répond uniquement à PATCH ; corrigé pour refléter le comportement réel, à confirmer que PUT n'était pas l'intention initiale |
 | DELETE | `/api/components/{id}` | Contributor | Supprimer (UCCE07/UCMOD08) — brouillon retiré du stockage local ; asset déjà soumis masqué localement (disparaît des listes), son enregistrement blockchain (y compris ses `ModuleVersion` éventuelles) n'est jamais modifié (RM08) |
 | GET | `/api/components/{id}/interfaces` | Auth | Interfaces physiques directes si l'asset n'a aucune instance, interfaces exposées (non connectées en interne) s'il en a (UCAM02, UCMOD04) |
 | GET | `/api/components/{id}/compatible` | Auth | Composants compatibles (type d'interface, catégorie, tag, sens — `DC_D8_Recherche.md` §2, UCREC02) |
@@ -112,7 +113,7 @@ tags:
 | DELETE | `/api/components/{id}/instances/{instanceId}` | Contributor | Retirer une instance (cascade sur ses connexions, RM14 — UCAM08) |
 | GET | `/api/components/{id}/assemblies` | Auth | Connexions internes de l'asset (UCMOD04) — liste vide si l'asset n'a aucune instance |
 | GET | `/api/components/{id}/bom` | Auth | Export BOM (Bill of Materials, `DC_D8_Recherche.md` §5, UCREC05) |
-| POST | `/api/components/{id}/submit` | Contributor | Soumettre à la blockchain — route unique dispatchant en interne vers `SubmitModule` (applique RM17, crée une `ModuleVersion`) si l'asset a des `Assemblies`, vers `Submit` sinon (voir ADR-11, Conséquence — le point de soumission doit dispatcher en interne) |
+| POST | `/api/components/{id}/submit` | Contributor | Soumettre à la blockchain — route unique dispatchant en interne vers `SubmitModule` (applique RM17, crée une `ModuleVersion`) si l'asset a des `Assemblies`, vers `Submit` sinon (voir ADR-11, Conséquence — le point de soumission doit dispatcher en interne). Un asset déjà soumis n'est jamais re-soumis (RM19, `409`) — une nouvelle version est un asset dérivé (`parent_id`) |
 | POST | `/api/components/{id}/decompose/preview` | Contributor | Analyser le fichier STEP du composant, retourner une proposition de découpage (sous-pièces, connexions candidates) sous un `decomposition_id` temporaire — aucune entité créée (UCAM09, RM40) |
 | POST | `/api/components/{id}/decompose/commit` | Contributor | Matérialiser une proposition de découpage retenue (`decomposition_id`), éventuellement corrigée : sous-composants en draft, module `decoupage`, liaisons compatibles (UCAM09, RM39/RM41) — crée un nouvel asset distinct référençant `{id}` par `parent_id`, ne modifie jamais `{id}` lui-même (post-condition UCAM09, voir ADR-11 pour le point ouvert PO sur cette sémantique d'identité) |
 

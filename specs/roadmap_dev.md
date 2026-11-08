@@ -9,7 +9,7 @@ tags:
 
 | Domaine | Service | CLI | REST | État réel |
 |---------|---------|-----|------|-----------|
-| `model` | ✅ | ✅ | ✅ | Bugs : module `submitted` modifiable sans fork (RM19), anti-plagiat SHA-256 non comparatif |
+| `model` | ✅ | ✅ | ✅ | Bugs : anti-plagiat SHA-256 non comparatif |
 | `channel` | ✅ | ✅ | ❌ | `myr channel get/list` + `myr org add`/`myr node add/remove` (AddOrganisation/AddNode/RemoveNode) ; aucune route REST dédiée |
 | `identity` | ✅ | ✅ | ✅ | `myr identity wallets/status/enroll/re-enroll/request/requests/approve/reject/register/set-role` ; inscription selon les règles du réseau (fermé / ouvert / avec approbation), rôle et statut lus dans le certificat (ADR-12) |
 | `network` | ✅ | ✅ | partiel | `myr network/org/node` complets ; REST ne couvre que `List`/`GetActive` (pas de create/update/activate/delete/test/addPeer) |
@@ -84,7 +84,7 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 ### Bugs bloquants — à corriger avant tout
 
 - [x] Rôle initial `reader` au lieu de `contributor` *(RM21 — faille sécurité)* — résolu : il n'existe pas de `domain/auth/` ; le rôle d'inscription par défaut est `reader` (`adapters/out/fabric/ca_client.go`) et le rôle de session est lu dans le certificat (R-03 étape 2, ADR-12)
-- [ ] `domain/model/service.go` — garde `SubmitModule` : module `submitted` non modifiable sans fork *(RM19)*
+- [x] `domain/model/service.go` — garde `SubmitModule` : module `submitted` non modifiable sans fork *(RM19)* — résolu (R-03 étape 3, FT-012) : un asset soumis n'est ni re-soumis, ni recomposé, ni modifié dans ses interfaces ou sa licence (`ErrAssetSubmitted`, 409) ; seules ses métadonnées descriptives changent, par `UpdateMetadata`, signée par son propriétaire (ADR-12)
 - [ ] `chaincode/model/entity.go` — aligner les champs (7 → 20+) avec le domaine *(perte de données silencieuse)*
 - [x] `domain/model/service.go` (`getModuleInterfacesInto`) — corrigé : `GetModuleInterfaces` exposait au plus 1 interface par `interface_id` partagé entre instances du même asset, au lieu d'une par `(instance_id, interface_id)` libre, à cause d'un dédoublonnage `seen[inst.AssetID]` qui sautait entièrement les instances suivantes dès qu'un asset apparaissait plus d'une fois dans `WorkspaceInstances`. Le filtre "interne" (ex-`internalIfaceIDs`) est désormais scindé en `internalGlobal` (connexion sans `FromInstanceID`/`ToInstanceID`, comportement historique conservé) et `internalByInstance` (connexion avec instance explicite, n'exclut que cette instance précise) — tests : `TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed`, `TestGetModuleInterfaces_InternalConnection_ScopedToInstance` *(RM13, UCMOD04, UCAM02)*
 - [ ] Limite résiduelle non corrigée : `AssetInterface` (`entity.go:126`) n'a toujours aucune identité par instance (`ID`/`AssetID` scopés à l'asset, partagés par toutes ses instances) — quand N instances d'un même asset restent exposées simultanément, le client reçoit N entrées `AssetInterface` de même `id`, non attribuables individuellement à une instance précise depuis la réponse JSON seule (il doit croiser avec `WorkspaceInstances` côté module). Nécessite de trancher comment l'API distingue ces entrées avant d'exposer cette information dans la réponse (ex. `instance_id` sur chaque entrée exposée)

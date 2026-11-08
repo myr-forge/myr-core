@@ -202,7 +202,10 @@ func (o *offlineBlockchain) err() error {
 	return fmt.Errorf("réseau %q non disponible dans le pool de connexions", o.networkID)
 }
 
-func (o *offlineBlockchain) StoreModelRecord(*model.Model3D) error               { return o.err() }
+func (o *offlineBlockchain) StoreModelRecord(*model.Model3D) error { return o.err() }
+func (o *offlineBlockchain) UpdateModelMetadata(_, _ string, _ model.AssetMetadata) error {
+	return o.err()
+}
 func (o *offlineBlockchain) GetModelRecord(_, _ string) (*model.Model3D, error)  { return nil, o.err() }
 func (o *offlineBlockchain) ListModelRecords(_ string) ([]*model.Model3D, error) { return nil, o.err() }
 func (o *offlineBlockchain) VerifyIntegrity(_, _, _ string) (bool, error)        { return false, o.err() }

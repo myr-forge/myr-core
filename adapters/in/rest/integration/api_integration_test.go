@@ -60,6 +60,19 @@ func (b *memBC) StoreModelRecord(m *model.Model3D) error {
 	return nil
 }
 
+func (b *memBC) UpdateModelMetadata(id, _ string, meta model.AssetMetadata) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	m, ok := b.records[id]
+	if !ok {
+		return fmt.Errorf("modèle introuvable : %s", id)
+	}
+	cp := *m
+	cp.Name, cp.Description, cp.Tags, cp.Links = meta.Name, meta.Description, meta.Tags, meta.Links
+	b.records[id] = &cp
+	return nil
+}
+
 func (b *memBC) GetModelRecord(id, _ string) (*model.Model3D, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()

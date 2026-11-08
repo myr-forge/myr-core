@@ -13,6 +13,7 @@ tags:
   - uc/UCCE02
   - rm/RM03
   - rm/RM07
+  - rm/RM19
   - enf/ENF12
   - enf/ENF30
 ---
@@ -46,13 +47,16 @@ UC1 ..> UC5 : <<include>>
 
 ## Contexte
 
-Après création, un composant peut être reconfiguré par son propriétaire : modification du nom, de la description, de la licence ou des tags. Cette opération ne modifie pas le fichier 3D ni le hash — elle met à jour les métadonnées de l'asset.
+Un composant peut être reconfiguré par son propriétaire. Cette opération ne modifie jamais le fichier 3D ni son empreinte. Ce qui peut changer dépend de l'état du composant (RM19) :
 
-La mise à jour est soumise à la blockchain Fabric via `PATCH /api/components/:id` → `service.UpdateAsset()` → `blockchain.StoreModelRecord()`. Chaque appel produit un nouveau bloc sur le ledger : l'historique des configurations est traçable.
+| État | Champs modifiables | Où la modification est enregistrée |
+|------|--------------------|------------------------------------|
+| Brouillon (`draft`) | nom, description, licence, tags, liens | brouillon local (`DraftStore`) — aucune transaction |
+| Soumis (`submitted`) | nom, description, tags, liens — **la licence est figée** | ledger, par l'opération dédiée `UpdateMetadata` (`BlockchainPort.UpdateModelMetadata`), signée par le propriétaire ; aucun autre champ de l'enregistrement ne change (ADR-12) |
 
-Cette opération est généralisée à tout asset, y compris un module (voir UCMOD03) : le même service `UpdateAsset()`, les mêmes champs modifiables (`name`, `description`, `license_id`, `tags`, `links`) et la même vérification RM03 s'appliquent, seule la route change (`PATCH /api/modules/:id`).
+Cette opération est généralisée à tout asset, y compris un module (voir UCMOD03) : même service `UpdateAsset()`, mêmes champs, mêmes contrôles, seule la route change (`PATCH /api/modules/:id`, alias de `PATCH /api/components/:id`).
 
-**Contrainte clé :** Si l'asset a un `ParentID` et que la nouvelle licence est modifiée, la compatibilité de licence avec le parent doit être re-vérifiée (RM03) — `UpdateAsset()` applique cette vérification au même titre que `AddFull()` à la création.
+**Contrainte clé :** une licence proposée doit exister dans le catalogue et, si l'asset a un `ParentID`, être compatible avec la licence du parent (RM03) — `UpdateAsset()` applique ces vérifications comme `AddFull()` à la création.
 
 ## Pré-conditions
 
@@ -69,52 +73,53 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 1. Un ou plusieurs champs sont transmis : nom, description, licence, tags, liens (JSON body ou form).
 2. Le REST Handler valide les champs (name max 256, description max 10000, IDs valides).
 3. Le handler appelle `service.UpdateAsset(UpdateRequest{ID, Name, Description, LicenseID, Tags, Links})`.
-4. Le service récupère l'asset existant : `blockchain.GetModelRecord(req.ID, "")`.
-5. Le service applique le patch partiel : seuls les champs non vides de `UpdateRequest` écrasent les valeurs actuelles.
-6. Si `LicenseID` est modifié et que l'asset a un `ParentID` : le service vérifie la compatibilité de licence avec le parent.
-7. Le service soumet la transaction : `blockchain.StoreModelRecord(m)`.
-8. Fabric valide et ancre le nouveau bloc.
-9. L'API retourne `200 OK` avec le `Model3D` mis à jour.
+4. Le service récupère l'asset : brouillon local d'abord, sinon enregistrement du ledger.
+5. **Brouillon :** si `LicenseID` est fourni, le service vérifie qu'il existe au catalogue et qu'il est compatible avec la licence du parent (RM03) ; il applique le patch partiel (seuls les champs non vides écrasent les valeurs actuelles) et enregistre le brouillon.
+6. **Asset soumis :** le service applique le patch partiel au nom, à la description, aux tags et aux liens, puis appelle `blockchain.UpdateModelMetadata(id, channelID, AssetMetadata{...})` ; le chaincode vérifie que le signataire est le propriétaire et ne remplace que ces quatre champs.
+7. L'API retourne `200 OK` avec le `Model3D` mis à jour.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
-> - 🟡 [TestFabricAdapter_GetModelRecord_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_EvaluateError.md) — déduit : teste `BlockchainPort.GetModelRecord`
-> - 🟡 [TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel.md) — déduit : teste `BlockchainPort.GetModelRecord`
-> - 🟡 [TestFabricAdapter_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
-> - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestFabricAdapter_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestFabricBlockchain_GetModelRecord_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_EvaluateError.md) — déduit : teste `BlockchainPort.GetModelRecord`
-> - 🟡 [TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError.md) — déduit : teste `BlockchainPort.GetModelRecord`
-> - 🟡 [TestFabricBlockchain_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
-> - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestFabricBlockchain_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestFabricBlockchain_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_GetModelRecord_NotFound](../../../docs/tests/adapters-out-fabric/TestIntegration_GetModelRecord_NotFound.md) — déduit : teste `BlockchainPort.GetModelRecord`
-> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.GetModelRecord`, `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_VerifyIntegrity](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyIntegrity.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 6 déduit(s)
+> - 🟡 [TestFabricBlockchain_UpdateModelMetadata](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_UpdateModelMetadata.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
+> - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestUpdateAsset_RM03_IncompatibleLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM03_IncompatibleLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestUpdateAsset_RM19_SubmittedLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM19_SubmittedLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestUpdateAsset_SubmittedMetadata_UpdatedOnLedger](../../../docs/tests/domain-model/TestUpdateAsset_SubmittedMetadata_UpdatedOnLedger.md) — déduit : teste `ModelService.UpdateAsset`
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Patch partiel (mise à jour d'un seul champ)
 
-1. Seule la licence est transmise (ex : passe de CC BY à CC BY-SA).
-2. Seul le champ `license_id` est envoyé dans la requête.
-3. Le service applique uniquement ce champ — les autres restent inchangés (`UpdateAsset` est un patch partiel).
-4. La compatibilité de licence avec le parent est vérifiée si applicable.
-5. La transaction est soumise normalement.
+1. Un seul champ est transmis (ex. : la licence d'un brouillon passe de CC BY à CC BY-SA, ou le lien d'un composant soumis change d'adresse).
+2. Le service applique uniquement ce champ — les autres restent inchangés (`UpdateAsset` est un patch partiel).
+3. Une licence est vérifiée (catalogue, RM03) ; un lien d'asset soumis est enregistré par `UpdateMetadata`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
+> - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestUpdateAsset_RM03_IncompatibleLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM03_IncompatibleLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestUpdateAsset_RM19_SubmittedLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM19_SubmittedLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestUpdateAsset_SubmittedMetadata_UpdatedOnLedger](../../../docs/tests/domain-model/TestUpdateAsset_SubmittedMetadata_UpdatedOnLedger.md) — déduit : teste `ModelService.UpdateAsset`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Incompatibilité de licence avec le parent (RM03)
 
-1. L'asset a un `ParentID` et la nouvelle licence est incompatible avec la licence du parent.
-2. `CheckLicenseCompatibility(parent.LicenseID, newLicenseID)` retourne `Compatible: false`.
-3. Le service retourne l'erreur avant toute soumission Fabric.
-4. L'API retourne `422 Unprocessable Entity` : `{ "error": "Incompatibilité de licence : <raison>." }`.
+1. L'asset est un brouillon dérivé (`ParentID`) et la nouvelle licence est incompatible avec la licence du parent — ou la licence est absente du catalogue.
+2. `CheckLicenseCompatibility(parent.LicenseID, newLicenseID)` retourne `Compatible: false` (`ErrLicenseIncompatible`), ou `GetLicense` échoue (`ErrUnknownLicense`).
+3. Le service retourne l'erreur sans rien enregistrer.
+4. L'API retourne `400 Bad Request` avec le motif.
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
+### Flux erreur — Changement de licence d'un composant soumis (RM19)
+
+1. Le composant est soumis et la requête propose une licence différente de la sienne.
+2. Le service refuse (`ErrAssetSubmitted`) sans rien enregistrer : la licence d'un asset soumis est figée — un changement de licence passe par un composant dérivé.
+3. L'API retourne `409 Conflict`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!warning] Tests — aucun test ne couvre cette exigence
@@ -140,27 +145,20 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 
 ### Flux erreur — Échec endorsement Fabric
 
-1. `blockchain.StoreModelRecord(m)` retourne une erreur Fabric.
-2. L'état de l'asset en mémoire n'est pas persisté.
-3. L'API retourne `500 Internal Server Error` : `{ "error": "Erreur blockchain : <message>." }`.
+1. `blockchain.UpdateModelMetadata(...)` retourne une erreur Fabric — notamment si le signataire n'est pas le propriétaire de l'asset.
+2. L'enregistrement du ledger reste inchangé.
+3. L'API retourne une erreur avec sa référence (`503` si le réseau est indisponible).
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
-> - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestFabricAdapter_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestFabricBlockchain_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestFabricBlockchain_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_VerifyIntegrity](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyIntegrity.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> - 🟡 [TestFabricBlockchain_UpdateModelMetadata](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_UpdateModelMetadata.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
 <!-- tests-obsidian:end -->
 
 ## Post-conditions
 
-- Les métadonnées mises à jour sont inscrites sur la blockchain (nouveau bloc — immuable).
-- L'historique des configurations est traçable via les blocs successifs du ledger.
-- Les informations mises à jour (nom, licence) sont visibles par les autres utilisateurs du réseau.
+- Brouillon : le brouillon local porte les nouvelles valeurs ; rien n'est écrit sur le ledger avant la soumission.
+- Asset soumis : les métadonnées descriptives mises à jour sont inscrites sur le ledger ; l'historique des modifications reste traçable par les transactions successives, et tous les autres champs de l'enregistrement sont inchangés.
+- Les informations mises à jour sont visibles par les autres utilisateurs du réseau.
 
 ## Diagramme de séquence
 
@@ -178,36 +176,38 @@ alt Champ invalide
     REST --> Browser : 400 Bad Request { error }
 else Champs valides
     REST -> ModelSvc : UpdateAsset(UpdateRequest{ID, Name?, Description?, LicenseID?, Tags?, Links?})
-    ModelSvc -> Fabric : GetModelRecord(req.ID, "")
+    ModelSvc -> ModelSvc : brouillon local, sinon GetModelRecord(req.ID)
 
     alt Asset introuvable
-        Fabric --> ModelSvc : ErrNotFound
-        ModelSvc --> REST : ErrNotFound
+        ModelSvc --> REST : erreur
         REST --> Browser : 404 Asset introuvable
-    else Asset trouvé
-        Fabric --> ModelSvc : model3D (existant)
-        ModelSvc -> ModelSvc : patchPartiel(model3D, req)
-
-        alt LicenseID modifié && ParentID présent
-            ModelSvc -> Fabric : GetModelRecord(ParentID)
-            Fabric --> ModelSvc : parentModel
-            ModelSvc -> ModelSvc : CheckLicenseCompatibility(parent.LicenseID, newLicenseID)
-            alt Incompatible
-                ModelSvc --> REST : ErrLicenseIncompatibility
-                REST --> Browser : 422 Incompatibilité de licence
+    else Brouillon
+        opt LicenseID fourni
+            ModelSvc -> ModelSvc : checkLicense (catalogue, RM03 avec le parent)
+            alt Licence refusée
+                ModelSvc --> REST : ErrUnknownLicense / ErrLicenseIncompatible
+                REST --> Browser : 400 Licence refusée
             end
         end
-
-        ModelSvc -> Fabric : StoreModelRecord(model3D_updated)
-
-        alt Échec Fabric
-            Fabric --> ModelSvc : ErrEndorsement
-            ModelSvc --> REST : ErrBlockchain
-            REST --> Browser : 500 Erreur blockchain
-        else Succès
-            Fabric --> ModelSvc : ok
-            ModelSvc --> REST : Model3D{updated}
-            REST --> Browser : 200 OK { model3D }
+        ModelSvc -> ModelSvc : patch partiel, SaveDraft
+        ModelSvc --> REST : Model3D{updated}
+        REST --> Browser : 200 OK { model3D }
+    else Asset soumis
+        alt LicenseID différent de la licence enregistrée
+            ModelSvc --> REST : ErrAssetSubmitted
+            REST --> Browser : 409 Licence figée (RM19)
+        else Métadonnées descriptives
+            ModelSvc -> Fabric : UpdateModelMetadata(id, channelID, {Name, Description, Tags, Links})
+            Fabric -> Fabric : UpdateMetadata — signataire = propriétaire, seuls ces 4 champs
+            alt Refus ou échec Fabric
+                Fabric --> ModelSvc : erreur
+                ModelSvc --> REST : erreur
+                REST --> Browser : erreur (réf.)
+            else Succès
+                Fabric --> ModelSvc : ok
+                ModelSvc --> REST : Model3D{updated}
+                REST --> Browser : 200 OK { model3D }
+            end
         end
     end
 end
@@ -253,15 +253,15 @@ note "Asset parent → Asset dérivé\nC = Commercial  NC = Non-Commercial" as N
 
 ## Notes d'implémentation
 
-**Route existante :** `PATCH /api/components/:id` → `handler.patchComponent()` → `service.UpdateAsset()` → `fabric.StoreModelRecord()`.
+**Route :** `PATCH /api/components/:id` → `handler.patchComponent()` → `service.UpdateAsset()` → `DraftStore.SaveDraft()` (brouillon) ou `BlockchainPort.UpdateModelMetadata()` (asset soumis, fonction chaincode `UpdateMetadata`).
 
 **Commande CLI équivalente :** `myr model update <id> --description <texte> --license <id> --tags <a,b>` (voir `specs/3-Conception/DC_CLI_Model.md` § 5), appelant la même méthode `service.UpdateAsset(UpdateRequest{...})` que le handler REST `updateAsset()`, avec le même comportement de patch partiel et la même vérification de compatibilité de licence (RM03).
 
 **Patch partiel :** `service.UpdateAsset()` applique uniquement les champs non-vides de `UpdateRequest`. Les champs `Tags` et `Links` sont des slices — si `nil`, ils ne sont pas écrasés ; si `[]string{}` (slice vide), ils effacent les valeurs existantes.
 
-**Vérification de licence manquante dans UpdateAsset :** `service.UpdateAsset()` ne vérifie pas actuellement la compatibilité de licence lors d'une modification. À ajouter : si `req.LicenseID != ""` et que l'asset a un `ParentID`, appeler `CheckLicenseCompatibility(parent.LicenseID, req.LicenseID)` avant `StoreModelRecord`.
+**Vérification de licence :** une seule fonction du domaine (`checkLicense`) contrôle la licence proposée à la création (`AddFull`, `CreateModule`) comme en modification (`UpdateAsset`) : présence au catalogue (`GetLicense`), puis compatibilité avec la licence du parent s'il est connu (RM03).
 
-**Catalogue de licences :** `service.ListLicenses()` et `service.GetLicense(id)` sont déjà implémentés dans `domain/model/`. L'interface REST d'exposition du catalogue (`GET /api/licenses`) est à créer.
+**Catalogue de licences :** `service.ListLicenses()` et `service.GetLicense(id)` (`domain/model/`), exposés par `GET /api/licenses` et `GET /api/licenses/{id}`.
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
@@ -269,6 +269,7 @@ note "Asset parent → Asset dérivé\nC = Commercial  NC = Non-Commercial" as N
 **Étape suivante — conception**
 - **API_REST** : [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](../../3-Conception/API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29)
 - **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29)
+- **Chaincode** : [§ 4. Fonctions chaincode — Store/Read (D3/D4/D6)](../../3-Conception/Chaincode.md#4.%20Fonctions%20chaincode%20—%20Store/Read%20%28D3/D4/D6%29)
 - **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case)
 
 <!-- liens-obsidian:end -->

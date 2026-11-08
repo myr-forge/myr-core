@@ -258,7 +258,7 @@ state "Module (toujours créé en brouillon — RM16)" {
   module_draft --> module_submitted : SubmitModule()\nrequiert len(Assemblies)>0 (RM17)
 }
 
-submitted_direct --> fork : modification tentée\n⚠️ fork non contraint (E5)
+submitted_direct --> fork : modification tentée\n(refusée sur l'asset soumis — RM19)
 asset_submitted --> fork : idem
 module_submitted --> fork : idem
 fork : nouveau Model3D en draft\nParentID = asset d'origine\nasset précédent inchangé (immuable)
@@ -279,9 +279,9 @@ note "Un composant peut devenir\nun module via Category=decoupage\n(UCAM05 — b
   - `ID` est généré côté serveur — jamais fourni par le client (RM04).
   - `Category != base` → `ParentID` obligatoire (RM05).
   - `Category = base` → soumission à l'anti-plagiat SHA-256 + SCM (RM01, voir §6).
-  - `OwnerID` doit correspondre au `UserID`/pseudo de la session — **non validé dans le code actuel** (écart sécurité, voir `Modele_Domaine.md` §2 note sur `owner_id`).
+  - `OwnerID` est l'identité de la session (`pseudo@org`), qui signe l'écriture — le chaincode refuse toute écriture dont le signataire n'est pas le propriétaire (ADR-12).
   - `BlockID` non vide → asset enregistré sur Fabric, immuable.
-  - `Status = submitted` → toute modification doit passer par un fork (RM19 — **non contraint dans le code actuel**, écart E5).
+  - `Status = submitted` → licence, interfaces et composition sont figées et l'asset n'est jamais re-soumis : toute évolution passe par un fork (RM19, `ErrAssetSubmitted`). Seules les métadonnées descriptives (`Name`, `Description`, `Tags`, `Links`) restent modifiables par le propriétaire, via l'opération chaincode `UpdateMetadata` (ADR-12).
 - **Cycle de vie composant (par défaut) :** `AddFull` → validation → `StoreModelRecord` → `submitted` (une seule transaction).
 - **Cycle de vie composant (brouillon explicite) :** `AddFull(draft: true)` → `draft` → édition locale des interfaces → `Submit` (cible E8) → `submitted`.
 - **Cycle de vie module :** `CreateModule` → `draft` → `SubmitModule` → `submitted`.
@@ -406,7 +406,7 @@ Seuil d'application : `score > 0.50` → rejet de la soumission (RM01), avant to
 | RM16 | Module créé en `draft` | ✅ `CreateModule()` |
 | RM17 | `SubmitModule` exige `len(Assemblies) > 0` | ✅ Vérifié dans `SubmitModule()` |
 | RM18 | `ModuleVersion` immuable horodatée | ✅ Créée dans `SubmitModule()` |
-| RM19 | Asset `submitted` → fork obligatoire (généralisée à tout `Model3D`, pas seulement module) | ❌ Non contraint (E5) |
+| RM19 | Asset `submitted` → fork obligatoire (généralisée à tout `Model3D`, pas seulement module) | ✅ `draftAsset()` / `submittableDraft()` → `ErrAssetSubmitted` ; write-once du chaincode (`StoreModel`) |
 
 ---
 
@@ -571,7 +571,7 @@ end note
 
 ## 10. Écarts code → specs (renvoi)
 
-Le détail des écarts E1, E2, E4, E5, E6, E8, E9 est centralisé dans `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus — ce document ne les duplique pas, il y renvoie depuis chaque section concernée (§2, §5, §6, §7 ci-dessus) pour garder une source unique.
+Le détail des écarts E1, E2, E4, E6, E8, E9 est centralisé dans `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus — ce document ne les duplique pas, il y renvoie depuis chaque section concernée (§2, §5, §6, §7 ci-dessus) pour garder une source unique.
 
 ---
 

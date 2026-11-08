@@ -215,7 +215,7 @@ func GetLicense(id string) (*License, error) {
 	if l, ok := licenseIndex[id]; ok {
 		return l, nil
 	}
-	return nil, fmt.Errorf("licence %q introuvable", id)
+	return nil, fmt.Errorf("%w : %q", ErrUnknownLicense, id)
 }
 
 // CheckLicenseCompatibility vérifie si proposedID est autorisé pour une œuvre dérivée

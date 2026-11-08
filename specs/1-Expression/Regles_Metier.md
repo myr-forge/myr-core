@@ -46,9 +46,11 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCCE04, UCMOD06
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 2 explicite(s) · 0 déduit(s)
+> [!check]- Tests — 4 explicite(s) · 0 déduit(s)
 > - ✅ [TestRunModelAdd_ServiceError_Rejected](../../docs/tests/adapters-in-cli/TestRunModelAdd_ServiceError_Rejected.md) — explicite (le test cite RM03)
+> - ✅ [TestDomainErrors_SubmittedAndLicense_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_SubmittedAndLicense_MappedToHTTP.md) — explicite (le test cite RM03)
 > - ✅ [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — explicite (le test cite RM03)
+> - ✅ [TestUpdateAsset_RM03_IncompatibleLicense_Rejected](../../docs/tests/domain-model/TestUpdateAsset_RM03_IncompatibleLicense_Rejected.md) — explicite (le test cite RM03)
 <!-- tests-obsidian:end -->
 
 ### RM04 — UUID unique
@@ -205,7 +207,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCAM08
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> - 🟡 [TestModuleComposition_RM19_Submitted_Rejected](../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
 > - 🟡 [TestWorkspace_AddRemoveInstance](../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
 > - 🟡 [TestWorkspace_NilStore_ReturnsError](../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
 <!-- tests-obsidian:end -->
@@ -250,16 +253,17 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD06
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 1 explicite(s) · 8 déduit(s)
+> [!check]- Tests — 1 explicite(s) · 9 déduit(s)
 > - ✅ [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — explicite (le test cite RM17)
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestCreateModule_RM19_ForkOfSubmitted_Submittable](../../docs/tests/domain-model/TestCreateModule_RM19_ForkOfSubmitted_Submittable.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestModule_NotFound_ReturnsError](../../docs/tests/domain-model/TestModule_NotFound_ReturnsError.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestModule_Submit](../../docs/tests/domain-model/TestModule_Submit.md) — déduit : teste `ModelService.SubmitModule`
-> - 🟡 [TestModule_SubmitTwice_VersionIncrement](../../docs/tests/domain-model/TestModule_SubmitTwice_VersionIncrement.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestModule_Submit_NoAssembly](../../docs/tests/domain-model/TestModule_Submit_NoAssembly.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestRemoveModule_Submitted_HidesLocally](../../docs/tests/domain-model/TestRemoveModule_Submitted_HidesLocally.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestService_NilBlockchain_ErrBlockchainUnavailable](../../docs/tests/domain-model/TestService_NilBlockchain_ErrBlockchainUnavailable.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestSubmitModule_RM19_AlreadySubmitted_Rejected](../../docs/tests/domain-model/TestSubmitModule_RM19_AlreadySubmitted_Rejected.md) — déduit : teste `ModelService.SubmitModule`
 <!-- tests-obsidian:end -->
 
 ### RM18 — ModuleVersion immuable (module uniquement)
@@ -278,12 +282,17 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 
 - **Déclencheur** : Modification d'un asset soumis (composant ou module)
 - **Condition** : Toujours
-- **Conséquence** : Un asset soumis ne peut pas être modifié directement (immuabilité Fabric, règle 7). Une nouvelle version (fork) doit être créée en état `draft`, avec `ParentID` référençant l'asset d'origine
-- **Use cases** : UCMOD06, UCCE06
+- **Conséquence** : Un asset soumis est immuable sur le ledger : il n'est jamais re-soumis, et ni sa licence, ni ses interfaces, ni sa composition (instances, liaisons) ne changent. Seules ses métadonnées descriptives — nom, description, tags, liens — restent modifiables, par son seul propriétaire. Toute autre évolution, y compris une nouvelle version d'un module, passe par un nouvel asset dérivé (fork), créé en état `draft` avec `ParentID` référençant l'asset d'origine
+- **Use cases** : UCMOD06, UCCE06, UCCE02, UCMOD03
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 6 explicite(s) · 0 déduit(s)
+> - ✅ [TestDomainErrors_SubmittedAndLicense_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_SubmittedAndLicense_MappedToHTTP.md) — explicite (le test cite RM19)
+> - ✅ [TestCreateModule_RM19_ForkOfSubmitted_Submittable](../../docs/tests/domain-model/TestCreateModule_RM19_ForkOfSubmitted_Submittable.md) — explicite (le test cite RM19)
+> - ✅ [TestModuleComposition_RM19_Submitted_Rejected](../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — explicite (le test cite RM19)
+> - ✅ [TestSubmitModule_RM19_AlreadySubmitted_Rejected](../../docs/tests/domain-model/TestSubmitModule_RM19_AlreadySubmitted_Rejected.md) — explicite (le test cite RM19)
+> - ✅ [TestSubmit_RM19_AlreadySubmitted_Rejected](../../docs/tests/domain-model/TestSubmit_RM19_AlreadySubmitted_Rejected.md) — explicite (le test cite RM19)
+> - ✅ [TestUpdateAsset_RM19_SubmittedLicense_Rejected](../../docs/tests/domain-model/TestUpdateAsset_RM19_SubmittedLicense_Rejected.md) — explicite (le test cite RM19)
 <!-- tests-obsidian:end -->
 
 ### RM39 — Filiation d'un découpage
@@ -695,7 +704,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | [RM16](#RM16%20—%20État%20draft) | État draft générique (module : toujours ; composant : optionnel via `--draft`) | Modules |
 | [RM17](#RM17%20—%20Assemblage%20requis%20pour%20soumission%20%28module%20uniquement%29) | Au moins un assemblage requis pour soumettre (module uniquement) | Modules |
 | [RM18](#RM18%20—%20ModuleVersion%20immuable%20%28module%20uniquement%29) | ModuleVersion immuable horodatée à la soumission (module uniquement) | Modules |
-| [RM19](#RM19%20—%20Fork%20d'un%20asset%20soumis) | Toute modification d'un asset soumis (composant ou module) crée un fork | Modules |
+| [RM19](#RM19%20—%20Fork%20d'un%20asset%20soumis) | Asset soumis immuable (jamais re-soumis, licence, interfaces et composition figées) ; seules ses métadonnées descriptives changent, par son propriétaire ; toute autre évolution crée un fork | Modules |
 | [RM39](#RM39%20—%20Filiation%20d'un%20découpage) | Filiation par `ParentID` du composant d'origine pour tous les éléments d'un découpage (manuel ou assisté) | Modules |
 | [RM40](#RM40%20—%20Proposition%20de%20découpage%20non%20engageante) | Une proposition de découpage automatique ne crée aucune entité tant qu'elle n'est pas validée | Modules |
 | [RM41](#RM41%20—%20Compatibilité%20toujours%20vérifiée%20pour%20une%20connexion%20suggérée) | Connexion suggérée soumise au même contrôle de compatibilité qu'une liaison manuelle, sans dérogation | Modules |

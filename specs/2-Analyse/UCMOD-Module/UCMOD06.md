@@ -86,7 +86,7 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 5. Le Module passe en lecture seule (RM19)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 20 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 21 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
@@ -101,8 +101,8 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 > - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.SubmitModule`
-> - 🟡 [TestModule_NotFound_ReturnsError](../../../docs/tests/domain-model/TestModule_NotFound_ReturnsError.md) — déduit : teste `ModelService.SubmitModule`
-> - … et 5 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestCreateModule_RM19_ForkOfSubmitted_Submittable](../../../docs/tests/domain-model/TestCreateModule_RM19_ForkOfSubmitted_Submittable.md) — déduit : teste `ModelService.SubmitModule`
+> - … et 6 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Module avec composants dérivés (licences parentales)
@@ -120,21 +120,24 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 > - 🟡 [TestCheckModuleLicense_NoComponents](../../../docs/tests/domain-model/TestCheckModuleLicense_NoComponents.md) — déduit : teste `ModelService.CheckModuleLicenseCompatibility`
 <!-- tests-obsidian:end -->
 
-### Flux alternatif — Fork d'un module déjà soumis (RM19 — comportement cible)
+### Flux alternatif — Fork d'un module déjà soumis (RM19)
 
-> **Note RM19 :** Ce flux décrit le comportement **attendu par les specs**. Il n'est **pas implémenté** dans le code actuel (écart E5). Dans le code, un module `submitted` reste modifiable directement.
+1. Une modification de la composition d'un Module en état `submitted` est tentée (ajout ou retrait d'instance, ajout ou retrait de liaison, ajout d'interface…), ou une nouvelle soumission du même module
+2. Le service refuse : le module n'est plus un brouillon (`ErrAssetSubmitted`) — rien n'est écrit, ni localement ni sur le ledger
+3. L'API retourne `409 Conflict` : le module est publié, une nouvelle version passe par un module dérivé
+4. Un module dérivé est créé explicitement : `POST /api/modules` avec `parent_id` = ID du module original (UCMOD01, dérivation)
+5. Le système crée un nouveau `Model3D` en état `draft` dont la composition (instances et liaisons internes) est une copie indépendante de celle du parent
+6. Le module dérivé est modifié par les mêmes actions directes que UCAM01/UCMOD01
+7. Le module dérivé peut être soumis à son tour → nouvelle `ModuleVersion` indépendante, le module original restant inchangé sur le ledger
 
-1. Une tentative de modification d'un Module en état `submitted` est effectuée (ajout d'assemblage, modification de liens…)
-2. Le système détecte `m.Status == ModuleSubmitted` — **modification directe refusée**
-3. Message : "Ce module est publié. Créez une nouvelle version pour le modifier."
-4. La création d'une nouvelle version est demandée explicitement
-5. Le système crée un nouveau `Model3D` en état `draft` avec les mêmes `WorkspaceInstances`, `Assemblies` et métadonnées (`ParentID` = ID du module original)
-6. Le fork est modifié par les mêmes actions directes que UCAM01/UCMOD01
-7. Le fork peut être soumis à son tour → nouvelle `ModuleVersion` indépendante
+Les métadonnées descriptives d'un module soumis (`name`, `description`, `tags`, `links`) ne relèvent pas de ce flux : elles restent modifiables par leur propriétaire sans fork (UCMOD03).
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 4 déduit(s)
+> - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestModules_Verify_OK](../../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : teste route `/api/modules`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Aucun assemblage (RM17)
@@ -145,15 +148,16 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 4. Le Module reste en état `draft` — des liaisons peuvent être ajoutées avant une nouvelle tentative
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 9 déduit(s)
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestCreateModule_RM19_ForkOfSubmitted_Submittable](../../../docs/tests/domain-model/TestCreateModule_RM19_ForkOfSubmitted_Submittable.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestModule_NotFound_ReturnsError](../../../docs/tests/domain-model/TestModule_NotFound_ReturnsError.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestModule_Submit](../../../docs/tests/domain-model/TestModule_Submit.md) — déduit : teste `ModelService.SubmitModule`
-> - 🟡 [TestModule_SubmitTwice_VersionIncrement](../../../docs/tests/domain-model/TestModule_SubmitTwice_VersionIncrement.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestModule_Submit_NoAssembly](../../../docs/tests/domain-model/TestModule_Submit_NoAssembly.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestRemoveModule_Submitted_HidesLocally](../../../docs/tests/domain-model/TestRemoveModule_Submitted_HidesLocally.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestService_NilBlockchain_ErrBlockchainUnavailable](../../../docs/tests/domain-model/TestService_NilBlockchain_ErrBlockchainUnavailable.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestSubmitModule_RM19_AlreadySubmitted_Rejected](../../../docs/tests/domain-model/TestSubmitModule_RM19_AlreadySubmitted_Rejected.md) — déduit : teste `ModelService.SubmitModule`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Incompatibilité de licences
@@ -254,7 +258,7 @@ end
 | **RM07** | Validation complète côté serveur avant toute transaction blockchain | Vérification ownership + RM17 avant `StoreModelRecord` |
 | **RM17** | Au moins une liaison requise pour soumettre | `len(m.Assemblies) == 0` → rejet dans `SubmitModule()` |
 | **RM18** | `ModuleVersion` immuable horodatée créée à la soumission | `ModuleVersion{..., CreatedAt: time.Now(), BlockID}` |
-| **RM19** | Module soumis → toute modification crée une nouvelle version (fork) | **Écart E5 — NON IMPLÉMENTÉ** dans le code actuel |
+| **RM19** | Module soumis immuable : composition et licence figées, re-soumission refusée — toute évolution passe par un module dérivé | `submittableDraft()` dans `Submit()`/`SubmitModule()`, `draftAsset()` dans chaque mutation de composition → `ErrAssetSubmitted` (409) |
 
 ## Exigences non-fonctionnelles
 
@@ -273,13 +277,7 @@ end
 
 **Hash du module :** `computeModuleHash()` (service.go:~730) calcule `SHA-256` sur la chaîne `"<moduleID>|v<n>|<connID1>,<connID2>,..."` avec les IDs triés. Ce hash est déterministe et permet la vérification d'intégrité ultérieure.
 
-**Écart E5 — RM19 (CRITIQUE) :** `AddAssemblyToModule()` et `AddAssetToWorkspace()` (service.go:~461, ~522) n'ont aucune garde sur `Status != ModuleSubmitted`. Un module soumis reste modifiable dans le code actuel. L'implémentation cible doit ajouter au début de ces fonctions :
-```go
-if m.Status == ModuleSubmitted {
-    return fmt.Errorf("module soumis : créer une nouvelle version (fork) pour modifier")
-}
-```
-Et implémenter une fonction `ForkModule(moduleID string) (*Model3D, error)` qui clone le module en état `draft`.
+**Immuabilité après soumission (RM19) :** `SubmitModule()` n'accepte qu'un brouillon absent du ledger (`submittableDraft()`), et chaque mutation de composition (`AddAssemblyToModule`, `RemoveAssemblyFromModule`, `AddAssetToWorkspace`, `RemoveAssetFromWorkspace`, `UpdateInstancePosition`, interfaces) passe par `draftAsset()`, qui retourne `ErrAssetSubmitted` pour un module soumis. Le fork n'a pas de fonction dédiée : c'est `CreateModule()` avec `ParentID`, qui copie la composition du parent (`copyModuleComposition()`, UCMOD01). Le chaincode applique de son côté le write-once (`StoreModel` refuse une clé existante — `specs/3-Conception/Chaincode.md`).
 
 **BlockID en production :** `simModuleBlockID()` génère un ID aléatoire simulé. En production, le `blockID` doit être le numéro de bloc Fabric retourné par `StoreModelRecord()` — l'adapter Fabric doit être adapté pour retourner cette information.
 
@@ -290,6 +288,6 @@ Et implémenter une fonction `ForkModule(moduleID string) (*Model3D, error)` qui
 - **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29)
 - **Chaincode** : [§ 4. Fonctions chaincode — Store/Read (D3/D4/D6)](../../3-Conception/Chaincode.md#4.%20Fonctions%20chaincode%20—%20Store/Read%20%28D3/D4/D6%29)
 - **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 3.6bis `myr model submit` (RM16/RM17/RM19 — soumission, composant ou assemblage)](../../3-Conception/DC_CLI_Model.md#3.6bis%20`myr%20model%20submit`%20%28RM16/RM17/RM19%20—%20soumission,%20composant%20ou%20assemblage%29) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case)
-- **Sequence_soumission_module** : [§ Séquence — Composition et soumission d'un module (D5/D6)](../../3-Conception/Sequence_soumission_module.md#Séquence%20—%20Composition%20et%20soumission%20d'un%20module%20%28D5/D6%29)
+- **Sequence_soumission_module** : [§ Séquence — Composition et soumission d'un module (D5/D6)](../../3-Conception/Sequence_soumission_module.md#Séquence%20—%20Composition%20et%20soumission%20d'un%20module%20%28D5/D6%29) · [§ 4. Notes](../../3-Conception/Sequence_soumission_module.md#4.%20Notes)
 
 <!-- liens-obsidian:end -->

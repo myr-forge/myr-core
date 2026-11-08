@@ -4,7 +4,13 @@ package model
 // BlockchainPort est le contrat que tout adapter blockchain doit respecter.
 // Intentionnellement minimal pour rester agnostique de la technologie sous-jacente.
 type BlockchainPort interface {
+	// StoreModelRecord enregistre un asset soumis ; un identifiant déjà
+	// enregistré n'est jamais réécrit (ADR-12).
 	StoreModelRecord(m *Model3D) error
+	// UpdateModelMetadata remplace les métadonnées descriptives d'un asset
+	// enregistré — seule modification permise après soumission, réservée à son
+	// propriétaire (ADR-12).
+	UpdateModelMetadata(id, channelID string, meta AssetMetadata) error
 	// GetModelRecord récupère un modèle par son ID sur le canal indiqué.
 	// channelID="" utilise le canal par défaut configuré dans l'adapter.
 	GetModelRecord(id, channelID string) (*Model3D, error)

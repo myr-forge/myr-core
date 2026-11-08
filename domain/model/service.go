@@ -4,6 +4,7 @@ package model
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -86,16 +87,14 @@ func (s *Service) AddFull(req AddRequest) (*Model3D, error) {
 	if s.draftStore == nil {
 		return nil, fmt.Errorf("stockage de brouillons non configuré")
 	}
-	// Vérification de compatibilité de licence avec le parent (si renseigné) —
-	// le parent peut lui-même être encore un brouillon (getAsset couvre les deux).
+	// Licence : présente au catalogue, compatible avec celle du parent s'il est
+	// connu de ce nœud (RM03) — le parent peut lui-même être encore un brouillon.
+	var parent *Model3D
 	if req.ParentID != "" && req.LicenseID != "" {
-		parent, _, err := s.getAsset(req.ParentID, req.ChannelID)
-		if err == nil && parent.LicenseID != "" {
-			check := CheckLicenseCompatibility(parent.LicenseID, req.LicenseID)
-			if !check.Compatible {
-				return nil, fmt.Errorf("incompatibilité de licence : %s", check.Reason)
-			}
-		}
+		parent, _, _ = s.getAsset(req.ParentID, req.ChannelID)
+	}
+	if err := checkLicense(req.LicenseID, parent); err != nil {
+		return nil, err
 	}
 
 	m := &Model3D{
@@ -139,7 +138,8 @@ func (s *Service) AddFull(req AddRequest) (*Model3D, error) {
 // création d'une ModuleVersion) — l'appelant (REST, CLI) n'a pas à savoir
 // laquelle des deux logiques invoquer (règle 28 : ne pas dupliquer ce
 // dispatch dans les adapters). note n'est utilisée que dans ce cas (ModuleVersion.Note) ;
-// ignorée pour un composant simple.
+// ignorée pour un composant simple. Un asset déjà soumis n'est jamais
+// re-soumis (ErrAssetSubmitted, RM19, ADR-12).
 func (s *Service) Submit(assetID, note string) (*Model3D, error) {
 	if s.draftStore == nil {
 		return nil, fmt.Errorf("stockage de brouillons non configuré")
@@ -147,12 +147,12 @@ func (s *Service) Submit(assetID, note string) (*Model3D, error) {
 	if s.blockchain == nil {
 		return nil, ErrBlockchainUnavailable
 	}
-	if m, _, err := s.getAsset(assetID, ""); err == nil && m.IsModule() {
-		return s.SubmitModule(assetID, note)
-	}
-	m, err := s.draftStore.GetDraft(assetID)
+	m, err := s.submittableDraft(assetID)
 	if err != nil {
-		return nil, fmt.Errorf("brouillon introuvable : %w", err)
+		return nil, err
+	}
+	if m.IsModule() {
+		return s.SubmitModule(assetID, note)
 	}
 	if s.ifaceStore != nil {
 		ifaces, err := s.ifaceStore.ListInterfacesForAsset(assetID)
@@ -175,8 +175,8 @@ func (s *Service) Submit(assetID, note string) (*Model3D, error) {
 // getAsset récupère un Model3D par son ID : d'abord dans DraftStore (état
 // mutable, pré-soumission), puis sur la blockchain (état immuable, soumis).
 // Généralise le cycle brouillon → soumission (ADR-02) à tout point d'accès du
-// domaine — indique en retour si l'asset provient du brouillon, pour que
-// l'appelant sache où répercuter une mutation (voir saveAsset).
+// domaine — indique en retour si l'asset provient du brouillon, seul état
+// modifiable (voir draftAsset).
 func (s *Service) getAsset(id, channelID string) (*Model3D, bool, error) {
 	if s.draftStore != nil {
 		if m, err := s.draftStore.GetDraft(id); err == nil {
@@ -190,26 +190,63 @@ func (s *Service) getAsset(id, channelID string) (*Model3D, bool, error) {
 	return m, false, err
 }
 
-// saveAsset persiste m dans le store dont il provient : DraftStore si isDraft,
-// sinon la blockchain (voir getAsset).
-func (s *Service) saveAsset(m *Model3D, isDraft bool) error {
-	if isDraft {
-		return s.draftStore.SaveDraft(m)
+// draftAsset retourne le brouillon id pour le modifier : un asset soumis est
+// immuable (ErrAssetSubmitted, RM19, ADR-12) — licence, interfaces et
+// composition ne changent plus, toute évolution passe par un fork. Seules ses
+// métadonnées descriptives restent modifiables (updateSubmittedMetadata).
+func (s *Service) draftAsset(id string) (*Model3D, error) {
+	m, isDraft, err := s.getAsset(id, "")
+	if err != nil {
+		return nil, err
 	}
-	return s.blockchain.StoreModelRecord(m)
+	if !isDraft {
+		return nil, fmt.Errorf("%w : %s", ErrAssetSubmitted, id)
+	}
+	return m, nil
 }
 
-// reopenAsDraft marque m comme brouillon et le sauvegarde dans DraftStore, que
-// l'asset provienne déjà d'un brouillon ou de la blockchain — toute
-// modification de la composition d'un module (assemblage, instance, position),
-// y compris d'un module déjà soumis en vue d'une nouvelle ModuleVersion,
-// redevient un brouillon local. Seul SubmitModule écrit sur la blockchain.
-func (s *Service) reopenAsDraft(m *Model3D) error {
+// submittableDraft retourne le brouillon id prêt à être soumis : ni un asset
+// déjà soumis, ni un brouillon dont l'identifiant est déjà enregistré sur le
+// ledger (brouillon rouvert sous l'identifiant d'un asset soumis) — le ledger
+// n'accepte qu'une écriture par identifiant (ADR-12).
+func (s *Service) submittableDraft(id string) (*Model3D, error) {
+	m, err := s.draftAsset(id)
+	if err != nil {
+		if errors.Is(err, ErrAssetSubmitted) {
+			return nil, err
+		}
+		return nil, fmt.Errorf("brouillon introuvable : %w", err)
+	}
+	if _, err := s.blockchain.GetModelRecord(id, m.ChannelID); err == nil {
+		return nil, fmt.Errorf("%w : %s est déjà enregistré sur le ledger", ErrAssetSubmitted, id)
+	}
+	return m, nil
+}
+
+// saveDraft enregistre un brouillon modifié.
+func (s *Service) saveDraft(m *Model3D) error {
 	if s.draftStore == nil {
 		return fmt.Errorf("stockage de brouillons non configuré")
 	}
-	m.Status = ModuleDraft
 	return s.draftStore.SaveDraft(m)
+}
+
+// checkLicense vérifie la licence proposée pour un asset : présente au
+// catalogue et, pour un asset dérivé dont le parent est connu, compatible
+// avec la licence de ce parent (RM03). Une licence vide n'est pas contrôlée.
+func checkLicense(licenseID string, parent *Model3D) error {
+	if licenseID == "" {
+		return nil
+	}
+	if _, err := GetLicense(licenseID); err != nil {
+		return err
+	}
+	if parent != nil && parent.LicenseID != "" {
+		if check := CheckLicenseCompatibility(parent.LicenseID, licenseID); !check.Compatible {
+			return fmt.Errorf("%w : %s", ErrLicenseIncompatible, check.Reason)
+		}
+	}
+	return nil
 }
 
 // Get récupère un modèle par son ID sur le canal indiqué.
@@ -493,12 +530,23 @@ func (s *Service) RegenerateThumbnail(assetID string) (string, error) {
 
 // ── Interfaces physiques (requiert ifaceStore) ───────────────────────────────
 
-// #incoherence — AddInterface/UpdateInterface/RemoveInterface ne vérifient pas
-// si l'asset porteur est déjà submitted avant de muter ses interfaces (RM19) —
-// voir specs/roadmap_dev.md § Écarts — revue de code, E3.
+// requireDraftCarrier refuse de modifier les interfaces d'un asset soumis :
+// elles ont été enregistrées sur le ledger avec lui (règle 27, RM19). Un asset
+// que ce nœud ne connaît pas n'est pas contrôlé.
+func (s *Service) requireDraftCarrier(assetID string) error {
+	if _, isDraft, err := s.getAsset(assetID, ""); err == nil && !isDraft {
+		return fmt.Errorf("%w : %s", ErrAssetSubmitted, assetID)
+	}
+	return nil
+}
+
+// AddInterface ajoute une interface à un asset en brouillon.
 func (s *Service) AddInterface(iface *AssetInterface) error {
 	if s.ifaceStore == nil {
 		return fmt.Errorf("interface store non configuré")
+	}
+	if err := s.requireDraftCarrier(iface.AssetID); err != nil {
+		return err
 	}
 	if iface.ID == "" {
 		iface.ID = generateID()
@@ -506,11 +554,15 @@ func (s *Service) AddInterface(iface *AssetInterface) error {
 	return s.ifaceStore.SaveInterface(iface)
 }
 
-// UpdateInterface met à jour une interface existante et marque les connexions
-// qui l'utilisent comme incompatibles si elles ne satisfont plus les contraintes.
+// UpdateInterface met à jour une interface d'un asset en brouillon et marque
+// les connexions qui l'utilisent comme incompatibles si elles ne satisfont
+// plus les contraintes.
 func (s *Service) UpdateInterface(iface *AssetInterface) error {
 	if s.ifaceStore == nil {
 		return fmt.Errorf("interface store non configuré")
+	}
+	if err := s.requireDraftCarrierOf(iface.ID); err != nil {
+		return err
 	}
 	if err := s.ifaceStore.SaveInterface(iface); err != nil {
 		return err
@@ -543,11 +595,24 @@ func (s *Service) UpdateInterface(iface *AssetInterface) error {
 	return nil
 }
 
+// RemoveInterface supprime une interface d'un asset en brouillon.
 func (s *Service) RemoveInterface(id string) error {
 	if s.ifaceStore == nil {
 		return fmt.Errorf("interface store non configuré")
 	}
+	if err := s.requireDraftCarrierOf(id); err != nil {
+		return err
+	}
 	return s.ifaceStore.RemoveInterface(id)
+}
+
+// requireDraftCarrierOf applique requireDraftCarrier à l'asset qui porte
+// l'interface ifaceID, si elle existe déjà.
+func (s *Service) requireDraftCarrierOf(ifaceID string) error {
+	if existing, err := s.ifaceStore.GetInterface(ifaceID); err == nil {
+		return s.requireDraftCarrier(existing.AssetID)
+	}
+	return nil
 }
 
 func (s *Service) ListInterfacesForAsset(assetID string) ([]*AssetInterface, error) {
@@ -633,9 +698,6 @@ func (s *Service) Remove(id string) error {
 }
 
 // applyAssetPatch applique sur m les champs non-vides d'un UpdateRequest.
-// #incoherence — ne réapplique pas CheckLicenseCompatibility (RM03) quand
-// LicenseID change, contrairement à AddFull — voir specs/roadmap_dev.md
-// § Écarts — revue de code, E2.
 func applyAssetPatch(m *Model3D, req UpdateRequest) {
 	if req.Name != "" {
 		m.Name = req.Name
@@ -654,14 +716,46 @@ func applyAssetPatch(m *Model3D, req UpdateRequest) {
 	}
 }
 
-// UpdateAsset applique un patch partiel sur un asset existant (brouillon local ou blockchain).
+// UpdateAsset applique un patch partiel. Sur un brouillon, tout champ du patch
+// change ; une nouvelle licence est vérifiée comme à la création (catalogue,
+// compatibilité avec le parent — RM03). Sur un asset soumis, seules ses
+// métadonnées descriptives changent, par une opération dédiée du ledger que
+// seul son propriétaire peut signer ; sa licence reste figée
+// (ErrAssetSubmitted, RM19, ADR-12).
 func (s *Service) UpdateAsset(req UpdateRequest) (*Model3D, error) {
 	m, isDraft, err := s.getAsset(req.ID, "")
 	if err != nil {
 		return nil, fmt.Errorf("asset introuvable: %w", err)
 	}
+	if !isDraft {
+		return s.updateSubmittedMetadata(m, req)
+	}
+	if req.LicenseID != "" {
+		var parent *Model3D
+		if m.ParentID != "" {
+			parent, _, _ = s.getAsset(m.ParentID, m.ChannelID)
+		}
+		if err := checkLicense(req.LicenseID, parent); err != nil {
+			return nil, err
+		}
+	}
 	applyAssetPatch(m, req)
-	return m, s.saveAsset(m, isDraft)
+	return m, s.saveDraft(m)
+}
+
+// updateSubmittedMetadata remplace sur le ledger les métadonnées descriptives
+// d'un asset soumis (nom, description, tags, liens) ; tout autre changement
+// exige un asset dérivé.
+func (s *Service) updateSubmittedMetadata(m *Model3D, req UpdateRequest) (*Model3D, error) {
+	if req.LicenseID != "" && req.LicenseID != m.LicenseID {
+		return nil, fmt.Errorf("%w : la licence de %s ne change plus après soumission", ErrAssetSubmitted, m.ID)
+	}
+	applyAssetPatch(m, req)
+	meta := AssetMetadata{Name: m.Name, Description: m.Description, Tags: m.Tags, Links: m.Links}
+	if err := s.blockchain.UpdateModelMetadata(m.ID, m.ChannelID, meta); err != nil {
+		return nil, fmt.Errorf("mise à jour des métadonnées sur le ledger : %w", err)
+	}
+	return m, nil
 }
 
 // ── Modules ───────────────────────────────────────────────────────────────────
@@ -684,12 +778,9 @@ func (s *Service) CreateModule(req ModuleRequest) (*Model3D, error) {
 			return nil, fmt.Errorf("module parent introuvable: %w", err)
 		}
 		parent = p
-		if req.LicenseID != "" && parent.LicenseID != "" {
-			check := CheckLicenseCompatibility(parent.LicenseID, req.LicenseID)
-			if !check.Compatible {
-				return nil, fmt.Errorf("incompatibilité de licence : %s", check.Reason)
-			}
-		}
+	}
+	if err := checkLicense(req.LicenseID, parent); err != nil {
+		return nil, err
 	}
 
 	m := &Model3D{
@@ -803,7 +894,7 @@ func (s *Service) ListModules(channelID string) ([]*Model3D, error) {
 }
 
 func (s *Service) AddAssemblyToModule(moduleID, connID string) error {
-	m, _, err := s.getAsset(moduleID, "")
+	m, err := s.draftAsset(moduleID)
 	if err != nil {
 		return err
 	}
@@ -813,11 +904,11 @@ func (s *Service) AddAssemblyToModule(moduleID, connID string) error {
 		}
 	}
 	m.Assemblies = append(m.Assemblies, connID)
-	return s.reopenAsDraft(m)
+	return s.saveDraft(m)
 }
 
 func (s *Service) RemoveAssemblyFromModule(moduleID, connID string) error {
-	m, _, err := s.getAsset(moduleID, "")
+	m, err := s.draftAsset(moduleID)
 	if err != nil {
 		return err
 	}
@@ -828,20 +919,20 @@ func (s *Service) RemoveAssemblyFromModule(moduleID, connID string) error {
 		}
 	}
 	m.Assemblies = filtered
-	return s.reopenAsDraft(m)
+	return s.saveDraft(m)
 }
 
-// SubmitModule soumet le module à la blockchain et crée une version immuable.
-// Le module peut provenir du brouillon (première soumission) ou déjà être sur
-// la blockchain (nouvel assemblage puis re-soumission — nouvelle ModuleVersion
-// sur le même module, distinct du fork RM19).
+// SubmitModule soumet un module brouillon à la blockchain et crée sa version
+// immuable (RM18). Un module déjà soumis n'est jamais re-soumis
+// (ErrAssetSubmitted) : une nouvelle version est un nouveau module dérivé
+// (CreateModule avec ParentID, qui reprend sa composition — RM19, ADR-12).
 func (s *Service) SubmitModule(moduleID, note string) (*Model3D, error) {
-	m, isDraft, err := s.getAsset(moduleID, "")
-	if err != nil {
-		return nil, err
-	}
 	if s.blockchain == nil {
 		return nil, ErrBlockchainUnavailable
+	}
+	m, err := s.submittableDraft(moduleID)
+	if err != nil {
+		return nil, err
 	}
 	if len(m.Assemblies) == 0 {
 		return nil, fmt.Errorf("le module ne contient aucun assemblage")
@@ -863,9 +954,7 @@ func (s *Service) SubmitModule(moduleID, note string) (*Model3D, error) {
 	if err := s.blockchain.StoreModelRecord(m); err != nil {
 		return nil, fmt.Errorf("storing on blockchain: %w", err)
 	}
-	if isDraft {
-		_ = s.draftStore.RemoveDraft(moduleID)
-	}
+	_ = s.draftStore.RemoveDraft(moduleID)
 	return m, nil
 }
 
@@ -878,13 +967,13 @@ func (s *Service) SubmitModule(moduleID, note string) (*Model3D, error) {
 // cyclique fait récurser indéfiniment GetModuleInterfaces (stack overflow) —
 // voir specs/roadmap_dev.md § Écarts — revue de code, E1.
 func (s *Service) AddAssetToWorkspace(moduleID, assetID string) (*Model3D, error) {
-	m, _, err := s.getAsset(moduleID, "")
+	m, err := s.draftAsset(moduleID)
 	if err != nil {
 		return nil, err
 	}
 	inst := WorkspaceInstance{ID: generateID(), AssetID: assetID}
 	m.WorkspaceInstances = append(m.WorkspaceInstances, inst)
-	if err := s.reopenAsDraft(m); err != nil {
+	if err := s.saveDraft(m); err != nil {
 		return nil, err
 	}
 	s.ensureVirtualSlot(assetID)
@@ -919,7 +1008,7 @@ func (s *Service) ensureVirtualSlot(assetID string) { s.EnsureVirtualSlot(assetI
 // RemoveAssetFromWorkspace retire une instance spécifique (par instanceID) du module.
 // Supprime en cascade les connexions de cette instance dans le module.
 func (s *Service) RemoveAssetFromWorkspace(moduleID, instanceID string) (*Model3D, error) {
-	m, _, err := s.getAsset(moduleID, "")
+	m, err := s.draftAsset(moduleID)
 	if err != nil {
 		return nil, err
 	}
@@ -956,7 +1045,7 @@ func (s *Service) RemoveAssetFromWorkspace(moduleID, instanceID string) (*Model3
 		}
 	}
 	m.WorkspaceInstances = filtered
-	if err := s.reopenAsDraft(m); err != nil {
+	if err := s.saveDraft(m); err != nil {
 		return nil, err
 	}
 	return m, nil
@@ -964,7 +1053,7 @@ func (s *Service) RemoveAssetFromWorkspace(moduleID, instanceID string) (*Model3
 
 // UpdateInstancePosition met à jour la position persistée d'une instance d'un module.
 func (s *Service) UpdateInstancePosition(moduleID, instanceID string, x, y float64) (*Model3D, error) {
-	m, _, err := s.getAsset(moduleID, "")
+	m, err := s.draftAsset(moduleID)
 	if err != nil {
 		return nil, err
 	}
@@ -972,7 +1061,7 @@ func (s *Service) UpdateInstancePosition(moduleID, instanceID string, x, y float
 		if inst.ID == instanceID {
 			m.WorkspaceInstances[i].X = x
 			m.WorkspaceInstances[i].Y = y
-			if err := s.reopenAsDraft(m); err != nil {
+			if err := s.saveDraft(m); err != nil {
 				return nil, err
 			}
 			return m, nil

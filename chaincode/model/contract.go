@@ -4,15 +4,17 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-protos-go/peer"
 )
 
 // SmartContract implémente le chaincode myrcc — périmètre minimal couvrant
-// exactement les 4 fonctions attendues par domain/model/ports.go BlockchainPort
-// (StoreModelRecord/GetModelRecord/ListModelRecords/VerifyIntegrity), plus
-// IndexHashes, opération de mise en service de l'index des empreintes. Les noms
+// exactement les 5 fonctions attendues par domain/model/ports.go BlockchainPort
+// (StoreModelRecord/UpdateModelMetadata/GetModelRecord/ListModelRecords/
+// VerifyIntegrity), plus IndexHashes, opération de mise en service de l'index
+// des empreintes. Les noms
 // de fonction et le nombre d'arguments reproduisent exactement ce qu'invoque
 // adapters/out/fabric/blockchain.go côté client — ce fichier-là fait foi, pas
 // les signatures indicatives de specs/3-Conception/Chaincode.md §4.
@@ -27,6 +29,8 @@ func (s *SmartContract) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	switch fn {
 	case "StoreModel":
 		return s.storeModel(stub, args)
+	case "UpdateMetadata":
+		return s.updateMetadata(stub, args)
 	case "GetModel":
 		return s.getModel(stub, args)
 	case "ListModels":
@@ -97,6 +101,59 @@ func (s *SmartContract) storeModel(stub shim.ChaincodeStubInterface, args []stri
 
 	if err := stub.PutState(m.ID, []byte(args[0])); err != nil {
 		return shim.Error(fmt.Sprintf("StoreModel : écriture ledger : %v", err))
+	}
+	return shim.Success([]byte(stub.GetTxID()))
+}
+
+// metadataKeys sont les seuls champs d'un asset enregistré qui changent après
+// sa soumission : ses métadonnées descriptives (ADR-12). Empreinte,
+// propriétaire, licence, parent, interfaces et composition restent figés.
+var metadataKeys = []string{"Name", "Description", "Tags", "Links"}
+
+// updateMetadata remplace les métadonnées descriptives d'un asset enregistré,
+// à la demande de son seul propriétaire. Le reste de l'enregistrement est
+// recopié octet pour octet : les champs que ce chaincode ne connaît pas ne
+// sont jamais perdus.
+func (s *SmartContract) updateMetadata(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 2 {
+		return shim.Error("UpdateMetadata attend 2 arguments (id, metadataJSON)")
+	}
+	id := args[0]
+	raw, err := stub.GetState(id)
+	if err != nil {
+		return shim.Error(fmt.Sprintf("UpdateMetadata : lecture ledger : %v", err))
+	}
+	if raw == nil {
+		return shim.Error(fmt.Sprintf("UpdateMetadata : asset %s introuvable sur le ledger", id))
+	}
+	var record map[string]json.RawMessage
+	var current Model3D
+	if json.Unmarshal(raw, &record) != nil || json.Unmarshal(raw, &current) != nil {
+		return shim.Error(fmt.Sprintf("UpdateMetadata : enregistrement %s illisible", id))
+	}
+	if err := checkSubmitter(stub, current.OwnerID); err != nil {
+		return shim.Error("UpdateMetadata : " + err.Error())
+	}
+	var meta map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(args[1]), &meta); err != nil {
+		return shim.Error(fmt.Sprintf("UpdateMetadata : JSON invalide : %v", err))
+	}
+	for k := range meta {
+		if !slices.Contains(metadataKeys, k) {
+			return shim.Error(fmt.Sprintf("UpdateMetadata : le champ %s ne change pas après soumission — seuls %v sont modifiables", k, metadataKeys))
+		}
+	}
+	for _, k := range metadataKeys {
+		if v, ok := meta[k]; ok {
+			record[k] = v
+		}
+	}
+	updated, err := json.Marshal(record)
+	if err != nil {
+		return shim.Error(fmt.Sprintf("UpdateMetadata : encodage : %v", err))
+	}
+	if err := stub.PutState(id, updated); err != nil {
+		return shim.Error(fmt.Sprintf("UpdateMetadata : écriture ledger : %v", err))
 	}
 	return shim.Success([]byte(stub.GetTxID()))
 }

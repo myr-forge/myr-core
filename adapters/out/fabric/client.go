@@ -25,6 +25,12 @@ func (f *FabricAdapter) StoreModelRecord(m *model.Model3D) error {
 	return err
 }
 
+func (f *FabricAdapter) UpdateModelMetadata(id, _ string, meta model.AssetMetadata) error {
+	data, _ := json.Marshal(meta)
+	_, err := f.contract.SubmitTransaction("UpdateMetadata", id, string(data))
+	return err
+}
+
 func (f *FabricAdapter) GetModelRecord(id, _ string) (*model.Model3D, error) {
 	result, err := f.contract.EvaluateTransaction("GetModel", id)
 	if err != nil {
