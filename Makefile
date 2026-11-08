@@ -2,7 +2,7 @@ VERSION   ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "d
 LDFLAGS    = -s -w -X main.version=$(VERSION)
 SWAG_VERSION = v1.16.4
 
-.PHONY: all build api cli docs docs-api clean test ci
+.PHONY: all build api cli docs docs-api docs-trace clean test ci
 
 all: build
 
@@ -32,6 +32,13 @@ docs-api:
 		-o api \
 		--outputTypes json,yaml \
 		--parseDependency --parseInternal
+
+## Régénérer la traçabilité specs ↔ code ↔ tests : sections générées de specs/
+## (blocs Tests, sections Liens, tags dérivés, Carte des specs) et notes
+## Obsidian de docs/code et docs/tests — outil de dev (go run, bibliothèque
+## standard seule, voir specs/3-Conception/Tracabilite.md)
+docs-trace:
+	go run ./cmd/tracegen
 
 ## Tests
 test:
