@@ -62,13 +62,15 @@ tags:
 
 | Méthode | Route | Accès | Description |
 |---------|-------|-------|-------------|
-| GET | `/api/identity/policy` | Public | Politique du réseau actif (AllowAutoGuest, AllowAutoRegister) |
+| GET | `/api/identity/policy` | Public | Politique du réseau actif (AllowAutoGuest, AllowAutoRegister, RequireApproval) |
 | POST | `/api/identity/enroll` | Public | Enrôlement Fabric CA avec secret d'enrollment (sans créer de session REST) |
-| POST | `/api/identity/session` | Public | (Ré-)enrôlement + création d'une session REST (token opaque) |
+| POST | `/api/identity/session` | Public | (Ré-)enrôlement + création d'une session REST (token opaque) portant le rôle du certificat — `403` si l'identité n'est pas active ou n'a pas de rôle |
 | POST | `/api/identity/guest` | Public | Token `reader` automatique (si `AllowAutoGuest=true`) |
-| POST | `/api/identity/request` | Public | Demande d'accès (auto-enregistrement si `AllowAutoRegister=true`, sinon mise en attente `pending` jusqu'à `POST /api/identity/requests/{id}/approve`) |
-| GET | `/api/identity/requests` | Admin | Liste des demandes de compte en attente — expose des données personnelles (email, message libre), réservée à `identity.admin` |
-| POST | `/api/identity/requests/{id}/approve` | Admin | Approuver une demande `pending` — transforme la demande en identité CA active (UCA01) |
+| POST | `/api/identity/request` | Public | Demande d'accès selon les règles du réseau (UCA01) : `403` si `AllowAutoRegister=false` ; sinon identité créée avec le rôle par défaut, active, ou en attente si `RequireApproval=true` — `201 {id, status, pseudo, org_id, secret}` |
+| GET | `/api/identity/requests` | Admin | Liste des demandes de compte et de leur statut — expose des données personnelles (email, message libre), réservée à `identity.admin` |
+| POST | `/api/identity/requests/{id}/approve` | Admin | Approuver une demande `pending` — l'identité devient active (`404` inconnue, `409` déjà décidée) |
+| POST | `/api/identity/requests/{id}/reject` | Admin | Refuser une demande `pending` — l'identité est suspendue, rien n'est supprimé (`404`, `409`) |
+| POST | `/api/identity/accounts` | Admin | Créer un compte actif avec le rôle donné (`{pseudo, org_id, role, email}` → `201 {handle, secret}`) — seule voie d'inscription sur un réseau fermé |
 | GET | `/api/identity/wallets` | Auth | Wallets locaux — le répertoire de wallets est partagé par tous les utilisateurs enrôlés sur le nœud : une session sans `identity.admin` ne voit que son propre wallet (filtré par pseudo), jamais celui des autres |
 | GET | `/api/identity/status` | Auth | Statut CA d'un wallet (`?handle=pseudo@org`) |
 

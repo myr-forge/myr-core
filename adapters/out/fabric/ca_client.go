@@ -25,6 +25,8 @@ import (
 	"myr-core/domain/identity"
 )
 
+var _ identity.CAPort = (*CAClient)(nil)
+
 // CAClient implémente identity.CAPort.
 type CAClient struct {
 	caURL     string // ex: "https://XXX.XXX.XXX.XXX:YYYY"
@@ -127,6 +129,57 @@ func roleOrDefault(role string) string {
 	}
 }
 
+// statusOrDefault retourne le statut d'enregistrement demandé — en attente si
+// aucun n'est précisé.
+func statusOrDefault(status string) string {
+	switch status {
+	case identity.StatusActive, identity.StatusSuspended:
+		return status
+	default:
+		return identity.StatusPending
+	}
+}
+
+// caAttrOID est l'extension X.509 dans laquelle la Fabric CA inscrit les
+// attributs ECert d'une identité, au format JSON {"attrs": {...}} — celle que
+// lit le paquet cid côté chaincode.
+var caAttrOID = asn1.ObjectIdentifier{1, 2, 3, 4, 5, 6, 7, 8, 1}
+
+// CertAttributes retourne les attributs d'identité (Myr.role, Myr.status…)
+// d'un certificat émis par la Fabric CA ; une table vide si le certificat n'en
+// porte aucun.
+func (c *CAClient) CertAttributes(certPEM string) (map[string]string, error) {
+	return CertAttributes(certPEM)
+}
+
+// CertAttributes est l'implémentation de CAClient.CertAttributes, utilisable
+// sans client CA (lecture locale d'un certificat de wallet).
+func CertAttributes(certPEM string) (map[string]string, error) {
+	block, _ := pem.Decode([]byte(certPEM))
+	if block == nil {
+		return nil, fmt.Errorf("certificat : bloc PEM invalide")
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("certificat : %w", err)
+	}
+	for _, ext := range cert.Extensions {
+		if ext.Id.Equal(caAttrOID) {
+			var v struct {
+				Attrs map[string]string `json:"attrs"`
+			}
+			if err := json.Unmarshal(ext.Value, &v); err != nil {
+				return nil, fmt.Errorf("attributs du certificat : %w", err)
+			}
+			if v.Attrs == nil {
+				v.Attrs = map[string]string{}
+			}
+			return v.Attrs, nil
+		}
+	}
+	return map[string]string{}, nil
+}
+
 // ─── Register ────────────────────────────────────────────────────────────────
 
 type caRegisterReq struct {
@@ -155,8 +208,8 @@ func (c *CAClient) Register(ctx context.Context, req identity.RegisterRequest) (
 		Type:   "client",
 		CAName: c.caName,
 		Attrs: []caAttr{
-			{Name: "Myr.status", Value: identity.StatusPending, ECert: true},
-			{Name: "Myr.role", Value: roleOrDefault(req.Role), ECert: true},
+			{Name: identity.AttrStatus, Value: statusOrDefault(req.Status), ECert: true},
+			{Name: identity.AttrRole, Value: roleOrDefault(req.Role), ECert: true},
 			{Name: "Myr.channels", Value: "green,red,blue", ECert: true},
 			{Name: "Myr.displayName", Value: req.DisplayName, ECert: false},
 			{Name: "Myr.legalName", Value: req.LegalName, ECert: false},

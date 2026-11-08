@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"myr-core/domain/identity"
+	"myr-core/domain/network"
 )
 
 type stubCA struct {
@@ -17,6 +18,7 @@ type stubCA struct {
 	getStatusFn     func(ctx context.Context, name string) (string, error)
 	reEnrollFn      func(ctx context.Context, name, certPEM, keyPEM string) (string, error)
 	updateAttrsFn   func(ctx context.Context, name string, attrs map[string]string) error
+	certAttrs       map[string]string // attributs portés par les certificats émis
 	lastRegisterReq identity.RegisterRequest
 	lastEnrollName  string
 	lastStatusName  string
@@ -59,6 +61,13 @@ func (s *stubCA) UpdateAttributes(ctx context.Context, name string, attrs map[st
 	}
 	return nil
 }
+func (s *stubCA) CertAttributes(certPEM string) (map[string]string, error) {
+	attrs := map[string]string{}
+	for k, v := range s.certAttrs {
+		attrs[k] = v
+	}
+	return attrs, nil
+}
 
 var _ identity.CAPort = (*stubCA)(nil)
 
@@ -66,46 +75,63 @@ const fakeCertPEM = "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ
 const fakeKeyPEM = "-----BEGIN EC PRIVATE KEY-----\nMHQCAQEEIFake/key/data==\n-----END EC PRIVATE KEY-----\n"
 const fakeCACertPEM = "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAcafake==\n-----END CERTIFICATE-----\n"
 
-// / @brief  Enregistrement échoue sans CA configurée
-// / @input  service sans CA (nil), requête avec nom "alice@Org1"
+// / @brief  Création de compte échoue sans CA configurée
+// / @input  service sans CA (nil), pseudo "alice" dans "Org1MSP"
 // / @expect retourne une erreur indiquant l'absence de CA
-func TestService_Register_NoCA(t *testing.T) {
+func TestService_CreateAccount_NoCA(t *testing.T) {
 	svc := identity.NewService(t.TempDir(), nil)
-	_, err := svc.Register(context.Background(), identity.RegisterRequest{Name: "alice@Org1"})
-	if err == nil {
+	if _, _, err := svc.CreateAccount(context.Background(), "alice", "Org1MSP", identity.RoleReader, ""); err == nil {
 		t.Fatal("erreur attendue sans CA")
 	}
 }
 
-// / @brief  Enregistrement réussi d'une identité via la CA
-// / @input  stubCA retournant "secret123", requête complète avec nom, orgID, email et pays
-// / @expect retourne le secret "secret123" et transmet le nom exact à la CA
-func TestService_Register_Success(t *testing.T) {
+// / @brief  Création de compte par l'admin : identité active avec le rôle donné
+// / @input  stubCA retournant "secret123", pseudo "alice", org "Org1MSP", rôle contributor, email
+// / @expect retourne ("alice@Org1", "secret123") ; la CA reçoit le nom complet, le statut active, le rôle et l'email
+func TestService_CreateAccount_Success(t *testing.T) {
 	ca := &stubCA{}
 	svc := identity.NewService(t.TempDir(), ca)
-	req := identity.RegisterRequest{Name: "alice@Org1", OrgID: "Org1MSP", DisplayName: "Alice", Email: "alice@example.com", Country: "FR"}
-	secret, err := svc.Register(context.Background(), req)
+	handle, secret, err := svc.CreateAccount(context.Background(), "alice", "Org1MSP", identity.RoleContributor, "alice@example.com")
 	if err != nil {
 		t.Fatalf("inattendu : %v", err)
 	}
-	if secret != "secret123" {
-		t.Errorf("secret attendu %q, obtenu %q", "secret123", secret)
+	if handle != "alice@Org1" || secret != "secret123" {
+		t.Errorf("attendu (alice@Org1, secret123), obtenu (%q, %q)", handle, secret)
 	}
-	if ca.lastRegisterReq.Name != req.Name {
-		t.Errorf("nom %q attendu, obtenu %q", req.Name, ca.lastRegisterReq.Name)
+	got := ca.lastRegisterReq
+	if got.Name != "alice@Org1" || got.OrgID != "Org1MSP" || got.Status != identity.StatusActive ||
+		got.Role != identity.RoleContributor || got.Email != "alice@example.com" {
+		t.Errorf("requête CA inattendue : %+v", got)
 	}
 }
 
-// / @brief  Enregistrement propage l'erreur retournée par la CA
+// / @brief  Création de compte propage l'erreur retournée par la CA
 // / @input  stubCA dont registerFn retourne "CA: identite deja enregistree"
-// / @expect retourne exactement l'erreur de la CA
-func TestService_Register_CAError(t *testing.T) {
+// / @expect retourne une erreur enveloppant celle de la CA
+func TestService_CreateAccount_CAError(t *testing.T) {
 	expected := errors.New("CA: identite deja enregistree")
 	ca := &stubCA{registerFn: func(_ context.Context, _ identity.RegisterRequest) (string, error) { return "", expected }}
 	svc := identity.NewService(t.TempDir(), ca)
-	_, err := svc.Register(context.Background(), identity.RegisterRequest{Name: "alice@Org1"})
+	_, _, err := svc.CreateAccount(context.Background(), "alice", "Org1MSP", "", "")
 	if !errors.Is(err, expected) {
 		t.Errorf("erreur attendue %v, obtenu %v", expected, err)
+	}
+}
+
+// / @brief  Création de compte refuse un pseudo ou une organisation qui ne forme pas un identifiant sûr
+// / @input  pseudos "", "..", "a@b", "a/b", "a b" ; organisation "Org:1"
+// / @expect ErrInvalidIdentityName dans chaque cas, la CA n'est jamais appelée
+func TestService_CreateAccount_InvalidName_Rejected(t *testing.T) {
+	ca := &stubCA{registerFn: func(context.Context, identity.RegisterRequest) (string, error) {
+		t.Fatal("la CA ne doit pas être appelée")
+		return "", nil
+	}}
+	svc := identity.NewService(t.TempDir(), ca)
+	cases := [][2]string{{"", "Org1MSP"}, {"..", "Org1MSP"}, {"a@b", "Org1MSP"}, {"a/b", "Org1MSP"}, {"a b", "Org1MSP"}, {"alice", "Org:1"}}
+	for _, c := range cases {
+		if _, _, err := svc.CreateAccount(context.Background(), c[0], c[1], "", ""); !errors.Is(err, identity.ErrInvalidIdentityName) {
+			t.Errorf("%q/%q : ErrInvalidIdentityName attendu, obtenu %v", c[0], c[1], err)
+		}
 	}
 }
 
@@ -122,10 +148,11 @@ func TestService_Enroll_NoCA(t *testing.T) {
 
 // / @brief  Enrôlement réussi avec écriture des fichiers MSP sur disque
 // / @input  stubCA retournant des PEM valides, répertoire temporaire, identité "alice" dans "Org1MSP"
-// / @expect retourne un WalletEntry avec handle "alice@Org1" et statut pending, fichiers cert/key/ca présents
+// / @expect retourne un WalletEntry avec handle "alice@Org1", statut et rôle lus dans le certificat, fichiers cert/key/ca présents
 func TestService_Enroll_Success(t *testing.T) {
 	walletDir := t.TempDir()
-	svc := identity.NewService(walletDir, &stubCA{})
+	ca := &stubCA{certAttrs: map[string]string{identity.AttrStatus: identity.StatusPending, identity.AttrRole: identity.RoleReader}}
+	svc := identity.NewService(walletDir, ca)
 	entry, err := svc.Enroll(context.Background(), "alice", "secret123", "Org1MSP")
 	if err != nil {
 		t.Fatalf("inattendu : %v", err)
@@ -133,8 +160,8 @@ func TestService_Enroll_Success(t *testing.T) {
 	if entry.Handle != "alice@Org1" {
 		t.Errorf("handle attendu %q, obtenu %q", "alice@Org1", entry.Handle)
 	}
-	if entry.Status != identity.StatusPending {
-		t.Errorf("statut attendu %q, obtenu %q", identity.StatusPending, entry.Status)
+	if entry.Status != identity.StatusPending || entry.Role != identity.RoleReader {
+		t.Errorf("attendu statut %q et rôle %q, obtenu %q / %q", identity.StatusPending, identity.RoleReader, entry.Status, entry.Role)
 	}
 	mspDir := filepath.Join(walletDir, "alice@Org1", "msp")
 	for _, path := range []string{
@@ -302,46 +329,67 @@ func TestService_ListLocalWallets_AfterEnroll(t *testing.T) {
 	}
 }
 
-// / @brief  Flux complet de demande de compte : enregistrement, enrôlement et suivi du statut
-// / @details Simule le cycle de vie d'une identité depuis la demande jusqu'à l'activation
-// / @input  stubCA simulant register/enroll/getStatus avec transition pending -> active, identité "carol@Org1"
-// / @expect enrôlement réussi, statut pending puis active après changement de la CA
+// / @brief  Flux complet d'inscription avec approbation : demande, enrôlement, approbation, connexion
+// / @details Simule une CA qui retient les attributs de chaque identité et les inscrit dans les
+// / certificats qu'elle émet — le statut d'une identité ne change qu'au prochain enrôlement
+// / @input  réseau ouvert exigeant une approbation, rôle par défaut reader, identité "carol@Org1"
+// / @expect avant approbation le certificat porte pending et la connexion est refusée ;
+// / après approbation et nouvel enrôlement il porte active et la connexion est permise
 func TestAccountRequest_FullFlow(t *testing.T) {
-	walletDir := t.TempDir()
-	status := identity.StatusPending
-	ca := &stubCA{
-		registerFn: func(_ context.Context, _ identity.RegisterRequest) (string, error) { return "enrollment-secret", nil },
-		enrollFn: func(_ context.Context, name, secret string) (string, string, string, error) {
-			if secret != "enrollment-secret" {
-				return "", "", "", errors.New("secret invalide")
-			}
-			return fakeCertPEM, fakeKeyPEM, fakeCACertPEM, nil
-		},
-		getStatusFn: func(_ context.Context, _ string) (string, error) { return status, nil },
+	registry := map[string]map[string]string{} // attributs CA par identité
+	ca := &stubCA{}
+	ca.registerFn = func(_ context.Context, req identity.RegisterRequest) (string, error) {
+		registry[req.Name] = map[string]string{identity.AttrStatus: req.Status, identity.AttrRole: req.Role}
+		return "enrollment-secret", nil
 	}
-	svc := identity.NewService(walletDir, ca)
-	req := identity.RegisterRequest{Name: "carol@Org1", OrgID: "Org1MSP", DisplayName: "Carol", Email: "carol@example.com", Country: "FR"}
-	secret, err := svc.Register(context.Background(), req)
+	ca.enrollFn = func(_ context.Context, name, secret string) (string, string, string, error) {
+		if secret != "enrollment-secret" {
+			return "", "", "", errors.New("secret invalide")
+		}
+		ca.certAttrs = registry[name]
+		return fakeCertPEM, fakeKeyPEM, fakeCACertPEM, nil
+	}
+	ca.updateAttrsFn = func(_ context.Context, name string, attrs map[string]string) error {
+		for k, v := range attrs {
+			registry[name][k] = v
+		}
+		return nil
+	}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(&mockRequestStore{})
+	policy := identity.RegistrationPolicy{AllowAutoRegister: true, RequireApproval: true, DefaultRole: identity.RoleReader}
+
+	req, secret, err := svc.RequestAccess(context.Background(),
+		identity.AccountRequest{Pseudo: "carol", Email: "carol@example.com", OrgID: "Org1MSP"}, policy)
 	if err != nil {
-		t.Fatalf("Register: %v", err)
+		t.Fatalf("RequestAccess: %v", err)
 	}
 	entry, err := svc.Enroll(context.Background(), "carol", secret, "Org1MSP")
 	if err != nil {
 		t.Fatalf("Enroll: %v", err)
 	}
-	st, _ := svc.GetStatus(context.Background(), entry)
-	if st != identity.StatusPending {
-		t.Errorf("attendu pending, obtenu %q", st)
+	if !errors.Is(entry.CanSignIn(), identity.ErrIdentityPending) {
+		t.Fatalf("connexion refusée attendue avant approbation, obtenu %v (statut %q)", entry.CanSignIn(), entry.Status)
 	}
-	status = identity.StatusActive
-	st, _ = svc.GetStatus(context.Background(), entry)
-	if st != identity.StatusActive {
-		t.Errorf("attendu active, obtenu %q", st)
+
+	if _, err := svc.ApproveRequest(context.Background(), req.ID); err != nil {
+		t.Fatalf("ApproveRequest: %v", err)
+	}
+	entry, err = svc.Enroll(context.Background(), "carol", secret, "Org1MSP")
+	if err != nil {
+		t.Fatalf("Enroll après approbation: %v", err)
+	}
+	if err := entry.CanSignIn(); err != nil {
+		t.Fatalf("connexion attendue après approbation, obtenu %v", err)
+	}
+	if entry.Role != identity.RoleReader {
+		t.Errorf("rôle attendu %q, obtenu %q", identity.RoleReader, entry.Role)
 	}
 }
 
 // ── Mock RequestStore ─────────────────────────────────────────────────────────
 
+// mockRequestStore remplace une demande de même ID, comme le stockage JSON,
+// et en conserve une copie pour ne pas partager l'état de l'appelant.
 type mockRequestStore struct {
 	requests []*identity.AccountRequest
 	err      error
@@ -351,7 +399,14 @@ func (m *mockRequestStore) Save(req *identity.AccountRequest) error {
 	if m.err != nil {
 		return m.err
 	}
-	m.requests = append(m.requests, req)
+	cp := *req
+	for i, r := range m.requests {
+		if r.ID == req.ID {
+			m.requests[i] = &cp
+			return nil
+		}
+	}
+	m.requests = append(m.requests, &cp)
 	return nil
 }
 
@@ -483,105 +538,249 @@ func TestSetRole_MissingName(t *testing.T) {
 	}
 }
 
-// ── SubmitRequest ─────────────────────────────────────────────────────────────
+// ── RequestAccess ─────────────────────────────────────────────────────────────
 
-// / @brief  SubmitRequest crée une demande avec ID et statut pending, la persiste dans le store
-// / @input  mockStore vide, demande {Pseudo:"bob", Email:"bob@example.com", OrgID:"Org1MSP"}
-// / @expect retourne une demande avec ID non vide et Status="pending", store contient 1 entrée
-func TestSubmitRequest_Success(t *testing.T) {
+var openPolicy = identity.RegistrationPolicy{AllowAutoRegister: true, DefaultRole: identity.RoleReader}
+
+func bobRequest() identity.AccountRequest {
+	return identity.AccountRequest{Pseudo: "bob", Email: "bob@example.com", OrgID: "Org1MSP", DisplayName: "Bob"}
+}
+
+// / @brief  RequestAccess refuse toute demande quand le réseau n'accepte pas l'auto-enregistrement
+// / @input  politique fermée (AllowAutoRegister=false), demande valide
+// / @expect ErrRegistrationClosed ; rien n'est conservé, la CA n'est pas appelée
+func TestRequestAccess_RegistrationClosed_Rejected(t *testing.T) {
+	ca := &stubCA{registerFn: func(context.Context, identity.RegisterRequest) (string, error) {
+		t.Fatal("la CA ne doit pas être appelée")
+		return "", nil
+	}}
 	store := &mockRequestStore{}
-	svc := identity.NewService(t.TempDir(), nil).WithRequestStore(store)
-	req := identity.AccountRequest{Pseudo: "bob", Email: "bob@example.com", OrgID: "Org1MSP", DisplayName: "Bob"}
-	got, err := svc.SubmitRequest(req)
-	if err != nil {
-		t.Fatalf("SubmitRequest : %v", err)
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store)
+	_, _, err := svc.RequestAccess(context.Background(), bobRequest(), identity.RegistrationPolicy{})
+	if !errors.Is(err, identity.ErrRegistrationClosed) {
+		t.Fatalf("ErrRegistrationClosed attendu, obtenu %v", err)
 	}
-	if got.ID == "" {
-		t.Error("ID doit être généré")
-	}
-	if got.Status != identity.RequestPending {
-		t.Errorf("Status: got %q, want pending", got.Status)
-	}
-	if len(store.requests) != 1 {
-		t.Errorf("store: attendu 1 demande, got %d", len(store.requests))
+	if len(store.requests) != 0 {
+		t.Errorf("aucune demande ne doit être conservée, obtenu %d", len(store.requests))
 	}
 }
 
-// / @brief  SubmitRequest refusé si pseudo, email ou org_id est vide
-// / @input  trois variantes de demande incomplète
-// / @expect retourne une erreur de validation pour chaque cas
-func TestSubmitRequest_MissingFields(t *testing.T) {
-	svc := identity.NewService(t.TempDir(), nil)
+// / @brief  RequestAccess sans approbation : l'identité est créée active avec le rôle par défaut
+// / @input  politique ouverte sans approbation, rôle par défaut reader
+// / @expect demande approved conservée ; la CA reçoit "bob@Org1", statut active, rôle reader ; secret renvoyé
+func TestRequestAccess_NoApproval_Active(t *testing.T) {
+	ca := &stubCA{}
+	store := &mockRequestStore{}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store)
+	got, secret, err := svc.RequestAccess(context.Background(), bobRequest(), openPolicy)
+	if err != nil {
+		t.Fatalf("RequestAccess : %v", err)
+	}
+	if got.ID == "" || got.Status != identity.RequestApproved || secret != "secret123" {
+		t.Errorf("attendu demande approved avec ID et secret, obtenu %+v / %q", got, secret)
+	}
+	reg := ca.lastRegisterReq
+	if reg.Name != "bob@Org1" || reg.Status != identity.StatusActive || reg.Role != identity.RoleReader {
+		t.Errorf("requête CA inattendue : %+v", reg)
+	}
+	if len(store.requests) != 1 || store.requests[0].Status != identity.RequestApproved {
+		t.Errorf("store : 1 demande approved attendue, obtenu %+v", store.requests)
+	}
+}
+
+// / @brief  RequestAccess avec approbation : l'identité est créée en attente
+// / @input  politique ouverte exigeant une approbation, rôle par défaut contributor
+// / @expect demande pending conservée ; la CA reçoit le statut pending et le rôle contributor
+func TestRequestAccess_RequireApproval_Pending(t *testing.T) {
+	ca := &stubCA{}
+	store := &mockRequestStore{}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store)
+	policy := identity.RegistrationPolicy{AllowAutoRegister: true, RequireApproval: true, DefaultRole: identity.RoleContributor}
+	got, _, err := svc.RequestAccess(context.Background(), bobRequest(), policy)
+	if err != nil {
+		t.Fatalf("RequestAccess : %v", err)
+	}
+	if got.Status != identity.RequestPending {
+		t.Errorf("statut de demande attendu pending, obtenu %q", got.Status)
+	}
+	if ca.lastRegisterReq.Status != identity.StatusPending || ca.lastRegisterReq.Role != identity.RoleContributor {
+		t.Errorf("requête CA inattendue : %+v", ca.lastRegisterReq)
+	}
+	if len(store.requests) != 1 || store.requests[0].Status != identity.RequestPending {
+		t.Errorf("store : 1 demande pending attendue, obtenu %+v", store.requests)
+	}
+}
+
+// / @brief  RequestAccess avec approbation exige un stockage des demandes
+// / @input  politique exigeant une approbation, service sans requestStore
+// / @expect erreur ; la CA n'est pas appelée (l'identité resterait en attente sans décision possible)
+func TestRequestAccess_RequireApproval_NoStore_Rejected(t *testing.T) {
+	ca := &stubCA{registerFn: func(context.Context, identity.RegisterRequest) (string, error) {
+		t.Fatal("la CA ne doit pas être appelée")
+		return "", nil
+	}}
+	svc := identity.NewService(t.TempDir(), ca)
+	policy := identity.RegistrationPolicy{AllowAutoRegister: true, RequireApproval: true}
+	if _, _, err := svc.RequestAccess(context.Background(), bobRequest(), policy); err == nil {
+		t.Fatal("erreur attendue sans stockage des demandes")
+	}
+}
+
+// / @brief  RequestAccess refusé si pseudo, email ou org_id est vide, ou si le pseudo est invalide
+// / @input  trois demandes incomplètes et un pseudo contenant "/"
+// / @expect une erreur pour chaque cas ; ErrInvalidIdentityName pour le pseudo invalide
+func TestRequestAccess_InvalidRequest_Rejected(t *testing.T) {
+	svc := identity.NewService(t.TempDir(), &stubCA{}).WithRequestStore(&mockRequestStore{})
 	cases := []identity.AccountRequest{
 		{Pseudo: "", Email: "x@x.com", OrgID: "Org1MSP"},
 		{Pseudo: "alice", Email: "", OrgID: "Org1MSP"},
 		{Pseudo: "alice", Email: "x@x.com", OrgID: ""},
 	}
 	for _, c := range cases {
-		if _, err := svc.SubmitRequest(c); err == nil {
+		if _, _, err := svc.RequestAccess(context.Background(), c, openPolicy); err == nil {
 			t.Errorf("attendu erreur pour %+v", c)
+		}
+	}
+	bad := identity.AccountRequest{Pseudo: "../alice", Email: "x@x.com", OrgID: "Org1MSP"}
+	if _, _, err := svc.RequestAccess(context.Background(), bad, openPolicy); !errors.Is(err, identity.ErrInvalidIdentityName) {
+		t.Errorf("ErrInvalidIdentityName attendu, obtenu %v", err)
+	}
+}
+
+// / @brief  RequestAccess conserve la demande au statut failed si la CA refuse l'enregistrement
+// / @input  stubCA dont registerFn échoue
+// / @expect erreur enveloppant celle de la CA ; 1 demande au statut failed dans le store
+func TestRequestAccess_CAError_Failed(t *testing.T) {
+	expected := errors.New("CA: identite deja enregistree")
+	ca := &stubCA{registerFn: func(context.Context, identity.RegisterRequest) (string, error) { return "", expected }}
+	store := &mockRequestStore{}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store)
+	if _, _, err := svc.RequestAccess(context.Background(), bobRequest(), openPolicy); !errors.Is(err, expected) {
+		t.Fatalf("erreur attendue %v, obtenu %v", expected, err)
+	}
+	if len(store.requests) != 1 || store.requests[0].Status != identity.RequestFailed {
+		t.Errorf("store : 1 demande failed attendue, obtenu %+v", store.requests)
+	}
+}
+
+// ── ApproveRequest / RejectRequest ────────────────────────────────────────────
+
+func pendingStore() *mockRequestStore {
+	return &mockRequestStore{requests: []*identity.AccountRequest{
+		{ID: "req-1", Pseudo: "bob", OrgID: "Org1MSP", Status: identity.RequestPending},
+	}}
+}
+
+// / @brief  ApproveRequest active l'identité de la demande et enregistre la décision
+// / @input  demande pending "req-1" de bob@Org1
+// / @expect la CA reçoit Myr.status=active pour "bob@Org1" ; demande approved
+func TestApproveRequest_NominalCase(t *testing.T) {
+	ca := &stubCA{}
+	store := pendingStore()
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store)
+	got, err := svc.ApproveRequest(context.Background(), "req-1")
+	if err != nil {
+		t.Fatalf("ApproveRequest : %v", err)
+	}
+	if ca.lastUpdateName != "bob@Org1" || ca.lastUpdateAttrs[identity.AttrStatus] != identity.StatusActive {
+		t.Errorf("mise à jour CA inattendue : %q %v", ca.lastUpdateName, ca.lastUpdateAttrs)
+	}
+	if got.Status != identity.RequestApproved || store.requests[0].Status != identity.RequestApproved {
+		t.Errorf("demande approved attendue, obtenu %q (store %q)", got.Status, store.requests[0].Status)
+	}
+}
+
+// / @brief  RejectRequest suspend l'identité sans rien supprimer
+// / @input  demande pending "req-1" de bob@Org1
+// / @expect la CA reçoit Myr.status=suspended ; demande rejected, toujours présente dans le store
+func TestRejectRequest_NominalCase(t *testing.T) {
+	ca := &stubCA{}
+	store := pendingStore()
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store)
+	got, err := svc.RejectRequest(context.Background(), "req-1")
+	if err != nil {
+		t.Fatalf("RejectRequest : %v", err)
+	}
+	if ca.lastUpdateAttrs[identity.AttrStatus] != identity.StatusSuspended {
+		t.Errorf("statut CA attendu suspended, obtenu %v", ca.lastUpdateAttrs)
+	}
+	if got.Status != identity.RequestRejected || len(store.requests) != 1 {
+		t.Errorf("demande rejected conservée attendue, obtenu %q (%d demandes)", got.Status, len(store.requests))
+	}
+}
+
+// / @brief  Une décision ne porte que sur une demande existante et encore en attente
+// / @input  identifiant inconnu ; demande déjà approuvée
+// / @expect ErrRequestNotFound puis ErrRequestNotPending ; la CA n'est jamais modifiée
+func TestDecideRequest_NotFoundOrNotPending_Rejected(t *testing.T) {
+	ca := &stubCA{updateAttrsFn: func(context.Context, string, map[string]string) error {
+		t.Fatal("la CA ne doit pas être modifiée")
+		return nil
+	}}
+	store := &mockRequestStore{requests: []*identity.AccountRequest{
+		{ID: "req-1", Pseudo: "bob", OrgID: "Org1MSP", Status: identity.RequestApproved},
+	}}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store)
+	if _, err := svc.ApproveRequest(context.Background(), "req-x"); !errors.Is(err, identity.ErrRequestNotFound) {
+		t.Errorf("ErrRequestNotFound attendu, obtenu %v", err)
+	}
+	if _, err := svc.RejectRequest(context.Background(), "req-1"); !errors.Is(err, identity.ErrRequestNotPending) {
+		t.Errorf("ErrRequestNotPending attendu, obtenu %v", err)
+	}
+}
+
+// / @brief  Une décision dont la mise à jour CA échoue laisse la demande en attente
+// / @input  demande pending, UpdateAttributes en erreur
+// / @expect erreur propagée ; la demande reste pending
+func TestApproveRequest_CAError_StaysPending(t *testing.T) {
+	expected := errors.New("CA indisponible")
+	ca := &stubCA{updateAttrsFn: func(context.Context, string, map[string]string) error { return expected }}
+	store := pendingStore()
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store)
+	if _, err := svc.ApproveRequest(context.Background(), "req-1"); !errors.Is(err, expected) {
+		t.Fatalf("erreur attendue %v, obtenu %v", expected, err)
+	}
+	if store.requests[0].Status != identity.RequestPending {
+		t.Errorf("la demande doit rester pending, obtenu %q", store.requests[0].Status)
+	}
+}
+
+// ── CanSignIn ─────────────────────────────────────────────────────────────────
+
+// / @brief  Seule une identité active dotée d'un rôle peut ouvrir une session
+// / @input  combinaisons de statut et de rôle lues dans le certificat
+// / @expect nil pour active+rôle ; erreur dédiée sinon (pending, suspended, statut inconnu, sans rôle)
+func TestWalletEntry_CanSignIn(t *testing.T) {
+	cases := []struct {
+		status, role string
+		want         error
+	}{
+		{identity.StatusActive, identity.RoleReader, nil},
+		{identity.StatusPending, identity.RoleReader, identity.ErrIdentityPending},
+		{identity.StatusSuspended, identity.RoleReader, identity.ErrIdentitySuspended},
+		{"", identity.RoleReader, identity.ErrIdentityInactive},
+		{"revoked", identity.RoleReader, identity.ErrIdentityInactive},
+		{identity.StatusActive, "", identity.ErrIdentityWithoutRole},
+	}
+	for _, c := range cases {
+		err := identity.WalletEntry{Status: c.status, Role: c.role}.CanSignIn()
+		if c.want == nil && err != nil || c.want != nil && !errors.Is(err, c.want) {
+			t.Errorf("statut %q rôle %q : attendu %v, obtenu %v", c.status, c.role, c.want, err)
 		}
 	}
 }
 
-// / @brief  SubmitRequest sans store génère quand même l'ID et retourne sans erreur
-// / @input  service sans requestStore, demande valide
-// / @expect retourne une demande avec ID généré, sans erreur
-func TestSubmitRequest_WithoutStore(t *testing.T) {
-	svc := identity.NewService(t.TempDir(), nil)
-	req := identity.AccountRequest{Pseudo: "carol", Email: "carol@example.com", OrgID: "Org1MSP"}
-	got, err := svc.SubmitRequest(req)
-	if err != nil {
-		t.Fatalf("SubmitRequest sans store : %v", err)
+// / @brief  PolicyOf reprend les règles d'inscription fixées sur le réseau
+// / @input  réseau ouvert exigeant une approbation, rôle par défaut contributor ; réseau absent
+// / @expect politique identique aux champs du réseau ; politique fermée sans réseau
+func TestPolicyOf(t *testing.T) {
+	p := &network.NetworkProfile{AllowAutoRegister: true, RequireApproval: true, AutoRegisterRole: identity.RoleContributor}
+	want := identity.RegistrationPolicy{AllowAutoRegister: true, RequireApproval: true, DefaultRole: identity.RoleContributor}
+	if got := identity.PolicyOf(p); got != want {
+		t.Errorf("PolicyOf = %+v, attendu %+v", got, want)
 	}
-	if got.ID == "" {
-		t.Error("ID doit être généré même sans store")
-	}
-}
-
-// ── AutoRegister ──────────────────────────────────────────────────────────────
-
-// / @brief  AutoRegister délègue à la CA avec le bon nom pseudo@org
-// / @input  stubCA retournant "secret123", demande {Pseudo:"dave", OrgID:"Org1MSP"}
-// / @expect retourne "secret123", nom CA == "dave@Org1"
-func TestAutoRegister_Success(t *testing.T) {
-	ca := &stubCA{}
-	svc := identity.NewService(t.TempDir(), ca)
-	req := &identity.AccountRequest{Pseudo: "dave", OrgID: "Org1MSP", DisplayName: "Dave", Email: "dave@example.com"}
-	secret, err := svc.AutoRegister(context.Background(), req, identity.RoleContributor)
-	if err != nil {
-		t.Fatalf("AutoRegister : %v", err)
-	}
-	if secret != "secret123" {
-		t.Errorf("secret: got %q, want secret123", secret)
-	}
-	if ca.lastRegisterReq.Name != "dave@Org1" {
-		t.Errorf("nom CA attendu %q, obtenu %q", "dave@Org1", ca.lastRegisterReq.Name)
-	}
-}
-
-// / @brief  AutoRegister échoue sans CA configurée
-// / @input  service sans CA, demande valide
-// / @expect retourne une erreur indiquant l'absence de CA
-func TestAutoRegister_NoCA(t *testing.T) {
-	svc := identity.NewService(t.TempDir(), nil)
-	_, err := svc.AutoRegister(context.Background(),
-		&identity.AccountRequest{Pseudo: "dave", OrgID: "Org1MSP"}, "")
-	if err == nil {
-		t.Fatal("erreur attendue sans CA")
-	}
-}
-
-// / @brief  AutoRegister transmet le rôle exact au RegisterRequest envoyé à la CA
-// / @input  stubCA enregistrant la requête, rôle RoleContributor
-// / @expect RegisterRequest.Role == RoleContributor
-func TestAutoRegister_RoleForwarded(t *testing.T) {
-	ca := &stubCA{}
-	svc := identity.NewService(t.TempDir(), ca)
-	svc.AutoRegister(context.Background(),
-		&identity.AccountRequest{Pseudo: "eve", OrgID: "Org1MSP"}, identity.RoleContributor)
-	if ca.lastRegisterReq.Role != identity.RoleContributor {
-		t.Errorf("rôle: got %q, want %q", ca.lastRegisterReq.Role, identity.RoleContributor)
+	if got := identity.PolicyOf(nil); got.AllowAutoRegister {
+		t.Errorf("politique fermée attendue sans réseau, obtenu %+v", got)
 	}
 }
 

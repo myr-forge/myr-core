@@ -19,6 +19,28 @@ var ErrNoAdminCredentials = errors.New(
 // identité — elle n'a jamais été enrôlée sur ce nœud.
 var ErrWalletNotFound = errors.New("identity: aucun wallet local pour cette identité")
 
+// ErrRegistrationClosed est retourné quand le réseau n'autorise pas
+// l'auto-enregistrement : seul l'administrateur crée des comptes (ADR-12).
+var ErrRegistrationClosed = errors.New("identity: ce réseau n'accepte pas les demandes d'inscription — contactez l'administrateur")
+
+// ErrInvalidIdentityName est retourné quand un pseudo ou une organisation ne
+// peut pas former un identifiant « pseudo@org ».
+var ErrInvalidIdentityName = errors.New("identity: pseudo ou organisation invalide")
+
+// Refus d'ouverture de session (WalletEntry.CanSignIn, ADR-12).
+var (
+	ErrIdentityPending     = errors.New("identity: compte en attente d'approbation par l'administrateur")
+	ErrIdentitySuspended   = errors.New("identity: compte suspendu")
+	ErrIdentityInactive    = errors.New("identity: compte inactif")
+	ErrIdentityWithoutRole = errors.New("identity: aucun rôle attribué à cette identité")
+)
+
+// Décision sur une demande d'inscription (ApproveRequest, RejectRequest).
+var (
+	ErrRequestNotFound   = errors.New("identity: demande d'inscription introuvable")
+	ErrRequestNotPending = errors.New("identity: la demande n'est plus en attente")
+)
+
 // IsNoAdminCredentials rapporte si err est ou enveloppe ErrNoAdminCredentials.
 func IsNoAdminCredentials(err error) bool {
 	return errors.Is(err, ErrNoAdminCredentials)

@@ -31,31 +31,38 @@ actor "Administrateur" as ADM
 
 rectangle "API myr" {
     usecase "Soumettre une demande d'accès" as UC1
-    usecase "Enregistrer automatiquement\n(auto-register réseau)" as UC2
-    usecase "Mettre en attente\n(validation admin)" as UC3
-    usecase "Enregistrer manuellement\nauprès de la CA (hors myr)" as UC4
+    usecase "Créer l'identité active\n(sans approbation)" as UC2
+    usecase "Créer l'identité en attente\n(approbation exigée)" as UC3
+    usecase "Approuver / refuser\nune demande" as UC4
+    usecase "Créer un compte\n(administrateur)" as UC5
 }
 
 V --> UC1
-UC1 .> UC2 : <<extend>> (AllowAutoRegister=true)
-UC1 .> UC3 : <<extend>> (AllowAutoRegister=false)
+UC1 .> UC2 : <<extend>> (AllowAutoRegister, !RequireApproval)
+UC1 .> UC3 : <<extend>> (AllowAutoRegister, RequireApproval)
 ADM --> UC4
+ADM --> UC5
 
 @enduml
 ```
 
 ## Contexte
 
-Il n'existe **pas de compte email + mot de passe** dans `myr`. L'identité d'un utilisateur est une identité cryptographique enregistrée auprès de la Fabric CA du réseau (cf. RM20) : « créer un compte » signifie obtenir un secret d'enrôlement CA valide pour un pseudo donné.
+Il n'existe **pas de compte email + mot de passe** dans `myr`. L'identité d'un utilisateur est une identité cryptographique enregistrée auprès de la Fabric CA du réseau (cf. RM20) : « créer un compte » signifie obtenir un secret d'enrôlement CA valide pour un pseudo donné. L'identifiant CA de l'identité est `pseudo@org` (`identity.Handle`), et son statut et son rôle sont portés par les attributs `Myr.status` et `Myr.role` des certificats émis — seule source de vérité de l'autorisation (ADR-12, `specs/3-Conception/Conception_intro.md` §6).
 
-Deux chemins existent pour l'obtenir :
+Les règles d'inscription sont un réglage du profil réseau, fixé par l'administrateur (`domain/network`, `NetworkProfile`) et converties en `identity.RegistrationPolicy` (`identity.PolicyOf`) :
 
-1. **Demande d'accès auto-traitée** : `POST /api/identity/request` — si le réseau actif a `AllowAutoRegister=true`, l'identité est enregistrée immédiatement auprès de la CA (rôle = `AutoRegisterRole` du profil réseau, ou `reader` par défaut — RM21) et le secret d'enrôlement est retourné directement dans la réponse.
-2. **Demande d'accès en attente** : si `AllowAutoRegister=false`, la demande est simplement stockée (`AccountRequest`, statut `pending`). **Aucun mécanisme REST ou CLI n'existe aujourd'hui pour qu'un administrateur approuve une demande déjà en attente** — seul `GET /api/identity/requests` (ou `myr identity requests`) permet de la consulter. L'administrateur doit créer l'identité manuellement via l'outillage Fabric CA (hors périmètre `myr`) et transmettre le secret à l'utilisateur par un canal hors bande. C'est un écart fonctionnel réel, pas seulement un détail d'implémentation (voir Notes).
+| Réglage réseau | Politique | Effet sur une demande |
+|----------------|-----------|------------------------|
+| `AllowAutoRegister=false` (ou aucun réseau actif) | fermée | refusée (`ErrRegistrationClosed`), rien n'est conservé — seul l'administrateur crée des comptes (`CreateAccount`) |
+| `AllowAutoRegister=true`, `RequireApproval=false` | ouverte | identité créée `Myr.status=active`, demande `approved` |
+| `AllowAutoRegister=true`, `RequireApproval=true` | ouverte avec approbation | identité créée `Myr.status=pending`, demande `pending` jusqu'à la décision de l'administrateur |
+
+Le rôle attribué à l'inscription est `AutoRegisterRole` du profil réseau, ou `reader` par défaut (RM21). L'identité est créée dans la CA **dès la demande**, y compris lorsqu'une approbation est exigée : l'approbation ne fait que changer son statut (`CAPort.UpdateAttributes`), elle ne la crée pas. Le changement s'applique au prochain enrôlement, c'est-à-dire à la prochaine connexion (UCA02), qui ré-enrôle systématiquement.
 
 Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POST /api/identity/guest`), qui n'entre pas dans ce use case.
 
-**Sur la portée réelle de l'auto-enregistrement (`AllowAutoRegister=true`) :** ce réglage supprime la validation humaine *au moment de la demande* — aucun administrateur ne doit approuver manuellement chaque visiteur. Il ne supprime pas pour autant toute autorité d'enregistrement : la Fabric CA exige qu'une identité **registrar** (privilèges `hf.Registrar.*`) signe chaque enregistrement (`CAClient.Register`, `adapters/out/fabric/ca_client.go`). Cette identité registrar est provisionnée une seule fois, à la création du réseau, puis le serveur `myr` l'utilise de façon automatisée pour chaque demande — voir ADR-07 (`specs/3-Conception/Conception_intro.md` §6) pour la décision d'architecture et ses conséquences (notamment le fait que ce registrar est scopé par organisation, pas partagé pour tout le réseau décentralisé).
+**Sur la portée réelle de l'auto-enregistrement (`AllowAutoRegister=true`) :** ce réglage supprime la validation humaine *au moment de la demande* — aucun administrateur n'intervient avant la création de l'identité, même lorsque son activation reste soumise à approbation. Il ne supprime pas pour autant toute autorité d'enregistrement : la Fabric CA exige qu'une identité **registrar** (privilèges `hf.Registrar.*`) signe chaque enregistrement (`CAClient.Register`, `adapters/out/fabric/ca_client.go`). Cette identité registrar est provisionnée une seule fois, à la création du réseau, puis le serveur `myr` l'utilise de façon automatisée pour chaque demande — voir ADR-07 (`specs/3-Conception/Conception_intro.md` §6) pour la décision d'architecture et ses conséquences (notamment le fait que ce registrar est scopé par organisation, pas partagé pour tout le réseau décentralisé).
 
 #incoherence est ce pertinant? pourquoi pas partagé sur le réseau décentralisé?
 
@@ -64,15 +71,16 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 
 - Le serveur `myr` est démarré avec un adaptateur Fabric CA configuré (`ca_endpoint` du réseau actif)
 - Un réseau actif est configuré (`networkSvc`) avec un `org_id` valide
+- Si le réseau exige une approbation : le stockage des demandes est configuré (`WithRequestStore`) — sans lui, une demande en attente ne pourrait jamais être décidée et `RequestAccess` la refuse
 
 ## Scénario
 
-### Flux nominal — Auto-enregistrement (`AllowAutoRegister=true`)
+### Flux nominal — Auto-enregistrement sans approbation (`AllowAutoRegister=true`, `RequireApproval=false`)
 
 1. Le visiteur soumet `POST /api/identity/request` avec `{pseudo, display_name, email, org_id, message}`
-2. Le handler valide que `pseudo`, `email` et `org_id` sont renseignés
-3. La demande est sauvegardée (`AccountRequest`, statut `pending`)
-4. Le profil réseau actif a `AllowAutoRegister=true` : le service appelle `AutoRegister` → enregistrement CA (rôle = `AutoRegisterRole`, ou `reader` si absent — RM21)
+2. Le handler valide que `pseudo`, `email` et `org_id` sont renseignés, puis appelle `identitySvc.RequestAccess(ctx, req, identity.PolicyOf(réseau actif))`
+3. Le service valide le pseudo et l'organisation (`ErrInvalidIdentityName` si l'un d'eux ne forme pas un identifiant `pseudo@org` sûr) et enregistre la demande (`AccountRequest`, statut `pending`)
+4. Enregistrement CA de `pseudo@org` : `Myr.role` = rôle par défaut du réseau (RM21), `Myr.status=active`
 5. Le statut de la demande passe à `approved`
 6. Réponse `HTTP 201` avec `{id, status:"approved", pseudo, org_id, secret}`
 7. Le visiteur conserve ce secret : il lui servira à se connecter (UCA02)
@@ -88,12 +96,14 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 > - 🟡 [TestAutoRegister_Success](../../../docs/tests/domain-identity/TestAutoRegister_Success.md) — déduit : teste `IdentityService.AutoRegister`
 <!-- tests-obsidian:end -->
 
-### Flux alternatif — Demande en attente (`AllowAutoRegister=false`)
+### Flux alternatif — Auto-enregistrement avec approbation (`RequireApproval=true`)
 
 1. Étapes 1 à 3 identiques
-2. Le profil réseau n'autorise pas l'auto-enregistrement (ou aucun réseau actif n'est configuré)
-3. Réponse `HTTP 201` avec `{id, pseudo, display_name, email, org_id, message, status:"pending", created_at}`
-4. **Écart connu** : aucun endpoint REST ni commande CLI ne permet à l'administrateur d'approuver une demande déjà en attente et de déclencher l'enregistrement CA correspondant après coup. Seule la consultation (`GET /api/identity/requests`, `myr identity requests`) existe. Le traitement réel se fait aujourd'hui hors `myr` (CA tooling + communication manuelle du secret).
+2. Enregistrement CA de `pseudo@org` avec `Myr.status=pending` ; la demande reste `pending`
+3. Réponse `HTTP 201` avec `{id, status:"pending", pseudo, org_id, secret}` — une connexion avec ce secret est refusée (`HTTP 403`, UCA02) tant que l'identité est en attente
+4. L'administrateur consulte les demandes : `GET /api/identity/requests` (permission `identity.admin`) ou `myr identity requests`
+5. Il approuve : `POST /api/identity/requests/{id}/approve` ou `myr identity approve <id>` → `ApproveRequest` → `CAPort.UpdateAttributes(pseudo@org, {Myr.status: active})`, demande `approved` → `HTTP 200` avec la demande
+6. À sa prochaine connexion, l'utilisateur reçoit un certificat portant `Myr.status=active` et ouvre sa session
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 0 explicite(s) · 3 déduit(s)
@@ -101,6 +111,41 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 > - 🟡 [TestHandleIdentityRequests_Admin_ReturnsList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_ReturnsList.md) — déduit : teste route `/api/identity/requests`
 > - 🟡 [TestHandleIdentityRequests_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
 <!-- tests-obsidian:end -->
+
+### Flux alternatif — Demande refusée
+
+1. Étapes 1 à 4 du flux précédent
+2. L'administrateur refuse : `POST /api/identity/requests/{id}/reject` ou `myr identity reject <id>` → `RejectRequest` → `Myr.status=suspended`, demande `rejected` → `HTTP 200`
+3. L'identité ne peut ni se connecter ni écrire ; rien n'est supprimé (ni l'identité CA, ni la demande)
+
+### Flux alternatif — Création de compte par l'administrateur
+
+1. L'administrateur soumet `POST /api/identity/accounts` avec `{pseudo, org_id, role, email}` (permission `identity.admin`) ou exécute `myr identity register --pseudo <p> --org-id <id> --role <r> [--email <e>]`
+2. `CreateAccount` valide le pseudo et l'organisation, puis enregistre `pseudo@org` auprès de la CA avec `Myr.status=active` et le rôle donné (`reader` si vide)
+3. Réponse `HTTP 201` avec `{handle, secret}` — l'administrateur transmet le secret à l'utilisateur par un canal hors bande
+4. Ce flux ne dépend pas des règles d'auto-enregistrement : c'est la seule voie d'inscription sur un réseau fermé
+
+### Flux erreur — Réseau fermé à l'auto-enregistrement
+
+1. `AllowAutoRegister=false`, ou aucun réseau actif
+2. `RequestAccess` retourne `ErrRegistrationClosed` sans rien enregistrer ni appeler la CA
+3. Réponse `HTTP 403` ; en CLI, `myr identity request` échoue avec le même message
+
+### Flux erreur — Pseudo ou organisation invalide
+
+1. Le pseudo ou l'organisation est réduit à `.`/`..`, ou contient `@`, `:`, `/`, `\`, une espace ou un caractère de contrôle
+2. `ErrInvalidIdentityName` → `HTTP 400` (demande comme création par l'administrateur)
+
+### Flux erreur — Enregistrement refusé par la CA
+
+1. La CA refuse l'enregistrement (identité déjà existante, CA indisponible…)
+2. La demande est conservée au statut `failed` et l'erreur est retournée (`HTTP 500`)
+
+### Flux erreur — Décision impossible
+
+1. Demande inconnue → `ErrRequestNotFound` → `HTTP 404`
+2. Demande déjà décidée (`approved`, `rejected`, `failed`) → `ErrRequestNotPending` → `HTTP 409`, l'identité n'est pas modifiée
+3. Action autre que `approve`/`reject` → `HTTP 404` ; session sans `identity.admin` → `HTTP 403`
 
 ### Flux erreur — Champs requis manquants
 
@@ -124,9 +169,9 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 
 ## Post-conditions
 
-- Une `AccountRequest` existe (statut `pending` ou `approved`)
-- Si auto-enregistrement : une identité CA existe (statut `pending` côté CA jusqu'au premier enrôlement effectif via UCA02), avec le rôle défini
-- Si en attente : aucune identité CA n'existe encore — le visiteur ne peut pas se connecter tant qu'un administrateur n'a pas agi hors `myr`
+- Réseau ouvert : une `AccountRequest` existe (`approved`, `pending`, `rejected` ou `failed`) ; sauf échec CA, l'identité `pseudo@org` existe auprès de la CA avec le rôle par défaut et un statut `active`, `pending` ou `suspended`
+- Création par l'administrateur : l'identité `pseudo@org` existe, active, avec le rôle choisi
+- Réseau fermé : aucune demande ni identité n'est créée par `POST /api/identity/request`
 
 ## Diagramme de séquence
 
@@ -134,30 +179,36 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 @startuml
 participant "Client" as Client
 participant "REST Handler\n(adapters/in/rest/handlers_identity.go)" as REST
-participant "Identity Service\n(domain/identity/service.go)" as Service
 participant "Network Service\n(domain/network/)" as NetSvc
+participant "Identity Service\n(domain/identity/service.go)" as Service
 database "AccountRequests\n(adapters/out/localstorage/)" as Store
 participant "Fabric CA" as CA
 
 Client -> REST : POST /api/identity/request\n{pseudo, display_name, email, org_id, message}
 REST -> REST : valider champs requis + rate limiter
-REST -> Service : SubmitRequest(req)
-Service -> Store : Save(AccountRequest{status:"pending"})
-Store --> Service : ok
-Service --> REST : *AccountRequest
-
 REST -> NetSvc : GetActive()
 NetSvc --> REST : *NetworkProfile
+REST -> Service : RequestAccess(ctx, req, PolicyOf(profile))
 
-alt AllowAutoRegister == true
-    REST -> Service : AutoRegister(ctx, req, profile.AutoRegisterRole)
-    Service -> CA : Register(ctx, {name, org_id, role})
+alt AllowAutoRegister == false
+    Service --> REST : ErrRegistrationClosed
+    REST --> Client : HTTP 403
+else AllowAutoRegister == true
+    Service -> Store : Save(AccountRequest{status:"pending"})
+    Service -> CA : Register(pseudo@org, role, status active|pending)
     CA --> Service : secret
-    Service --> REST : secret
-    REST --> Client : HTTP 201\n{id, status:"approved", pseudo, org_id, secret}
-else AllowAutoRegister == false
-    REST --> Client : HTTP 201\n{id, pseudo, email, org_id, status:"pending", created_at}
+    Service -> Store : Save(status approved|pending)
+    Service --> REST : *AccountRequest, secret
+    REST --> Client : HTTP 201\n{id, status, pseudo, org_id, secret}
 end
+
+== Approbation (RequireApproval == true) ==
+Client -> REST : POST /api/identity/requests/{id}/approve\n(session identity.admin)
+REST -> Service : ApproveRequest(ctx, id)
+Service -> Store : FindAll()
+Service -> CA : UpdateAttributes(pseudo@org, {Myr.status: active})
+Service -> Store : Save(status approved)
+REST --> Client : HTTP 200 AccountRequest
 @enduml
 ```
 
@@ -168,20 +219,20 @@ end
 
 ## Exigences non-fonctionnelles
 
-- **ENF12** — La validation du rôle attribué est strictement côté serveur (le rôle est un attribut du certificat CA, jamais choisi par le client).
+- **ENF12** — La validation du rôle attribué est strictement côté serveur (le rôle est un attribut du certificat CA, jamais choisi par le client qui s'inscrit).
 - Rate limiting appliqué (`authLimiter`) pour prévenir l'énumération/spam de demandes.
 
 ## Notes d'implémentation
 
-**Endpoints réels :**
-- `POST /api/identity/request` → `handleIdentityRequest` (`adapters/in/rest/handlers_identity.go`)
-- `GET /api/identity/requests` → `handleIdentityRequests` (lecture seule, protégée par `requireAuth` — pas de contrôle de rôle admin spécifique constaté)
+**Endpoints :**
+- `POST /api/identity/request` → `handleIdentityRequest` (ouvert, rate limité)
+- `GET /api/identity/requests` → `handleIdentityRequests` (permission `identity.admin`)
+- `POST /api/identity/requests/{id}/approve|reject` → `handleIdentityRequestDecision` (permission `identity.admin`)
+- `POST /api/identity/accounts` → `handleIdentityAccounts` (permission `identity.admin`)
 
-**Commande CLI équivalente :** `myr identity request --pseudo <p> --email <e> --org-id <id> [--display-name <n>] [--message <m>]` (`adapters/in/cli/identity.go`) reproduit exactement le flux REST ci-dessus, y compris l'auto-enregistrement transparent si le réseau actif a `AllowAutoRegister=true` — même service domaine (`identitySvc.SubmitRequest` puis `identitySvc.AutoRegister`), donc même comportement quel que soit le canal. `myr identity requests` est l'équivalent CLI de `GET /api/identity/requests`.
+**Commandes CLI :** `myr identity request` (même service, même politique lue sur le réseau actif), `myr identity requests`, `myr identity approve <id>`, `myr identity reject <id>`, `myr identity register`. Les règles d'inscription se règlent par `myr network add|update --auto-register --require-approval --auto-role <r>` et s'affichent dans `myr network show`. Le CLI et l'API partagent le même stockage des demandes (`account-requests.json` du répertoire de données serveur) : une demande reçue par l'API se décide en CLI.
 
-**Écart — pas de flux d'approbation *a posteriori*:** Il n'existe toujours aucun endpoint REST (`POST /api/identity/requests/{id}/approve`) ni commande CLI équivalente pour transformer une `AccountRequest` déjà en attente en identité CA active. C'est un vrai manque fonctionnel, pas une simplification de cette spec : `myr identity request` ne fait qu'imiter la logique d'auto-approbation *au moment de la soumission* (comme l'endpoint REST) — il ne rejoue rien pour une demande déjà stockée avec le statut `pending`. `myr identity` propose par ailleurs `set-role` (UCA08) et `re-enroll`, qui supposent tous deux une identité déjà enregistrée auprès de la CA.
-
-**Rôle par défaut :** `RegisterRequest.Role` vide → la Fabric CA applique son propre défaut (probablement `reader` au niveau de la configuration CA, pas garanti par le code `myr`) — à vérifier côté configuration CA plutôt que côté application.
+**Rôle par défaut :** le rôle vide est remplacé par `reader` à l'enregistrement CA (`adapters/out/fabric/ca_client.go`), conformément à RM21.
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens

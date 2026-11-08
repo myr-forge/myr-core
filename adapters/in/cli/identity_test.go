@@ -151,47 +151,68 @@ func TestRunIdentityReEnroll_NoLocalWallet_Rejected(t *testing.T) {
 	}
 }
 
-/// @brief  runIdentityRequest, réseau sans auto-enregistrement : la demande reste en attente
+/// @brief  runIdentityRequest, aucun réseau actif : l'inscription est fermée
 /// @input  nsvc=nil (pas de réseau actif)
-/// @expect SubmitRequest est appelé, AutoRegister jamais, sortie mentionne "attente"/statut pending
-func TestRunIdentityRequest_NoAutoRegister_Pending(t *testing.T) {
-	autoCalled := false
+/// @expect RequestAccess reçoit une politique fermée, l'erreur ErrRegistrationClosed remonte
+func TestRunIdentityRequest_NoNetwork_Rejected(t *testing.T) {
+	var got identity.RegistrationPolicy
 	svc := &mockIdentitySvc{
-		submitRequest: func(req identity.AccountRequest) (*identity.AccountRequest, error) {
-			req.ID = "req-1"
-			req.Status = identity.RequestPending
-			return &req, nil
-		},
-		autoRegister: func(context.Context, *identity.AccountRequest, string) (string, error) {
-			autoCalled = true
-			return "", nil
+		requestAccess: func(_ context.Context, _ identity.AccountRequest, policy identity.RegistrationPolicy) (*identity.AccountRequest, string, error) {
+			got = policy
+			return nil, "", identity.ErrRegistrationClosed
 		},
 	}
 	var buf bytes.Buffer
 	req := identity.AccountRequest{Pseudo: "bob", Email: "bob@example.com", OrgID: "Org1MSP"}
-	if err := runIdentityRequest(&buf, svc, nil, req); err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	err := runIdentityRequest(&buf, svc, nil, req)
+	if !errors.Is(err, identity.ErrRegistrationClosed) {
+		t.Fatalf("expected ErrRegistrationClosed, got %v", err)
 	}
-	if autoCalled {
-		t.Fatalf("AutoRegister should not be called when no network service is available")
-	}
-	if !strings.Contains(buf.String(), "req-1") {
-		t.Fatalf("unexpected output: %q", buf.String())
+	if got.AllowAutoRegister {
+		t.Fatalf("expected a closed policy without active network, got %+v", got)
 	}
 }
 
-/// @brief  runIdentityRequest, réseau avec AllowAutoRegister=true : la demande est auto-approuvée
-/// @input  nsvc.GetActive() retourne un profil avec AllowAutoRegister=true
-/// @expect AutoRegister est appelé et le secret d'enrôlement apparaît dans la sortie
+/// @brief  runIdentityRequest transmet les règles d'inscription du réseau actif
+/// @input  réseau actif AllowAutoRegister=true, RequireApproval=true, AutoRegisterRole=contributor
+/// @expect RequestAccess reçoit ces trois règles ; la sortie donne le secret et la commande d'approbation
+func TestRunIdentityRequest_RequireApproval_Pending(t *testing.T) {
+	var got identity.RegistrationPolicy
+	svc := &mockIdentitySvc{
+		requestAccess: func(_ context.Context, req identity.AccountRequest, policy identity.RegistrationPolicy) (*identity.AccountRequest, string, error) {
+			got = policy
+			req.ID = "req-1"
+			req.Status = identity.RequestPending
+			return &req, "generated-secret", nil
+		},
+	}
+	nsvc := &mockNetworkSvc{getActive: func() (*network.NetworkProfile, error) {
+		return &network.NetworkProfile{AllowAutoRegister: true, RequireApproval: true, AutoRegisterRole: "contributor"}, nil
+	}}
+	var buf bytes.Buffer
+	req := identity.AccountRequest{Pseudo: "bob", Email: "bob@example.com", OrgID: "Org1MSP"}
+	if err := runIdentityRequest(&buf, svc, nsvc, req); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := identity.RegistrationPolicy{AllowAutoRegister: true, RequireApproval: true, DefaultRole: "contributor"}
+	if got != want {
+		t.Fatalf("policy = %+v, want %+v", got, want)
+	}
+	out := buf.String()
+	if !strings.Contains(out, "generated-secret") || !strings.Contains(out, "myr identity approve req-1") {
+		t.Fatalf("unexpected output: %q", out)
+	}
+}
+
+/// @brief  runIdentityRequest, réseau ouvert sans approbation : l'identité est créée active
+/// @input  réseau actif AllowAutoRegister=true, RequireApproval=false
+/// @expect Le secret d'enrôlement apparaît, aucune commande d'approbation n'est suggérée
 func TestRunIdentityRequest_AutoRegister_Approved(t *testing.T) {
 	svc := &mockIdentitySvc{
-		submitRequest: func(req identity.AccountRequest) (*identity.AccountRequest, error) {
+		requestAccess: func(_ context.Context, req identity.AccountRequest, _ identity.RegistrationPolicy) (*identity.AccountRequest, string, error) {
 			req.ID = "req-2"
-			req.Status = identity.RequestPending
-			return &req, nil
-		},
-		autoRegister: func(_ context.Context, req *identity.AccountRequest, role string) (string, error) {
-			return "generated-secret", nil
+			req.Status = identity.RequestApproved
+			return &req, "generated-secret", nil
 		},
 	}
 	nsvc := &mockNetworkSvc{getActive: func() (*network.NetworkProfile, error) {
@@ -202,8 +223,67 @@ func TestRunIdentityRequest_AutoRegister_Approved(t *testing.T) {
 	if err := runIdentityRequest(&buf, svc, nsvc, req); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(buf.String(), "generated-secret") {
-		t.Fatalf("expected the enrollment secret in output, got: %q", buf.String())
+	out := buf.String()
+	if !strings.Contains(out, "generated-secret") || !strings.Contains(out, "carol@Org1") {
+		t.Fatalf("expected the handle and enrollment secret in output, got: %q", out)
+	}
+	if strings.Contains(out, "myr identity approve") {
+		t.Fatalf("no approval expected for an active identity, got: %q", out)
+	}
+}
+
+/// @brief  runIdentityDecision approuve une demande via le service
+/// @input  ApproveRequest renvoie la demande approuvée de alice@Org1MSP
+/// @expect L'identifiant transmis est celui de la demande ; la sortie donne le statut et le handle
+func TestRunIdentityDecision_Approve_OK(t *testing.T) {
+	var gotID string
+	svc := &mockIdentitySvc{approveRequest: func(_ context.Context, id string) (*identity.AccountRequest, error) {
+		gotID = id
+		return &identity.AccountRequest{ID: id, Pseudo: "alice", OrgID: "Org1MSP", Status: identity.RequestApproved}, nil
+	}}
+	var buf bytes.Buffer
+	if err := runIdentityDecision(&buf, svc.ApproveRequest, "req-1"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if gotID != "req-1" {
+		t.Fatalf("ApproveRequest called with %q, want req-1", gotID)
+	}
+	if out := buf.String(); !strings.Contains(out, identity.RequestApproved) || !strings.Contains(out, "alice@Org1") {
+		t.Fatalf("unexpected output: %q", out)
+	}
+}
+
+/// @brief  runIdentityDecision propage le refus du service
+/// @input  RejectRequest renvoie ErrRequestNotPending
+/// @expect L'erreur remonte telle quelle
+func TestRunIdentityDecision_NotPending_Rejected(t *testing.T) {
+	svc := &mockIdentitySvc{rejectRequest: func(context.Context, string) (*identity.AccountRequest, error) {
+		return nil, identity.ErrRequestNotPending
+	}}
+	var buf bytes.Buffer
+	if err := runIdentityDecision(&buf, svc.RejectRequest, "req-1"); !errors.Is(err, identity.ErrRequestNotPending) {
+		t.Fatalf("expected ErrRequestNotPending, got %v", err)
+	}
+}
+
+/// @brief  runIdentityRegister crée un compte actif via CreateAccount
+/// @input  pseudo=alice, org=Org1MSP, rôle=contributor, email
+/// @expect CreateAccount reçoit ces valeurs ; la sortie donne le handle et le secret
+func TestRunIdentityRegister_NominalCase(t *testing.T) {
+	var gotRole string
+	svc := &mockIdentitySvc{createAccount: func(_ context.Context, pseudo, orgID, role, _ string) (string, string, error) {
+		gotRole = role
+		return identity.Handle(pseudo, orgID), "s3cret", nil
+	}}
+	var buf bytes.Buffer
+	if err := runIdentityRegister(&buf, svc, "alice", "Org1MSP", "contributor", "alice@example.com"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if gotRole != "contributor" {
+		t.Fatalf("role = %q, want contributor", gotRole)
+	}
+	if out := buf.String(); !strings.Contains(out, "alice@Org1") || !strings.Contains(out, "s3cret") {
+		t.Fatalf("unexpected output: %q", out)
 	}
 }
 

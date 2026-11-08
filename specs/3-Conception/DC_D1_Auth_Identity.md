@@ -56,8 +56,10 @@ package "domain/identity" {
     + Handle : string <<pseudo@org>>
     + Name : string
     + OrgID : string
-    + Status : string
+    + Status : string <<Myr.status du certificat>>
+    + Role : string <<Myr.role du certificat>>
     + MSPDir : string <<chemin absolu MSP>>
+    + CanSignIn() : error
   }
 
   class RegisterRequest {
@@ -65,6 +67,7 @@ package "domain/identity" {
     + OrgID : string
     + Password : string <<secret enrollment, jamais stocké>>
     + Role : string
+    + Status : string <<vide = pending>>
     + DisplayName : string
     + LegalName : string
     + Email : string
@@ -86,11 +89,23 @@ package "domain/identity" {
     pending
     approved
     rejected
+    failed
   }
+
+  class RegistrationPolicy {
+    + AllowAutoRegister : bool
+    + RequireApproval : bool
+    + DefaultRole : string <<vide = reader>>
+  }
+  note bottom of RegistrationPolicy
+    Règles d'inscription du réseau,
+    PolicyOf(NetworkProfile)
+  end note
 
   MyrIdentity ..> IdentityStatus : uses
   WalletEntry ..> IdentityStatus : uses (statut lu depuis le certificat)
   AccountRequest ..> RequestStatus : uses
+  AccountRequest ..> RegistrationPolicy : traitée selon
 }
 
 package "domain/role" {
@@ -121,6 +136,7 @@ package "adapters/in/rest (pas un domaine)" {
     + Token : string <<32 octets aléatoires, hex>>
     + Role : string
     + Pseudo : string
+    + Handle : string <<pseudo@org signataire, vide pour un invité>>
     + Channel : string
     + NetworkID : string
     + ExpiresAt : time.Time
@@ -143,7 +159,7 @@ package "domain/session" {
 
 ' Relations inter-domaines
 WalletEntry ..> MyrIdentity : vue locale (fichiers MSP)\nd'une identité enregistrée en CA
-myrSession ..> MyrIdentity : créée après un Enroll() réussi\n(rôle figé à la création, non resynchronisé)
+myrSession ..> MyrIdentity : créée après un Enroll() réussi\n(rôle lu dans le certificat, figé pour la durée de la session)
 myrSession ..> Role : Role vérifié via RoleService.HasPermission
 
 @enduml
@@ -155,13 +171,13 @@ myrSession ..> Role : Role vérifié via RoleService.HasPermission
 
 ### MyrIdentity (`domain/identity`)
 
-- **Rôle :** Identité blockchain d'un auteur dans le réseau Myr. Les attributs `Status` et `Role` sont écrits dans le certificat X.509 par la Fabric CA (attribut `Myr.role`).
+- **Rôle :** Identité blockchain d'un auteur dans le réseau Myr. Les attributs `Status` et `Role` sont écrits dans le certificat X.509 par la Fabric CA (attributs `Myr.status` et `Myr.role`).
 - **Invariants :**
   - `IPAgreement` doit être `true` avant tout acte de publication sur la blockchain.
   - `LicenseDefault` définit la licence par défaut appliquée aux créations de cet auteur.
   - `Role` est une chaîne libre — sa validité vis-à-vis du catalogue RBAC (`domain/role`) n'est pas vérifiée à ce niveau.
   - `Status` reflète l'état de l'identité dans la CA Fabric.
-- **Cycle de vie :** `pending` (demande soumise ou enregistrée) → `Register` + `Enroll` → `active` ; `suspended` via admin CA.
+- **Cycle de vie :** créée `active` (création par l'administrateur, ou auto-enregistrement sans approbation) ou `pending` (auto-enregistrement avec approbation) ; `pending` → `active` à l'approbation, `pending` → `suspended` au refus (`CAPort.UpdateAttributes`). Le changement apparaît dans le certificat au prochain enrôlement.
 
 ### WalletEntry (`domain/identity`)
 
@@ -169,24 +185,30 @@ myrSession ..> Role : Role vérifié via RoleService.HasPermission
 - **Invariants :**
   - `Handle` suit le format `pseudo@org` (ex : `alice@Org1`).
   - `MSPDir` est un chemin absolu vers le répertoire MSP local.
-  - `Status` est lu directement depuis le certificat X.509 local (`statusFromCert`), pas depuis une base de données.
+  - `Status` et `Role` sont lus dans l'extension d'attributs du certificat X.509 local (`CAPort.CertAttributes`), pas depuis une base de données ; ils restent vides si le certificat ne les porte pas.
+  - `CanSignIn` n'autorise l'ouverture d'une session qu'à une identité `active` dotée d'un rôle (`ErrIdentityPending`, `ErrIdentitySuspended`, `ErrIdentityInactive`, `ErrIdentityWithoutRole` sinon).
 
 ### RegisterRequest (`domain/identity`)
 
 - **Rôle :** DTO de création d'identité auprès de la Fabric CA (`CAPort.Register`). Valeur éphémère, non persistée.
-- **Invariants :** `Password` (secret d'enrôlement) n'est jamais stocké par `myr` — seul le certificat/clé résultant de l'enrôlement l'est (dans le wallet local).
+- **Invariants :** `Password` (secret d'enrôlement) n'est jamais stocké par `myr` — seul le certificat/clé résultant de l'enrôlement l'est (dans le wallet local). `Status` fixe l'attribut `Myr.status` à l'enregistrement : `active` ou `suspended` explicitement, `pending` sinon.
+
+### RegistrationPolicy (`domain/identity`)
+
+- **Rôle :** Règles d'inscription d'un réseau, fixées par son administrateur sur le profil réseau (`AllowAutoRegister`, `RequireApproval`, `AutoRegisterRole`) et converties par `identity.PolicyOf(*NetworkProfile)` — sans réseau, la politique est fermée. Les adapters `in/` (CLI, REST) la transmettent à `RequestAccess` sans l'interpréter.
 
 ### AccountRequest (`domain/identity`)
 
-- **Rôle :** Demande d'accès soumise par un inconnu avant l'obtention d'une identité CA. Stockée localement (`adapters/out/localstorage/request_store.go`), consultable par un administrateur.
+- **Rôle :** Demande d'accès soumise par un utilisateur sans compte, acceptée seulement si le réseau autorise l'auto-enregistrement (`RegistrationPolicy`). Stockée localement (`adapters/out/localstorage/request_store.go`, fichier partagé par le CLI et l'API), consultable et décidée par un administrateur.
 - **Invariants :**
-  - `Status` initial est `pending`.
+  - Aucune demande n'est conservée sur un réseau fermé (`ErrRegistrationClosed`).
+  - L'identité CA `pseudo@org` est créée dès la demande ; la demande ne fait que tracer la décision.
   - `CreatedAt` est une chaîne ISO 8601 (`string`, pas `time.Time`).
   - **Aucun champ structuré pour un rôle souhaité** — seul `Message` (texte libre) existe (voir Écart E3).
-- **Cycle de vie :** `pending` → `approved` (auto-enregistrement CA réussi, voir UCA01) | reste `pending` indéfiniment en l'absence de mécanisme d'approbation manuelle (voir Écart E2) | reste `pending` même quand `AllowAutoRegister=true` si le client CA du serveur n'est pas configuré (voir Écart E4).
+- **Cycle de vie :** `pending` à l'enregistrement → `approved` (identité créée active) | reste `pending` (identité créée en attente, approbation exigée) → `approved` (`ApproveRequest`) ou `rejected` (`RejectRequest`, identité suspendue) | `failed` si la CA refuse l'enregistrement. Seule une demande `pending` peut être décidée (`ErrRequestNotPending`).
 
 
-**⚠️ Écart E4 (critique) — le passage `pending` → `approved` dépend d'une configuration invisible depuis le `NetworkProfile` :** le client CA utilisé par `identitySvc.AutoRegister` (`cmd/api/main.go`) est construit une fois au démarrage depuis les variables d'environnement (`FABRIC_CA_ENDPOINT`, `FABRIC_CA_ADMIN_CERT_PATH`...) ou un `fabric.env` optionnel — jamais depuis les champs `CAEndpoint`/`CAAdminCertPath`/`CAAdminKeyPath` du `NetworkProfile` actif, alors que ces champs existent précisément pour ça et sont déjà utilisés ainsi par le CLI et par le pool blockchain multi-réseau du serveur (`ConfigFromProfile`, voir `specs/roadmap_dev.md` § Écarts Identité & Session pour le détail vérifié). Conséquence : `myr network update --auto-register` peut afficher une configuration entièrement correcte (CLI et `GET /api/identity/policy` inclus) sans que l'auto-enregistrement ne fonctionne réellement — la demande reste `pending` silencieusement.
+**⚠️ Écart E4 (critique) — l'enregistrement dépend d'une configuration invisible depuis le `NetworkProfile` :** le client CA utilisé par `identitySvc.RequestAccess` (`cmd/api/main.go`) est construit une fois au démarrage depuis les variables d'environnement (`FABRIC_CA_ENDPOINT`, `FABRIC_CA_ADMIN_CERT_PATH`...) ou un `fabric.env` optionnel — jamais depuis les champs `CAEndpoint`/`CAAdminCertPath`/`CAAdminKeyPath` du `NetworkProfile` actif, alors que ces champs existent précisément pour ça et sont déjà utilisés ainsi par le CLI et par le pool blockchain multi-réseau du serveur (`ConfigFromProfile`, voir `specs/roadmap_dev.md` § Écarts Identité & Session pour le détail vérifié). Conséquence : `myr network update --auto-register` peut afficher une configuration entièrement correcte (CLI et `GET /api/identity/policy` inclus) sans que l'auto-enregistrement ne fonctionne réellement — la demande échoue faute de CA.
 
 #ecart "a trancher"
  
@@ -206,7 +228,8 @@ myrSession ..> Role : Role vérifié via RoleService.HasPermission
 - **Invariants :**
   - `Token` est généré par `crypto/rand`, jamais dérivé de données utilisateur.
   - `ExpiresAt` = création + 7 jours (`sessionTTL`), non renouvelable automatiquement.
-  - `Role` est fixé **une fois pour toutes à la création** de la session, sans resynchronisation ultérieure avec l'identité CA (voir `specs/roadmap_dev.md` § Écarts Identité & Session pour l'état de cette dépendance).
+  - `Role` est le `Myr.role` du certificat émis à la connexion, fixé **une fois pour toutes à la création** de la session, sans resynchronisation ultérieure avec l'identité CA : un changement de rôle s'applique à la session suivante.
+  - `Handle` est l'identité `pseudo@org` dont le wallet signe les écritures de l'utilisateur sur le ledger (ADR-12) ; vide pour un invité, qui ne peut pas écrire.
 - **Cycle de vie :** `create` (connexion ou invité) → `get` (vérifié à chaque requête protégée) → `delete` (révocation admin uniquement, pas de self-service) ou expiration naturelle.
 
 ### Session (`domain/session`)
@@ -223,7 +246,7 @@ myrSession ..> Role : Role vérifié via RoleService.HasPermission
 ## 4. Relations et dépendances
 
 - **WalletEntry → MyrIdentity** : `WalletEntry` est la vue fichier locale d'une identité enregistrée auprès de la CA ; il n'existe pas de seconde vue chiffrée en base (pas de BDD relationnelle, cf. principe de décentralisation).
-- **myrSession → MyrIdentity** : une session REST est créée après un enrôlement CA réussi (`POST /api/identity/session`), mais **ne référence pas** l'identité après coup — son champ `Role` est une copie figée au moment de la création, jamais resynchronisée (voir `specs/roadmap_dev.md` § Écarts Identité & Session).
+- **myrSession → MyrIdentity** : une session REST est créée après un enrôlement CA réussi d'une identité active dotée d'un rôle (`POST /api/identity/session`) ; elle retient son identifiant (`Handle`, signataire des écritures) et une copie de son rôle, figée au moment de la création et jamais resynchronisée.
 - **myrSession → Role** : à chaque requête protégée, `requireRole` interroge `RoleService.HasPermission(session.Role, permission)` — c'est le seul point de contact entre la session REST et le RBAC.
 - **Session (domain/session) ↔ WalletEntry** : lien conceptuel seulement (`Session.Name` pourrait correspondre à un `WalletEntry.Handle`) — aucune vérification ni jointure automatique entre les deux n'est requise par la conception.
 
@@ -238,13 +261,15 @@ myrSession ..> Role : Role vérifié via RoleService.HasPermission
 skinparam classAttributeIconSize 0
 interface IdentityService {
   + ListLocalWallets() : ([]WalletEntry, error)
-  + Register(ctx, req RegisterRequest) : (secret string, err)
+  + Wallet(handle) : (WalletEntry, error)
+  + CreateAccount(ctx, pseudo, orgID, role, email) : (handle, secret string, err)
   + Enroll(ctx, name, secret, orgID) : (WalletEntry, error)
   + GetStatus(ctx, wallet WalletEntry) : (string, error)
   + ReEnroll(ctx, wallet WalletEntry) : (WalletEntry, error)
   + LoadGuestWallet(certPath, keyPath, caCertPath, orgID) : (WalletEntry, error)
-  + SubmitRequest(req AccountRequest) : (*AccountRequest, error)
-  + AutoRegister(ctx, req AccountRequest, role) : (secret string, err)
+  + RequestAccess(ctx, req AccountRequest, policy RegistrationPolicy) : (*AccountRequest, secret string, err)
+  + ApproveRequest(ctx, id) : (*AccountRequest, error)
+  + RejectRequest(ctx, id) : (*AccountRequest, error)
   + ListRequests() : ([]*AccountRequest, error)
   + WalletDir() : string
   + SetRole(ctx, name, newRole string) : error
@@ -263,7 +288,13 @@ interface CAPort {
   + GetStatus(ctx, name) : (status string, err)
   + ReEnroll(ctx, name, certPEM, keyPEM) : (newCertPEM string, err)
   + UpdateAttributes(ctx, name, attrs map[string]string) : error
+  + CertAttributes(certPEM) : (map[string]string, error)
 }
+note right of CAPort
+  CertAttributes lit localement l'extension
+  d'attributs du certificat (format propre
+  à la CA), sans appel réseau
+end note
 
 interface RequestStore {
   + Save(req *AccountRequest) : error
@@ -320,7 +351,7 @@ interface Store {
 @startuml
 skinparam classAttributeIconSize 0
 interface sessionBackend {
-  + create(pseudo, role, channel) : (*myrSession, error)
+  + create(pseudo, handle, role, channel) : (*myrSession, error)
   + get(token) : *myrSession
   + setNetwork(token, networkID) : bool
   + setChannel(token, channel) : bool
@@ -339,7 +370,7 @@ note right : Implémentée par sessionStore (mémoire + JSON optionnel)\net redi
 |-----|----------|--------|
 | DC-D1-01 | Pas de domaine `auth` séparé — l'identité CA est l'unique source de vérité | Une architecture à deux systèmes d'identité (compte web + identité blockchain) a été abandonnée au profit d'un système unique : l'identité CA. La session REST n'est qu'une couche d'adaptateur au-dessus, pas un second domaine d'identité. |
 | DC-D1-02 | Le wallet local n'est représenté que par des fichiers MSP sur disque, sans miroir chiffré en base | Source unique pour éviter la divergence entre deux vues du même wallet — voir `Conception_intro.md` ADR-03 pour l'écart de sécurité qui en résulte (absence de chiffrement au repos). |
-| DC-D1-03 | RBAC dynamique (`domain/role`) découplé de l'identité CA | Le rôle RBAC (permissions) et le rôle CA (`Myr.role`, attribut de certificat) sont deux notions distinctes qui ne se synchronisent pas automatiquement — voir `specs/roadmap_dev.md` § Écarts Identité & Session. |
+| DC-D1-03 | Le certificat nomme le rôle, `domain/role` en définit les permissions | Le rôle d'une session est le `Myr.role` du certificat de l'identité, jamais un rôle choisi par le client ni figé par le serveur ; `RoleService.HasPermission(rôle, permission)` traduit ce nom en permissions (table des rôles, éditable par l'administrateur — ADR-12). |
 | DC-D1-04 | Le token de session REST est opaque, pas un JWT | Évite toute dépendance à une bibliothèque JWT et tout risque de claims falsifiables côté client ; en contrepartie, aucune information (rôle, pseudo) n'est extractible du token lui-même — elle doit être recherchée côté serveur (`sessionBackend.get`). |
 | DC-D1-05 | `domain/session` (compte local CLI) reste un domaine à part, non couplé conceptuellement aux autres domaines (identité CA, RBAC) | Exposé en CLI (`myr session create/show/logout`) comme bootstrap machine, mais `Session.Name` n'est ni validé ni synchronisé automatiquement avec `WalletEntry.Handle` (`domain/identity`) ou un rôle RBAC (`domain/role`) — un lien purement conceptuel, pas une jointure applicative (voir § 4 « Relations et dépendances »). |
 | DC-D1-06 | Lecture des composants (`GET /api/components`) ouverte aux visiteurs non authentifiés, inconditionnellement — écriture (POST/PUT/PATCH/DELETE) reste gated par rôle | EF17 (D4, `specs/2-Analyse/UCCL-Composant_Lecture/UCCL01.md`) exige un accès public en lecture, sans condition. Le RBAC dynamique (`domain/role`) et la session REST (`myrSession`) ne changent pas de mécanisme : la route GET est dispensée de `requireAuth` par distinction de méthode HTTP dans le routeur (`server.go`, pattern déjà décrit dans `API_REST.md` §1 « routes mixtes ») — pas par un nouveau système d'identité « visiteur ». |

@@ -118,6 +118,7 @@ func runNetworkShow(w io.Writer, svc network.NetworkService, id string) error {
 		fmt.Fprintf(w, "Server URL       : %s\n", serverURL)
 		fmt.Fprintf(w, "Auto guest       : %v\n", n.AllowAutoGuest)
 		fmt.Fprintf(w, "Auto register    : %v\n", n.AllowAutoRegister)
+		fmt.Fprintf(w, "Approbation      : %v\n", n.RequireApproval)
 		fmt.Fprintf(w, "Auto role        : %s\n", autoRole)
 		fmt.Fprintf(w, "Production       : %v\n", n.IsProduction)
 		fmt.Fprintf(w, "Actif            : %v\n", n.Active)
@@ -140,31 +141,46 @@ var networkShowCmd = &cobra.Command{
 // ── add ───────────────────────────────────────────────────────────────────────
 
 var (
-	networkAddName         string
-	networkAddNode         string
-	networkAddOrgID        string
-	networkAddGateway      string
-	networkAddCert         string
-	networkAddKey          string
-	networkAddTLSCert      string
-	networkAddChannel      string
-	networkAddContract     string
-	networkAddCA           string
-	networkAddCAName       string
-	networkAddAutoGuest    bool
-	networkAddAutoRegister bool
-	networkAddAutoRole     string
-	networkAddProduction   bool
+	networkAddName            string
+	networkAddNode            string
+	networkAddOrgID           string
+	networkAddGateway         string
+	networkAddCert            string
+	networkAddKey             string
+	networkAddTLSCert         string
+	networkAddChannel         string
+	networkAddContract        string
+	networkAddCA              string
+	networkAddCAName          string
+	networkAddAutoGuest       bool
+	networkAddAutoRegister    bool
+	networkAddRequireApproval bool
+	networkAddAutoRole        string
+	networkAddProduction      bool
 )
 
-func runNetworkAdd(w io.Writer, svc network.NetworkService, name, node, gateway, orgID, cert, key, tlsCert, channel, contract, ca, caName string, autoGuest, autoRegister bool, autoRole string, production bool) error {
+func runNetworkAdd(w io.Writer, svc network.NetworkService, name, node, gateway, orgID, cert, key, tlsCert, channel, contract, ca, caName string, autoGuest, autoRegister, requireApproval bool, autoRole string, production bool) error {
 	n, err := svc.Add(name, node, gateway, orgID, cert, key, tlsCert, channel, contract, ca, caName, nil, autoGuest, autoRegister, autoRole, production)
 	if err != nil {
+		return err
+	}
+	if err := requireNetworkApproval(svc, n.ID, requireApproval); err != nil {
 		return err
 	}
 	fmt.Fprintf(w, "Réseau %q configuré (id: %s).\n", name, n.ID)
 	fmt.Fprintf(w, "Activez-le avec : myr network activate %s\n", n.ID)
 	return nil
+}
+
+// requireNetworkApproval applique au réseau tout juste ajouté l'exigence
+// d'approbation des inscriptions, que NetworkService.Add ne prend pas en
+// paramètre — sans elle, une inscription crée directement une identité active.
+func requireNetworkApproval(svc network.NetworkService, id string, require bool) error {
+	if !require {
+		return nil
+	}
+	_, err := svc.SetRequireApproval(id, true)
+	return err
 }
 
 var networkAddCmd = &cobra.Command{
@@ -196,7 +212,7 @@ Examples:
 			networkAddName, networkAddNode, networkAddGateway, networkAddOrgID,
 			networkAddCert, networkAddKey, networkAddTLSCert,
 			networkAddChannel, networkAddContract, networkAddCA, networkAddCAName,
-			networkAddAutoGuest, networkAddAutoRegister, networkAddAutoRole, networkAddProduction,
+			networkAddAutoGuest, networkAddAutoRegister, networkAddRequireApproval, networkAddAutoRole, networkAddProduction,
 		)
 	},
 }
@@ -308,6 +324,12 @@ func runNetworkUpdate(w io.Writer, cmd *cobra.Command, svc network.NetworkServic
 
 	if _, err := svc.Update(id, name, peer, gateway, msp, cert, key, tlsCert, channel, chaincode, ca, caName, autoGuest, autoRegister, autoRole, production); err != nil {
 		return err
+	}
+	if cmd.Flags().Changed("require-approval") {
+		v, _ := cmd.Flags().GetBool("require-approval")
+		if _, err := svc.SetRequireApproval(id, v); err != nil {
+			return err
+		}
 	}
 	fmt.Fprintf(w, "Réseau %s mis à jour.\n", id)
 	return nil
@@ -618,6 +640,9 @@ func importNetworkProfile(w io.Writer, svc network.NetworkService, np network.Ne
 	if err != nil {
 		return fmt.Errorf("erreur lors de l'importation : %w", err)
 	}
+	if err := requireNetworkApproval(svc, n.ID, np.RequireApproval); err != nil {
+		return fmt.Errorf("erreur lors de l'importation : %w", err)
+	}
 	fmt.Fprintf(w, "Réseau importé (id: %s).\n", n.ID)
 	if activate {
 		if err := svc.Activate(n.ID); err != nil {
@@ -817,6 +842,7 @@ func init() {
 	networkAddCmd.Flags().StringVar(&networkAddCAName, "ca-name", "", "Nom de l'autorité de certification")
 	networkAddCmd.Flags().BoolVar(&networkAddAutoGuest, "auto-guest", false, "Autoriser les accès invité automatiques")
 	networkAddCmd.Flags().BoolVar(&networkAddAutoRegister, "auto-register", false, "Autoriser l'enregistrement CA automatique")
+	networkAddCmd.Flags().BoolVar(&networkAddRequireApproval, "require-approval", false, "Exiger l'approbation d'un administrateur pour activer une identité auto-enregistrée")
 	networkAddCmd.Flags().StringVar(&networkAddAutoRole, "auto-role", "reader", "Rôle auto-register : reader, contributor ou auditor")
 	networkAddCmd.Flags().BoolVar(&networkAddProduction, "production", false, "Marquer ce réseau comme réseau de production — protège contre destroy")
 	_ = networkAddCmd.MarkFlagRequired("name")
@@ -837,6 +863,7 @@ func init() {
 	networkUpdateCmd.Flags().String("ca-name", "", "Nom de l'autorité de certification")
 	networkUpdateCmd.Flags().Bool("auto-guest", false, "Autoriser les accès invité automatiques")
 	networkUpdateCmd.Flags().Bool("auto-register", false, "Autoriser l'enregistrement CA automatique")
+	networkUpdateCmd.Flags().Bool("require-approval", false, "Exiger l'approbation d'un administrateur pour activer une identité auto-enregistrée")
 	networkUpdateCmd.Flags().String("auto-role", "", "Rôle auto-register : reader, contributor ou auditor")
 	networkUpdateCmd.Flags().Bool("production", false, "Marquer ce réseau comme réseau de production — protège contre destroy")
 

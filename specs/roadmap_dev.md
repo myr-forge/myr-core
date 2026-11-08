@@ -9,9 +9,9 @@ tags:
 
 | Domaine | Service | CLI | REST | État réel |
 |---------|---------|-----|------|-----------|
-| `model` | ✅ | ✅ | ✅ | Bugs : rôle `contributor` au lieu de `reader` (RM21), module `submitted` modifiable sans fork (RM19), anti-plagiat SHA-256 non comparatif |
+| `model` | ✅ | ✅ | ✅ | Bugs : module `submitted` modifiable sans fork (RM19), anti-plagiat SHA-256 non comparatif |
 | `channel` | ✅ | ✅ | ❌ | `myr channel get/list` + `myr org add`/`myr node add/remove` (AddOrganisation/AddNode/RemoveNode) ; aucune route REST dédiée |
-| `identity` | ✅ | ✅ | ✅ | `myr identity wallets/status/enroll/re-enroll/request/requests/set-role` ; pas de flux d'approbation d'une demande déjà en attente (ni CLI ni REST) |
+| `identity` | ✅ | ✅ | ✅ | `myr identity wallets/status/enroll/re-enroll/request/requests/approve/reject/register/set-role` ; inscription selon les règles du réseau (fermé / ouvert / avec approbation), rôle et statut lus dans le certificat (ADR-12) |
 | `network` | ✅ | ✅ | partiel | `myr network/org/node` complets ; REST ne couvre que `List`/`GetActive` (pas de create/update/activate/delete/test/addPeer) |
 | `session` | ✅ | ✅ | — | `myr session create/show/logout` ; pas de REST par conception (compte local machine, sans rapport avec les sessions REST) |
 | `auth` | 🔶 | ❌ | partiel | REST basique, bug rôle initial |
@@ -30,17 +30,17 @@ tags:
 
 **Cause :** `cmd/api/main.go:83` construit le client CA (`caPort`, utilisé par `identity.NewService(walletDir, caPort)` à la ligne 130) exclusivement via `fabricadapter.ConfigFromEnv()` — variables d'environnement `FABRIC_CA_ENDPOINT`/`FABRIC_CA_ADMIN_CERT_PATH`/`FABRIC_CA_ADMIN_KEY_PATH`/etc., ou un fichier `fabric.env` optionnel auto-détecté (`~/.Myr/data/fabric.env`). **Les champs `CAEndpoint`/`CAAdminCertPath`/`CAAdminKeyPath` du `NetworkProfile` actif — ceux que `myr network update`/`show` exposent et modifient — ne sont jamais lus pour construire ce client CA.** Pourtant `adapters/out/fabric/config.go` définit bien `ConfigFromProfile(np *NetworkProfile) Config`, et cette fonction **est** utilisée ailleurs (`cmd/cli/main.go:63,82` pour le CLI, `adapters/out/fabric/network_pool.go:89` pour le pool blockchain multi-réseau du serveur) — seul le câblage identité/CA de `cmd/api/main.go` en fait l'impasse.
 
-**Conséquence :** Sur un serveur où aucun `fabric.env` n'existe et aucune variable `FABRIC_CA_*` n'a été exportée avant le lancement de `myr-api` (cas vérifié en production le 2026-07-17 : aucune des deux), `caPort` reste `nil` en permanence. `identitySvc.AutoRegister` échoue alors systématiquement avec `"aucun CA configuré"` ([domain/identity/service.go:210-213](../domain/identity/service.go#L210-L213)), quel que soit l'état du `NetworkProfile` — l'auto-enregistrement (UCA01) est silencieusement inopérant même quand la CLI et l'API `/identity/policy` affichent une configuration correcte. Une simple relance du service (`systemctl restart` ou équivalent) **ne corrige rien** tant que les variables d'environnement/`fabric.env` correspondantes n'ont pas été positionnées au préalable.
+**Conséquence :** Sur un serveur où aucun `fabric.env` n'existe et aucune variable `FABRIC_CA_*` n'a été exportée avant le lancement de `myr-api` (cas vérifié en production le 2026-07-17 : aucune des deux), `caPort` reste `nil` en permanence. `identitySvc.RequestAccess` échoue alors systématiquement avec `"aucun CA configuré"` (`domain/identity/service.go`), quel que soit l'état du `NetworkProfile` — l'auto-enregistrement (UCA01) est inopérant même quand la CLI et l'API `/identity/policy` affichent une configuration correcte. Une simple relance du service (`systemctl restart` ou équivalent) **ne corrige rien** tant que les variables d'environnement/`fabric.env` correspondantes n'ont pas été positionnées au préalable.
 
 **Piste de correction (à valider par le PO avant implémentation) :** aligner `cmd/api/main.go` sur le pattern déjà utilisé par le CLI et le `NetworkPool` — construire la config CA via `fabricadapter.ConfigFromProfile(activeProfile)` en base, avec les variables d'environnement en surcharge optionnelle (comportement actuel conservé en repli), plutôt que l'inverse actuel (environnement uniquement, profil réseau ignoré).
 
-### Écart connexe — échec `AutoRegister` avalé sans trace
+### ~~Écart connexe — échec `AutoRegister` avalé sans trace~~ — résolu (R-03 étape 2, ADR-12)
 
-`adapters/in/rest/handlers_identity.go:250-252` : le commentaire affirme *« logguer l'erreur »* en cas d'échec de `AutoRegister`, mais aucun appel de log n'existe réellement pour `err3` — l'échec est invisible côté serveur (pas de log) et côté client (message générique `pending`, aucun détail). Rend le diagnostic du point précédent impossible sans accès SSH direct aux conteneurs (comme fait manuellement lors de cette investigation). À corriger indépendamment de la cause racine ci-dessus : au minimum `log.Printf("auto-register CA échoué pour %s : %v", req.Pseudo, err3)`.
+L'échec d'enregistrement CA n'est plus masqué : `RequestAccess` conserve la demande au statut `failed` et retourne l'erreur (`HTTP 500` journalisé par `internalErr`, message d'erreur en CLI) au lieu d'une réponse `pending` trompeuse.
 
-### Rôle de session figé à la création (`myrSession.Role`)
+### ~~Rôle de session codé en dur (`myrSession.Role`)~~ — résolu (R-03 étape 2, ADR-12)
 
-Voir `handlers_identity.go:375` (annotation `#question` posée sur place) et `specs/2-Analyse/UCA-Compte_et_Acces/UCA02.md` § Écart critique : le rôle de session REST est codé en dur à `"contributor"` à la connexion, jamais lu depuis l'attribut `Myr.role` du certificat CA réellement enrôlé, et jamais resynchronisé après un `myr identity set-role`.
+Le rôle de session est lu dans l'attribut `Myr.role` du certificat émis à la connexion, et seule une identité `active` dotée d'un rôle ouvre une session. Le rôle reste figé pour la durée de la session : un `myr identity set-role` s'applique à la connexion suivante (chaque connexion ré-enrôle).
 
 ### Registrar CA unique par organisation
 
@@ -83,7 +83,7 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 
 ### Bugs bloquants — à corriger avant tout
 
-- [ ] `domain/auth/service.go` — rôle initial `reader` au lieu de `contributor` *(RM21 — faille sécurité)*
+- [x] Rôle initial `reader` au lieu de `contributor` *(RM21 — faille sécurité)* — résolu : il n'existe pas de `domain/auth/` ; le rôle d'inscription par défaut est `reader` (`adapters/out/fabric/ca_client.go`) et le rôle de session est lu dans le certificat (R-03 étape 2, ADR-12)
 - [ ] `domain/model/service.go` — garde `SubmitModule` : module `submitted` non modifiable sans fork *(RM19)*
 - [ ] `chaincode/model/entity.go` — aligner les champs (7 → 20+) avec le domaine *(perte de données silencieuse)*
 - [x] `domain/model/service.go` (`getModuleInterfacesInto`) — corrigé : `GetModuleInterfaces` exposait au plus 1 interface par `interface_id` partagé entre instances du même asset, au lieu d'une par `(instance_id, interface_id)` libre, à cause d'un dédoublonnage `seen[inst.AssetID]` qui sautait entièrement les instances suivantes dès qu'un asset apparaissait plus d'une fois dans `WorkspaceInstances`. Le filtre "interne" (ex-`internalIfaceIDs`) est désormais scindé en `internalGlobal` (connexion sans `FromInstanceID`/`ToInstanceID`, comportement historique conservé) et `internalByInstance` (connexion avec instance explicite, n'exclut que cette instance précise) — tests : `TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed`, `TestGetModuleInterfaces_InternalConnection_ScopedToInstance` *(RM13, UCMOD04, UCAM02)*

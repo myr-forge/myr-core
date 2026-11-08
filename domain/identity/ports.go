@@ -14,6 +14,10 @@ type CAPort interface {
 	// l'appel — un ré-enrôlement (ReEnroll) est nécessaire pour qu'il prenne effet
 	// dans le certificat actif de l'identité (propriété de la Fabric CA).
 	UpdateAttributes(ctx context.Context, name string, attrs map[string]string) error
+	// CertAttributes retourne les attributs d'identité (ex: Myr.role,
+	// Myr.status) portés par un certificat émis par la CA — dans le format
+	// propre à la technologie de CA, que le domaine n'a pas à connaître.
+	CertAttributes(certPEM string) (map[string]string, error)
 }
 
 // RequestStore est le port de sortie pour la persistance des demandes de compte.

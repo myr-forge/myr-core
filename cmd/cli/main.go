@@ -64,7 +64,9 @@ func main() {
 	}
 	walletDir := filepath.Join(data, "wallets")
 	_ = os.MkdirAll(walletDir, 0700)
-	identitySvc := identity.NewService(walletDir, caPort)
+	// Même fichier que myr-api : une demande reçue par l'API se décide en CLI.
+	requestStore := localstorage.NewJSONRequestStore(filepath.Join(data, "account-requests.json"))
+	identitySvc := identity.NewService(walletDir, caPort).WithRequestStore(requestStore)
 
 	sessionStore := localstorage.NewJSONSessionStore(filepath.Join(data, "session.json"))
 	sessionSvc := session.NewService(sessionStore)

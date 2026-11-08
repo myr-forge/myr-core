@@ -71,12 +71,19 @@ REST -> ISVC : Enroll(ctx, name, secret, org_id)
 ISVC -> CA : Enroll(ctx, name, secret)
 CA --> ISVC : certPEM, keyPEM, caCertPEM
 ISVC -> ISVC : sauvegarder wallet local (PEM, non chiffré)
-ISVC --> REST : WalletEntry
-REST -> SESS : create(name, "contributor", channel)
-SESS --> REST : {token (32 octets aléatoires), role, pseudo, channel}
-REST --> C : HTTP 200
+ISVC -> ISVC : lire Myr.status / Myr.role du certificat
+ISVC --> REST : WalletEntry{Handle, Status, Role}
+alt identité active dotée d'un rôle
+  REST -> SESS : create(name, handle, role du certificat, channel)
+  SESS --> REST : {token (32 octets aléatoires), role, pseudo, channel}
+  REST --> C : HTTP 200
+else en attente, suspendue ou sans rôle
+  REST --> C : HTTP 403
+end
 @enduml
 ```
+
+Le rôle et le statut d'une session ne viennent que du certificat émis à la connexion : le client ne peut pas les choisir, et une identité en attente d'approbation ou suspendue n'ouvre aucune session (ADR-12).
 
 ### Le token n'est pas un JWT
 

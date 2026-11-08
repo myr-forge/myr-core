@@ -6,6 +6,9 @@ package network
 type NetworkService interface {
 	Add(name, peerEndpoint, gatewayPeer, mspID, certPath, keyPath, tlsCertPath, fabricChannel, chaincodeName, caEndpoint, caName string, channels []string, allowAutoGuest, allowAutoRegister bool, autoRegisterRole string, isProduction bool) (*NetworkProfile, error)
 	Update(id, name, peerEndpoint, gatewayPeer, mspID, certPath, keyPath, tlsCertPath, fabricChannel, chaincodeName, caEndpoint, caName string, allowAutoGuest, allowAutoRegister bool, autoRegisterRole string, isProduction bool) (*NetworkProfile, error)
+	// SetRequireApproval fixe si les identités inscrites sur le réseau id
+	// doivent être approuvées par l'admin avant d'être actives (ADR-12).
+	SetRequireApproval(id string, require bool) (*NetworkProfile, error)
 	List() ([]*NetworkProfile, error)
 	GetActive() (*NetworkProfile, error)
 	Activate(id string) error

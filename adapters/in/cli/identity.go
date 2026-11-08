@@ -166,21 +166,22 @@ Example:
 // ── request ───────────────────────────────────────────────────────────────────
 
 func runIdentityRequest(w io.Writer, isvc identity.IdentityService, nsvc network.NetworkService, req identity.AccountRequest) error {
-	saved, err := isvc.SubmitRequest(req)
+	var policy identity.RegistrationPolicy
+	if nsvc != nil {
+		if profile, err := nsvc.GetActive(); err == nil {
+			policy = identity.PolicyOf(profile)
+		}
+	}
+	saved, secret, err := isvc.RequestAccess(context.Background(), req, policy)
 	if err != nil {
 		return err
 	}
-
-	if nsvc != nil {
-		if profile, err2 := nsvc.GetActive(); err2 == nil && profile != nil && profile.AllowAutoRegister {
-			secret, err3 := isvc.AutoRegister(context.Background(), saved, profile.AutoRegisterRole)
-			if err3 == nil {
-				fmt.Fprintf(w, "Identité créée automatiquement : %s\nSecret d'enrôlement : %s\n", saved.Pseudo, secret)
-				return nil
-			}
-		}
+	handle := identity.Handle(saved.Pseudo, saved.OrgID)
+	fmt.Fprintf(w, "Identité créée : %s (demande %s, statut=%s)\n", handle, saved.ID, saved.Status)
+	fmt.Fprintf(w, "Secret d'enrôlement : %s\n", secret)
+	if saved.Status == identity.RequestPending {
+		fmt.Fprintf(w, "L'identité reste inactive jusqu'à son approbation : myr identity approve %s\n", saved.ID)
 	}
-	fmt.Fprintf(w, "Demande enregistrée (id=%s, statut=%s) — un administrateur doit créer l'identité manuellement.\n", saved.ID, saved.Status)
 	return nil
 }
 
@@ -199,10 +200,13 @@ var identityRequestCmd = &cobra.Command{
 user who does not have an account yet — the CLI equivalent of
 POST /api/identity/request.
 
-If the active network profile allows auto-registration, the identity is
-created immediately and the enrollment secret is printed. Otherwise the
-request is only recorded as pending — an administrator must create the
-identity in the CA out of band and transmit the secret separately.
+The request is refused unless the active network accepts self-registration
+(myr network add/update --auto-register). Otherwise the identity is created
+with the network's default role (--auto-role) and the enrollment secret is
+printed. If the network requires approval (--require-approval), the identity
+stays inactive until an administrator approves it (myr identity approve);
+on a closed network, only an administrator creates accounts
+(myr identity register).
 
 Example:
   myr identity request --pseudo alice --email alice@example.com --org-id Org1MSP`,
@@ -247,6 +251,90 @@ var identityRequestsCmd = &cobra.Command{
 	},
 }
 
+// ── approve / reject ──────────────────────────────────────────────────────────
+
+func runIdentityDecision(w io.Writer, decide func(context.Context, string) (*identity.AccountRequest, error), id string) error {
+	req, err := decide(context.Background(), id)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Demande %s : %s (%s).\n", req.ID, req.Status, identity.Handle(req.Pseudo, req.OrgID))
+	fmt.Fprintln(w, "La décision s'applique au prochain enrôlement de l'identité.")
+	return nil
+}
+
+var identityApproveCmd = &cobra.Command{
+	Use:   "approve <request-id>",
+	Short: "Approve a pending access request and activate its identity",
+	Long: `Approve an access request awaiting approval (see myr identity requests):
+the identity created at request time becomes active and can sign in.
+
+Example:
+  myr identity approve 3f2a9c`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if identitySvc == nil {
+			return fmt.Errorf("service identité non disponible")
+		}
+		return runIdentityDecision(cmd.OutOrStdout(), identitySvc.ApproveRequest, args[0])
+	},
+}
+
+var identityRejectCmd = &cobra.Command{
+	Use:   "reject <request-id>",
+	Short: "Reject a pending access request and suspend its identity",
+	Long: `Reject an access request awaiting approval: the identity created at
+request time is suspended — it can neither sign in nor write. Nothing is
+deleted.
+
+Example:
+  myr identity reject 3f2a9c`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if identitySvc == nil {
+			return fmt.Errorf("service identité non disponible")
+		}
+		return runIdentityDecision(cmd.OutOrStdout(), identitySvc.RejectRequest, args[0])
+	},
+}
+
+// ── register ──────────────────────────────────────────────────────────────────
+
+func runIdentityRegister(w io.Writer, svc identity.IdentityService, pseudo, orgID, role, email string) error {
+	handle, secret, err := svc.CreateAccount(context.Background(), pseudo, orgID, role, email)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Identité créée : %s (active)\n", handle)
+	fmt.Fprintf(w, "Secret d'enrôlement : %s\n", secret)
+	return nil
+}
+
+var (
+	identityRegisterPseudo string
+	identityRegisterOrgID  string
+	identityRegisterRole   string
+	identityRegisterEmail  string
+)
+
+var identityRegisterCmd = &cobra.Command{
+	Use:   "register",
+	Short: "Create an active account (administrator)",
+	Long: `Create an identity directly, as an administrator, with the given role —
+the only way to add users to a network that does not accept
+self-registration. The enrollment secret is printed once: transmit it to the
+user, who then signs in with it.
+
+Example:
+  myr identity register --pseudo alice --org-id Org1MSP --role contributor --email alice@example.com`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if identitySvc == nil {
+			return fmt.Errorf("service identité non disponible")
+		}
+		return runIdentityRegister(cmd.OutOrStdout(), identitySvc, identityRegisterPseudo, identityRegisterOrgID, identityRegisterRole, identityRegisterEmail)
+	},
+}
+
 // ── set-role ──────────────────────────────────────────────────────────────────
 
 func runIdentitySetRole(w io.Writer, svc identity.IdentityService, id, role string) error {
@@ -288,7 +376,8 @@ Examples:
 func init() {
 	identityCmd.AddCommand(
 		identityWalletsCmd, identityStatusCmd, identityEnrollCmd, identityReEnrollCmd,
-		identityRequestCmd, identityRequestsCmd, identitySetRoleCmd,
+		identityRequestCmd, identityRequestsCmd, identityApproveCmd, identityRejectCmd,
+		identityRegisterCmd, identitySetRoleCmd,
 	)
 
 	identityStatusCmd.Flags().StringVar(&identityStatusHandle, "handle", "", "Identité CA, ex: alice@Org1 (requis)")
@@ -309,6 +398,13 @@ func init() {
 	_ = identityRequestCmd.MarkFlagRequired("pseudo")
 	_ = identityRequestCmd.MarkFlagRequired("email")
 	_ = identityRequestCmd.MarkFlagRequired("org-id")
+
+	identityRegisterCmd.Flags().StringVar(&identityRegisterPseudo, "pseudo", "", "Pseudo (requis)")
+	identityRegisterCmd.Flags().StringVar(&identityRegisterOrgID, "org-id", "", "Organisation, ex: Org1MSP (requis)")
+	identityRegisterCmd.Flags().StringVar(&identityRegisterRole, "role", identity.RoleReader, "Rôle attribué")
+	identityRegisterCmd.Flags().StringVar(&identityRegisterEmail, "email", "", "E-mail (optionnel)")
+	_ = identityRegisterCmd.MarkFlagRequired("pseudo")
+	_ = identityRegisterCmd.MarkFlagRequired("org-id")
 
 	identitySetRoleCmd.Flags().StringVar(&identitySetRoleID, "id", "", "Identité CA cible, ex: alice@org1 (requis)")
 	identitySetRoleCmd.Flags().StringVar(&identitySetRoleName, "role", "", "Nouveau rôle (requis)")

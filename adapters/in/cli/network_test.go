@@ -27,6 +27,14 @@ type mockNetworkSvc struct {
 	testConn     func(id string) error
 	addPeer      func(networkID string, req network.AddPeerRequest) (*network.PeerCredentials, error)
 	create       func(req network.CreateNetworkRequest) (*network.NetworkProfile, error)
+	setApproval  func(id string, require bool) (*network.NetworkProfile, error)
+}
+
+func (m *mockNetworkSvc) SetRequireApproval(id string, require bool) (*network.NetworkProfile, error) {
+	if m.setApproval != nil {
+		return m.setApproval(id, require)
+	}
+	return &network.NetworkProfile{ID: id, RequireApproval: require}, nil
 }
 
 func (m *mockNetworkSvc) List() ([]*network.NetworkProfile, error) {
@@ -217,7 +225,7 @@ func TestRunNetworkAdd_NominalCase(t *testing.T) {
 			return &network.NetworkProfile{ID: "net-new", Name: name}, nil
 		},
 	}
-	err := runNetworkAdd(&buf, svc, "mon-réseau", "203.0.113.10:7051", "", "Org1MSP", "", "", "", "", "", "", "", false, false, "reader", false)
+	err := runNetworkAdd(&buf, svc, "mon-réseau", "203.0.113.10:7051", "", "Org1MSP", "", "", "", "", "", "", "", false, false, false, "reader", false)
 	if err != nil {
 		t.Fatalf("runNetworkAdd: %v", err)
 	}
@@ -239,8 +247,48 @@ func TestRunNetworkAdd_InvalidPeer_Rejected(t *testing.T) {
 			return nil, fmt.Errorf("adresse du peer invalide")
 		},
 	}
-	if err := runNetworkAdd(&bytes.Buffer{}, svc, "test", "invalid", "", "Org1MSP", "", "", "", "", "", "", "", false, false, "reader", false); err == nil {
+	if err := runNetworkAdd(&bytes.Buffer{}, svc, "test", "invalid", "", "Org1MSP", "", "", "", "", "", "", "", false, false, false, "reader", false); err == nil {
 		t.Error("attendu erreur pour peer invalide")
+	}
+}
+
+/// @brief  --require-approval à l'ajout : l'exigence d'approbation est appliquée au réseau créé
+/// @input  requireApproval=true, Add retourne le réseau "net-new"
+/// @expect SetRequireApproval appelé une fois avec ("net-new", true)
+func TestRunNetworkAdd_RequireApproval(t *testing.T) {
+	var calls []string
+	svc := &mockNetworkSvc{
+		add: func(name, _, _, _, _, _, _, _, _, _, _ string, _ []string, _, _ bool, _ string, _ bool) (*network.NetworkProfile, error) {
+			return &network.NetworkProfile{ID: "net-new", Name: name}, nil
+		},
+		setApproval: func(id string, require bool) (*network.NetworkProfile, error) {
+			calls = append(calls, fmt.Sprintf("%s=%v", id, require))
+			return &network.NetworkProfile{ID: id, RequireApproval: require}, nil
+		},
+	}
+	if err := runNetworkAdd(&bytes.Buffer{}, svc, "test", "203.0.113.10:7051", "", "Org1MSP", "", "", "", "", "", "", "", false, true, true, "reader", false); err != nil {
+		t.Fatalf("runNetworkAdd: %v", err)
+	}
+	if len(calls) != 1 || calls[0] != "net-new=true" {
+		t.Fatalf("SetRequireApproval calls = %v, want [net-new=true]", calls)
+	}
+}
+
+/// @brief  Sans --require-approval, l'ajout ne touche pas à l'exigence d'approbation
+/// @input  requireApproval=false
+/// @expect SetRequireApproval jamais appelé
+func TestRunNetworkAdd_NoApproval_NotSet(t *testing.T) {
+	svc := &mockNetworkSvc{
+		add: func(name, _, _, _, _, _, _, _, _, _, _ string, _ []string, _, _ bool, _ string, _ bool) (*network.NetworkProfile, error) {
+			return &network.NetworkProfile{ID: "net-new", Name: name}, nil
+		},
+		setApproval: func(string, bool) (*network.NetworkProfile, error) {
+			t.Fatal("SetRequireApproval should not be called")
+			return nil, nil
+		},
+	}
+	if err := runNetworkAdd(&bytes.Buffer{}, svc, "test", "203.0.113.10:7051", "", "Org1MSP", "", "", "", "", "", "", "", false, true, false, "reader", false); err != nil {
+		t.Fatalf("runNetworkAdd: %v", err)
 	}
 }
 
@@ -489,6 +537,37 @@ func TestRunNetworkUpdate_NominalCase(t *testing.T) {
 	}
 	if !strings.Contains(buf.String(), "mis à jour") {
 		t.Errorf("attendu 'mis à jour' dans la sortie, obtenu : %s", buf.String())
+	}
+}
+
+/// @brief  Update avec --require-approval=false : l'exigence d'approbation est levée
+/// @input  Réseau "net-001" existant, flag require-approval positionné à false
+/// @expect SetRequireApproval appelé avec ("net-001", false) après Update
+func TestRunNetworkUpdate_RequireApproval(t *testing.T) {
+	var calls []string
+	svc := &mockNetworkSvc{
+		list: func() ([]*network.NetworkProfile, error) {
+			p := sampleProfile("net-001", "sample-network", false)
+			p.RequireApproval = true
+			return []*network.NetworkProfile{p}, nil
+		},
+		update: func(id, _, _, _, _, _, _, _, _, _, _, _ string, _, _ bool, _ string, _ bool) (*network.NetworkProfile, error) {
+			calls = append(calls, "update")
+			return &network.NetworkProfile{ID: id}, nil
+		},
+		setApproval: func(id string, require bool) (*network.NetworkProfile, error) {
+			calls = append(calls, fmt.Sprintf("%s=%v", id, require))
+			return &network.NetworkProfile{ID: id, RequireApproval: require}, nil
+		},
+	}
+	cmd := &cobra.Command{}
+	cmd.Flags().Bool("require-approval", false, "")
+	_ = cmd.Flags().Set("require-approval", "false")
+	if err := runNetworkUpdate(&bytes.Buffer{}, cmd, svc, "net-001"); err != nil {
+		t.Fatalf("runNetworkUpdate: %v", err)
+	}
+	if strings.Join(calls, ",") != "update,net-001=false" {
+		t.Fatalf("calls = %v, want [update net-001=false]", calls)
 	}
 }
 

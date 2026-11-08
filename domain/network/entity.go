@@ -61,12 +61,16 @@ type NetworkProfile struct {
 	// false (défaut) : tout accès requiert une identité validée par l'admin.
 	// true  : POST /api/identity/guest délivre immédiatement un token reader.
 	AllowAutoGuest bool `json:"allow_auto_guest,omitempty"`
-	// AllowAutoRegister contrôle si une demande de compte est automatiquement
-	// enregistrée dans la CA Fabric (requiert des credentials admin configurés).
-	// false (défaut) : la demande reste en attente, l'admin crée le compte manuellement.
+	// AllowAutoRegister contrôle si les utilisateurs peuvent s'inscrire seuls
+	// (ADR-12 ; requiert des credentials admin CA configurés).
+	// false (défaut) : aucune demande d'inscription n'est acceptée, seul l'admin crée les comptes.
 	// true  : POST /api/identity/request enregistre l'identité dans la CA et retourne
 	//         le secret d'enrollment directement dans la réponse.
 	AllowAutoRegister bool `json:"allow_auto_register,omitempty"`
+	// RequireApproval, avec AllowAutoRegister : l'identité inscrite est créée en
+	// attente et ne devient active qu'à l'approbation par l'admin.
+	// false (défaut) : elle est créée active avec AutoRegisterRole.
+	RequireApproval bool `json:"require_approval,omitempty"`
 	// AutoRegisterRole définit le rôle attribué automatiquement lors d'un auto-register.
 	// Valeurs possibles : "reader" | "contributor" | "auditor"
 	// Vide = "reader" par défaut.

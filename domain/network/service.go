@@ -106,6 +106,20 @@ func (s *Service) GetActive() (*NetworkProfile, error) {
 	return nil, nil
 }
 
+// SetRequireApproval fixe si les identités inscrites sur le réseau id doivent
+// être approuvées par l'admin avant d'être actives (ADR-12).
+func (s *Service) SetRequireApproval(id string, require bool) (*NetworkProfile, error) {
+	n, err := s.findNetwork(id)
+	if err != nil {
+		return nil, err
+	}
+	n.RequireApproval = require
+	if err := s.repo.Save(n); err != nil {
+		return nil, err
+	}
+	return n, nil
+}
+
 // Activate marque le profil id comme actif et désactive les autres.
 func (s *Service) Activate(id string) error {
 	all, err := s.repo.FindAll()

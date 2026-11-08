@@ -49,6 +49,8 @@ Il n'y a pas de formulaire email / mot de passe. « Se connecter » consiste à 
 
 Il n'y a pas d'étape de « provisionnement de l'identité blockchain » distincte de la connexion : enrôler l'identité auprès de la CA *est* l'action de connexion elle-même. Il n'existe donc pas de flux séparé « première connexion » vs « connexion standard » — le même appel (`POST /api/identity/session`) couvre les deux cas.
 
+Le certificat émis à la connexion est la seule source de vérité de l'accès : il porte le **statut** de l'identité (active, en attente d'approbation, suspendue) et son **rôle**. Seule une identité active dotée d'un rôle ouvre une session, et la session porte exactement ce rôle. Une approbation, un refus ou un changement de rôle décidés par l'administrateur (UCA01, UCA08) prennent donc effet à la connexion suivante.
+
 Un second mode existe pour un réseau public : l'**accès invité**, qui ne requiert aucun secret ni identité préalable (si le réseau l'autorise) et attribue directement un rôle Lecteur.
 
 ## Pré-conditions
@@ -64,8 +66,9 @@ Un second mode existe pour un réseau public : l'**accès invité**, qui ne requ
 
 1. Le pseudo, le secret d'enrôlement et l'organisation sont transmis (`POST /api/identity/session`)
 2. Le serveur (ré-)enrôle l'identité auprès de la Fabric CA du réseau
-3. Un token de session est retourné dans la réponse, associé au rôle courant de l'identité
-4. Le client inclut ce token dans l'en-tête `X-Myr-Token` pour les requêtes suivantes
+3. Le certificat émis indique une identité active dotée d'un rôle
+4. Un token de session est retourné dans la réponse, associé au rôle inscrit dans le certificat
+5. Le client inclut ce token dans l'en-tête `X-Myr-Token` pour les requêtes suivantes
 
 ### Flux nominal — Accès invité (réseau public)
 
@@ -83,6 +86,12 @@ Un second mode existe pour un réseau public : l'**accès invité**, qui ne requ
 1. Le serveur retourne une erreur d'enrôlement (`401 Unauthorized`)
 2. Message d'erreur : « Secret d'enrôlement invalide »
 3. Une nouvelle tentative peut être soumise avec un secret corrigé
+
+### Flux erreur — Identité inactive ou sans rôle
+
+1. Le secret est valide, mais le certificat émis indique une identité en attente d'approbation, suspendue, sans statut reconnu, ou sans rôle
+2. Aucune session n'est ouverte (`403 Forbidden`) ; le message indique la cause (approbation attendue, identité suspendue, rôle absent)
+3. Une identité en attente pourra se connecter dès que l'administrateur l'aura approuvée (UCA01)
 
 ### Flux erreur — Serveur inaccessible
 
@@ -105,7 +114,11 @@ start
 if (Secret fourni ?) then (oui)
   if (Secret valide ?) then (oui)
     :Enrôler l'identité auprès de la Fabric CA;
-    :Retourner un token de session (rôle courant);
+    if (Certificat : identité active dotée d'un rôle ?) then (oui)
+      :Retourner un token de session (rôle du certificat);
+    else (non)
+      :Retourner 403 — identité en attente, suspendue ou sans rôle;
+    endif
     stop
   else (non)
     :Retourner l'erreur "Secret d'enrôlement invalide" (401);

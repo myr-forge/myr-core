@@ -22,13 +22,14 @@ import (
 type mockIdentitySvc struct {
 	listWallets     func() ([]identity.WalletEntry, error)
 	wallet          func(handle string) (identity.WalletEntry, error)
+	createAccount   func(ctx context.Context, pseudo, orgID, role, email string) (string, string, error)
 	enroll          func(ctx context.Context, name, secret, orgID string) (identity.WalletEntry, error)
 	getStatus       func(ctx context.Context, wallet identity.WalletEntry) (string, error)
 	reEnroll        func(ctx context.Context, wallet identity.WalletEntry) (identity.WalletEntry, error)
-	register        func(ctx context.Context, req identity.RegisterRequest) (string, error)
-	autoRegister    func(ctx context.Context, req *identity.AccountRequest, role string) (string, error)
 	loadGuestWallet func(certPath, keyPath, caCertPath, orgID string) (identity.WalletEntry, error)
-	submitRequest   func(req identity.AccountRequest) (*identity.AccountRequest, error)
+	requestAccess   func(ctx context.Context, req identity.AccountRequest, policy identity.RegistrationPolicy) (*identity.AccountRequest, string, error)
+	approveRequest  func(ctx context.Context, id string) (*identity.AccountRequest, error)
+	rejectRequest   func(ctx context.Context, id string) (*identity.AccountRequest, error)
 	listRequests    func() ([]*identity.AccountRequest, error)
 	walletDir       func() string
 	setRole         func(ctx context.Context, name, newRole string) error
@@ -46,11 +47,23 @@ func (m *mockIdentitySvc) Wallet(handle string) (identity.WalletEntry, error) {
 	}
 	return identity.WalletEntry{}, identity.ErrWalletNotFound
 }
+func (m *mockIdentitySvc) CreateAccount(ctx context.Context, pseudo, orgID, role, email string) (string, string, error) {
+	if m.createAccount != nil {
+		return m.createAccount(ctx, pseudo, orgID, role, email)
+	}
+	return identity.Handle(pseudo, orgID), "secret", nil
+}
+
+// Enroll renvoie par défaut une identité active dotée d'un rôle, comme le
+// certificat d'une identité approuvée — celle qui peut ouvrir une session.
 func (m *mockIdentitySvc) Enroll(ctx context.Context, name, secret, orgID string) (identity.WalletEntry, error) {
 	if m.enroll != nil {
 		return m.enroll(ctx, name, secret, orgID)
 	}
-	return identity.WalletEntry{Handle: name + "@" + orgID, Name: name, OrgID: orgID, Status: identity.StatusPending}, nil
+	return identity.WalletEntry{
+		Handle: name + "@" + orgID, Name: name, OrgID: orgID,
+		Status: identity.StatusActive, Role: identity.RoleContributor,
+	}, nil
 }
 func (m *mockIdentitySvc) GetStatus(ctx context.Context, wallet identity.WalletEntry) (string, error) {
 	if m.getStatus != nil {
@@ -64,25 +77,31 @@ func (m *mockIdentitySvc) ReEnroll(ctx context.Context, wallet identity.WalletEn
 	}
 	return wallet, nil
 }
-func (m *mockIdentitySvc) Register(ctx context.Context, req identity.RegisterRequest) (string, error) {
-	if m.register != nil {
-		return m.register(ctx, req)
+func (m *mockIdentitySvc) RequestAccess(ctx context.Context, req identity.AccountRequest, policy identity.RegistrationPolicy) (*identity.AccountRequest, string, error) {
+	if m.requestAccess != nil {
+		return m.requestAccess(ctx, req, policy)
 	}
-	return "secret", nil
-}
-func (m *mockIdentitySvc) AutoRegister(ctx context.Context, req *identity.AccountRequest, role string) (string, error) {
-	if m.autoRegister != nil {
-		return m.autoRegister(ctx, req, role)
-	}
-	return "auto-secret", nil
-}
-func (m *mockIdentitySvc) SubmitRequest(req identity.AccountRequest) (*identity.AccountRequest, error) {
-	if m.submitRequest != nil {
-		return m.submitRequest(req)
+	if !policy.AllowAutoRegister {
+		return nil, "", identity.ErrRegistrationClosed
 	}
 	req.ID = "req-test"
-	req.Status = identity.RequestPending
-	return &req, nil
+	req.Status = identity.RequestApproved
+	if policy.RequireApproval {
+		req.Status = identity.RequestPending
+	}
+	return &req, "auto-secret", nil
+}
+func (m *mockIdentitySvc) ApproveRequest(ctx context.Context, id string) (*identity.AccountRequest, error) {
+	if m.approveRequest != nil {
+		return m.approveRequest(ctx, id)
+	}
+	return &identity.AccountRequest{ID: id, Status: identity.RequestApproved}, nil
+}
+func (m *mockIdentitySvc) RejectRequest(ctx context.Context, id string) (*identity.AccountRequest, error) {
+	if m.rejectRequest != nil {
+		return m.rejectRequest(ctx, id)
+	}
+	return &identity.AccountRequest{ID: id, Status: identity.RequestRejected}, nil
 }
 func (m *mockIdentitySvc) ListRequests() ([]*identity.AccountRequest, error) {
 	if m.listRequests != nil {
@@ -127,6 +146,9 @@ func (m *mockNetworkSvc) Add(name, peerEndpoint, gatewayPeer, mspID, certPath, k
 	return nil, nil
 }
 func (m *mockNetworkSvc) Update(id, name, peerEndpoint, gatewayPeer, mspID, certPath, keyPath, tlsCertPath, fabricChannel, chaincodeName, caEndpoint, caName string, allowAutoGuest, allowAutoRegister bool, autoRegisterRole string, isProduction bool) (*network.NetworkProfile, error) {
+	return nil, nil
+}
+func (m *mockNetworkSvc) SetRequireApproval(id string, require bool) (*network.NetworkProfile, error) {
 	return nil, nil
 }
 func (m *mockNetworkSvc) List() ([]*network.NetworkProfile, error) { return nil, nil }
@@ -184,8 +206,8 @@ func (m *mockRoleSvc) HasPermission(roleName string, p rbac.Permission) bool {
 
 // newIdentityMuxWithRole is like newIdentityMux but injects a rbac.RoleService,
 // letting a test grant a permission to whatever role loginToken's session ends up
-// with (currently hardcoded to "contributor" — see #question at
-// handlers_identity.go:378) without depending on that hardcoding directly.
+// with (the role carried by the mock's enrolled certificate) without depending
+// on that role directly.
 func newIdentityMuxWithRole(t *testing.T, idSvc identity.IdentityService, roleSvc rbac.RoleService) http.Handler {
 	t.Helper()
 	store := &mockStore{}
@@ -529,6 +551,21 @@ func TestHandleIdentityPolicy_BlockchainPublic(t *testing.T) {
 	}
 }
 
+// / @brief  GET /api/identity/policy expose les règles d'inscription du réseau actif
+// / @input  réseau ouvert à l'auto-enregistrement avec approbation exigée
+// / @expect allow_auto_register=true et require_approval=true
+func TestHandleIdentityPolicy_RequireApproval(t *testing.T) {
+	w := do(t, newBothMux(t, &mockIdentitySvc{}, openNetwork(true, "reader")), http.MethodGet, "/api/identity/policy", "")
+	var res struct {
+		AllowAutoRegister bool `json:"allow_auto_register"`
+		RequireApproval   bool `json:"require_approval"`
+	}
+	decodeJSON(t, w, &res)
+	if !res.AllowAutoRegister || !res.RequireApproval {
+		t.Errorf("allow_auto_register et require_approval attendus à true, obtenu %+v", res)
+	}
+}
+
 // ── POST /api/identity/guest ──────────────────────────────────────────────────
 
 func TestHandleIdentityGuest_AllowedDeliversToken(t *testing.T) {
@@ -631,14 +668,35 @@ func TestRequireAuth_BlockchainWithValidToken(t *testing.T) {
 
 // ── POST /api/identity/request ────────────────────────────────────────────────
 
+// openNetwork retourne un service réseau dont le réseau actif accepte
+// l'auto-enregistrement avec les règles données.
+func openNetwork(requireApproval bool, defaultRole string) *mockNetworkSvc {
+	return &mockNetworkSvc{getActive: func() (*network.NetworkProfile, error) {
+		return &network.NetworkProfile{Name: "TestNet", AllowAutoRegister: true, RequireApproval: requireApproval, AutoRegisterRole: defaultRole}, nil
+	}}
+}
+
+// asAdmin fait porter le rôle admin au certificat enrôlé par svc — la session
+// ouverte par loginToken dispose alors de identity.admin.
+func asAdmin(svc *mockIdentitySvc) *mockIdentitySvc {
+	svc.enroll = func(_ context.Context, name, _, orgID string) (identity.WalletEntry, error) {
+		return identity.WalletEntry{Handle: name + "@" + orgID, Name: name, OrgID: orgID, Status: identity.StatusActive, Role: identity.RoleAdmin}, nil
+	}
+	return svc
+}
+
+// / @brief  POST /api/identity/request transmet la demande et les règles du réseau actif
+// / @input  réseau actif ouvert, approbation exigée, rôle par défaut contributor
+// / @expect 201 ; RequestAccess reçoit les champs et la politique ; statut pending et secret renvoyés
 func TestHandleIdentityRequest_Success(t *testing.T) {
 	var captured identity.AccountRequest
+	var policy identity.RegistrationPolicy
 	svc := &mockIdentitySvc{
-		submitRequest: func(req identity.AccountRequest) (*identity.AccountRequest, error) {
-			captured = req
+		requestAccess: func(_ context.Context, req identity.AccountRequest, p identity.RegistrationPolicy) (*identity.AccountRequest, string, error) {
+			captured, policy = req, p
 			req.ID = "req-001"
 			req.Status = identity.RequestPending
-			return &req, nil
+			return &req, "s3cret", nil
 		},
 	}
 
@@ -648,7 +706,7 @@ func TestHandleIdentityRequest_Success(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/identity/request", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
-	newIdentityMux(t, svc).ServeHTTP(w, req)
+	newBothMux(t, svc, openNetwork(true, "contributor")).ServeHTTP(w, req)
 
 	if w.Code != http.StatusCreated {
 		t.Fatalf("code 201 attendu, obtenu %d — body: %s", w.Code, w.Body.String())
@@ -656,10 +714,47 @@ func TestHandleIdentityRequest_Success(t *testing.T) {
 	if captured.Pseudo != "bob" || captured.Email != "bob@exemple.com" || captured.OrgID != "Org1MSP" {
 		t.Errorf("champs transmis incorrects : %+v", captured)
 	}
-	var resp identity.AccountRequest
+	want := identity.RegistrationPolicy{AllowAutoRegister: true, RequireApproval: true, DefaultRole: "contributor"}
+	if policy != want {
+		t.Errorf("politique transmise %+v, attendu %+v", policy, want)
+	}
+	var resp map[string]string
 	json.NewDecoder(w.Body).Decode(&resp)
-	if resp.Status != identity.RequestPending {
-		t.Errorf("statut attendu %q, obtenu %q", identity.RequestPending, resp.Status)
+	if resp["status"] != identity.RequestPending || resp["secret"] != "s3cret" {
+		t.Errorf("réponse inattendue : %v", resp)
+	}
+}
+
+// / @brief  POST /api/identity/request est refusé quand l'inscription est fermée
+// / @input  aucun réseau actif (politique fermée), mock appliquant ErrRegistrationClosed
+// / @expect 403
+func TestHandleIdentityRequest_RegistrationClosed_Rejected(t *testing.T) {
+	body, _ := json.Marshal(map[string]string{"pseudo": "bob", "email": "b@b.com", "org_id": "Org1MSP"})
+	req := httptest.NewRequest(http.MethodPost, "/api/identity/request", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	newIdentityMux(t, &mockIdentitySvc{}).ServeHTTP(w, req)
+	if w.Code != http.StatusForbidden {
+		t.Errorf("code 403 attendu, obtenu %d — body: %s", w.Code, w.Body.String())
+	}
+}
+
+// / @brief  POST /api/identity/request rejette un pseudo invalide
+// / @input  RequestAccess renvoie ErrInvalidIdentityName
+// / @expect 400
+func TestHandleIdentityRequest_InvalidName_Rejected(t *testing.T) {
+	svc := &mockIdentitySvc{
+		requestAccess: func(context.Context, identity.AccountRequest, identity.RegistrationPolicy) (*identity.AccountRequest, string, error) {
+			return nil, "", identity.ErrInvalidIdentityName
+		},
+	}
+	body, _ := json.Marshal(map[string]string{"pseudo": "bob/../x", "email": "b@b.com", "org_id": "Org1MSP"})
+	req := httptest.NewRequest(http.MethodPost, "/api/identity/request", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	newBothMux(t, svc, openNetwork(false, "")).ServeHTTP(w, req)
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("code 400 attendu, obtenu %d", w.Code)
 	}
 }
 
@@ -693,17 +788,155 @@ func TestHandleIdentityRequest_InvalidJSON(t *testing.T) {
 
 func TestHandleIdentityRequest_ServiceError(t *testing.T) {
 	svc := &mockIdentitySvc{
-		submitRequest: func(req identity.AccountRequest) (*identity.AccountRequest, error) {
-			return nil, errors.New("disque plein")
+		requestAccess: func(context.Context, identity.AccountRequest, identity.RegistrationPolicy) (*identity.AccountRequest, string, error) {
+			return nil, "", errors.New("disque plein")
 		},
 	}
 	body, _ := json.Marshal(map[string]string{"pseudo": "bob", "email": "b@b.com", "org_id": "Org1MSP"})
 	req := httptest.NewRequest(http.MethodPost, "/api/identity/request", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
-	newIdentityMux(t, svc).ServeHTTP(w, req)
+	newBothMux(t, svc, openNetwork(false, "")).ServeHTTP(w, req)
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("code 500 attendu, obtenu %d", w.Code)
+	}
+}
+
+// ── POST /api/identity/requests/{id}/{approve|reject} ─────────────────────────
+
+// / @brief  POST /api/identity/requests/{id}/approve active l'identité de la demande
+// / @input  session admin, ApproveRequest renvoie la demande approuvée
+// / @expect 200 ; ApproveRequest reçoit l'identifiant de l'URL ; RejectRequest jamais appelé
+func TestHandleIdentityRequestDecision_Approve_OK(t *testing.T) {
+	var gotID string
+	svc := asAdmin(&mockIdentitySvc{
+		approveRequest: func(_ context.Context, id string) (*identity.AccountRequest, error) {
+			gotID = id
+			return &identity.AccountRequest{ID: id, Status: identity.RequestApproved}, nil
+		},
+		rejectRequest: func(context.Context, string) (*identity.AccountRequest, error) {
+			t.Fatal("RejectRequest ne doit pas être appelé")
+			return nil, nil
+		},
+	})
+	w := do(t, newIdentityMux(t, svc), http.MethodPost, "/api/identity/requests/req-1/approve", "")
+	if w.Code != http.StatusOK {
+		t.Fatalf("code 200 attendu, obtenu %d — body: %s", w.Code, w.Body.String())
+	}
+	if gotID != "req-1" {
+		t.Errorf("ApproveRequest appelé avec %q, attendu req-1", gotID)
+	}
+}
+
+// / @brief  POST /api/identity/requests/{id}/reject suspend l'identité de la demande
+// / @input  session admin, RejectRequest renvoie la demande refusée
+// / @expect 200, statut rejected renvoyé
+func TestHandleIdentityRequestDecision_Reject_OK(t *testing.T) {
+	w := do(t, newIdentityMux(t, asAdmin(&mockIdentitySvc{})), http.MethodPost, "/api/identity/requests/req-1/reject", "")
+	if w.Code != http.StatusOK {
+		t.Fatalf("code 200 attendu, obtenu %d — body: %s", w.Code, w.Body.String())
+	}
+	var resp identity.AccountRequest
+	decodeJSON(t, w, &resp)
+	if resp.Status != identity.RequestRejected {
+		t.Errorf("statut attendu %q, obtenu %q", identity.RequestRejected, resp.Status)
+	}
+}
+
+// / @brief  La décision sur une demande est réservée à identity.admin
+// / @input  session contributor (certificat par défaut du mock)
+// / @expect 403, ApproveRequest jamais appelé
+func TestHandleIdentityRequestDecision_NonAdmin_Forbidden(t *testing.T) {
+	svc := &mockIdentitySvc{approveRequest: func(context.Context, string) (*identity.AccountRequest, error) {
+		t.Fatal("ApproveRequest ne doit pas être appelé")
+		return nil, nil
+	}}
+	w := do(t, newIdentityMux(t, svc), http.MethodPost, "/api/identity/requests/req-1/approve", "")
+	if w.Code != http.StatusForbidden {
+		t.Errorf("code 403 attendu, obtenu %d", w.Code)
+	}
+}
+
+// / @brief  Erreurs du service traduites en codes HTTP, action inconnue → 404
+// / @input  demande introuvable, demande déjà décidée, action "delete"
+// / @expect 404, 409, 404
+func TestHandleIdentityRequestDecision_Errors(t *testing.T) {
+	svc := asAdmin(&mockIdentitySvc{
+		approveRequest: func(context.Context, string) (*identity.AccountRequest, error) {
+			return nil, identity.ErrRequestNotFound
+		},
+		rejectRequest: func(context.Context, string) (*identity.AccountRequest, error) {
+			return nil, identity.ErrRequestNotPending
+		},
+	})
+	mux := newIdentityMux(t, svc)
+	cases := []struct {
+		path string
+		want int
+	}{
+		{"/api/identity/requests/req-x/approve", http.StatusNotFound},
+		{"/api/identity/requests/req-1/reject", http.StatusConflict},
+		{"/api/identity/requests/req-1/delete", http.StatusNotFound},
+	}
+	for _, c := range cases {
+		if w := do(t, mux, http.MethodPost, c.path, ""); w.Code != c.want {
+			t.Errorf("%s : code %d attendu, obtenu %d", c.path, c.want, w.Code)
+		}
+	}
+}
+
+// ── POST /api/identity/accounts ───────────────────────────────────────────────
+
+// / @brief  POST /api/identity/accounts crée un compte actif à l'initiative de l'admin
+// / @input  session admin, corps {pseudo, org_id, role, email}
+// / @expect 201 {handle, secret} ; CreateAccount reçoit les champs du corps
+func TestHandleIdentityAccounts_Admin_Created(t *testing.T) {
+	var got []string
+	svc := asAdmin(&mockIdentitySvc{
+		createAccount: func(_ context.Context, pseudo, orgID, role, email string) (string, string, error) {
+			got = []string{pseudo, orgID, role, email}
+			return identity.Handle(pseudo, orgID), "s3cret", nil
+		},
+	})
+	w := do(t, newIdentityMux(t, svc), http.MethodPost, "/api/identity/accounts",
+		`{"pseudo":"alice","org_id":"Org1MSP","role":"contributor","email":"alice@example.com"}`)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("code 201 attendu, obtenu %d — body: %s", w.Code, w.Body.String())
+	}
+	if strings.Join(got, ",") != "alice,Org1MSP,contributor,alice@example.com" {
+		t.Errorf("champs transmis à CreateAccount : %v", got)
+	}
+	var resp map[string]string
+	decodeJSON(t, w, &resp)
+	if resp["handle"] != "alice@Org1" || resp["secret"] != "s3cret" {
+		t.Errorf("réponse inattendue : %v", resp)
+	}
+}
+
+// / @brief  La création de compte est réservée à identity.admin
+// / @input  session contributor
+// / @expect 403, CreateAccount jamais appelé
+func TestHandleIdentityAccounts_NonAdmin_Forbidden(t *testing.T) {
+	svc := &mockIdentitySvc{createAccount: func(context.Context, string, string, string, string) (string, string, error) {
+		t.Fatal("CreateAccount ne doit pas être appelé")
+		return "", "", nil
+	}}
+	w := do(t, newIdentityMux(t, svc), http.MethodPost, "/api/identity/accounts", `{"pseudo":"alice","org_id":"Org1MSP"}`)
+	if w.Code != http.StatusForbidden {
+		t.Errorf("code 403 attendu, obtenu %d", w.Code)
+	}
+}
+
+// / @brief  POST /api/identity/accounts rejette un pseudo invalide
+// / @input  session admin, CreateAccount renvoie ErrInvalidIdentityName
+// / @expect 400
+func TestHandleIdentityAccounts_InvalidName_Rejected(t *testing.T) {
+	svc := asAdmin(&mockIdentitySvc{createAccount: func(context.Context, string, string, string, string) (string, string, error) {
+		return "", "", identity.ErrInvalidIdentityName
+	}})
+	w := do(t, newIdentityMux(t, svc), http.MethodPost, "/api/identity/accounts", `{"pseudo":"a/b","org_id":"Org1MSP"}`)
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("code 400 attendu, obtenu %d", w.Code)
 	}
 }
 
@@ -879,6 +1112,58 @@ func TestHandleIdentitySession_EnrollError(t *testing.T) {
 	newIdentityMux(t, svc).ServeHTTP(w, r)
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("code 401 attendu, obtenu %d", w.Code)
+	}
+}
+
+// / @brief  POST /api/identity/session n'ouvre aucune session pour une identité inactive ou sans rôle
+// / @input  certificat enrôlé : en attente, suspendu, statut absent, ou actif sans Myr.role
+// / @expect HTTP 403 dans chaque cas, aucun token délivré
+func TestHandleIdentitySession_CannotSignIn_Forbidden(t *testing.T) {
+	cases := map[string]identity.WalletEntry{
+		"pending":   {Status: identity.StatusPending, Role: identity.RoleContributor},
+		"suspended": {Status: identity.StatusSuspended, Role: identity.RoleContributor},
+		"no status": {Role: identity.RoleContributor},
+		"no role":   {Status: identity.StatusActive},
+	}
+	for name, entry := range cases {
+		svc := &mockIdentitySvc{enroll: func(_ context.Context, n, _, orgID string) (identity.WalletEntry, error) {
+			entry.Handle, entry.Name, entry.OrgID = n+"@"+orgID, n, orgID
+			return entry, nil
+		}}
+		body, _ := json.Marshal(map[string]string{"name": "alice", "secret": "s3cr3t", "org_id": "Org1MSP"})
+		r := httptest.NewRequest(http.MethodPost, "/api/identity/session", bytes.NewReader(body))
+		r.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		newIdentityMux(t, svc).ServeHTTP(w, r)
+		if w.Code != http.StatusForbidden {
+			t.Errorf("%s : code 403 attendu, obtenu %d — body: %s", name, w.Code, w.Body.String())
+		}
+		if strings.Contains(w.Body.String(), "token") {
+			t.Errorf("%s : aucun token ne doit être délivré, body: %s", name, w.Body.String())
+		}
+	}
+}
+
+// / @brief  La session porte le rôle inscrit dans le certificat enrôlé
+// / @input  certificat actif portant Myr.role=admin, aucun RoleService injecté
+// / @expect role="admin" dans la réponse ; la session accède à une route identity.admin
+func TestHandleIdentitySession_RoleFromCertificate(t *testing.T) {
+	mux := newIdentityMux(t, asAdmin(&mockIdentitySvc{}))
+	body, _ := json.Marshal(map[string]string{"name": "alice", "secret": "s3cr3t", "org_id": "Org1MSP"})
+	r := httptest.NewRequest(http.MethodPost, "/api/identity/session", bytes.NewReader(body))
+	r.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, r)
+	var sess struct {
+		Token string `json:"token"`
+		Role  string `json:"role"`
+	}
+	decodeJSON(t, w, &sess)
+	if sess.Role != identity.RoleAdmin {
+		t.Fatalf("role attendu admin, obtenu %q", sess.Role)
+	}
+	if w := do(t, mux, http.MethodGet, "/api/identity/requests", ""); w.Code != http.StatusOK {
+		t.Errorf("code 200 attendu sur une route identity.admin, obtenu %d", w.Code)
 	}
 }
 

@@ -2,9 +2,12 @@
 package identity
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"myr-core/domain/network"
 )
 
 // MyrIdentity représente l'identité d'un auteur dans le réseau Myr.
@@ -30,8 +33,28 @@ type WalletEntry struct {
 	Handle string // "<pseudo>@<org>" — identifiant unique du wallet
 	Name   string // pseudo affiché
 	OrgID  string // Org1MSP, Org2MSP, Org3MSP
-	Status string // pending | active | suspended (lu depuis le cert)
+	Status string // attribut Myr.status du certificat (pending | active | suspended) — vide si absent ou illisible
+	Role   string // attribut Myr.role du certificat — vide si absent ou illisible
 	MSPDir string // chemin absolu vers le répertoire MSP
+}
+
+// CanSignIn vérifie qu'une identité peut ouvrir une session (ADR-12) : son
+// certificat la déclare active et lui attribue un rôle. Une identité en
+// attente d'approbation, suspendue, sans statut ou sans rôle est refusée.
+func (w WalletEntry) CanSignIn() error {
+	switch w.Status {
+	case StatusActive:
+	case StatusPending:
+		return ErrIdentityPending
+	case StatusSuspended:
+		return ErrIdentitySuspended
+	default:
+		return fmt.Errorf("%w (Myr.status %q)", ErrIdentityInactive, w.Status)
+	}
+	if w.Role == "" {
+		return ErrIdentityWithoutRole
+	}
+	return nil
 }
 
 // Disposition d'un wallet sous son répertoire MSP — seule définition, partagée
@@ -67,11 +90,45 @@ type RegisterRequest struct {
 	OrgID       string // ex: Org1MSP
 	Password    string // secret d'enrollment (jamais stocké)
 	Role        string // ex: RoleReader, RoleContributor — vide = RoleReader par défaut
+	Status      string // statut à l'enregistrement (StatusActive, StatusPending) — vide = StatusPending
 	DisplayName string
 	LegalName   string
 	Email       string
 	Country     string
 }
+
+// RegistrationPolicy décrit les règles d'inscription d'un réseau, fixées par
+// son administrateur (ADR-12).
+type RegistrationPolicy struct {
+	// AllowAutoRegister : sans auto-enregistrement, aucune demande
+	// d'inscription n'est acceptée — seul l'administrateur crée des comptes.
+	AllowAutoRegister bool
+	// RequireApproval : l'identité est créée en attente (StatusPending) et ne
+	// devient active qu'à l'approbation par l'administrateur ; sinon elle est
+	// créée active.
+	RequireApproval bool
+	// DefaultRole est le rôle attribué à l'inscription — vide = RoleReader (RM21).
+	DefaultRole string
+}
+
+// PolicyOf retourne les règles d'inscription fixées par l'administrateur du
+// réseau p — sans réseau, l'inscription est fermée.
+func PolicyOf(p *network.NetworkProfile) RegistrationPolicy {
+	if p == nil {
+		return RegistrationPolicy{}
+	}
+	return RegistrationPolicy{
+		AllowAutoRegister: p.AllowAutoRegister,
+		RequireApproval:   p.RequireApproval,
+		DefaultRole:       p.AutoRegisterRole,
+	}
+}
+
+// Attributs d'identité portés par le certificat émis par la CA.
+const (
+	AttrRole   = "Myr.role"
+	AttrStatus = "Myr.status"
+)
 
 // Constantes de statut Fabric CA
 const (
@@ -88,9 +145,11 @@ const (
 	RoleAdmin       = "admin"
 )
 
-// AccountRequest est une demande d'accès soumise par un utilisateur qui n'a pas encore
-// de compte. Elle est stockée localement et traitée par l'administrateur.
-// L'admin crée ensuite l'identité dans la CA Fabric et transmet le secret d'enrollment.
+// AccountRequest est une demande d'inscription d'un utilisateur qui n'a pas encore
+// de compte, acceptée seulement si le réseau autorise l'auto-enregistrement
+// (RegistrationPolicy). L'identité est créée dans la CA dès la demande ; si le
+// réseau exige une approbation, la demande reste en attente jusqu'à la décision
+// de l'administrateur (ApproveRequest, RejectRequest).
 type AccountRequest struct {
 	ID          string `json:"id"`
 	Pseudo      string `json:"pseudo"`       // identifiant souhaité
@@ -98,7 +157,7 @@ type AccountRequest struct {
 	Email       string `json:"email"`
 	OrgID       string `json:"org_id"`            // organisation souhaitée (ex: Org1MSP)
 	Message     string `json:"message,omitempty"` // message libre pour l'admin
-	Status      string `json:"status"`            // "pending" | "approved" | "rejected"
+	Status      string `json:"status"`            // "pending" | "approved" | "rejected" | "failed"
 	CreatedAt   string `json:"created_at"`        // ISO 8601
 }
 
@@ -107,4 +166,7 @@ const (
 	RequestPending  = "pending"
 	RequestApproved = "approved"
 	RequestRejected = "rejected"
+	// RequestFailed : l'identité n'a pas pu être créée dans la CA ; la demande
+	// est conservée pour trace, sans identité associée.
+	RequestFailed = "failed"
 )

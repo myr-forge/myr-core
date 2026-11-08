@@ -10,13 +10,14 @@ import (
 type mockIdentitySvc struct {
 	listLocalWallets func() ([]identity.WalletEntry, error)
 	wallet           func(handle string) (identity.WalletEntry, error)
-	register         func(ctx context.Context, req identity.RegisterRequest) (string, error)
+	createAccount    func(ctx context.Context, pseudo, orgID, role, email string) (string, string, error)
 	enroll           func(ctx context.Context, name, secret, orgID string) (identity.WalletEntry, error)
 	getStatus        func(ctx context.Context, wallet identity.WalletEntry) (string, error)
 	reEnroll         func(ctx context.Context, wallet identity.WalletEntry) (identity.WalletEntry, error)
 	loadGuestWallet  func(certPath, keyPath, caCertPath, orgID string) (identity.WalletEntry, error)
-	submitRequest    func(req identity.AccountRequest) (*identity.AccountRequest, error)
-	autoRegister     func(ctx context.Context, req *identity.AccountRequest, role string) (string, error)
+	requestAccess    func(ctx context.Context, req identity.AccountRequest, policy identity.RegistrationPolicy) (*identity.AccountRequest, string, error)
+	approveRequest   func(ctx context.Context, id string) (*identity.AccountRequest, error)
+	rejectRequest    func(ctx context.Context, id string) (*identity.AccountRequest, error)
 	listRequests     func() ([]*identity.AccountRequest, error)
 	walletDir        func() string
 	setRole          func(ctx context.Context, name, newRole string) error
@@ -34,11 +35,11 @@ func (m *mockIdentitySvc) Wallet(handle string) (identity.WalletEntry, error) {
 	}
 	return identity.WalletEntry{}, identity.ErrWalletNotFound
 }
-func (m *mockIdentitySvc) Register(ctx context.Context, req identity.RegisterRequest) (string, error) {
-	if m.register != nil {
-		return m.register(ctx, req)
+func (m *mockIdentitySvc) CreateAccount(ctx context.Context, pseudo, orgID, role, email string) (string, string, error) {
+	if m.createAccount != nil {
+		return m.createAccount(ctx, pseudo, orgID, role, email)
 	}
-	return "secret-test", nil
+	return identity.Handle(pseudo, orgID), "secret-test", nil
 }
 func (m *mockIdentitySvc) Enroll(ctx context.Context, name, secret, orgID string) (identity.WalletEntry, error) {
 	if m.enroll != nil {
@@ -64,19 +65,31 @@ func (m *mockIdentitySvc) LoadGuestWallet(certPath, keyPath, caCertPath, orgID s
 	}
 	return identity.WalletEntry{}, nil
 }
-func (m *mockIdentitySvc) SubmitRequest(req identity.AccountRequest) (*identity.AccountRequest, error) {
-	if m.submitRequest != nil {
-		return m.submitRequest(req)
+func (m *mockIdentitySvc) RequestAccess(ctx context.Context, req identity.AccountRequest, policy identity.RegistrationPolicy) (*identity.AccountRequest, string, error) {
+	if m.requestAccess != nil {
+		return m.requestAccess(ctx, req, policy)
+	}
+	if !policy.AllowAutoRegister {
+		return nil, "", identity.ErrRegistrationClosed
 	}
 	req.ID = "req-test"
-	req.Status = identity.RequestPending
-	return &req, nil
-}
-func (m *mockIdentitySvc) AutoRegister(ctx context.Context, req *identity.AccountRequest, role string) (string, error) {
-	if m.autoRegister != nil {
-		return m.autoRegister(ctx, req, role)
+	req.Status = identity.RequestApproved
+	if policy.RequireApproval {
+		req.Status = identity.RequestPending
 	}
-	return "secret-test", nil
+	return &req, "secret-test", nil
+}
+func (m *mockIdentitySvc) ApproveRequest(ctx context.Context, id string) (*identity.AccountRequest, error) {
+	if m.approveRequest != nil {
+		return m.approveRequest(ctx, id)
+	}
+	return &identity.AccountRequest{ID: id, Status: identity.RequestApproved}, nil
+}
+func (m *mockIdentitySvc) RejectRequest(ctx context.Context, id string) (*identity.AccountRequest, error) {
+	if m.rejectRequest != nil {
+		return m.rejectRequest(ctx, id)
+	}
+	return &identity.AccountRequest{ID: id, Status: identity.RequestRejected}, nil
 }
 func (m *mockIdentitySvc) ListRequests() ([]*identity.AccountRequest, error) {
 	if m.listRequests != nil {

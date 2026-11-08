@@ -48,6 +48,8 @@ Se connecter ne produit pas de JWT : `POST /api/identity/session` (re-)enrôle l
 
 Il n'y a pas de distinction « connexion standard / première connexion avec provisionnement Wallet » : l'appel à `Enroll()` est fait à chaque connexion, qu'un wallet local existe déjà ou non — c'est la Fabric CA elle-même qui décide si le secret est encore valide (comportement dépendant de sa configuration `max_enrollments`).
 
+Le certificat tout juste émis est la seule source de vérité de l'autorisation (ADR-12) : `Enroll` lit ses attributs `Myr.status` et `Myr.role` (`CAPort.CertAttributes`) dans le `WalletEntry` retourné, et `WalletEntry.CanSignIn` n'autorise l'ouverture de session qu'à une identité `active` dotée d'un rôle. La session porte ce rôle et l'identifiant `pseudo@org` de l'identité, dont le wallet signe ensuite ses écritures sur le ledger. Comme chaque connexion ré-enrôle, une approbation, un refus (UCA01) ou un changement de rôle (UCA08) s'appliquent dès la connexion suivante.
+
 Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/identity/guest` délivre directement un token `reader` si le réseau autorise l'accès automatique (`AllowAutoGuest=true`), sans secret ni pseudo obligatoires.
 
 ## Pré-conditions
@@ -61,10 +63,11 @@ Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/ident
 
 1. Le client soumet `POST /api/identity/session` avec `{name, secret, org_id, channel}` (`channel` optionnel)
 2. Le handler valide que `name`, `secret` et `org_id` sont renseignés
-3. `identitySvc.Enroll(ctx, name, secret, org_id)` (ré-)enrôle l'identité auprès de la CA et sauvegarde le wallet local (`~/.Myr/wallets/<name>@<org>/msp/`)
-4. Une session REST est créée : `h.sessions.create(name, "contributor", channel)` — **le rôle est actuellement toujours fixé à `"contributor"`, jamais lu depuis l'attribut `Myr.role` du certificat CA** (voir Écart ci-dessous)
-5. Réponse `HTTP 200` avec `{token, role, pseudo, channel}`
-6. Le client conserve ce token et l'envoie dans l'en-tête `X-Myr-Token` de chaque requête protégée suivante — c'est aussi la seule occasion où le client reçoit son rôle (voir UCA04/UCA07)
+3. `identitySvc.Enroll(ctx, name, secret, org_id)` (ré-)enrôle l'identité `name@org` auprès de la CA, sauvegarde le wallet local (`~/.Myr/wallets/<name>@<org>/msp/`) et renseigne `Status`/`Role` depuis le certificat émis
+4. `entry.CanSignIn()` : l'identité est `active` et porte un rôle
+5. Une session REST est créée : `h.sessions.create(name, entry.Handle, entry.Role, channel)` — rôle du certificat, identité signataire des écritures
+6. Réponse `HTTP 200` avec `{token, role, pseudo, channel}`
+7. Le client conserve ce token et l'envoie dans l'en-tête `X-Myr-Token` de chaque requête protégée suivante — c'est aussi la seule occasion où le client reçoit son rôle (voir UCA04/UCA07)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 0 explicite(s) · 8 déduit(s)
@@ -94,8 +97,8 @@ Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/ident
 ### Flux alternatif — Accès invité refusé (réseau privé)
 
 1. `AllowAutoGuest=false`
-2. Si `pseudo`, `email` et `org_id` sont fournis dans le corps : une `AccountRequest` est enregistrée en best-effort (voir UCA01)
-3. Réponse `HTTP 403` avec `{"error": "ce réseau ne permet pas l'accès automatique — contactez l'administrateur"}`
+2. Réponse `HTTP 403` avec `{"error": "ce réseau ne permet pas l'accès automatique — contactez l'administrateur"}`
+3. Aucune demande d'accès n'est enregistrée par cet appel : une inscription passe par `POST /api/identity/request`, selon les règles d'inscription du réseau (UCA01)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!warning] Tests — aucun test ne couvre cette exigence
@@ -111,6 +114,12 @@ Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/ident
 > [!warning] Tests — aucun test ne couvre cette exigence
 > [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
+
+### Flux erreur — Identité inactive ou sans rôle
+
+1. L'enrôlement réussit, mais le certificat émis porte `Myr.status` différent de `active`, ou aucun `Myr.role`
+2. `CanSignIn` retourne `ErrIdentityPending` (en attente d'approbation), `ErrIdentitySuspended` (demande refusée ou identité suspendue), `ErrIdentityInactive` (statut absent ou inconnu) ou `ErrIdentityWithoutRole`
+3. Réponse `HTTP 403` avec le message correspondant ; aucune session n'est créée
 
 ### Flux erreur — Champs requis manquants
 
@@ -154,12 +163,15 @@ REST -> Service : Enroll(ctx, name, secret, org_id)
 Service -> CA : Enroll(ctx, name, secret)
 CA --> Service : certPEM, keyPEM, caCertPEM
 Service -> Service : sauvegarder wallet local (~/.Myr/wallets/)
-Service --> REST : WalletEntry
+Service -> Service : CertAttributes(certPEM)\n(lecture locale du certificat, sans appel CA)
+Service --> REST : WalletEntry{Handle, Status, Role}
 
-alt enrôlement réussi
-    REST -> Sessions : create(name, "contributor", channel)
+alt enrôlement réussi, identité active dotée d'un rôle
+    REST -> Sessions : create(name, entry.Handle, entry.Role, channel)
     Sessions --> REST : {token, role, pseudo, channel}
     REST --> Client : HTTP 200 {token, role, pseudo, channel}
+else identité en attente, suspendue ou sans rôle
+    REST --> Client : HTTP 403 {error}
 else secret invalide
     CA --> Service : error
     Service --> REST : error
@@ -171,7 +183,7 @@ end
 ## Règles métier déclenchées
 
 - **RM20** — Se connecter et enrôler l'identité CA sont la même opération : il n'y a pas de provisionnement blockchain différé à une étape ultérieure.
-- **RM22** — Le rôle qui conditionne l'accès aux ressources protégées est celui porté par la session REST (voir écart ci-dessous sur son origine réelle).
+- **RM22** — Le rôle qui conditionne l'accès aux ressources protégées est celui porté par la session REST, lu dans le certificat émis à la connexion : un changement de rôle par l'administrateur s'applique à la connexion suivante.
 
 ## Exigences non-fonctionnelles
 
@@ -180,9 +192,9 @@ end
 
 ## Notes d'implémentation
 
-**⚠️ Écart critique — le rôle de session ignore le rôle CA réel :** `handleIdentitySession` (`adapters/in/rest/handlers_identity.go`) appelle `h.sessions.create(req.Name, "contributor", channel)` — le rôle `"contributor"` est **codé en dur**, quel que soit l'attribut `Myr.role` réellement porté par le certificat CA de l'identité. Concrètement : un administrateur peut changer le rôle d'une identité via `myr identity set-role` (UCA08), mais la session REST obtenue à la connexion suivante affichera quand même `"contributor"`. C'est l'équivalent moderne de l'ancien écart « rôle par défaut incorrect » — à corriger en lisant le rôle depuis le certificat enrôlé (`WalletEntry`/attributs CA) plutôt qu'en le figeant.
+**Rôle et statut de session :** lus dans l'extension d'attributs du certificat (OID `1.2.3.4.5.6.7.8.1`, JSON `{"attrs":{...}}`) par `CAPort.CertAttributes` (`adapters/out/fabric/ca_client.go`) — jamais choisis par le client ni figés par le serveur.
 
-**Endpoints réels :**
+**Endpoints :**
 - `POST /api/identity/session` → `handleIdentitySession`
 - `POST /api/identity/guest` → `handleIdentityGuest`
 - `POST /api/identity/enroll` → `handleIdentityEnroll` (variante sans création de session REST — récupère juste le wallet local, utile hors contexte HTTP)

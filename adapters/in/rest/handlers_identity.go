@@ -4,6 +4,7 @@ package rest
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -28,7 +29,8 @@ type walletDTO struct {
 type networkPolicyResponse struct {
 	Mode              string `json:"mode"`                        // "blockchain"
 	AllowAutoGuest    bool   `json:"allow_auto_guest"`            // le réseau délivre un accès reader automatiquement
-	AllowAutoRegister bool   `json:"allow_auto_register"`         // le réseau enregistre les comptes automatiquement
+	AllowAutoRegister bool   `json:"allow_auto_register"`         // le réseau accepte les demandes d'inscription
+	RequireApproval   bool   `json:"require_approval"`            // une inscription doit être approuvée par l'admin avant d'être active
 	NetworkName       string `json:"network_name,omitempty"`
 }
 
@@ -188,18 +190,20 @@ type accountRequestDTO struct {
 	Message     string `json:"message,omitempty"`
 }
 
-// handleIdentityRequest soumet une demande d'accès sans credential préalable —
-// utilisé par un inconnu qui veut accéder au réseau et doit passer par l'admin.
-// Si le réseau actif autorise l'auto-enregistrement (AllowAutoRegister), la
-// demande est immédiatement approuvée et le secret d'enrollment est renvoyé.
+// handleIdentityRequest traite une demande d'inscription d'un utilisateur sans
+// compte, selon les règles du réseau actif (ADR-12, identity.RequestAccess) :
+// refusée si le réseau n'accepte pas l'auto-enregistrement ; sinon l'identité
+// est créée, active ou en attente d'approbation, et le secret d'enrôlement est
+// renvoyé.
 //
 //	@Summary	Demander un accès au réseau
 //	@Tags		identity
 //	@Accept		json
 //	@Produce	json
 //	@Param		body	body		accountRequestDTO	true	"pseudo, email, org_id requis"
-//	@Success	201	{object}	identity.AccountRequest
+//	@Success	201	{object}	map[string]string	"{id, status (approved | pending), pseudo, org_id, secret}"
 //	@Failure	400	{object}	map[string]string
+//	@Failure	403	{object}	map[string]string	"le réseau n'accepte pas les demandes d'inscription"
 //	@Failure	429	{object}	map[string]string
 //	@Failure	503	{object}	map[string]string
 //	@Router		/identity/request [post]
@@ -235,35 +239,140 @@ func (h *Handler) handleIdentityRequest(w http.ResponseWriter, r *http.Request) 
 		OrgID:       dto.OrgID,
 		Message:     strings.TrimSpace(dto.Message),
 	}
-	saved, err := h.identitySvc.SubmitRequest(req)
-	if err != nil {
+	saved, secret, err := h.identitySvc.RequestAccess(r.Context(), req, h.registrationPolicy())
+	switch {
+	case errors.Is(err, identity.ErrRegistrationClosed):
+		jsonError(w, err.Error(), http.StatusForbidden)
+		return
+	case errors.Is(err, identity.ErrInvalidIdentityName):
+		jsonError(w, err.Error(), http.StatusBadRequest)
+		return
+	case err != nil:
 		internalErr(w, err)
 		return
 	}
-
-	// Si le réseau autorise l'auto-enregistrement, créer l'identité dans la CA
-	// et retourner le secret d'enrollment directement.
-	if h.networkSvc != nil {
-		if profile, err2 := h.networkSvc.GetActive(); err2 == nil && profile != nil && profile.AllowAutoRegister {
-			secret, err3 := h.identitySvc.AutoRegister(r.Context(), saved, profile.AutoRegisterRole)
-			if err3 == nil {
-				w.WriteHeader(http.StatusCreated)
-				jsonOK(w, map[string]string{
-					"id":      saved.ID,
-					"status":  saved.Status,
-					"pseudo":  saved.Pseudo,
-					"org_id":  saved.OrgID,
-					"secret":  secret,
-				})
-				return
-			}
-			// Échec de l'enregistrement CA — fallback demande pending, logguer l'erreur
-			// sans exposer les détails internes au client.
-		}
-	}
-
 	w.WriteHeader(http.StatusCreated)
-	jsonOK(w, saved)
+	jsonOK(w, map[string]string{
+		"id":     saved.ID,
+		"status": saved.Status,
+		"pseudo": saved.Pseudo,
+		"org_id": saved.OrgID,
+		"secret": secret,
+	})
+}
+
+// registrationPolicy retourne les règles d'inscription du réseau actif — sans
+// réseau actif, l'inscription est fermée.
+func (h *Handler) registrationPolicy() identity.RegistrationPolicy {
+	if h.networkSvc == nil {
+		return identity.RegistrationPolicy{}
+	}
+	p, err := h.networkSvc.GetActive()
+	if err != nil {
+		return identity.RegistrationPolicy{}
+	}
+	return identity.PolicyOf(p)
+}
+
+// handleIdentityRequestDecision approuve ou refuse une demande d'inscription
+// en attente — réservé aux identités portant la permission identity.admin.
+// Approuver active l'identité ; refuser la suspend (ADR-12).
+//
+//	@Summary	Approuver ou refuser une demande d'inscription
+//	@Tags		identity
+//	@Produce	json
+//	@Param		id		path		string	true	"identifiant de la demande"
+//	@Param		action	path		string	true	"approve ou reject"
+//	@Success	200	{object}	identity.AccountRequest
+//	@Failure	403	{object}	map[string]string
+//	@Failure	404	{object}	map[string]string
+//	@Failure	409	{object}	map[string]string	"la demande n'est plus en attente"
+//	@Security	MyrToken
+//	@Router		/identity/requests/{id}/{action} [post]
+func (h *Handler) handleIdentityRequestDecision(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if h.identitySvc == nil {
+		jsonError(w, "service identité non configuré", http.StatusServiceUnavailable)
+		return
+	}
+	id, action, _ := strings.Cut(strings.TrimPrefix(r.URL.Path, "/api/identity/requests/"), "/")
+	var decide func(context.Context, string) (*identity.AccountRequest, error)
+	switch action {
+	case "approve":
+		decide = h.identitySvc.ApproveRequest
+	case "reject":
+		decide = h.identitySvc.RejectRequest
+	}
+	if id == "" || decide == nil {
+		http.NotFound(w, r)
+		return
+	}
+	req, err := decide(r.Context(), id)
+	switch {
+	case errors.Is(err, identity.ErrRequestNotFound):
+		jsonError(w, err.Error(), http.StatusNotFound)
+	case errors.Is(err, identity.ErrRequestNotPending):
+		jsonError(w, err.Error(), http.StatusConflict)
+	case err != nil:
+		internalErr(w, err)
+	default:
+		jsonOK(w, req)
+	}
+}
+
+// accountDTO est le corps attendu pour POST /api/identity/accounts.
+type accountDTO struct {
+	Pseudo string `json:"pseudo"`
+	OrgID  string `json:"org_id"`
+	Role   string `json:"role,omitempty"`
+	Email  string `json:"email,omitempty"`
+}
+
+// handleIdentityAccounts crée, à l'initiative de l'administrateur, une identité
+// active avec le rôle donné — seule voie d'inscription sur un réseau qui
+// n'accepte pas l'auto-enregistrement (ADR-12).
+//
+//	@Summary	Créer un compte (administrateur)
+//	@Tags		identity
+//	@Accept		json
+//	@Produce	json
+//	@Param		body	body		accountDTO	true	"pseudo et org_id requis — role vide = reader"
+//	@Success	201	{object}	map[string]string	"{handle, secret}"
+//	@Failure	400	{object}	map[string]string
+//	@Failure	403	{object}	map[string]string
+//	@Failure	503	{object}	map[string]string
+//	@Security	MyrToken
+//	@Router		/identity/accounts [post]
+func (h *Handler) handleIdentityAccounts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if h.identitySvc == nil {
+		jsonError(w, "service identité non configuré", http.StatusServiceUnavailable)
+		return
+	}
+	var dto accountDTO
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		jsonError(w, "corps JSON invalide", http.StatusBadRequest)
+		return
+	}
+	handle, secret, err := h.identitySvc.CreateAccount(r.Context(),
+		strings.TrimSpace(dto.Pseudo), strings.TrimSpace(dto.OrgID),
+		strings.TrimSpace(dto.Role), strings.TrimSpace(dto.Email))
+	switch {
+	case errors.Is(err, identity.ErrInvalidIdentityName):
+		jsonError(w, err.Error(), http.StatusBadRequest)
+		return
+	case err != nil:
+		internalErr(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	jsonOK(w, map[string]string{"handle": handle, "secret": secret})
 }
 
 // handleIdentityRequests liste les demandes de compte en attente — réservé aux
@@ -326,6 +435,7 @@ func (h *Handler) handleIdentityPolicy(w http.ResponseWriter, r *http.Request) {
 		Mode:              "blockchain",
 		AllowAutoGuest:    profile.AllowAutoGuest,
 		AllowAutoRegister: profile.AllowAutoRegister,
+		RequireApproval:   profile.RequireApproval,
 		NetworkName:       profile.Name,
 	})
 }
@@ -342,6 +452,7 @@ func (h *Handler) handleIdentityPolicy(w http.ResponseWriter, r *http.Request) {
 //	@Success	200	{object}	sessionDTO
 //	@Failure	400	{object}	map[string]string
 //	@Failure	401	{object}	map[string]string
+//	@Failure	403	{object}	map[string]string	"compte en attente d'approbation, suspendu, ou sans rôle dans son certificat"
 //	@Failure	429	{object}	map[string]string
 //	@Failure	503	{object}	map[string]string
 //	@Router		/identity/session [post]
@@ -381,16 +492,19 @@ func (h *Handler) handleIdentitySession(w http.ResponseWriter, r *http.Request) 
 		jsonError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+	// Le certificat tout juste émis est la seule source de vérité : seule une
+	// identité active et dotée d'un rôle ouvre une session (ADR-12).
+	if err := entry.CanSignIn(); err != nil {
+		jsonError(w, err.Error(), http.StatusForbidden)
+		return
+	}
 	channel := req.Channel
 	if channel == "" {
 		channel = h.netInfo.Channel // canal par défaut du réseau
 	}
-	// #question rôle codé en dur — ignore l'attribut Myr.role du certificat CA
-	// réellement enrôlé (voir UCA02.md, écart documenté). Faut-il le lire depuis
-	// WalletEntry/attributs CA plutôt que de le figer ici ?
-	// La session retient l'identité enrôlée : son wallet signera les écritures
-	// de l'utilisateur sur le ledger (ADR-12).
-	sess, err := h.sessions.create(req.Name, entry.Handle, "contributor", channel)
+	// La session porte le rôle du certificat et retient l'identité enrôlée,
+	// dont le wallet signera les écritures de l'utilisateur sur le ledger.
+	sess, err := h.sessions.create(req.Name, entry.Handle, entry.Role, channel)
 	if err != nil {
 		jsonError(w, "erreur interne", http.StatusInternalServerError)
 		return
@@ -399,8 +513,8 @@ func (h *Handler) handleIdentitySession(w http.ResponseWriter, r *http.Request) 
 }
 
 // handleIdentityGuest délivre un token reader si le réseau autorise l'accès
-// automatique (AllowAutoGuest=true). Sinon, enregistre une demande en attente
-// si pseudo/email/org_id sont fournis, et répond 403.
+// automatique (AllowAutoGuest=true), et répond 403 sinon. Une inscription passe
+// par POST /api/identity/request, selon les règles du réseau.
 //
 //	@Summary	Accès invité automatique
 //	@Tags		identity
@@ -459,19 +573,6 @@ func (h *Handler) handleIdentityGuest(w http.ResponseWriter, r *http.Request) {
 		}
 		jsonOK(w, sessionDTO{Token: sess.Token, Role: sess.Role, Pseudo: sess.Pseudo, Channel: sess.Channel, Guest: true})
 		return
-	}
-
-	// Réseau privé — enregistrer la demande si les infos sont fournies
-	if h.identitySvc != nil && strings.TrimSpace(body.Pseudo) != "" &&
-		strings.TrimSpace(body.Email) != "" && strings.TrimSpace(body.OrgID) != "" {
-		req := identity.AccountRequest{
-			Pseudo:      strings.TrimSpace(body.Pseudo),
-			DisplayName: strings.TrimSpace(body.DisplayName),
-			Email:       strings.TrimSpace(body.Email),
-			OrgID:       strings.TrimSpace(body.OrgID),
-			Message:     strings.TrimSpace(body.Message),
-		}
-		h.identitySvc.SubmitRequest(req) //nolint:errcheck — best-effort
 	}
 
 	// 403 : le réseau n'autorise pas l'accès automatique
