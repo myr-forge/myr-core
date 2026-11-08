@@ -89,8 +89,7 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 8. Le module passe en état `submitted`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 32 déduit(s)
-> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/modules`
+> [!check]- Tests — 0 explicite(s) · 31 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
@@ -105,7 +104,8 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 > - 🟡 [TestModule_AddRemoveAssembly](../../../docs/tests/domain-model/TestModule_AddRemoveAssembly.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestModule_CreateGetList](../../../docs/tests/domain-model/TestModule_CreateGetList.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestModule_ListModules_BlockchainUnreachable_DegradedReturnsDraftModules](../../../docs/tests/domain-model/TestModule_ListModules_BlockchainUnreachable_DegradedReturnsDraftModules.md) — déduit : teste `ModelService.CreateModule`
-> - … et 17 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestModule_NotFound_ReturnsError](../../../docs/tests/domain-model/TestModule_NotFound_ReturnsError.md) — déduit : teste `ModelService.SubmitModule`
+> - … et 16 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Composant sans interfaces définies

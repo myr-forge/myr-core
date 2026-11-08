@@ -86,8 +86,7 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 5. Le Module passe en lecture seule (RM19)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 21 déduit(s)
-> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/modules`
+> [!check]- Tests — 0 explicite(s) · 20 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
@@ -102,7 +101,8 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 > - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.SubmitModule`
-> - … et 6 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestModule_NotFound_ReturnsError](../../../docs/tests/domain-model/TestModule_NotFound_ReturnsError.md) — déduit : teste `ModelService.SubmitModule`
+> - … et 5 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Module avec composants dérivés (licences parentales)

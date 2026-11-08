@@ -75,8 +75,7 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 5. Le module est enregistré localement en état **draft**
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 29 déduit(s)
-> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/modules`
+> [!check]- Tests — 0 explicite(s) · 28 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
@@ -91,7 +90,8 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 > - 🟡 [TestModule_AddRemoveAssembly](../../../docs/tests/domain-model/TestModule_AddRemoveAssembly.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestModule_CreateGetList](../../../docs/tests/domain-model/TestModule_CreateGetList.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestModule_ListModules_BlockchainUnreachable_DegradedReturnsDraftModules](../../../docs/tests/domain-model/TestModule_ListModules_BlockchainUnreachable_DegradedReturnsDraftModules.md) — déduit : teste `ModelService.CreateModule`
-> - … et 14 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestModule_Remove](../../../docs/tests/domain-model/TestModule_Remove.md) — déduit : teste `ModelService.CreateModule`
+> - … et 13 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
@@ -103,8 +103,7 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 5. Le Concepteur retrouve immédiatement l'assemblage complet du Module parent, prêt à être modifié, sans avoir ajouté une seule instance ni recréé une seule Liaison manuellement
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
-> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/modules`
+> [!check]- Tests — 0 explicite(s) · 4 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`

@@ -191,8 +191,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 1 explicite(s) · 0 déduit(s)
+> - ✅ [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — explicite (le test cite RM13)
 <!-- tests-obsidian:end -->
 
 ## 4. Composition d'un Module (instances)
@@ -250,7 +250,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD06
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> [!check]- Tests — 1 explicite(s) · 8 déduit(s)
+> - ✅ [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — explicite (le test cite RM17)
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.SubmitModule`
 > - 🟡 [TestModule_NotFound_ReturnsError](../../docs/tests/domain-model/TestModule_NotFound_ReturnsError.md) — déduit : teste `ModelService.SubmitModule`

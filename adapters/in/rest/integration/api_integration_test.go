@@ -2,6 +2,9 @@
 //
 // Tests d'intégration end-to-end de l'API REST.
 // Aucun mock : domaine réel + localstorage réel + serveur HTTP réel (httptest.Server).
+// Seules la blockchain et l'autorité de certification sont simulées en mémoire ;
+// la CA émet de vrais certificats X.509, lus par le parseur de l'adapter Fabric,
+// et chaque test passe par une vraie connexion (POST /api/identity/session).
 //
 // Lancer avec :
 //   go test -tags integration -v -timeout 60s ./adapters/in/rest/integration/...
@@ -12,18 +15,31 @@ package rest_integration_test
 
 import (
 	"bytes"
+	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/asn1"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 
 	"myr-core/adapters/in/rest"
+	"myr-core/adapters/out/fabric"
 	"myr-core/adapters/out/localstorage"
+	"myr-core/domain/identity"
 	"myr-core/domain/model"
+	"myr-core/domain/role"
 )
 
 // ── In-memory blockchain (remplace Fabric en test d'intégration) ──────────────
@@ -87,9 +103,118 @@ func (b *memBC) RemoveModelRecord(id string) error {
 	return nil
 }
 
+// ── Autorité de certification en mémoire (remplace la Fabric CA) ──────────────
+// Retient les attributs de chaque identité et les inscrit, comme la Fabric CA,
+// dans l'extension X.509 des certificats qu'elle émet ; la lecture de ces
+// attributs passe par le parseur réel de l'adapter Fabric.
+
+type memCA struct {
+	mu      sync.Mutex
+	attrs   map[string]map[string]string
+	secrets map[string]string
+}
+
+func newMemCA() *memCA {
+	return &memCA{attrs: map[string]map[string]string{}, secrets: map[string]string{}}
+}
+
+func (c *memCA) Register(_ context.Context, req identity.RegisterRequest) (string, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if _, ok := c.attrs[req.Name]; ok {
+		return "", fmt.Errorf("identité %s déjà enregistrée", req.Name)
+	}
+	status := req.Status
+	if status == "" {
+		status = identity.StatusPending
+	}
+	c.attrs[req.Name] = map[string]string{identity.AttrRole: req.Role, identity.AttrStatus: status}
+	c.secrets[req.Name] = fmt.Sprintf("secret-%d", time.Now().UnixNano())
+	return c.secrets[req.Name], nil
+}
+
+func (c *memCA) Enroll(_ context.Context, name, secret string) (string, string, string, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if s, ok := c.secrets[name]; !ok || s != secret {
+		return "", "", "", fmt.Errorf("secret d'enrôlement invalide pour %s", name)
+	}
+	return c.issue(name)
+}
+
+func (c *memCA) GetStatus(_ context.Context, name string) (string, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.attrs[name][identity.AttrStatus], nil
+}
+
+func (c *memCA) ReEnroll(_ context.Context, name, _, _ string) (string, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	cert, _, _, err := c.issue(name)
+	return cert, err
+}
+
+func (c *memCA) UpdateAttributes(_ context.Context, name string, attrs map[string]string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.attrs[name] == nil {
+		return fmt.Errorf("identité %s inconnue", name)
+	}
+	for k, v := range attrs {
+		c.attrs[name][k] = v
+	}
+	return nil
+}
+
+func (c *memCA) CertAttributes(certPEM string) (map[string]string, error) {
+	return fabric.CertAttributes(certPEM)
+}
+
+// issue émet un certificat portant les attributs courants de l'identité, dans
+// l'extension utilisée par la Fabric CA (OID 1.2.3.4.5.6.7.8.1).
+func (c *memCA) issue(name string) (string, string, string, error) {
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return "", "", "", err
+	}
+	ext, _ := json.Marshal(map[string]any{"attrs": c.attrs[name]})
+	tmpl := &x509.Certificate{
+		SerialNumber:    big.NewInt(time.Now().UnixNano()),
+		Subject:         pkix.Name{CommonName: name},
+		NotBefore:       time.Now().Add(-time.Hour),
+		NotAfter:        time.Now().Add(time.Hour),
+		ExtraExtensions: []pkix.Extension{{Id: asn1.ObjectIdentifier{1, 2, 3, 4, 5, 6, 7, 8, 1}, Value: ext}},
+	}
+	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
+	if err != nil {
+		return "", "", "", err
+	}
+	keyDER, err := x509.MarshalPKCS8PrivateKey(key)
+	if err != nil {
+		return "", "", "", err
+	}
+	cert := string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der}))
+	return cert, string(pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: keyDER})), cert, nil
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-// newIntegrationServer câble un serveur HTTP complet avec des adapters réels.
+// tokenTransport ajoute le jeton de session à chaque requête du client de test.
+type tokenTransport struct {
+	base  http.RoundTripper
+	token string
+}
+
+func (t tokenTransport) RoundTrip(r *http.Request) (*http.Response, error) {
+	r = r.Clone(r.Context())
+	r.Header.Set("X-Myr-Token", t.token)
+	return t.base.RoundTrip(r)
+}
+
+// newIntegrationServer câble un serveur HTTP complet avec des adapters réels,
+// crée un compte contributor et ouvre sa session : srv.Client() envoie ensuite
+// le jeton de session à chaque requête.
 func newIntegrationServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	dataDir := t.TempDir()
@@ -100,18 +225,55 @@ func newIntegrationServer(t *testing.T) *httptest.Server {
 	fs := localstorage.NewLocalStorage(filesDir)
 	db := localstorage.NewJSONBlockchain(filepath.Join(dataDir, "db.json"))
 
+	// Même câblage que cmd/api/main.go (hors Fabric, remplacé par memBC).
 	svc := model.NewService(bc, fs).
 		WithConnStore(db).
 		WithThumbStore(db).
-		WithIfaceStore(db)
+		WithIfaceStore(db).
+		WithDraftStore(db).
+		WithRemovedStore(db)
 
-	h := rest.NewHandler(svc, db, db)
-	srv := rest.NewServer(h, "localhost:0")
-	mux, err := srv.Handler()
+	roleSvc := role.NewService(localstorage.NewJSONRoleStore(filepath.Join(dataDir, "roles.json")))
+	idSvc := identity.NewService(filepath.Join(dataDir, "wallets"), newMemCA()).
+		WithRequestStore(localstorage.NewJSONRequestStore(filepath.Join(dataDir, "account-requests.json"))).
+		WithRoles(roleSvc)
+
+	h := rest.NewHandler(svc, db, db).
+		WithIdentityService(idSvc).
+		WithRoleService(roleSvc).
+		WithConnStore(db).
+		WithDraftStore(db).
+		WithRemovedStore(db)
+	mux, err := rest.NewServer(h, "localhost:0").Handler()
 	if err != nil {
 		t.Fatalf("Handler(): %v", err)
 	}
-	return httptest.NewServer(mux)
+	srv := httptest.NewServer(mux)
+
+	_, secret, err := idSvc.CreateAccount(context.Background(), "tester", "Org1MSP", identity.RoleContributor, "")
+	if err != nil {
+		t.Fatalf("CreateAccount: %v", err)
+	}
+	resp, err := srv.Client().Post(srv.URL+"/api/identity/session", "application/json",
+		bytes.NewBufferString(`{"name":"tester","secret":"`+secret+`","org_id":"Org1MSP"}`))
+	if err != nil {
+		t.Fatalf("POST /api/identity/session: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		t.Fatalf("connexion: got %d, want 200", resp.StatusCode)
+	}
+	var sess struct {
+		Token string `json:"token"`
+		Role  string `json:"role"`
+	}
+	decodeBody(t, resp, &sess)
+	if sess.Role != identity.RoleContributor {
+		t.Fatalf("rôle de session: got %q, want contributor (lu dans le certificat)", sess.Role)
+	}
+	client := srv.Client()
+	client.Transport = tokenTransport{base: client.Transport, token: sess.Token}
+	return srv
 }
 
 // apiDo envoie une requête HTTP et retourne la réponse.
@@ -343,28 +505,49 @@ func TestAPIIntegration_ConnectionLifecycle(t *testing.T) {
 
 // ── Modules ────────────────────────────────────────────────────────────────────
 
-/// @brief  Cycle complet : créer module → ajouter assemblage → soumettre
-/// @input  Module + connexion réels, soumission blockchain simulée (memBC)
-/// @expect statut "draft" à la création, "submitted" après SubmitModule
+// createComponent crée un composant brouillon (POST multipart /api/components).
+func createComponent(t *testing.T, srv *httptest.Server, name string) (id, status string) {
+	t.Helper()
+	body, ct := multipartBody(name)
+	req, _ := http.NewRequest(http.MethodPost, srv.URL+"/api/components", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", ct)
+	resp, err := srv.Client().Do(req)
+	if err != nil {
+		t.Fatalf("POST /api/components: %v", err)
+	}
+	if resp.StatusCode != http.StatusCreated {
+		resp.Body.Close()
+		t.Fatalf("création de %s: got %d, want 201", name, resp.StatusCode)
+	}
+	var c struct {
+		ID     string `json:"id"`
+		Status string `json:"status"`
+	}
+	decodeBody(t, resp, &c)
+	return c.ID, c.Status
+}
+
+/// @brief  Cycle complet d'un module (ADR-11) : composant brouillon → instance → assemblage → soumission (RM17)
+/// @input  Module et composant réels, connexion réelle, soumission blockchain simulée (memBC)
+/// @expect statut "draft" à la création, "submitted" après soumission
 func TestAPIIntegration_ModuleLifecycle(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()
 	client := srv.Client()
 
-	// Créer le module
-	resp := apiDo(t, client, http.MethodPost, srv.URL+"/api/modules",
-		`{"name":"Drone v1","owner_id":"user1"}`)
-	if resp.StatusCode != http.StatusCreated {
-		resp.Body.Close()
-		t.Fatalf("POST module: got %d, want 201", resp.StatusCode)
+	// Créer le module et un composant à y instancier
+	modID, status := createComponent(t, srv, "Drone v1")
+	if status != string(model.ModuleDraft) {
+		t.Errorf("status initial: got %q, want draft", status)
 	}
-	var mod struct {
-		ID     string `json:"id"`
-		Status string `json:"status"`
-	}
-	decodeBody(t, resp, &mod)
-	if mod.Status != string(model.ModuleDraft) {
-		t.Errorf("status initial: got %q, want draft", mod.Status)
+	partID, _ := createComponent(t, srv, "Moteur")
+
+	// Instancier le composant dans le module
+	resp1 := apiDo(t, client, http.MethodPost, srv.URL+"/api/components/"+modID+"/instances",
+		`{"asset_id":"`+partID+`"}`)
+	resp1.Body.Close()
+	if resp1.StatusCode != http.StatusOK && resp1.StatusCode != http.StatusCreated {
+		t.Fatalf("POST instances: got %d, want 200/201", resp1.StatusCode)
 	}
 
 	// Créer une connexion
@@ -374,7 +557,7 @@ func TestAPIIntegration_ModuleLifecycle(t *testing.T) {
 	decodeBody(t, resp2, &conn)
 
 	// Ajouter la connexion comme assemblage
-	resp3 := apiDo(t, client, http.MethodPost, srv.URL+"/api/modules/"+mod.ID+"/assemblies",
+	resp3 := apiDo(t, client, http.MethodPost, srv.URL+"/api/components/"+modID+"/assemblies",
 		`{"connection_id":"`+conn.ID+`"}`)
 	if resp3.StatusCode != http.StatusOK {
 		resp3.Body.Close()
@@ -383,7 +566,7 @@ func TestAPIIntegration_ModuleLifecycle(t *testing.T) {
 	resp3.Body.Close()
 
 	// Soumettre
-	resp4 := apiDo(t, client, http.MethodPost, srv.URL+"/api/modules/"+mod.ID+"/submit",
+	resp4 := apiDo(t, client, http.MethodPost, srv.URL+"/api/components/"+modID+"/submit",
 		`{"note":"première livraison"}`)
 	if resp4.StatusCode != http.StatusOK {
 		resp4.Body.Close()
@@ -398,21 +581,36 @@ func TestAPIIntegration_ModuleLifecycle(t *testing.T) {
 
 // ── Interfaces physiques ──────────────────────────────────────────────────────
 
+// physicalInterfaces liste les interfaces non virtuelles d'un composant — le
+// slot virtuel est toujours présent (RM13).
+func physicalInterfaces(t *testing.T, srv *httptest.Server, assetID string) []string {
+	t.Helper()
+	resp := apiDo(t, srv.Client(), http.MethodGet, srv.URL+"/api/components/"+assetID+"/interfaces", "")
+	var ifaces []struct {
+		ID      string `json:"id"`
+		Virtual bool   `json:"virtual"`
+	}
+	decodeBody(t, resp, &ifaces)
+	var ids []string
+	for _, i := range ifaces {
+		if !i.Virtual {
+			ids = append(ids, i.ID)
+		}
+	}
+	return ids
+}
+
 /// @brief  Cycle complet : ajouter interface → lister → supprimer (JSONBlockchain réel)
 /// @input  Composant créé ; interface ELEC USB-C Out ajoutée et supprimée
-/// @expect interface présente dans la liste après ajout ; absente après suppression
+/// @expect interface physique présente dans la liste après ajout, absente après suppression ; le slot virtuel reste (RM13)
 func TestAPIIntegration_InterfaceLifecycle(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()
 	client := srv.Client()
 
 	// Créer un composant
-	body, ct := multipartBody("Capteur")
-	req, _ := http.NewRequest(http.MethodPost, srv.URL+"/api/components", bytes.NewBufferString(body))
-	req.Header.Set("Content-Type", ct)
-	resp, _ := client.Do(req)
-	var asset struct{ ID string `json:"id"` }
-	decodeBody(t, resp, &asset)
+	assetID, _ := createComponent(t, srv, "Capteur")
+	asset := struct{ ID string }{assetID}
 
 	// Ajouter une interface
 	resp2 := apiDo(t, client, http.MethodPost, srv.URL+"/api/components/"+asset.ID+"/interfaces",
@@ -428,11 +626,8 @@ func TestAPIIntegration_InterfaceLifecycle(t *testing.T) {
 	}
 
 	// Lister
-	resp3 := apiDo(t, client, http.MethodGet, srv.URL+"/api/components/"+asset.ID+"/interfaces", "")
-	var ifaces []struct{ ID string `json:"id"` }
-	decodeBody(t, resp3, &ifaces)
-	if len(ifaces) != 1 {
-		t.Errorf("got %d interfaces, want 1", len(ifaces))
+	if ifaces := physicalInterfaces(t, srv, asset.ID); len(ifaces) != 1 || ifaces[0] != iface.ID {
+		t.Errorf("interfaces physiques: got %v, want [%s]", ifaces, iface.ID)
 	}
 
 	// Supprimer
@@ -443,11 +638,8 @@ func TestAPIIntegration_InterfaceLifecycle(t *testing.T) {
 	}
 
 	// Vérifier l'absence
-	resp5 := apiDo(t, client, http.MethodGet, srv.URL+"/api/components/"+asset.ID+"/interfaces", "")
-	var empty []struct{ ID string `json:"id"` }
-	decodeBody(t, resp5, &empty)
-	if len(empty) != 0 {
-		t.Errorf("interface toujours présente après suppression : got %d", len(empty))
+	if ifaces := physicalInterfaces(t, srv, asset.ID); len(ifaces) != 0 {
+		t.Errorf("interface toujours présente après suppression : %v", ifaces)
 	}
 }
 
