@@ -15,11 +15,11 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 
 | Statut | Nombre |
 |--------|--------|
-| Ouvert | 18 |
+| Ouvert | 17 |
 | À vérifier | 2 |
 | À trancher (PO) | 13 |
 | Différé | 1 |
-| Résolu | 4 |
+| Résolu | 5 |
 
 ## Critiques à traiter en premier
 
@@ -49,7 +49,6 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-026 — Erreur Fabric indisponible renvoyée en 500 au lieu de 503](FT-026-erreur-fabric-indisponible-renvoyee-en-500-au.md) | Anomalie | mineure | Ouvert | UCCL01 |
 | [FT-029 — make deploy suppose un fabric.env présent sur le serveur](FT-029-make-deploy-suppose-un-fabric-env-present.md) | Anomalie | mineure | Ouvert | — |
 | [FT-032 — API_REST.md diverge des routes réellement servies](FT-032-api-rest-md-diverge-des-routes-reellement.md) | Incohérence documentaire | mineure | Ouvert | UCCE02, UCMOD03 |
-| [FT-034 — Modèle de domaine : ligne RM22 décrivant un écart](FT-034-modele-de-domaine-ligne-rm22-decrivant-un.md) | Incohérence documentaire | mineure | Ouvert | UCA02 |
 | [FT-035 — Roadmap et tableaux d'état d'implémentation obsolètes](FT-035-roadmap-et-tableaux-d-etat-d-implementation.md) | Dette technique | mineure | Ouvert | UCA02 |
 
 ## À vérifier
@@ -91,6 +90,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md) | Sécurité | critique | Résolu | UCA02, UCA05, UCA07 |
 | [FT-004 — Échec de l'auto-enregistrement CA non journalisé](FT-004-echec-de-l-auto-enregistrement-ca-non.md) | Anomalie | majeure | Résolu | UCA01 |
 | [FT-005 — Aucune approbation manuelle des demandes de compte](FT-005-aucune-approbation-manuelle-des-demandes-de-compte.md) | Écart spec ↔ code | majeure | Résolu | UCA01, UCA08 |
+| [FT-034 — Modèle de domaine : ligne RM22 décrivant un écart](FT-034-modele-de-domaine-ligne-rm22-decrivant-un.md) | Incohérence documentaire | mineure | Résolu | UCA02 |
 
 ## Fonctionnement
 

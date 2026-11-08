@@ -2,10 +2,10 @@
 id: FT-034
 titre: "Modèle de domaine : ligne RM22 décrivant un écart"
 type: incoherence
-statut: ouvert
+statut: resolu
 severite: mineure
 detecte: 2026-10-02
-maj: 2026-10-02
+maj: 2026-11-08
 composants: [specs]
 uc: [UCA02]
 rm: [RM22]
@@ -13,7 +13,7 @@ enf: []
 tags:
   - ticket
   - ticket/incoherence
-  - statut/ouvert
+  - statut/resolu
   - severite/mineure
   - domaine/identity
   - uc/UCA02
@@ -21,7 +21,7 @@ tags:
 ---
 # FT-034 — Modèle de domaine : ligne RM22 décrivant un écart
 
-> **Incohérence documentaire** · sévérité **mineure** · statut **Ouvert** · détecté le 2026-10-02
+> **Incohérence documentaire** · sévérité **mineure** · statut **Résolu** · détecté le 2026-10-02
 > Source : Annotations #incoherence de Modele_Domaine.md
 
 ## Constat
@@ -46,8 +46,8 @@ Réécrire la ligne RM22 selon la règle cible, retirer l'annotation « non vali
 
 ## Critères de clôture
 
-- [ ] Modele_Domaine.md décrit uniquement le comportement cible
-- [ ] Annotations levées
+- [x] Modele_Domaine.md décrit uniquement le comportement cible
+- [x] Annotations levées
 
 ## Liens
 
@@ -60,3 +60,4 @@ Réécrire la ligne RM22 selon la règle cible, retirer l'annotation « non vali
 ## Historique
 
 - 2026-10-02 — Ticket créé
+- 2026-11-08 — Corrigé — commit `b86eb54` : ligne RM22 réécrite selon la règle (changement de rôle par l'administrateur, effectif au prochain ré-enrôlement), relation « owns » décrite par la cible ADR-12 (`OwnerID` = identité signataire), les deux annotations `#incoherence` et le tag `relecture/incoherence` levés ; lignes RM43 à RM46 ajoutées. FT-001 reste ouvert pour le contrôle de propriété côté domaine. Branche `feature/ledger-invariants`, ni fusionnée ni déployée
