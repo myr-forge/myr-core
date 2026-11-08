@@ -15,11 +15,11 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 
 | Statut | Nombre |
 |--------|--------|
-| Ouvert | 17 |
+| Ouvert | 16 |
 | À vérifier | 2 |
 | À trancher (PO) | 14 |
 | Différé | 1 |
-| En cours | 5 |
+| En cours | 6 |
 | Résolu | 1 |
 
 ## Critiques à traiter en premier
@@ -36,7 +36,6 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | Ticket | Type | Sévérité | Statut | Use cases |
 |--------|------|----------|--------|-----------|
 | [FT-001 — Propriété des assets non contrôlée côté serveur](FT-001-propriete-des-assets-non-controlee-cote-serveur.md) | Sécurité | critique | Ouvert | UCCE01, UCCE02, UCCE07, UCMOD03, UCMOD04, UCMOD08, UCPI07 |
-| [FT-012 — Un module soumis peut être soumis à nouveau sans fork](FT-012-un-module-soumis-peut-etre-soumis-a.md) | Écart spec ↔ code | majeure | Ouvert | UCMOD06 |
 | [FT-014 — Catégorie d'asset decoupage absente](FT-014-categorie-d-asset-decoupage-absente.md) | Écart spec ↔ code | majeure | Ouvert | UCAM05, UCAM09 |
 | [FT-018 — Identifiant de bloc des versions de module simulé](FT-018-identifiant-de-bloc-des-versions-de-module.md) | Anomalie | majeure | Ouvert | UCMOD06 |
 | [FT-019 — Deux tests rouges dans domain/model](FT-019-deux-tests-rouges-dans-domain-model.md) | Anomalie | majeure | Ouvert | UCREC03, UCCE01 |
@@ -92,6 +91,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md) | Sécurité | critique | En cours | UCA02, UCA05, UCA07 |
 | [FT-004 — Échec de l'auto-enregistrement CA non journalisé](FT-004-echec-de-l-auto-enregistrement-ca-non.md) | Anomalie | majeure | En cours | UCA01 |
 | [FT-005 — Aucune approbation manuelle des demandes de compte](FT-005-aucune-approbation-manuelle-des-demandes-de-compte.md) | Écart spec ↔ code | majeure | En cours | UCA01, UCA08 |
+| [FT-012 — Un module soumis peut être soumis à nouveau sans fork](FT-012-un-module-soumis-peut-etre-soumis-a.md) | Écart spec ↔ code | majeure | En cours | UCMOD06 |
 | [FT-034 — Modèle de domaine : ligne RM22 décrivant un écart](FT-034-modele-de-domaine-ligne-rm22-decrivant-un.md) | Incohérence documentaire | mineure | En cours | UCA02 |
 | [FT-039 — Tests d'intégration REST en échec depuis l'authentification obligatoire](FT-039-tests-d-integration-rest-en-echec.md) | Anomalie | majeure | En cours | UCDEV01, UCMOD06, UCCE06 |
 

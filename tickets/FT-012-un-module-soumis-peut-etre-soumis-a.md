@@ -2,10 +2,10 @@
 id: FT-012
 titre: "Un module soumis peut être soumis à nouveau sans fork"
 type: ecart
-statut: ouvert
+statut: en-cours
 severite: majeure
 detecte: 2026-10-02
-maj: 2026-10-02
+maj: 2026-11-08
 composants: [domain/model]
 uc: [UCMOD06]
 rm: [RM19, RM06]
@@ -13,7 +13,7 @@ enf: [ENF28]
 tags:
   - ticket
   - ticket/ecart
-  - statut/ouvert
+  - statut/en-cours
   - severite/majeure
   - domaine/model
   - uc/UCMOD06
@@ -23,7 +23,7 @@ tags:
 ---
 # FT-012 — Un module soumis peut être soumis à nouveau sans fork
 
-> **Écart spec ↔ code** · sévérité **majeure** · statut **Ouvert** · détecté le 2026-10-02
+> **Écart spec ↔ code** · sévérité **majeure** · statut **En cours** · détecté le 2026-10-02
 > Source : Écart E5 (Analyse_des_besoins.md) ; roadmap § Bugs bloquants
 
 ## Constat
@@ -48,9 +48,9 @@ Refuser `SubmitModule` (et les mutations de composition : ajout/retrait d'instan
 
 ## Critères de clôture
 
-- [ ] Soumission d'un module déjà soumis refusée
-- [ ] Mutations de composition refusées sur un module soumis
-- [ ] Tests `TestSubmitModule_AlreadySubmitted_Rejected` et équivalents
+- [x] Soumission d'un module déjà soumis refusée
+- [x] Mutations de composition refusées sur un module soumis
+- [x] Tests `TestSubmitModule_AlreadySubmitted_Rejected` et équivalents (`domain/model/tests/immutability_test.go`)
 
 ## Liens
 
@@ -65,3 +65,4 @@ Refuser `SubmitModule` (et les mutations de composition : ajout/retrait d'instan
 ## Historique
 
 - 2026-10-02 — Ticket créé ; constat vérifié au commit `2aa69c1`
+- 2026-11-08 — Corrigé sur `feature/ledger-invariants` (commit `bde68f4`, R-03 étape 3) : `Submit`/`SubmitModule` n'acceptent qu'un brouillon absent du ledger, les mutations de composition et d'interfaces ne s'appliquent qu'à un brouillon (`ErrAssetSubmitted`, 409) ; un composant soumis suit la même règle. Une nouvelle version est un module dérivé (`CreateModule` avec `ParentID`). Exception décidée par le PO (ADR-12 amendé) : les métadonnées descriptives d'un asset soumis restent modifiables par son propriétaire via l'opération chaincode `UpdateMetadata` ; la licence est figée. Passe à `resolu` à la fusion dans `develop`
