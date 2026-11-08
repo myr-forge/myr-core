@@ -66,8 +66,12 @@ Un Module "utilise" un Composant si son `WorkspaceInstances` contient une instan
 3. La liste des Modules correspondants est retournée, avec pour chacun : nom, statut (`draft`/`submitted`), nombre de liaisons
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
+> - 🟡 [TestIsModule_DraftComponent_NotMisclassified](../../../docs/tests/domain-model/TestIsModule_DraftComponent_NotMisclassified.md) — déduit : teste `ModelService.ListModules`
+> - 🟡 [TestModule_CreateGetList](../../../docs/tests/domain-model/TestModule_CreateGetList.md) — déduit : teste `ModelService.ListModules`
+> - 🟡 [TestModule_ListModules_BlockchainUnreachable_DegradedReturnsDraftModules](../../../docs/tests/domain-model/TestModule_ListModules_BlockchainUnreachable_DegradedReturnsDraftModules.md) — déduit : teste `ModelService.ListModules`
+> - 🟡 [TestModule_ListNilStore_ReturnsNil](../../../docs/tests/domain-model/TestModule_ListNilStore_ReturnsNil.md) — déduit : teste `ModelService.ListModules`
+> - 🟡 [TestRemoveModule_Submitted_HidesLocally](../../../docs/tests/domain-model/TestRemoveModule_Submitted_HidesLocally.md) — déduit : teste `ModelService.ListModules`
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Aucun Module utilisant ce Composant

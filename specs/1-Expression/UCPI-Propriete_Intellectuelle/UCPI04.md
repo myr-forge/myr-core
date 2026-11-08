@@ -1,3 +1,12 @@
+---
+tags:
+  - rm/RM03
+  - rm/RM23
+  - rm/RM24
+  - rm/RM31
+  - rm/RM33
+  - relecture/question
+---
 ﻿---
 categorie: Propriété Intellectuelle
 titre: "Définir un prix sur un Composant proprietaire"

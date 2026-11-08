@@ -229,7 +229,7 @@ go run ./cmd/mangen  # génère les man pages dans docs/man/
 
 **Étape suivante — code, par section**
 - [§ CLI admin (via SSH sur le serveur)](Deploiement.md#CLI%20admin%20%28via%20SSH%20sur%20le%20serveur%29) → [CLI myr channel list](../../docs/code/commandes/CLI%20myr-channel-list.md) · [CLI myr model add](../../docs/code/commandes/CLI%20myr-model-add.md)
-- [§ 8. Monitoring](Deploiement.md#8.%20Monitoring) → [REST /api/ping](../../docs/code/routes/REST%20api-ping.md) · [REST /api/health](../../docs/code/routes/REST%20api-health.md) · [REST /api/status](../../docs/code/routes/REST%20api-status.md)
-- [§ 10. Informations manquantes](Deploiement.md#10.%20Informations%20manquantes) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md)
+- [§ 8. Monitoring](Deploiement.md#8.%20Monitoring) → [REST /api/health](../../docs/code/routes/REST%20api-health.md) · [REST /api/ping](../../docs/code/routes/REST%20api-ping.md) · [REST /api/status](../../docs/code/routes/REST%20api-status.md) · [REST /metrics](../../docs/code/routes/REST%20metrics.md)
+- [§ 10. Informations manquantes](Deploiement.md#10.%20Informations%20manquantes) → [REST /api/components](../../docs/code/routes/REST%20api-components.md)
 
 <!-- liens-obsidian:end -->

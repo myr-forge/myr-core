@@ -19,6 +19,7 @@ tags:
   - rm/RM07
   - rm/RM16
   - rm/RM19
+  - rm/RM42
   - enf/ENF12
   - enf/ENF30
 ---
@@ -86,16 +87,23 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 11. L'API retourne `201 Created` avec le `Model3D` JSON (ID, name, hash, blockID…).
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 9 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 38 déduit(s)
+> - 🟡 [TestFabricAdapter_ListModelRecords_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_ListModelRecords_EvaluateError.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestFabricAdapter_ListModelRecords_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_ListModelRecords_Success.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricAdapter_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricBlockchain_ListModelRecords_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_EvaluateError.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestFabricBlockchain_ListModelRecords_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_Success.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricBlockchain_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricBlockchain_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_ListModelRecords](../../../docs/tests/adapters-out-fabric/TestIntegration_ListModelRecords.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_VerifyIntegrity](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyIntegrity.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestAddFull_AllFields](../../../docs/tests/domain-model/TestAddFull_AllFields.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_AlwaysDraft_NoBlockchainWrite](../../../docs/tests/domain-model/TestAddFull_AlwaysDraft_NoBlockchainWrite.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_MissingFile_ReturnsError](../../../docs/tests/domain-model/TestAddFull_MissingFile_ReturnsError.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_NilBlockchain_StillWorks](../../../docs/tests/domain-model/TestAddFull_NilBlockchain_StillWorks.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_NilDraftStore_Rejected](../../../docs/tests/domain-model/TestAddFull_NilDraftStore_Rejected.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_NoFile_NoVersionNoHash](../../../docs/tests/domain-model/TestAddFull_NoFile_NoVersionNoHash.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_STLAndSTEP_BothAccepted](../../../docs/tests/domain-model/TestAddFull_STLAndSTEP_BothAccepted.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_WithFile_HashAndVersionCreated](../../../docs/tests/domain-model/TestAddFull_WithFile_HashAndVersionCreated.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_WithParent](../../../docs/tests/domain-model/TestAddFull_WithParent.md) — déduit : teste `ModelService.AddFull`
+> - … et 23 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Import depuis un format CAO non natif (STL, STEP, OBJ)
@@ -122,23 +130,23 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 > Ce flux est **optionnel** : le flux nominal (sans `draft: true`) reste inchangé — un composant est créé et soumis en une seule transaction, comme aujourd'hui. `draft` sert uniquement au cas où le Concepteur veut affiner les interfaces après création, sans les connaître entièrement à l'import du fichier.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 69 déduit(s)
-> - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponentInterfaces_GET](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponentInterfaces_POST_BadJSON](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_BadJSON.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponentInterfaces_POST_Created](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponentTree_GET](../../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponentTree_MethodNotAllowed](../../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponent_AddAssembly](../../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponent_AddAssembly_MissingConnectionID](../../../docs/tests/adapters-in-rest/TestComponent_AddAssembly_MissingConnectionID.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponent_AddInstance](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components/`
-> - 🟡 [TestComponent_DELETE_ServiceError](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_ServiceError.md) — déduit : teste route `/api/components/`
-> - … et 54 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 77 déduit(s)
+> - 🟡 [TestResolveOwner](../../../docs/tests/adapters-in-cli/TestResolveOwner.md) — déduit : teste commande `myr model add`
+> - 🟡 [TestRunModelAdd_NominalCase](../../../docs/tests/adapters-in-cli/TestRunModelAdd_NominalCase.md) — déduit : teste commande `myr model add`
+> - 🟡 [TestRunModelAdd_ServiceError_Rejected](../../../docs/tests/adapters-in-cli/TestRunModelAdd_ServiceError_Rejected.md) — déduit : teste commande `myr model add`
+> - 🟡 [TestRunModelSubmit_NominalCase](../../../docs/tests/adapters-in-cli/TestRunModelSubmit_NominalCase.md) — déduit : teste commande `myr model submit`
+> - 🟡 [TestRunModelSubmit_ServiceError_Rejected](../../../docs/tests/adapters-in-cli/TestRunModelSubmit_ServiceError_Rejected.md) — déduit : teste commande `myr model submit`
+> - 🟡 [TestRunModelSubmit_WithNote](../../../docs/tests/adapters-in-cli/TestRunModelSubmit_WithNote.md) — déduit : teste commande `myr model submit`
+> - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_GET](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_POST_BadJSON](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_BadJSON.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_POST_Created](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentTree_GET](../../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentTree_MethodNotAllowed](../../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponent_AddAssembly](../../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : teste route `/api/components`
+> - … et 62 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Catégorie dérivée (non-`base`)
@@ -194,8 +202,15 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 3. L'API retourne `500 Internal Server Error` : `{ "error": "Erreur blockchain : <message>. Aucune donnée enregistrée." }`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricAdapter_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricBlockchain_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricBlockchain_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_VerifyIntegrity](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyIntegrity.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 <!-- tests-obsidian:end -->
 
 ## Post-conditions
@@ -311,6 +326,7 @@ end
 - **API_REST** : [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](../../3-Conception/API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29)
 - **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29)
 - **Chaincode** : [§ 4. Fonctions chaincode — Store/Read (D3/D4/D6)](../../3-Conception/Chaincode.md#4.%20Fonctions%20chaincode%20—%20Store/Read%20%28D3/D4/D6%29)
+- **Conception_intro** : [§ ADR-02 — Interfaces enregistrées sur la blockchain via le cycle brouillon → soumission (généralisé à tout asset)](../../3-Conception/Conception_intro.md#ADR-02%20—%20Interfaces%20enregistrées%20sur%20la%20blockchain%20via%20le%20cycle%20brouillon%20→%20soumission%20%28généralisé%20à%20tout%20asset%29)
 - **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 3.1 `myr model add`](../../3-Conception/DC_CLI_Model.md#3.1%20`myr%20model%20add`) · [§ 3.6bis `myr model submit` (RM16/RM17/RM19 — soumission, composant ou assemblage)](../../3-Conception/DC_CLI_Model.md#3.6bis%20`myr%20model%20submit`%20%28RM16/RM17/RM19%20—%20soumission,%20composant%20ou%20assemblage%29) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case) · [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
 - **Sequence_soumission_asset** : [§ Séquence — Soumission d'un composant (D3)](../../3-Conception/Sequence_soumission_asset.md#Séquence%20—%20Soumission%20d'un%20composant%20%28D3%29)
 

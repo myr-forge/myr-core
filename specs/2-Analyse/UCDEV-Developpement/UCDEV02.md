@@ -85,8 +85,14 @@ Les groupes `model`, `channel`, `payment` et `peer` sont **implémentés** (`ada
 5. Le résultat est affiché en sortie texte dans le terminal
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
+> - 🟡 [TestResolveOwner](../../../docs/tests/adapters-in-cli/TestResolveOwner.md) — déduit : teste commande `myr model add`
+> - 🟡 [TestRunModelAdd_NominalCase](../../../docs/tests/adapters-in-cli/TestRunModelAdd_NominalCase.md) — déduit : teste commande `myr model add`
+> - 🟡 [TestRunModelAdd_ServiceError_Rejected](../../../docs/tests/adapters-in-cli/TestRunModelAdd_ServiceError_Rejected.md) — déduit : teste commande `myr model add`
+> - 🟡 [TestRunModelList_BlockchainUnreachable_NoDrafts_Rejected](../../../docs/tests/adapters-in-cli/TestRunModelList_BlockchainUnreachable_NoDrafts_Rejected.md) — déduit : teste commande `myr model list`
+> - 🟡 [TestRunModelList_BlockchainUnreachable_WithDrafts_ShowsWarningAndTable](../../../docs/tests/adapters-in-cli/TestRunModelList_BlockchainUnreachable_WithDrafts_ShowsWarningAndTable.md) — déduit : teste commande `myr model list`
+> - 🟡 [TestRunModelList_Empty](../../../docs/tests/adapters-in-cli/TestRunModelList_Empty.md) — déduit : teste commande `myr model list`
+> - 🟡 [TestRunModelList_NominalCase](../../../docs/tests/adapters-in-cli/TestRunModelList_NominalCase.md) — déduit : teste commande `myr model list`
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Commandes d'administration réseau (UCADM01–05)
@@ -108,8 +114,23 @@ Les groupes `model`, `channel`, `payment` et `peer` sont **implémentés** (`ada
 > La référence complète des commandes UCADM (flags, sorties, erreurs, services appelés) est dans `specs/3-Conception/DC_CLI_Admin.md`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 44 déduit(s)
+> - 🟡 [TestRunNetworkActivate_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNetworkActivate_NominalCase.md) — déduit : teste commande `myr network activate`
+> - 🟡 [TestRunNetworkActivate_NotFound](../../../docs/tests/adapters-in-cli/TestRunNetworkActivate_NotFound.md) — déduit : teste commande `myr network activate`
+> - 🟡 [TestRunNetworkAdd_InvalidPeer_Rejected](../../../docs/tests/adapters-in-cli/TestRunNetworkAdd_InvalidPeer_Rejected.md) — déduit : teste commande `myr network add`
+> - 🟡 [TestRunNetworkAdd_NoApproval_NotSet](../../../docs/tests/adapters-in-cli/TestRunNetworkAdd_NoApproval_NotSet.md) — déduit : teste commande `myr network add`
+> - 🟡 [TestRunNetworkAdd_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNetworkAdd_NominalCase.md) — déduit : teste commande `myr network add`
+> - 🟡 [TestRunNetworkAdd_RequireApproval](../../../docs/tests/adapters-in-cli/TestRunNetworkAdd_RequireApproval.md) — déduit : teste commande `myr network add`
+> - 🟡 [TestRunNetworkDestroy_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_NominalCase.md) — déduit : teste commande `myr network destroy`
+> - 🟡 [TestRunNetworkDestroy_NotFound](../../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_NotFound.md) — déduit : teste commande `myr network destroy`
+> - 🟡 [TestRunNetworkDestroy_ProductionRefused](../../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_ProductionRefused.md) — déduit : teste commande `myr network destroy`
+> - 🟡 [TestRunNetworkDestroy_WithoutConfirm](../../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_WithoutConfirm.md) — déduit : teste commande `myr network destroy`
+> - 🟡 [TestRunNetworkImport_FabricProfile_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNetworkImport_FabricProfile_NominalCase.md) — déduit : teste commande `myr network import`
+> - 🟡 [TestRunNetworkImport_FileNotFound](../../../docs/tests/adapters-in-cli/TestRunNetworkImport_FileNotFound.md) — déduit : teste commande `myr network import`
+> - 🟡 [TestRunNetworkImport_InvalidFormat](../../../docs/tests/adapters-in-cli/TestRunNetworkImport_InvalidFormat.md) — déduit : teste commande `myr network import`
+> - 🟡 [TestRunNetworkImport_NameOverride](../../../docs/tests/adapters-in-cli/TestRunNetworkImport_NameOverride.md) — déduit : teste commande `myr network import`
+> - 🟡 [TestRunNetworkImport_NetworkProfileJSON_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNetworkImport_NetworkProfileJSON_NominalCase.md) — déduit : teste commande `myr network import`
+> - … et 29 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Vérification d'intégrité d'un modèle
@@ -120,8 +141,11 @@ Les groupes `model`, `channel`, `payment` et `peer` sont **implémentés** (`ada
 4. Affichage : "OK modele [id] : integrité vérifiée" ou "KO modele [id] : integrité compromise"
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 4 déduit(s)
+> - 🟡 [TestRunModelVerify_Compromised](../../../docs/tests/adapters-in-cli/TestRunModelVerify_Compromised.md) — déduit : teste commande `myr model verify`
+> - 🟡 [TestRunModelVerify_FileMissing](../../../docs/tests/adapters-in-cli/TestRunModelVerify_FileMissing.md) — déduit : teste commande `myr model verify`
+> - 🟡 [TestRunModelVerify_HashMismatch](../../../docs/tests/adapters-in-cli/TestRunModelVerify_HashMismatch.md) — déduit : teste commande `myr model verify`
+> - 🟡 [TestRunModelVerify_OK](../../../docs/tests/adapters-in-cli/TestRunModelVerify_OK.md) — déduit : teste commande `myr model verify`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Adapter Fabric non configuré
@@ -130,8 +154,23 @@ Les groupes `model`, `channel`, `payment` et `peer` sont **implémentés** (`ada
 2. Les commandes `myr org add`, `myr node add`, `myr node remove` retournent `ErrFabricUnavailable` — elles nécessitent un adapter Fabric configuré, sans repli vers un autre stockage.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 25 déduit(s)
+> - 🟡 [TestRunNodeAdd_CertNotFound_Rejected](../../../docs/tests/adapters-in-cli/TestRunNodeAdd_CertNotFound_Rejected.md) — déduit : teste commande `myr node add`
+> - 🟡 [TestRunNodeAdd_ExplicitChannel](../../../docs/tests/adapters-in-cli/TestRunNodeAdd_ExplicitChannel.md) — déduit : teste commande `myr node add`
+> - 🟡 [TestRunNodeAdd_FabricUnavailable_Rejected](../../../docs/tests/adapters-in-cli/TestRunNodeAdd_FabricUnavailable_Rejected.md) — déduit : teste commande `myr node add`
+> - 🟡 [TestRunNodeAdd_InvalidType_Rejected](../../../docs/tests/adapters-in-cli/TestRunNodeAdd_InvalidType_Rejected.md) — déduit : teste commande `myr node add`
+> - 🟡 [TestRunNodeAdd_NodeUnreachable_Rejected](../../../docs/tests/adapters-in-cli/TestRunNodeAdd_NodeUnreachable_Rejected.md) — déduit : teste commande `myr node add`
+> - 🟡 [TestRunNodeAdd_Orderer_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNodeAdd_Orderer_NominalCase.md) — déduit : teste commande `myr node add`
+> - 🟡 [TestRunNodeAdd_Peer_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNodeAdd_Peer_NominalCase.md) — déduit : teste commande `myr node add`
+> - 🟡 [TestRunNodeAdd_SyncTimeout_Warning](../../../docs/tests/adapters-in-cli/TestRunNodeAdd_SyncTimeout_Warning.md) — déduit : teste commande `myr node add`
+> - 🟡 [TestRunNodeAdd_WithCert_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNodeAdd_WithCert_NominalCase.md) — déduit : teste commande `myr node add`
+> - 🟡 [TestRunNodeRemove_EndorsementPolicy_Rejected](../../../docs/tests/adapters-in-cli/TestRunNodeRemove_EndorsementPolicy_Rejected.md) — déduit : teste commande `myr node remove`
+> - 🟡 [TestRunNodeRemove_FabricUnavailable_Rejected](../../../docs/tests/adapters-in-cli/TestRunNodeRemove_FabricUnavailable_Rejected.md) — déduit : teste commande `myr node remove`
+> - 🟡 [TestRunNodeRemove_NoChannel_Rejected](../../../docs/tests/adapters-in-cli/TestRunNodeRemove_NoChannel_Rejected.md) — déduit : teste commande `myr node remove`
+> - 🟡 [TestRunNodeRemove_NodeNotMember_Rejected](../../../docs/tests/adapters-in-cli/TestRunNodeRemove_NodeNotMember_Rejected.md) — déduit : teste commande `myr node remove`
+> - 🟡 [TestRunNodeRemove_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNodeRemove_NominalCase.md) — déduit : teste commande `myr node remove`
+> - 🟡 [TestRunNodeRemove_RM27_MinNodesRequired_Rejected](../../../docs/tests/adapters-in-cli/TestRunNodeRemove_RM27_MinNodesRequired_Rejected.md) — déduit : teste commande `myr node remove`
+> - … et 10 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Commande invalide ou arguments manquants

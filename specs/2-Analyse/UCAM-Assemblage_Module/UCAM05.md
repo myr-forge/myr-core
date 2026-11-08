@@ -89,15 +89,23 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 8. Le module passe en état `submitted`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
-> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/modules/`
-> - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules/`
-> - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules/`
-> - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules/`
-> - 🟡 [TestModules_Verify_OK](../../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : teste route `/api/modules/`
-> - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.CreateModule`
+> [!check]- Tests — 0 explicite(s) · 32 déduit(s)
+> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestModules_Verify_OK](../../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`, `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_ParentID_NotFound_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_NotFound_Rejected.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.CreateModule`
+> - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.CreateModule`, `ModelService.SubmitModule`
+> - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
+> - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
+> - 🟡 [TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed](../../../docs/tests/domain-model/TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
+> - 🟡 [TestIsModule_DraftComponent_NotMisclassified](../../../docs/tests/domain-model/TestIsModule_DraftComponent_NotMisclassified.md) — déduit : teste `ModelService.CreateModule`
+> - 🟡 [TestModule_AddRemoveAssembly](../../../docs/tests/domain-model/TestModule_AddRemoveAssembly.md) — déduit : teste `ModelService.CreateModule`
+> - 🟡 [TestModule_CreateGetList](../../../docs/tests/domain-model/TestModule_CreateGetList.md) — déduit : teste `ModelService.CreateModule`
+> - 🟡 [TestModule_ListModules_BlockchainUnreachable_DegradedReturnsDraftModules](../../../docs/tests/domain-model/TestModule_ListModules_BlockchainUnreachable_DegradedReturnsDraftModules.md) — déduit : teste `ModelService.CreateModule`
+> - … et 17 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Composant sans interfaces définies
@@ -130,8 +138,15 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 3. Le handler retourne HTTP 500
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestModule_NotFound_ReturnsError](../../../docs/tests/domain-model/TestModule_NotFound_ReturnsError.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestModule_Submit](../../../docs/tests/domain-model/TestModule_Submit.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestModule_SubmitTwice_VersionIncrement](../../../docs/tests/domain-model/TestModule_SubmitTwice_VersionIncrement.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestModule_Submit_NoAssembly](../../../docs/tests/domain-model/TestModule_Submit_NoAssembly.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestRemoveModule_Submitted_HidesLocally](../../../docs/tests/domain-model/TestRemoveModule_Submitted_HidesLocally.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestService_NilBlockchain_ErrBlockchainUnavailable](../../../docs/tests/domain-model/TestService_NilBlockchain_ErrBlockchainUnavailable.md) — déduit : teste `ModelService.SubmitModule`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Erreur blockchain à la soumission
@@ -141,8 +156,15 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 3. Une erreur est retournée, la soumission peut être retentée
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricAdapter_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricBlockchain_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestFabricBlockchain_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_VerifyIntegrity](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyIntegrity.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 <!-- tests-obsidian:end -->
 
 ## Post-conditions
@@ -263,6 +285,8 @@ const (
 **Étape suivante — conception**
 - **API_REST** : [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](../../3-Conception/API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29)
 - **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29) · [§ 2. Diagramme de classes](../../3-Conception/Architecture_Composition.md#2.%20Diagramme%20de%20classes) · [§ 3. Diagramme d'états — Model3D](../../3-Conception/Architecture_Composition.md#3.%20Diagramme%20d'états%20—%20Model3D)
+- **Conception_intro** : [§ ADR-01 — Entité unifiée Model3D pour composants et modules](../../3-Conception/Conception_intro.md#ADR-01%20—%20Entité%20unifiée%20Model3D%20pour%20composants%20et%20modules) · [§ ADR-11 — Fusion composant/module au niveau du contrat REST et CLI](../../3-Conception/Conception_intro.md#ADR-11%20—%20Fusion%20composant/module%20au%20niveau%20du%20contrat%20REST%20et%20CLI)
 - **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 3.5 `myr model instance add` / `remove`](../../3-Conception/DC_CLI_Model.md#3.5%20`myr%20model%20instance%20add`%20/%20`remove`) · [§ 3.7 Transformation composant → module (UCAM05, catégorie `decoupage`)](../../3-Conception/DC_CLI_Model.md#3.7%20Transformation%20composant%20→%20module%20%28UCAM05,%20catégorie%20`decoupage`%29) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case) · [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
+- **Tracabilite** : [§ 4.1 Citations relevées dans les specs](../../3-Conception/Tracabilite.md#4.1%20Citations%20relevées%20dans%20les%20specs)
 
 <!-- liens-obsidian:end -->

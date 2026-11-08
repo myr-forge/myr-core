@@ -17,6 +17,7 @@ tags:
   - rm/RM22
   - rm/RM23
   - rm/RM24
+  - rm/RM42
   - enf/ENF01
   - enf/ENF02
   - enf/ENF12
@@ -264,7 +265,8 @@ REST --> BrowserCons : 200 {status: delivered, timestamp}
 
 **Étape suivante — conception**
 - **API_REST** : [§ 11. D7 — Paiement](../../3-Conception/API_REST.md#11.%20D7%20—%20Paiement)
-- **Chaincode** : [§ 5. Fonctions chaincode — Commissions (D7, à implémenter)](../../3-Conception/Chaincode.md#5.%20Fonctions%20chaincode%20—%20Commissions%20%28D7,%20à%20implémenter%29)
+- **Chaincode** : [§ 5. Fonctions chaincode — Commissions (D7, à implémenter)](../../3-Conception/Chaincode.md#5.%20Fonctions%20chaincode%20—%20Commissions%20%28D7,%20à%20implémenter%29) · [§ 7. Diagramme de séquence — Distribution de commissions (UCAUT01)](../../3-Conception/Chaincode.md#7.%20Diagramme%20de%20séquence%20—%20Distribution%20de%20commissions%20%28UCAUT01%29)
+- **Conception_intro** : [§ ADR-09 — Deux canaux de fabrication : organisation réseau (nœud propre) pour un atelier qui rejoint le réseau, adaptateur externe (oracle) pour un partenaire industriel](../../3-Conception/Conception_intro.md#ADR-09%20—%20Deux%20canaux%20de%20fabrication%20:%20organisation%20réseau%20%28nœud%20propre%29%20pour%20un%20atelier%20qui%20rejoint%20le%20réseau,%20adaptateur%20externe%20%28oracle%29%20pour%20un%20partenaire%20industriel)
 - **DC_CLI_Model** : [§ 6. Écarts et points ouverts](../../3-Conception/DC_CLI_Model.md#6.%20Écarts%20et%20points%20ouverts)
 - **DC_D7_Payment** : [§ 3. Entités à concevoir (RM23/RM24)](../../3-Conception/DC_D7_Payment.md#3.%20Entités%20à%20concevoir%20%28RM23/RM24%29) · [§ 4. Algorithme de distribution des commissions (RM23/RM24)](../../3-Conception/DC_D7_Payment.md#4.%20Algorithme%20de%20distribution%20des%20commissions%20%28RM23/RM24%29) · [§ 7. Écarts code → specs](../../3-Conception/DC_D7_Payment.md#7.%20Écarts%20code%20→%20specs)
 - **DC_D9_Automatisation** : [§ DC — D9 : Automatisation](../../3-Conception/DC_D9_Automatisation.md#DC%20—%20D9%20:%20Automatisation) · [§ 1. Objectif](../../3-Conception/DC_D9_Automatisation.md#1.%20Objectif) · [§ 2. UCAUT01 — Déclenchement des commissions à la livraison](../../3-Conception/DC_D9_Automatisation.md#2.%20UCAUT01%20—%20Déclenchement%20des%20commissions%20à%20la%20livraison) · [§ 6. Écarts code → specs](../../3-Conception/DC_D9_Automatisation.md#6.%20Écarts%20code%20→%20specs)

@@ -12,6 +12,7 @@ tags:
   - rm/RM11
   - rm/RM15
   - rm/RM16
+  - rm/RM42
   - enf/ENF03
 ---
 # DC — D8 : Recherche
@@ -162,11 +163,10 @@ Ce tableau complète — sans le remplacer — `DC_CLI_Model.md` §6 point 2/3, 
 ## Liens
 
 **Étape suivante — code, par section**
-- [§ 1. Objectif](DC_D8_Recherche.md#1.%20Objectif) → [ModelService.Get](../../docs/code/fonctions/model.ModelService.Get.md) · [ModelService.List](../../docs/code/fonctions/model.ModelService.List.md)
 - [§ 3. UCREC03 — Arbre de versions (généalogie `ParentID`)](DC_D8_Recherche.md#3.%20UCREC03%20—%20Arbre%20de%20versions%20%28généalogie%20`ParentID`%29) → [ModelService.GetChildren](../../docs/code/fonctions/model.ModelService.GetChildren.md)
 - [§ 4. UCREC04 — Modules utilisant un composant](DC_D8_Recherche.md#4.%20UCREC04%20—%20Modules%20utilisant%20un%20composant) → [ModelService.ListModules](../../docs/code/fonctions/model.ModelService.ListModules.md)
 - [§ 6. Décisions de conception](DC_D8_Recherche.md#6.%20Décisions%20de%20conception) → [ModelService.GetChildren](../../docs/code/fonctions/model.ModelService.GetChildren.md)
 - [§ 7. Écarts code → specs](DC_D8_Recherche.md#7.%20Écarts%20code%20→%20specs) → [ModelService.GetChildren](../../docs/code/fonctions/model.ModelService.GetChildren.md)
-- [§ 8. CLI et REST](DC_D8_Recherche.md#8.%20CLI%20et%20REST) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [REST /api/modules/](../../docs/code/routes/REST%20api-modules.md) · [CLI myr model](../../docs/code/commandes/CLI%20myr-model.md)
+- [§ 8. CLI et REST](DC_D8_Recherche.md#8.%20CLI%20et%20REST) → [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [REST /api/modules](../../docs/code/routes/REST%20api-modules.md)
 
 <!-- liens-obsidian:end -->

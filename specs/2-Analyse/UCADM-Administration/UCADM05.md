@@ -78,9 +78,8 @@ La commande est exposée **uniquement via le CLI admin** (`myr`). Elle n'est jam
 6. Le CLI retourne : `Réseau "<nom>" démantelé. Toutes les données locales ont été supprimées.`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
-> - 🟡 [TestDelete_NotFound](../../../docs/tests/domain-network/TestDelete_NotFound.md) — déduit : teste `NetworkService.Delete`, `Repo.Delete`
-> - 🟡 [TestDelete_Success](../../../docs/tests/domain-network/TestDelete_Success.md) — déduit : teste `NetworkService.Delete`, `Repo.Delete`
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Flag --confirm absent
@@ -95,8 +94,11 @@ La commande est exposée **uniquement via le CLI admin** (`myr`). Elle n'est jam
    ```
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 4 déduit(s)
+> - 🟡 [TestRunNetworkDestroy_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_NominalCase.md) — déduit : teste commande `myr network destroy`
+> - 🟡 [TestRunNetworkDestroy_NotFound](../../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_NotFound.md) — déduit : teste commande `myr network destroy`
+> - 🟡 [TestRunNetworkDestroy_ProductionRefused](../../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_ProductionRefused.md) — déduit : teste commande `myr network destroy`
+> - 🟡 [TestRunNetworkDestroy_WithoutConfirm](../../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_WithoutConfirm.md) — déduit : teste commande `myr network destroy`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Réseau marqué en production
@@ -217,7 +219,7 @@ end
 ## Liens
 
 **Étape suivante — conception**
-- **DC_CLI_Admin** : [§ DC — CLI Admin : Référence des commandes administrateur](../../3-Conception/DC_CLI_Admin.md#DC%20—%20CLI%20Admin%20:%20Référence%20des%20commandes%20administrateur) · [§ 1. Objectif](../../3-Conception/DC_CLI_Admin.md#1.%20Objectif) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Admin.md#2.%20Arbre%20de%20commandes) · [§ 11. Écarts code → specs](../../3-Conception/DC_CLI_Admin.md#11.%20Écarts%20code%20→%20specs) · [§ 12. Informations manquantes / points ouverts](../../3-Conception/DC_CLI_Admin.md#12.%20Informations%20manquantes%20/%20points%20ouverts)
+- **DC_CLI_Admin** : [§ DC — CLI Admin : Référence des commandes administrateur](../../3-Conception/DC_CLI_Admin.md#DC%20—%20CLI%20Admin%20:%20Référence%20des%20commandes%20administrateur) · [§ 1. Objectif](../../3-Conception/DC_CLI_Admin.md#1.%20Objectif) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Admin.md#2.%20Arbre%20de%20commandes) · [§ 3.9 `myr network destroy <id> --confirm` *(UCADM05)*](../../3-Conception/DC_CLI_Admin.md#3.9%20`myr%20network%20destroy%20<id>%20--confirm`%20*%28UCADM05%29*) · [§ 11. Écarts code → specs](../../3-Conception/DC_CLI_Admin.md#11.%20Écarts%20code%20→%20specs) · [§ 12. Informations manquantes / points ouverts](../../3-Conception/DC_CLI_Admin.md#12.%20Informations%20manquantes%20/%20points%20ouverts)
 - **DC_CLI_Model** : [§ 1. Objectif](../../3-Conception/DC_CLI_Model.md#1.%20Objectif)
 - **DC_D2_Administration** : [§ DC — D2 : Administration réseau](../../3-Conception/DC_D2_Administration.md#DC%20—%20D2%20:%20Administration%20réseau) · [§ NetworkProfile (domain/network)](../../3-Conception/DC_D2_Administration.md#NetworkProfile%20%28domain/network%29) · [§ Champ à ajouter à NetworkProfile](../../3-Conception/DC_D2_Administration.md#Champ%20à%20ajouter%20à%20NetworkProfile) · [§ Port entrant — NetworkService](../../3-Conception/DC_D2_Administration.md#Port%20entrant%20—%20NetworkService) · [§ 8. Écarts code → specs](../../3-Conception/DC_D2_Administration.md#8.%20Écarts%20code%20→%20specs) · [§ 9. Informations manquantes](../../3-Conception/DC_D2_Administration.md#9.%20Informations%20manquantes)
 

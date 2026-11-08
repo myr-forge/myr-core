@@ -13,11 +13,15 @@ tags:
   - uc/UCADM06
   - uc/UCADM07
   - rm/RM07
+  - rm/RM21
   - rm/RM27
   - rm/RM34
   - rm/RM35
   - rm/RM36
   - rm/RM37
+  - rm/RM43
+  - rm/RM44
+  - rm/RM46
   - enf/ENF18
 ---
 # DC — D2 : Administration réseau
@@ -395,12 +399,11 @@ Annuaire des peers : déclaré dans `configtx.yaml`, distribué sur le ledger. C
 **Étape suivante — code, par section**
 - [§ NetworkProfile (domain/network)](DC_D2_Administration.md#NetworkProfile%20%28domain/network%29) → [REST /api/networks/active](../../docs/code/routes/REST%20api-networks-active.md) · [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md)
 - [§ Champ à ajouter à NetworkProfile](DC_D2_Administration.md#Champ%20à%20ajouter%20à%20NetworkProfile) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md)
-- [§ Role (domain/channel)](DC_D2_Administration.md#Role%20%28domain/channel%29) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md) · [CLI myr role](../../docs/code/commandes/CLI%20myr-role.md) · [CLI myr role delete](../../docs/code/commandes/CLI%20myr-role-delete.md)
-- [§ 4. Politique d'accès réseau](DC_D2_Administration.md#4.%20Politique%20d'accès%20réseau) → [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md)
+- [§ Role (domain/channel)](DC_D2_Administration.md#Role%20%28domain/channel%29) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md) · [CLI myr role delete](../../docs/code/commandes/CLI%20myr-role-delete.md)
+- [§ 4. Politique d'accès réseau](DC_D2_Administration.md#4.%20Politique%20d'accès%20réseau) → [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [CLI myr identity approve](../../docs/code/commandes/CLI%20myr-identity-approve.md) · [CLI myr identity register](../../docs/code/commandes/CLI%20myr-identity-register.md)
 - [§ Port entrant — NetworkService](DC_D2_Administration.md#Port%20entrant%20—%20NetworkService) → [NetworkService.AddPeer](../../docs/code/fonctions/network.NetworkService.AddPeer.md) · [NetworkService.GetActive](../../docs/code/fonctions/network.NetworkService.GetActive.md) · [NetworkService.TestConnection](../../docs/code/fonctions/network.NetworkService.TestConnection.md)
-- [§ Port entrant — ChannelService](DC_D2_Administration.md#Port%20entrant%20—%20ChannelService) → [ChannelConfigPort.AddNode](../../docs/code/fonctions/channel.ChannelConfigPort.AddNode.md) · [ChannelConfigPort.AddOrganisation](../../docs/code/fonctions/channel.ChannelConfigPort.AddOrganisation.md) · [ChannelConfigPort.RemoveNode](../../docs/code/fonctions/channel.ChannelConfigPort.RemoveNode.md) · [ChannelService.AddNode](../../docs/code/fonctions/channel.ChannelService.AddNode.md) · [ChannelService.AddOrganisation](../../docs/code/fonctions/channel.ChannelService.AddOrganisation.md) · [ChannelService.RemoveNode](../../docs/code/fonctions/channel.ChannelService.RemoveNode.md)
-- [§ 7. Décisions de conception](DC_D2_Administration.md#7.%20Décisions%20de%20conception) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [NetworkService.Delete](../../docs/code/fonctions/network.NetworkService.Delete.md) · [Repo.Delete](../../docs/code/fonctions/network.Repo.Delete.md)
-- [§ 8. Écarts code → specs](DC_D2_Administration.md#8.%20Écarts%20code%20→%20specs) → [CLI myr network](../../docs/code/commandes/CLI%20myr-network.md) · [CLI myr org](../../docs/code/commandes/CLI%20myr-org.md) · [CLI myr node](../../docs/code/commandes/CLI%20myr-node.md) · [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [ChannelConfigPort.AddNode](../../docs/code/fonctions/channel.ChannelConfigPort.AddNode.md) · [ChannelConfigPort.AddOrganisation](../../docs/code/fonctions/channel.ChannelConfigPort.AddOrganisation.md) · [ChannelConfigPort.RemoveNode](../../docs/code/fonctions/channel.ChannelConfigPort.RemoveNode.md) · [ChannelService.AddNode](../../docs/code/fonctions/channel.ChannelService.AddNode.md) · [ChannelService.AddOrganisation](../../docs/code/fonctions/channel.ChannelService.AddOrganisation.md) · [ChannelService.RemoveNode](../../docs/code/fonctions/channel.ChannelService.RemoveNode.md)
+- [§ 7. Décisions de conception](DC_D2_Administration.md#7.%20Décisions%20de%20conception) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [NetworkService.Delete](../../docs/code/fonctions/network.NetworkService.Delete.md)
+- [§ 8. Écarts code → specs](DC_D2_Administration.md#8.%20Écarts%20code%20→%20specs) → [CLI myr network](../../docs/code/commandes/CLI%20myr-network.md) · [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [CLI myr node](../../docs/code/commandes/CLI%20myr-node.md) · [CLI myr org](../../docs/code/commandes/CLI%20myr-org.md)
 - [§ 9. Informations manquantes](DC_D2_Administration.md#9.%20Informations%20manquantes) → [CLI myr network create](../../docs/code/commandes/CLI%20myr-network-create.md) · [CLI myr network import](../../docs/code/commandes/CLI%20myr-network-import.md)
 
 <!-- liens-obsidian:end -->

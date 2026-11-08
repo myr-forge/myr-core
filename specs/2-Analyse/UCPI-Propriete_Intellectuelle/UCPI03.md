@@ -10,8 +10,6 @@ tags:
   - domaine/payment
   - uc/UCPI03
   - rm/RM23
-  - rm/RM24
-  - rm/RM25
   - rm/RM26
 ---
 

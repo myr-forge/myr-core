@@ -124,9 +124,6 @@ Aucune règle métier dédiée. La révocation est une opération d'administrati
 ## Liens
 
 **Étape suivante — conception**
-- _Aucun document de conception ne traite ce use case : la chaîne s'arrête à l'analyse._
-
-**Code cité par cette analyse (sans conception : non relié)**
-- REST `/api/admin/sessions/`
+- **Tracabilite** : [§ 4.1 Citations relevées dans les specs](../../3-Conception/Tracabilite.md#4.1%20Citations%20relevées%20dans%20les%20specs)
 
 <!-- liens-obsidian:end -->

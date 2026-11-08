@@ -1,3 +1,7 @@
+---
+tags:
+  - rm/RM01
+---
 ﻿---
 categorie: Composant Ecriture
 titre: "Ajout d'un composant Numérique"

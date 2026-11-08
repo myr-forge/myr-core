@@ -71,15 +71,23 @@ Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/ident
 7. Le client conserve ce token et l'envoie dans l'en-tête `X-Myr-Token` de chaque requête protégée suivante — c'est aussi la seule occasion où le client reçoit son rôle (voir UCA04/UCA07)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 19 déduit(s)
 > - 🟡 [TestChannels_PUT_SwitchesChannel](../../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_CannotSignIn_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_CannotSignIn_Forbidden.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_EnrollError](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_EnrollError.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_InvalidJSON](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_InvalidJSON.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_MethodNotAllowed](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MethodNotAllowed.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_MissingFields](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MissingFields.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_NoIdentityService](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_NoIdentityService.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_RoleFromCertificate](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_RoleFromCertificate.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_Success](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_Success.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestRequireAuth_BlockchainWithValidToken](../../../docs/tests/adapters-in-rest/TestRequireAuth_BlockchainWithValidToken.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestAccountRequest_FullFlow](../../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestReEnroll_CAError](../../../docs/tests/domain-identity/TestReEnroll_CAError.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestReEnroll_Success](../../../docs/tests/domain-identity/TestReEnroll_Success.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestService_Enroll_CAError](../../../docs/tests/domain-identity/TestService_Enroll_CAError.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestService_Enroll_NoCA](../../../docs/tests/domain-identity/TestService_Enroll_NoCA.md) — déduit : teste `IdentityService.Enroll`
+> - … et 4 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Accès invité (réseau public)
@@ -102,8 +110,13 @@ Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/ident
 3. Aucune demande d'accès n'est enregistrée par cet appel : une inscription passe par `POST /api/identity/request`, selon les règles d'inscription du réseau (UCA01)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 6 déduit(s)
+> - 🟡 [TestHandleIdentityRequest_InvalidJSON](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidJSON.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_InvalidName_Rejected](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidName_Rejected.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_MissingFields](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_MissingFields.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_RegistrationClosed_Rejected](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_RegistrationClosed_Rejected.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_ServiceError](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_ServiceError.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_Success](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_Success.md) — déduit : teste route `/api/identity/request`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Secret invalide ou identité inconnue
@@ -112,8 +125,16 @@ Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/ident
 2. Réponse `HTTP 401` avec le message d'erreur renvoyé par la CA
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 9 déduit(s)
+> - 🟡 [TestAccountRequest_FullFlow](../../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestReEnroll_CAError](../../../docs/tests/domain-identity/TestReEnroll_CAError.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestReEnroll_Success](../../../docs/tests/domain-identity/TestReEnroll_Success.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestService_Enroll_CAError](../../../docs/tests/domain-identity/TestService_Enroll_CAError.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestService_Enroll_NoCA](../../../docs/tests/domain-identity/TestService_Enroll_NoCA.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestService_Enroll_Success](../../../docs/tests/domain-identity/TestService_Enroll_Success.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestService_Enroll_UsesFullHandleForCAAuth](../../../docs/tests/domain-identity/TestService_Enroll_UsesFullHandleForCAAuth.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestService_ListLocalWallets_AfterEnroll](../../../docs/tests/domain-identity/TestService_ListLocalWallets_AfterEnroll.md) — déduit : teste `IdentityService.Enroll`
+> - 🟡 [TestWallet_AfterEnroll_Found](../../../docs/tests/domain-identity/TestWallet_AfterEnroll_Found.md) — déduit : teste `IdentityService.Enroll`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Identité inactive ou sans rôle
@@ -121,6 +142,11 @@ Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/ident
 1. L'enrôlement réussit, mais le certificat émis porte `Myr.status` différent de `active`, ou aucun `Myr.role`
 2. `CanSignIn` retourne `ErrIdentityPending` (en attente d'approbation), `ErrIdentitySuspended` (demande refusée ou identité suspendue), `ErrIdentityInactive` (statut absent ou inconnu) ou `ErrIdentityWithoutRole`
 3. Réponse `HTTP 403` avec le message correspondant ; aucune session n'est créée
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Champs requis manquants
 
@@ -210,5 +236,6 @@ end
 
 **Étape suivante — conception**
 - **DC_CLI_Identity** : [§ DC — CLI Identité & Session : Référence des commandes `myr identity` / `myr session`](../../3-Conception/DC_CLI_Identity.md#DC%20—%20CLI%20Identité%20&%20Session%20:%20Référence%20des%20commandes%20`myr%20identity`%20/%20`myr%20session`) · [§ 1. Objectif](../../3-Conception/DC_CLI_Identity.md#1.%20Objectif) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Identity.md#2.%20Arbre%20de%20commandes)
+- **Tracabilite** : [§ 4.1 Citations relevées dans les specs](../../3-Conception/Tracabilite.md#4.1%20Citations%20relevées%20dans%20les%20specs)
 
 <!-- liens-obsidian:end -->

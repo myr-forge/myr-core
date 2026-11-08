@@ -1,3 +1,9 @@
+---
+tags:
+  - rm/RM23
+  - rm/RM24
+  - rm/RM30
+---
 ﻿---
 categorie: Propriété Intellectuelle
 titre: "Définir un prix sur un Module proprietaire"

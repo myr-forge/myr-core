@@ -149,6 +149,6 @@ endif
 ## Liens
 
 **Étape suivante — analyse**
-- _Pas d'analyse pour ce use case._
+- _Aucune analyse ne traite ce use case : la chaîne s'arrête à l'expression._
 
 <!-- liens-obsidian:end -->

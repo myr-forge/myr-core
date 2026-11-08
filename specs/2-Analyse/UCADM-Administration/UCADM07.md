@@ -219,7 +219,7 @@ end
 ## Liens
 
 **Étape suivante — conception**
-- **DC_CLI_Admin** : [§ 11. Écarts code → specs](../../3-Conception/DC_CLI_Admin.md#11.%20Écarts%20code%20→%20specs)
+- **DC_CLI_Admin** : [§ 5. Groupe `myr role` — Gestion des rôles *(UCADM07)*](../../3-Conception/DC_CLI_Admin.md#5.%20Groupe%20`myr%20role`%20—%20Gestion%20des%20rôles%20*%28UCADM07%29*) · [§ 5.2 `myr role create` *(UCADM07)*](../../3-Conception/DC_CLI_Admin.md#5.2%20`myr%20role%20create`%20*%28UCADM07%29*) · [§ 5.3 `myr role edit <id>` *(UCADM07)*](../../3-Conception/DC_CLI_Admin.md#5.3%20`myr%20role%20edit%20<id>`%20*%28UCADM07%29*) · [§ 5.4 `myr role delete <id>` *(UCADM07)*](../../3-Conception/DC_CLI_Admin.md#5.4%20`myr%20role%20delete%20<id>`%20*%28UCADM07%29*) · [§ 7.2 `RoleService` (port_in) *(UCADM06/07)*](../../3-Conception/DC_CLI_Admin.md#7.2%20`RoleService`%20%28port_in%29%20*%28UCADM06/07%29*) · [§ 7.5 `RoleStore` (port_out) *(UCADM06/07)*](../../3-Conception/DC_CLI_Admin.md#7.5%20`RoleStore`%20%28port_out%29%20*%28UCADM06/07%29*) · [§ 11. Écarts code → specs](../../3-Conception/DC_CLI_Admin.md#11.%20Écarts%20code%20→%20specs)
 - **DC_D2_Administration** : [§ DC — D2 : Administration réseau](../../3-Conception/DC_D2_Administration.md#DC%20—%20D2%20:%20Administration%20réseau) · [§ Entités à concevoir (non présentes dans le code)](../../3-Conception/DC_D2_Administration.md#Entités%20à%20concevoir%20%28non%20présentes%20dans%20le%20code%29) · [§ 8. Écarts code → specs](../../3-Conception/DC_D2_Administration.md#8.%20Écarts%20code%20→%20specs)
 
 <!-- liens-obsidian:end -->

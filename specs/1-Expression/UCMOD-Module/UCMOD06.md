@@ -1,3 +1,7 @@
+---
+tags:
+  - rm/RM17
+---
 ﻿---
 categorie: Module
 titre: "Soumettre un module à la blockchain"

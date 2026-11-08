@@ -1,3 +1,7 @@
+---
+tags:
+  - rm/RM01
+---
 ﻿---
 categorie: Propriété Intellectuelle
 titre: "Déclarer un composant similaire"

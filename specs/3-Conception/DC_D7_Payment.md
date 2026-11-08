@@ -361,6 +361,7 @@ interface ManufacturingPort {
 ## Liens
 
 **Étape suivante — code, par section**
+- [§ Port entrant — PaymentService (existant, partiel)](DC_D7_Payment.md#Port%20entrant%20—%20PaymentService%20%28existant,%20partiel%29) → [PaymentService.Pay](../../docs/code/fonctions/payment.PaymentService.Pay.md)
 - [§ 8. Décisions arrêtées sur les points ouverts](DC_D7_Payment.md#8.%20Décisions%20arrêtées%20sur%20les%20points%20ouverts) → [CLI myr org add](../../docs/code/commandes/CLI%20myr-org-add.md)
 
 <!-- liens-obsidian:end -->

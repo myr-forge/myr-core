@@ -13,6 +13,7 @@ tags:
   - domaine/role
   - uc/UCA08
   - rm/RM22
+  - rm/RM45
   - rm/RM46
   - enf/ENF12
 ---
@@ -72,23 +73,23 @@ Le rôle de la session REST est lu dans le certificat émis à la connexion (UCA
 6. L'identité doit être ré-enrôlée pour qu'un nouveau certificat portant l'attribut à jour soit émis — soit côté CLI via `myr identity re-enroll <pseudo@org>` (renouvelle le wallet local sans passer par une session REST), soit côté REST via une nouvelle connexion (`POST /api/identity/session`), dont la session porte alors le nouveau rôle
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 17 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 26 déduit(s)
+> - 🟡 [TestRunIdentityReEnroll_NoLocalWallet_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityReEnroll_NoLocalWallet_Rejected.md) — déduit : teste commande `myr identity re-enroll`
+> - 🟡 [TestRunIdentityReEnroll_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentityReEnroll_NominalCase.md) — déduit : teste commande `myr identity re-enroll`
+> - 🟡 [TestRunIdentitySetRole_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentitySetRole_NominalCase.md) — déduit : teste commande `myr identity set-role`
 > - 🟡 [TestChannels_PUT_SwitchesChannel](../../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : teste route `/api/identity/session`
-> - 🟡 [TestHandleIdentityGuest_AllowedDeliversToken](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_AllowedDeliversToken.md) — déduit : teste route `/api/identity/guest`
-> - 🟡 [TestHandleIdentityGuest_DisallowedReturnsForbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_DisallowedReturnsForbidden.md) — déduit : teste route `/api/identity/guest`
+> - 🟡 [TestHandleIdentityRequestDecision_Approve_OK](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Approve_OK.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequestDecision_Errors](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Errors.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequestDecision_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequestDecision_Reject_OK](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Reject_OK.md) — déduit : teste route `/api/identity/requests`
 > - 🟡 [TestHandleIdentityRequest_InvalidJSON](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidJSON.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_InvalidName_Rejected](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidName_Rejected.md) — déduit : teste route `/api/identity/request`
 > - 🟡 [TestHandleIdentityRequest_MissingFields](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_MissingFields.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_RegistrationClosed_Rejected](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_RegistrationClosed_Rejected.md) — déduit : teste route `/api/identity/request`
 > - 🟡 [TestHandleIdentityRequest_ServiceError](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_ServiceError.md) — déduit : teste route `/api/identity/request`
 > - 🟡 [TestHandleIdentityRequest_Success](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_Success.md) — déduit : teste route `/api/identity/request`
 > - 🟡 [TestHandleIdentityRequests_Admin_EmptyList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_EmptyList.md) — déduit : teste route `/api/identity/requests`
-> - 🟡 [TestHandleIdentityRequests_Admin_ReturnsList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_ReturnsList.md) — déduit : teste route `/api/identity/requests`
-> - 🟡 [TestHandleIdentityRequests_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
-> - 🟡 [TestHandleIdentitySession_EnrollError](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_EnrollError.md) — déduit : teste route `/api/identity/session`
-> - 🟡 [TestHandleIdentitySession_InvalidJSON](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_InvalidJSON.md) — déduit : teste route `/api/identity/session`
-> - 🟡 [TestHandleIdentitySession_MethodNotAllowed](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MethodNotAllowed.md) — déduit : teste route `/api/identity/session`
-> - 🟡 [TestHandleIdentitySession_MissingFields](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MissingFields.md) — déduit : teste route `/api/identity/session`
-> - 🟡 [TestHandleIdentitySession_NoIdentityService](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_NoIdentityService.md) — déduit : teste route `/api/identity/session`
-> - … et 2 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 11 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Identité ou rôle invalide
@@ -97,8 +98,12 @@ Le rôle de la session REST est lu dans le certificat émis à la connexion (UCA
 2. Rôle absent de la table des rôles : `SetRole` refuse le changement (`ErrInvalidRole`, RM46) sans modifier la CA — le rôle doit d'abord être créé (`myr role create`)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
+> - 🟡 [TestSetRole_CAError](../../../docs/tests/domain-identity/TestSetRole_CAError.md) — déduit : teste `IdentityService.SetRole`
+> - 🟡 [TestSetRole_MissingName](../../../docs/tests/domain-identity/TestSetRole_MissingName.md) — déduit : teste `IdentityService.SetRole`
+> - 🟡 [TestSetRole_NoCA](../../../docs/tests/domain-identity/TestSetRole_NoCA.md) — déduit : teste `IdentityService.SetRole`
+> - 🟡 [TestSetRole_RM46_UnknownRole_Rejected](../../../docs/tests/domain-identity/TestSetRole_RM46_UnknownRole_Rejected.md) — déduit : teste `IdentityService.SetRole`
+> - 🟡 [TestSetRole_Success](../../../docs/tests/domain-identity/TestSetRole_Success.md) — déduit : teste `IdentityService.SetRole`
 <!-- tests-obsidian:end -->
 
 ## Post-conditions

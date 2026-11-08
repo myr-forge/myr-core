@@ -1,3 +1,9 @@
+---
+tags:
+  - rm/RM09
+  - rm/RM10
+  - rm/RM11
+---
 ﻿---
 categorie: Assemblage Module
 titre: "Liaison entre interfaces"

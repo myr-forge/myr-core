@@ -4,7 +4,11 @@ tags:
   - type/conception
   - rm/RM01
   - rm/RM03
+  - rm/RM04
+  - rm/RM05
   - rm/RM06
+  - rm/RM16
+  - rm/RM19
   - rm/RM23
   - rm/RM24
   - rm/RM25

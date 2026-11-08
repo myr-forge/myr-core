@@ -89,14 +89,21 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 7. Le visiteur conserve ce secret : il lui servira à se connecter (UCA02)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 14 déduit(s)
 > - 🟡 [TestHandleIdentityRequest_InvalidJSON](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidJSON.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_InvalidName_Rejected](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidName_Rejected.md) — déduit : teste route `/api/identity/request`
 > - 🟡 [TestHandleIdentityRequest_MissingFields](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_MissingFields.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_RegistrationClosed_Rejected](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_RegistrationClosed_Rejected.md) — déduit : teste route `/api/identity/request`
 > - 🟡 [TestHandleIdentityRequest_ServiceError](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_ServiceError.md) — déduit : teste route `/api/identity/request`
 > - 🟡 [TestHandleIdentityRequest_Success](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_Success.md) — déduit : teste route `/api/identity/request`
-> - 🟡 [TestAutoRegister_NoCA](../../../docs/tests/domain-identity/TestAutoRegister_NoCA.md) — déduit : teste `IdentityService.AutoRegister`
-> - 🟡 [TestAutoRegister_RoleForwarded](../../../docs/tests/domain-identity/TestAutoRegister_RoleForwarded.md) — déduit : teste `IdentityService.AutoRegister`
-> - 🟡 [TestAutoRegister_Success](../../../docs/tests/domain-identity/TestAutoRegister_Success.md) — déduit : teste `IdentityService.AutoRegister`
+> - 🟡 [TestAccountRequest_FullFlow](../../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_CAError_Failed](../../../docs/tests/domain-identity/TestRequestAccess_CAError_Failed.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_InvalidRequest_Rejected](../../../docs/tests/domain-identity/TestRequestAccess_InvalidRequest_Rejected.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_NoApproval_Active](../../../docs/tests/domain-identity/TestRequestAccess_NoApproval_Active.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_RM46_InvalidDefaultRole_Rejected](../../../docs/tests/domain-identity/TestRequestAccess_RM46_InvalidDefaultRole_Rejected.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_RegistrationClosed_Rejected](../../../docs/tests/domain-identity/TestRequestAccess_RegistrationClosed_Rejected.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_RequireApproval_NoStore_Rejected](../../../docs/tests/domain-identity/TestRequestAccess_RequireApproval_NoStore_Rejected.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_RequireApproval_Pending](../../../docs/tests/domain-identity/TestRequestAccess_RequireApproval_Pending.md) — déduit : teste `IdentityService.RequestAccess`
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Auto-enregistrement avec approbation (`RequireApproval=true`)
@@ -109,10 +116,22 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 6. À sa prochaine connexion, l'utilisateur reçoit un certificat portant `Myr.status=active` et ouvre sa session
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
+> - 🟡 [TestRunIdentityDecision_Approve_OK](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : teste commande `myr identity approve`
+> - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : teste commande `myr identity approve`
+> - 🟡 [TestRunIdentityRequests_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentityRequests_NominalCase.md) — déduit : teste commande `myr identity requests`
+> - 🟡 [TestHandleIdentityRequestDecision_Approve_OK](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Approve_OK.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequestDecision_Errors](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Errors.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequestDecision_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequestDecision_Reject_OK](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Reject_OK.md) — déduit : teste route `/api/identity/requests`
 > - 🟡 [TestHandleIdentityRequests_Admin_EmptyList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_EmptyList.md) — déduit : teste route `/api/identity/requests`
 > - 🟡 [TestHandleIdentityRequests_Admin_ReturnsList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_ReturnsList.md) — déduit : teste route `/api/identity/requests`
 > - 🟡 [TestHandleIdentityRequests_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentitySession_RoleFromCertificate](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_RoleFromCertificate.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestAccountRequest_FullFlow](../../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — déduit : teste `IdentityService.ApproveRequest`
+> - 🟡 [TestApproveRequest_CAError_StaysPending](../../../docs/tests/domain-identity/TestApproveRequest_CAError_StaysPending.md) — déduit : teste `IdentityService.ApproveRequest`
+> - 🟡 [TestApproveRequest_NominalCase](../../../docs/tests/domain-identity/TestApproveRequest_NominalCase.md) — déduit : teste `IdentityService.ApproveRequest`
+> - 🟡 [TestDecideRequest_NotFoundOrNotPending_Rejected](../../../docs/tests/domain-identity/TestDecideRequest_NotFoundOrNotPending_Rejected.md) — déduit : teste `IdentityService.ApproveRequest`
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Demande refusée
@@ -121,6 +140,22 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 2. L'administrateur refuse : `POST /api/identity/requests/{id}/reject` ou `myr identity reject <id>` → `RejectRequest` → `Myr.status=suspended`, demande `rejected` → `HTTP 200`
 3. L'identité ne peut ni se connecter ni écrire ; rien n'est supprimé (ni l'identité CA, ni la demande)
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 12 déduit(s)
+> - 🟡 [TestRunIdentityDecision_Approve_OK](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : teste commande `myr identity reject`
+> - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : teste commande `myr identity reject`
+> - 🟡 [TestHandleIdentityRequestDecision_Approve_OK](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Approve_OK.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequestDecision_Errors](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Errors.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequestDecision_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequestDecision_Reject_OK](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Reject_OK.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequests_Admin_EmptyList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_EmptyList.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequests_Admin_ReturnsList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_ReturnsList.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequests_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentitySession_RoleFromCertificate](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_RoleFromCertificate.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestDecideRequest_NotFoundOrNotPending_Rejected](../../../docs/tests/domain-identity/TestDecideRequest_NotFoundOrNotPending_Rejected.md) — déduit : teste `IdentityService.RejectRequest`
+> - 🟡 [TestRejectRequest_NominalCase](../../../docs/tests/domain-identity/TestRejectRequest_NominalCase.md) — déduit : teste `IdentityService.RejectRequest`
+<!-- tests-obsidian:end -->
+
 ### Flux alternatif — Création de compte par l'administrateur
 
 1. L'administrateur soumet `POST /api/identity/accounts` avec `{pseudo, org_id, role, email}` (permission `identity.admin`) ou exécute `myr identity register --pseudo <p> --org-id <id> --role <r> [--email <e>]`
@@ -128,32 +163,81 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 3. Réponse `HTTP 201` avec `{handle, secret}` — l'administrateur transmet le secret à l'utilisateur par un canal hors bande
 4. Ce flux ne dépend pas des règles d'auto-enregistrement : c'est la seule voie d'inscription sur un réseau fermé
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 10 déduit(s)
+> - 🟡 [TestRunIdentityRegister_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentityRegister_NominalCase.md) — déduit : teste commande `myr identity register`
+> - 🟡 [TestHandleIdentityAccounts_Admin_Created](../../../docs/tests/adapters-in-rest/TestHandleIdentityAccounts_Admin_Created.md) — déduit : teste route `/api/identity/accounts`
+> - 🟡 [TestHandleIdentityAccounts_InvalidNameOrRole_Rejected](../../../docs/tests/adapters-in-rest/TestHandleIdentityAccounts_InvalidNameOrRole_Rejected.md) — déduit : teste route `/api/identity/accounts`
+> - 🟡 [TestHandleIdentityAccounts_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityAccounts_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/accounts`
+> - 🟡 [TestCreateAccount_RM46_CustomAndDefaultRole](../../../docs/tests/domain-identity/TestCreateAccount_RM46_CustomAndDefaultRole.md) — déduit : teste `IdentityService.CreateAccount`
+> - 🟡 [TestCreateAccount_RM46_UnknownRole_Rejected](../../../docs/tests/domain-identity/TestCreateAccount_RM46_UnknownRole_Rejected.md) — déduit : teste `IdentityService.CreateAccount`
+> - 🟡 [TestService_CreateAccount_CAError](../../../docs/tests/domain-identity/TestService_CreateAccount_CAError.md) — déduit : teste `IdentityService.CreateAccount`
+> - 🟡 [TestService_CreateAccount_InvalidName_Rejected](../../../docs/tests/domain-identity/TestService_CreateAccount_InvalidName_Rejected.md) — déduit : teste `IdentityService.CreateAccount`
+> - 🟡 [TestService_CreateAccount_NoCA](../../../docs/tests/domain-identity/TestService_CreateAccount_NoCA.md) — déduit : teste `IdentityService.CreateAccount`
+> - 🟡 [TestService_CreateAccount_Success](../../../docs/tests/domain-identity/TestService_CreateAccount_Success.md) — déduit : teste `IdentityService.CreateAccount`
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Réseau fermé à l'auto-enregistrement
 
 1. `AllowAutoRegister=false`, ou aucun réseau actif
 2. `RequestAccess` retourne `ErrRegistrationClosed` sans rien enregistrer ni appeler la CA
 3. Réponse `HTTP 403` ; en CLI, `myr identity request` échoue avec le même message
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 11 déduit(s)
+> - 🟡 [TestRunIdentityRequest_AutoRegister_Approved](../../../docs/tests/adapters-in-cli/TestRunIdentityRequest_AutoRegister_Approved.md) — déduit : teste commande `myr identity request`
+> - 🟡 [TestRunIdentityRequest_NoNetwork_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityRequest_NoNetwork_Rejected.md) — déduit : teste commande `myr identity request`
+> - 🟡 [TestRunIdentityRequest_RequireApproval_Pending](../../../docs/tests/adapters-in-cli/TestRunIdentityRequest_RequireApproval_Pending.md) — déduit : teste commande `myr identity request`
+> - 🟡 [TestAccountRequest_FullFlow](../../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_CAError_Failed](../../../docs/tests/domain-identity/TestRequestAccess_CAError_Failed.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_InvalidRequest_Rejected](../../../docs/tests/domain-identity/TestRequestAccess_InvalidRequest_Rejected.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_NoApproval_Active](../../../docs/tests/domain-identity/TestRequestAccess_NoApproval_Active.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_RM46_InvalidDefaultRole_Rejected](../../../docs/tests/domain-identity/TestRequestAccess_RM46_InvalidDefaultRole_Rejected.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_RegistrationClosed_Rejected](../../../docs/tests/domain-identity/TestRequestAccess_RegistrationClosed_Rejected.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_RequireApproval_NoStore_Rejected](../../../docs/tests/domain-identity/TestRequestAccess_RequireApproval_NoStore_Rejected.md) — déduit : teste `IdentityService.RequestAccess`
+> - 🟡 [TestRequestAccess_RequireApproval_Pending](../../../docs/tests/domain-identity/TestRequestAccess_RequireApproval_Pending.md) — déduit : teste `IdentityService.RequestAccess`
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Pseudo ou organisation invalide
 
 1. Le pseudo ou l'organisation est réduit à `.`/`..`, ou contient `@`, `:`, `/`, `\`, une espace ou un caractère de contrôle
 2. `ErrInvalidIdentityName` → `HTTP 400` (demande comme création par l'administrateur)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Rôle non attribuable (RM46)
 
 1. Création par l'administrateur avec un rôle absent de la table des rôles → `ErrInvalidRole` → `HTTP 400`, la CA n'est pas appelée
 2. Demande d'accès alors que le rôle par défaut du réseau est inconnu ou porte un droit d'administration → `ErrInvalidRole` → `HTTP 500` (configuration du réseau à corriger), rien n'est conservé — ce cas ne survient que si la table des rôles a changé après la configuration du réseau, qui refuse déjà un tel rôle
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
 ### Flux erreur — Enregistrement refusé par la CA
 
 1. La CA refuse l'enregistrement (identité déjà existante, CA indisponible…)
 2. La demande est conservée au statut `failed` et l'erreur est retournée (`HTTP 500`)
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Décision impossible
 
 1. Demande inconnue → `ErrRequestNotFound` → `HTTP 404`
 2. Demande déjà décidée (`approved`, `rejected`, `failed`) → `ErrRequestNotPending` → `HTTP 409`, l'identité n'est pas modifiée
 3. Action autre que `approve`/`reject` → `HTTP 404` ; session sans `identity.admin` → `HTTP 403`
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### Flux erreur — Champs requis manquants
 
@@ -250,7 +334,8 @@ REST --> Client : HTTP 200 AccountRequest
 
 **Étape suivante — conception**
 - **API_REST** : [§ 2. D1 — Identité & RBAC](../../3-Conception/API_REST.md#2.%20D1%20—%20Identité%20&%20RBAC)
-- **DC_CLI_Identity** : [§ DC — CLI Identité & Session : Référence des commandes `myr identity` / `myr session`](../../3-Conception/DC_CLI_Identity.md#DC%20—%20CLI%20Identité%20&%20Session%20:%20Référence%20des%20commandes%20`myr%20identity`%20/%20`myr%20session`) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Identity.md#2.%20Arbre%20de%20commandes) · [§ 3.5 `myr identity request`](../../3-Conception/DC_CLI_Identity.md#3.5%20`myr%20identity%20request`) · [§ 4. Points ouverts](../../3-Conception/DC_CLI_Identity.md#4.%20Points%20ouverts) · [§ 5. Décisions de conception](../../3-Conception/DC_CLI_Identity.md#5.%20Décisions%20de%20conception)
-- **DC_D1_Auth_Identity** : [§ AccountRequest (`domain/identity`)](../../3-Conception/DC_D1_Auth_Identity.md#AccountRequest%20%28`domain/identity`%29)
+- **Conception_intro** : [§ ADR-07 — Émission d'identité permissionnée (Fabric CA), pas d'auto-génération de clé sans registrar](../../3-Conception/Conception_intro.md#ADR-07%20—%20Émission%20d'identité%20permissionnée%20%28Fabric%20CA%29,%20pas%20d'auto-génération%20de%20clé%20sans%20registrar) · [§ ADR-08 — Point ouvert : le client CA du serveur REST ignore le `NetworkProfile` actif](../../3-Conception/Conception_intro.md#ADR-08%20—%20Point%20ouvert%20:%20le%20client%20CA%20du%20serveur%20REST%20ignore%20le%20`NetworkProfile`%20actif)
+- **DC_CLI_Identity** : [§ DC — CLI Identité & Session : Référence des commandes `myr identity` / `myr session`](../../3-Conception/DC_CLI_Identity.md#DC%20—%20CLI%20Identité%20&%20Session%20:%20Référence%20des%20commandes%20`myr%20identity`%20/%20`myr%20session`) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Identity.md#2.%20Arbre%20de%20commandes) · [§ 3.5 `myr identity request`](../../3-Conception/DC_CLI_Identity.md#3.5%20`myr%20identity%20request`) · [§ 3.5b `myr identity approve` / `reject`](../../3-Conception/DC_CLI_Identity.md#3.5b%20`myr%20identity%20approve`%20/%20`reject`) · [§ 5. Décisions de conception](../../3-Conception/DC_CLI_Identity.md#5.%20Décisions%20de%20conception)
+- **Tracabilite** : [§ 4.1 Citations relevées dans les specs](../../3-Conception/Tracabilite.md#4.1%20Citations%20relevées%20dans%20les%20specs)
 
 <!-- liens-obsidian:end -->

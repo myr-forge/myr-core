@@ -76,10 +76,13 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 6. La réponse `201 Created` retourne le DTO de la connexion créée
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 6 déduit(s)
 > - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyLink_MissingStore](../../../docs/tests/domain-model/TestAddAssemblyLink_MissingStore.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyLink_UnknownInterface](../../../docs/tests/domain-model/TestAddAssemblyLink_UnknownInterface.md) — déduit : teste `ModelService.AddAssemblyLink`
+> - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddAssemblyLink`
+> - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddAssemblyLink`
+> - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddAssemblyLink`
 <!-- tests-obsidian:end -->
 
 ### Flux nominal B — Liaison via asset d'accroche
@@ -101,7 +104,7 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 3. Un nouveau slot virtuel est recréé sur l'asset source (RM13 — `EnsureVirtualSlot`)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 11 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 14 déduit(s)
 > - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
@@ -113,6 +116,9 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 > - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestWorkspace_VirtualIsClickable](../../../docs/tests/domain-model/TestWorkspace_VirtualIsClickable.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestWorkspace_VirtualSlot_ChainedConnections](../../../docs/tests/domain-model/TestWorkspace_VirtualSlot_ChainedConnections.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 <!-- tests-obsidian:end -->
 
 ### Flux — Liaison devenue incompatible après modification
@@ -125,10 +131,10 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 0 explicite(s) · 6 déduit(s)
-> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/interfaces/`
-> - 🟡 [TestInterface_DELETE](../../../docs/tests/adapters-in-rest/TestInterface_DELETE.md) — déduit : teste route `/api/interfaces/`
-> - 🟡 [TestInterface_PATCH_NotFound](../../../docs/tests/adapters-in-rest/TestInterface_PATCH_NotFound.md) — déduit : teste route `/api/interfaces/`
-> - 🟡 [TestInterface_PATCH_OK](../../../docs/tests/adapters-in-rest/TestInterface_PATCH_OK.md) — déduit : teste route `/api/interfaces/`
+> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/interfaces`
+> - 🟡 [TestInterface_DELETE](../../../docs/tests/adapters-in-rest/TestInterface_DELETE.md) — déduit : teste route `/api/interfaces`
+> - 🟡 [TestInterface_PATCH_NotFound](../../../docs/tests/adapters-in-rest/TestInterface_PATCH_NotFound.md) — déduit : teste route `/api/interfaces`
+> - 🟡 [TestInterface_PATCH_OK](../../../docs/tests/adapters-in-rest/TestInterface_PATCH_OK.md) — déduit : teste route `/api/interfaces`
 > - 🟡 [TestUpdateConnection](../../../docs/tests/adapters-out-localstorage/TestUpdateConnection.md) — déduit : teste `ConnectionStore.UpdateConnection`
 > - 🟡 [TestUpdateConnection_NotFound](../../../docs/tests/adapters-out-localstorage/TestUpdateConnection_NotFound.md) — déduit : teste `ConnectionStore.UpdateConnection`
 <!-- tests-obsidian:end -->
@@ -140,10 +146,13 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 3. Message d'erreur attendu : `"Cette interface est déjà utilisée dans une liaison"`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 6 déduit(s)
 > - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyLink_MissingStore](../../../docs/tests/domain-model/TestAddAssemblyLink_MissingStore.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyLink_UnknownInterface](../../../docs/tests/domain-model/TestAddAssemblyLink_UnknownInterface.md) — déduit : teste `ModelService.AddAssemblyLink`
+> - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddAssemblyLink`
+> - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddAssemblyLink`
+> - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddAssemblyLink`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Interfaces incompatibles
@@ -275,5 +284,6 @@ for _, c := range conns {
 - **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29)
 - **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 3.4 `myr model link add`](../../3-Conception/DC_CLI_Model.md#3.4%20`myr%20model%20link%20add`) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case)
 - **Sequence_soumission_module** : [§ Séquence — Composition et soumission d'un module (D5/D6)](../../3-Conception/Sequence_soumission_module.md#Séquence%20—%20Composition%20et%20soumission%20d'un%20module%20%28D5/D6%29)
+- **Tracabilite** : [§ 4.1 Citations relevées dans les specs](../../3-Conception/Tracabilite.md#4.1%20Citations%20relevées%20dans%20les%20specs)
 
 <!-- liens-obsidian:end -->

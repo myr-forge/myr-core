@@ -238,11 +238,10 @@ Au-delà, `HTTP 429` est retourné.
 **Étape suivante — code, par section**
 - [§ 1. Vue d'ensemble](Securite.md#1.%20Vue%20d'ensemble) → [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [RoleService.HasPermission](../../docs/code/fonctions/role.RoleService.HasPermission.md)
 - [§ Flux d'authentification](Securite.md#Flux%20d'authentification) → [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
-- [§ Révocation](Securite.md#Révocation) → [REST /api/admin/sessions/](../../docs/code/routes/REST%20api-admin-sessions.md)
-- [§ Cycle de vie d'une identité](Securite.md#Cycle%20de%20vie%20d'une%20identité) → [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
-- [§ Rôles et permissions](Securite.md#Rôles%20et%20permissions) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md) · [CLI myr identity set-role](../../docs/code/commandes/CLI%20myr-identity-set-role.md)
-- [§ Middleware de contrôle d'accès](Securite.md#Middleware%20de%20contrôle%20d'accès) → [RoleService.HasPermission](../../docs/code/fonctions/role.RoleService.HasPermission.md)
-- [§ 8. Rate limiting](Securite.md#8.%20Rate%20limiting) → [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md)
-- [§ 9. Surfaces d'attaque et mitigations](Securite.md#9.%20Surfaces%20d'attaque%20et%20mitigations) → [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [REST /api/admin/sessions/](../../docs/code/routes/REST%20api-admin-sessions.md)
+- [§ Révocation](Securite.md#Révocation) → [REST /api/admin/sessions](../../docs/code/routes/REST%20api-admin-sessions.md)
+- [§ Cycle de vie d'une identité](Securite.md#Cycle%20de%20vie%20d'une%20identité) → [REST /api/identity/requests](../../docs/code/routes/REST%20api-identity-requests.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
+- [§ Rôles et permissions](Securite.md#Rôles%20et%20permissions) → [CLI myr identity set-role](../../docs/code/commandes/CLI%20myr-identity-set-role.md) · [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md)
+- [§ 8. Rate limiting](Securite.md#8.%20Rate%20limiting) → [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
+- [§ 9. Surfaces d'attaque et mitigations](Securite.md#9.%20Surfaces%20d'attaque%20et%20mitigations) → [REST /api/admin/sessions](../../docs/code/routes/REST%20api-admin-sessions.md) · [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [CLI myr network create](../../docs/code/commandes/CLI%20myr-network-create.md)
 
 <!-- liens-obsidian:end -->

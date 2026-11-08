@@ -1,3 +1,7 @@
+---
+tags:
+  - rm/RM13
+---
 ﻿---
 categorie: Assemblage Module
 titre: "Créer une interface sur un composant"

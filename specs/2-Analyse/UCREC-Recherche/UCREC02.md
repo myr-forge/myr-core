@@ -68,9 +68,8 @@ La compatibilité est déterminée par l'algorithme `ifacesCompatible()` (RM11) 
 4. La liste des Composants ayant au moins une Interface compatible est retournée, avec pour chacun : nom, catégorie, type d'interface compatible
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
-> - 🟡 [TestListInterfacesForAsset](../../../docs/tests/adapters-out-localstorage/TestListInterfacesForAsset.md) — déduit : teste `InterfaceStore.ListInterfacesForAsset`
-> - 🟡 [TestList_MergesDraftsAndBlockchain](../../../docs/tests/domain-model/TestList_MergesDraftsAndBlockchain.md) — déduit : teste `ModelService.List`
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Aucun Composant compatible
@@ -111,8 +110,13 @@ La compatibilité est déterminée par l'algorithme `ifacesCompatible()` (RM11) 
 2. Message : "Impossible de contacter la blockchain — réessayez"
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 6 déduit(s)
+> - 🟡 [TestFabricAdapter_ListModelRecords_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_ListModelRecords_EvaluateError.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestFabricAdapter_ListModelRecords_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_ListModelRecords_Success.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestFabricBlockchain_ListModelRecords_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_EvaluateError.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestFabricBlockchain_ListModelRecords_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_Success.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestIntegration_ListModelRecords](../../../docs/tests/adapters-out-fabric/TestIntegration_ListModelRecords.md) — déduit : teste `BlockchainPort.ListModelRecords`
 <!-- tests-obsidian:end -->
 
 ## Post-conditions

@@ -46,21 +46,9 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCCE04, UCMOD06
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 2 explicite(s) · 12 déduit(s)
+> [!check]- Tests — 2 explicite(s) · 0 déduit(s)
 > - ✅ [TestRunModelAdd_ServiceError_Rejected](../../docs/tests/adapters-in-cli/TestRunModelAdd_ServiceError_Rejected.md) — explicite (le test cite RM03)
 > - ✅ [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — explicite (le test cite RM03)
-> - 🟡 [TestAddFull_AllFields](../../docs/tests/domain-model/TestAddFull_AllFields.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_AlwaysDraft_NoBlockchainWrite](../../docs/tests/domain-model/TestAddFull_AlwaysDraft_NoBlockchainWrite.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_MissingFile_ReturnsError](../../docs/tests/domain-model/TestAddFull_MissingFile_ReturnsError.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_NilBlockchain_StillWorks](../../docs/tests/domain-model/TestAddFull_NilBlockchain_StillWorks.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_NilDraftStore_Rejected](../../docs/tests/domain-model/TestAddFull_NilDraftStore_Rejected.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_NoFile_NoVersionNoHash](../../docs/tests/domain-model/TestAddFull_NoFile_NoVersionNoHash.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_STLAndSTEP_BothAccepted](../../docs/tests/domain-model/TestAddFull_STLAndSTEP_BothAccepted.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_WithFile_HashAndVersionCreated](../../docs/tests/domain-model/TestAddFull_WithFile_HashAndVersionCreated.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_WithParent](../../docs/tests/domain-model/TestAddFull_WithParent.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestCreateModule_ParentID_NotFound_Rejected](../../docs/tests/domain-model/TestCreateModule_ParentID_NotFound_Rejected.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
 <!-- tests-obsidian:end -->
 
 ### RM04 — UUID unique
@@ -71,10 +59,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCCE01–06
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
-> - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestCreateModule_ParentID_NotFound_Rejected](../../docs/tests/domain-model/TestCreateModule_ParentID_NotFound_Rejected.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.CreateModule`
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### RM05 — ParentID obligatoire pour les dérivés
@@ -85,16 +71,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCCE04, UCCE05
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 9 déduit(s)
-> - 🟡 [TestAddFull_AllFields](../../docs/tests/domain-model/TestAddFull_AllFields.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_AlwaysDraft_NoBlockchainWrite](../../docs/tests/domain-model/TestAddFull_AlwaysDraft_NoBlockchainWrite.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_MissingFile_ReturnsError](../../docs/tests/domain-model/TestAddFull_MissingFile_ReturnsError.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_NilBlockchain_StillWorks](../../docs/tests/domain-model/TestAddFull_NilBlockchain_StillWorks.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_NilDraftStore_Rejected](../../docs/tests/domain-model/TestAddFull_NilDraftStore_Rejected.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_NoFile_NoVersionNoHash](../../docs/tests/domain-model/TestAddFull_NoFile_NoVersionNoHash.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_STLAndSTEP_BothAccepted](../../docs/tests/domain-model/TestAddFull_STLAndSTEP_BothAccepted.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_WithFile_HashAndVersionCreated](../../docs/tests/domain-model/TestAddFull_WithFile_HashAndVersionCreated.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestAddFull_WithParent](../../docs/tests/domain-model/TestAddFull_WithParent.md) — déduit : teste `ModelService.AddFull`
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### RM42 — Traçabilité et alerte des emplacements externes
@@ -121,10 +99,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCCE01, UCMOD06, UCPI07–09
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
-> - 🟡 [TestRemove_Draft_RemovesLocally](../../docs/tests/domain-model/TestRemove_Draft_RemovesLocally.md) — déduit : teste `ModelService.Remove`
-> - 🟡 [TestRemove_Submitted_HidesLocally](../../docs/tests/domain-model/TestRemove_Submitted_HidesLocally.md) — déduit : teste `ModelService.Remove`
-> - 🟡 [TestRemove_UnknownID_Rejected](../../docs/tests/domain-model/TestRemove_UnknownID_Rejected.md) — déduit : teste `ModelService.Remove`
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### RM07 — Validation préalable obligatoire
@@ -149,11 +125,9 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 2 explicite(s) · 2 déduit(s)
+> [!check]- Tests — 2 explicite(s) · 0 déduit(s)
 > - ✅ [TestRemoveModule_Submitted_HidesLocally](../../docs/tests/domain-model/TestRemoveModule_Submitted_HidesLocally.md) — explicite (le test cite RM08)
 > - ✅ [TestRemove_Submitted_HidesLocally](../../docs/tests/domain-model/TestRemove_Submitted_HidesLocally.md) — explicite (le test cite RM08)
-> - 🟡 [TestRemove_Draft_RemovesLocally](../../docs/tests/domain-model/TestRemove_Draft_RemovesLocally.md) — déduit : teste `ModelService.Remove`
-> - 🟡 [TestRemove_UnknownID_Rejected](../../docs/tests/domain-model/TestRemove_UnknownID_Rejected.md) — déduit : teste `ModelService.Remove`
 <!-- tests-obsidian:end -->
 
 ## 3. Interfaces et liaisons
@@ -166,11 +140,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCAM01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 1 explicite(s) · 3 déduit(s)
+> [!check]- Tests — 1 explicite(s) · 0 déduit(s)
 > - ✅ [TestRunModelLinkAdd_MissingFrom_Rejected](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_MissingFrom_Rejected.md) — explicite (le test cite RM09)
-> - 🟡 [TestAddAssemblyLink](../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_MissingStore](../../docs/tests/domain-model/TestAddAssemblyLink_MissingStore.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_UnknownInterface](../../docs/tests/domain-model/TestAddAssemblyLink_UnknownInterface.md) — déduit : teste `ModelService.AddAssemblyLink`
 <!-- tests-obsidian:end -->
 
 ### RM10 — Vérification de compatibilité automatique
@@ -181,12 +152,9 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCAM01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 2 explicite(s) · 3 déduit(s)
+> [!check]- Tests — 2 explicite(s) · 0 déduit(s)
 > - ✅ [TestRunModelLinkAdd_Incompatible](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_Incompatible.md) — explicite (le test cite RM10)
 > - ✅ [TestRunModelLinkAdd_MissingFrom_Rejected](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_MissingFrom_Rejected.md) — explicite (le test cite RM10)
-> - 🟡 [TestAddAssemblyLink](../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_MissingStore](../../docs/tests/domain-model/TestAddAssemblyLink_MissingStore.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_UnknownInterface](../../docs/tests/domain-model/TestAddAssemblyLink_UnknownInterface.md) — déduit : teste `ModelService.AddAssemblyLink`
 <!-- tests-obsidian:end -->
 
 ### RM11 — Critères de compatibilité d'interfaces
@@ -223,23 +191,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
-> - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalName](../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalValues](../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilConnStore_Error](../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilConnStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.GetModuleInterfaces`
-> - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.GetModuleInterfaces`
-> - 🟡 [TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed](../../docs/tests/domain-model/TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed.md) — déduit : teste `ModelService.GetModuleInterfaces`
-> - 🟡 [TestGetModuleInterfaces_NilStore](../../docs/tests/domain-model/TestGetModuleInterfaces_NilStore.md) — déduit : teste `ModelService.GetModuleInterfaces`
-> - … et 1 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## 4. Composition d'un Module (instances)
@@ -252,8 +205,9 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCAM08
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestWorkspace_AddRemoveInstance](../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
+> - 🟡 [TestWorkspace_NilStore_ReturnsError](../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
 <!-- tests-obsidian:end -->
 
 ### RM15 — Instance indépendante
@@ -283,9 +237,9 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 0 explicite(s) · 3 déduit(s)
-> - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestCreateModule_ParentID_NotFound_Rejected](../../docs/tests/domain-model/TestCreateModule_ParentID_NotFound_Rejected.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.CreateModule`
+> - 🟡 [TestResolveOwner](../../docs/tests/adapters-in-cli/TestResolveOwner.md) — déduit : teste commande `myr model add`
+> - 🟡 [TestRunModelAdd_NominalCase](../../docs/tests/adapters-in-cli/TestRunModelAdd_NominalCase.md) — déduit : teste commande `myr model add`
+> - 🟡 [TestRunModelAdd_ServiceError_Rejected](../../docs/tests/adapters-in-cli/TestRunModelAdd_ServiceError_Rejected.md) — déduit : teste commande `myr model add`
 <!-- tests-obsidian:end -->
 
 ### RM17 — Assemblage requis pour soumission (module uniquement)
@@ -296,8 +250,15 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD06
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestModule_NotFound_ReturnsError](../../docs/tests/domain-model/TestModule_NotFound_ReturnsError.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestModule_Submit](../../docs/tests/domain-model/TestModule_Submit.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestModule_SubmitTwice_VersionIncrement](../../docs/tests/domain-model/TestModule_SubmitTwice_VersionIncrement.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestModule_Submit_NoAssembly](../../docs/tests/domain-model/TestModule_Submit_NoAssembly.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestRemoveModule_Submitted_HidesLocally](../../docs/tests/domain-model/TestRemoveModule_Submitted_HidesLocally.md) — déduit : teste `ModelService.SubmitModule`
+> - 🟡 [TestService_NilBlockchain_ErrBlockchainUnavailable](../../docs/tests/domain-model/TestService_NilBlockchain_ErrBlockchainUnavailable.md) — déduit : teste `ModelService.SubmitModule`
 <!-- tests-obsidian:end -->
 
 ### RM18 — ModuleVersion immuable (module uniquement)
@@ -320,8 +281,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD06, UCCE06
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
-> - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### RM39 — Filiation d'un découpage
@@ -372,13 +333,15 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCA01, UCA02
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 10 déduit(s)
 > - 🟡 [TestChannels_PUT_SwitchesChannel](../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_CannotSignIn_Forbidden](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_CannotSignIn_Forbidden.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_EnrollError](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_EnrollError.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_InvalidJSON](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_InvalidJSON.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MethodNotAllowed.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_MissingFields](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MissingFields.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_NoIdentityService](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_NoIdentityService.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_RoleFromCertificate](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_RoleFromCertificate.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_Success](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_Success.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestRequireAuth_BlockchainWithValidToken](../../docs/tests/adapters-in-rest/TestRequireAuth_BlockchainWithValidToken.md) — déduit : teste route `/api/identity/session`
 <!-- tests-obsidian:end -->
@@ -391,9 +354,13 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCA01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 4 déduit(s)
+> [!check]- Tests — 2 explicite(s) · 6 déduit(s)
+> - ✅ [TestHandleIdentitySession_ReaderCannotWrite](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_ReaderCannotWrite.md) — explicite (le test cite RM21)
+> - ✅ [TestCreateAccount_RM46_CustomAndDefaultRole](../../docs/tests/domain-identity/TestCreateAccount_RM46_CustomAndDefaultRole.md) — explicite (le test cite RM21)
 > - 🟡 [TestHandleIdentityRequest_InvalidJSON](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidJSON.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_InvalidName_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidName_Rejected.md) — déduit : teste route `/api/identity/request`
 > - 🟡 [TestHandleIdentityRequest_MissingFields](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_MissingFields.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_RegistrationClosed_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_RegistrationClosed_Rejected.md) — déduit : teste route `/api/identity/request`
 > - 🟡 [TestHandleIdentityRequest_ServiceError](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_ServiceError.md) — déduit : teste route `/api/identity/request`
 > - 🟡 [TestHandleIdentityRequest_Success](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_Success.md) — déduit : teste route `/api/identity/request`
 <!-- tests-obsidian:end -->
@@ -405,12 +372,37 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Conséquence** : Seul l'administrateur peut modifier le rôle (`Myr.role`) d'une identité existante auprès de la CA. Le nouveau rôle ne s'applique qu'au prochain ré-enrôlement de l'identité — ce n'est pas immédiat
 - **Use cases** : UCA08
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> - 🟡 [TestRunIdentitySetRole_NominalCase](../../docs/tests/adapters-in-cli/TestRunIdentitySetRole_NominalCase.md) — déduit : teste commande `myr identity set-role`
+<!-- tests-obsidian:end -->
+
 ### RM43 — Inscription selon les règles du réseau
 
 - **Déclencheur** : Demande d'accès (`POST /api/identity/request`, `myr identity request`)
 - **Condition** : Toujours
 - **Conséquence** : Les règles d'inscription sont propres à chaque réseau et fixées par son administrateur. Sans auto-enregistrement, aucune demande n'est acceptée et rien n'est conservé : seul l'administrateur crée des comptes (`myr identity register`, `POST /api/identity/accounts`), actifs d'emblée avec le rôle qu'il choisit. Avec auto-enregistrement, l'identité est créée dès la demande avec le rôle par défaut du réseau (RM21) : active si le réseau n'exige pas d'approbation, en attente sinon
 - **Use cases** : UCA01
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 5 explicite(s) · 12 déduit(s)
+> - ✅ [TestHandleIdentityRequest_RegistrationClosed_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_RegistrationClosed_Rejected.md) — explicite (le test cite RM43)
+> - ✅ [TestAccountRequest_FullFlow](../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — explicite (le test cite RM43)
+> - ✅ [TestRequestAccess_NoApproval_Active](../../docs/tests/domain-identity/TestRequestAccess_NoApproval_Active.md) — explicite (le test cite RM43)
+> - ✅ [TestRequestAccess_RegistrationClosed_Rejected](../../docs/tests/domain-identity/TestRequestAccess_RegistrationClosed_Rejected.md) — explicite (le test cite RM43)
+> - ✅ [TestRequestAccess_RequireApproval_Pending](../../docs/tests/domain-identity/TestRequestAccess_RequireApproval_Pending.md) — explicite (le test cite RM43)
+> - 🟡 [TestRunIdentityRegister_NominalCase](../../docs/tests/adapters-in-cli/TestRunIdentityRegister_NominalCase.md) — déduit : teste commande `myr identity register`
+> - 🟡 [TestRunIdentityRequest_AutoRegister_Approved](../../docs/tests/adapters-in-cli/TestRunIdentityRequest_AutoRegister_Approved.md) — déduit : teste commande `myr identity request`
+> - 🟡 [TestRunIdentityRequest_NoNetwork_Rejected](../../docs/tests/adapters-in-cli/TestRunIdentityRequest_NoNetwork_Rejected.md) — déduit : teste commande `myr identity request`
+> - 🟡 [TestRunIdentityRequest_RequireApproval_Pending](../../docs/tests/adapters-in-cli/TestRunIdentityRequest_RequireApproval_Pending.md) — déduit : teste commande `myr identity request`
+> - 🟡 [TestHandleIdentityAccounts_Admin_Created](../../docs/tests/adapters-in-rest/TestHandleIdentityAccounts_Admin_Created.md) — déduit : teste route `/api/identity/accounts`
+> - 🟡 [TestHandleIdentityAccounts_InvalidNameOrRole_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityAccounts_InvalidNameOrRole_Rejected.md) — déduit : teste route `/api/identity/accounts`
+> - 🟡 [TestHandleIdentityAccounts_NonAdmin_Forbidden](../../docs/tests/adapters-in-rest/TestHandleIdentityAccounts_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/accounts`
+> - 🟡 [TestHandleIdentityRequest_InvalidJSON](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidJSON.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_InvalidName_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidName_Rejected.md) — déduit : teste route `/api/identity/request`
+> - 🟡 [TestHandleIdentityRequest_MissingFields](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_MissingFields.md) — déduit : teste route `/api/identity/request`
+> - … et 2 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
 
 ### RM44 — Décision sur une demande en attente
 
@@ -419,12 +411,46 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Conséquence** : Approuver active l'identité ; refuser la suspend — rien n'est supprimé, ni l'identité ni la demande. Une demande déjà décidée ne peut plus l'être. La décision prend effet au prochain enrôlement de l'identité, c'est-à-dire à sa prochaine connexion
 - **Use cases** : UCA01
 
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 6 explicite(s) · 8 déduit(s)
+> - ✅ [TestHandleIdentityRequestDecision_Approve_OK](../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Approve_OK.md) — explicite (le test cite RM44)
+> - ✅ [TestHandleIdentityRequestDecision_Reject_OK](../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Reject_OK.md) — explicite (le test cite RM44)
+> - ✅ [TestAccountRequest_FullFlow](../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — explicite (le test cite RM44)
+> - ✅ [TestApproveRequest_NominalCase](../../docs/tests/domain-identity/TestApproveRequest_NominalCase.md) — explicite (le test cite RM44)
+> - ✅ [TestDecideRequest_NotFoundOrNotPending_Rejected](../../docs/tests/domain-identity/TestDecideRequest_NotFoundOrNotPending_Rejected.md) — explicite (le test cite RM44)
+> - ✅ [TestRejectRequest_NominalCase](../../docs/tests/domain-identity/TestRejectRequest_NominalCase.md) — explicite (le test cite RM44)
+> - 🟡 [TestRunIdentityDecision_Approve_OK](../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : teste commande `myr identity approve`
+> - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : teste commande `myr identity approve`
+> - 🟡 [TestHandleIdentityRequestDecision_Errors](../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Errors.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequestDecision_NonAdmin_Forbidden](../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequests_Admin_EmptyList](../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_EmptyList.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequests_Admin_ReturnsList](../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_ReturnsList.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentityRequests_NonAdmin_Forbidden](../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestHandleIdentitySession_RoleFromCertificate](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_RoleFromCertificate.md) — déduit : teste route `/api/identity/requests`
+<!-- tests-obsidian:end -->
+
 ### RM45 — Connexion réservée aux identités actives dotées d'un rôle
 
 - **Déclencheur** : Connexion (`POST /api/identity/session`)
 - **Condition** : Toujours
 - **Conséquence** : Le statut et le rôle de l'identité sont lus dans le certificat émis à la connexion, jamais fournis par le client. Une identité en attente, suspendue, sans statut reconnu ou sans rôle n'ouvre aucune session. La session porte le rôle du certificat
 - **Use cases** : UCA02
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 4 explicite(s) · 8 déduit(s)
+> - ✅ [TestHandleIdentitySession_CannotSignIn_Forbidden](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_CannotSignIn_Forbidden.md) — explicite (le test cite RM45)
+> - ✅ [TestHandleIdentitySession_RoleFromCertificate](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_RoleFromCertificate.md) — explicite (le test cite RM45)
+> - ✅ [TestAccountRequest_FullFlow](../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — explicite (le test cite RM45)
+> - ✅ [TestWalletEntry_CanSignIn](../../docs/tests/domain-identity/TestWalletEntry_CanSignIn.md) — explicite (le test cite RM45)
+> - 🟡 [TestChannels_PUT_SwitchesChannel](../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_EnrollError](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_EnrollError.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_InvalidJSON](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_InvalidJSON.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MethodNotAllowed.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_MissingFields](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MissingFields.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_NoIdentityService](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_NoIdentityService.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestHandleIdentitySession_Success](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_Success.md) — déduit : teste route `/api/identity/session`
+> - 🟡 [TestRequireAuth_BlockchainWithValidToken](../../docs/tests/adapters-in-rest/TestRequireAuth_BlockchainWithValidToken.md) — déduit : teste route `/api/identity/session`
+<!-- tests-obsidian:end -->
 
 ### RM46 — Rôle attribué toujours défini dans la table des rôles
 
@@ -436,8 +462,18 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 9 explicite(s) · 2 déduit(s)
+> - ✅ [TestHandleIdentityAccounts_InvalidNameOrRole_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityAccounts_InvalidNameOrRole_Rejected.md) — explicite (le test cite RM46)
+> - ✅ [TestCreateAccount_RM46_CustomAndDefaultRole](../../docs/tests/domain-identity/TestCreateAccount_RM46_CustomAndDefaultRole.md) — explicite (le test cite RM46)
+> - ✅ [TestCreateAccount_RM46_UnknownRole_Rejected](../../docs/tests/domain-identity/TestCreateAccount_RM46_UnknownRole_Rejected.md) — explicite (le test cite RM46)
+> - ✅ [TestRequestAccess_RM46_InvalidDefaultRole_Rejected](../../docs/tests/domain-identity/TestRequestAccess_RM46_InvalidDefaultRole_Rejected.md) — explicite (le test cite RM46)
+> - ✅ [TestSetRole_RM46_UnknownRole_Rejected](../../docs/tests/domain-identity/TestSetRole_RM46_UnknownRole_Rejected.md) — explicite (le test cite RM46)
+> - ✅ [TestAutoRegisterRole_RM46_Invalid_Rejected](../../docs/tests/domain-network/TestAutoRegisterRole_RM46_Invalid_Rejected.md) — explicite (le test cite RM46)
+> - ✅ [TestAssignableByDefault_RM46_AdminPermission_Rejected](../../docs/tests/domain-role/TestAssignableByDefault_RM46_AdminPermission_Rejected.md) — explicite (le test cite RM46)
+> - ✅ [TestAssignable_RM46_KnownRole_OK](../../docs/tests/domain-role/TestAssignable_RM46_KnownRole_OK.md) — explicite (le test cite RM46)
+> - ✅ [TestAssignable_RM46_UnknownRole_Rejected](../../docs/tests/domain-role/TestAssignable_RM46_UnknownRole_Rejected.md) — explicite (le test cite RM46)
+> - 🟡 [TestRunIdentityRegister_NominalCase](../../docs/tests/adapters-in-cli/TestRunIdentityRegister_NominalCase.md) — déduit : teste commande `myr identity register`
+> - 🟡 [TestRunIdentitySetRole_NominalCase](../../docs/tests/adapters-in-cli/TestRunIdentitySetRole_NominalCase.md) — déduit : teste commande `myr identity set-role`
 <!-- tests-obsidian:end -->
 
 ## 7. Propriété intellectuelle et commissions
@@ -578,8 +614,11 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCADM05
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 4 déduit(s)
+> - 🟡 [TestRunNetworkDestroy_NominalCase](../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_NominalCase.md) — déduit : teste commande `myr network destroy`
+> - 🟡 [TestRunNetworkDestroy_NotFound](../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_NotFound.md) — déduit : teste commande `myr network destroy`
+> - 🟡 [TestRunNetworkDestroy_ProductionRefused](../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_ProductionRefused.md) — déduit : teste commande `myr network destroy`
+> - 🟡 [TestRunNetworkDestroy_WithoutConfirm](../../docs/tests/adapters-in-cli/TestRunNetworkDestroy_WithoutConfirm.md) — déduit : teste commande `myr network destroy`
 <!-- tests-obsidian:end -->
 
 ### RM34 — Rôle admin protégé

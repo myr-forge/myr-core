@@ -159,8 +159,8 @@ end
 - _Aucun document de conception ne traite ce use case : la chaîne s'arrête à l'analyse._
 
 **Code cité par cette analyse (sans conception : non relié)**
-- CLI `myr role list`
 - CLI `myr role create`
-- `RoleService.HasPermission`
+- CLI `myr role list`
+- Fonction `RoleService.HasPermission`
 
 <!-- liens-obsidian:end -->

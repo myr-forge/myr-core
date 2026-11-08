@@ -141,8 +141,8 @@ type VersionDiff struct {
 
 **Étape suivante — code, par section**
 - [§ 2. UCAUT01 — Déclenchement des commissions à la livraison](DC_D9_Automatisation.md#2.%20UCAUT01%20—%20Déclenchement%20des%20commissions%20à%20la%20livraison) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md)
-- [§ 4. UCAUT03 — Import depuis un plugin CAO](DC_D9_Automatisation.md#4.%20UCAUT03%20—%20Import%20depuis%20un%20plugin%20CAO) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [ModelService.AddInterface](../../docs/code/fonctions/model.ModelService.AddInterface.md)
+- [§ 4. UCAUT03 — Import depuis un plugin CAO](DC_D9_Automatisation.md#4.%20UCAUT03%20—%20Import%20depuis%20un%20plugin%20CAO) → [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [ModelService.AddInterface](../../docs/code/fonctions/model.ModelService.AddInterface.md)
 - [§ 6. Écarts code → specs](DC_D9_Automatisation.md#6.%20Écarts%20code%20→%20specs) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.AddInterface](../../docs/code/fonctions/model.ModelService.AddInterface.md)
-- [§ 7. CLI et REST cibles](DC_D9_Automatisation.md#7.%20CLI%20et%20REST%20cibles) → [REST /api/components/](../../docs/code/routes/REST%20api-components.md) · [CLI myr model add](../../docs/code/commandes/CLI%20myr-model-add.md) · [CLI myr model](../../docs/code/commandes/CLI%20myr-model.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md)
+- [§ 7. CLI et REST cibles](DC_D9_Automatisation.md#7.%20CLI%20et%20REST%20cibles) → [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [CLI myr model add](../../docs/code/commandes/CLI%20myr-model-add.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md)
 
 <!-- liens-obsidian:end -->

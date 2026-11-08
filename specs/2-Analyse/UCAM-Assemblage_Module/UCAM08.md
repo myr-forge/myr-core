@@ -74,8 +74,9 @@ Le retrait d'un composant d'un module supprime une **instance spécifique** (`Wo
 2. La réponse `200 OK` retourne le module mis à jour
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestWorkspace_AddRemoveInstance](../../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
+> - 🟡 [TestWorkspace_NilStore_ReturnsError](../../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Retrait avec liaisons en cascade
@@ -89,8 +90,9 @@ Le retrait d'un composant d'un module supprime une **instance spécifique** (`Wo
 2. La réponse retourne le module sans l'instance et sans ses connexions
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
-> - 🟡 [TestRemoveConnection](../../../docs/tests/adapters-out-localstorage/TestRemoveConnection.md) — déduit : teste `ConnectionStore.RemoveConnection`
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestWorkspace_AddRemoveInstance](../../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
+> - 🟡 [TestWorkspace_NilStore_ReturnsError](../../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Module non trouvé
@@ -100,8 +102,17 @@ Le retrait d'un composant d'un module supprime une **instance spécifique** (`Wo
 3. Le handler retourne HTTP 500
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 10 déduit(s)
+> - 🟡 [TestFabricAdapter_GetModelRecord_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_EvaluateError.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestFabricAdapter_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestFabricBlockchain_GetModelRecord_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_EvaluateError.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestFabricBlockchain_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestIntegration_GetModelRecord_NotFound](../../../docs/tests/adapters-out-fabric/TestIntegration_GetModelRecord_NotFound.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestWorkspace_AddRemoveInstance](../../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
+> - 🟡 [TestWorkspace_NilStore_ReturnsError](../../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Instance introuvable dans le module
@@ -111,8 +122,9 @@ Le retrait d'un composant d'un module supprime une **instance spécifique** (`Wo
 3. La réponse retourne le module inchangé — **à améliorer** : retourner HTTP 404 si l'instance est introuvable
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestWorkspace_AddRemoveInstance](../../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
+> - 🟡 [TestWorkspace_NilStore_ReturnsError](../../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
 <!-- tests-obsidian:end -->
 
 ## Post-conditions

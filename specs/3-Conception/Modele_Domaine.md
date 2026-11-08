@@ -355,6 +355,6 @@ Entité `Payment` implémentée (paiement manuel).
 
 **Étape suivante — code, par section**
 - [§ Agrégat RBAC (D1 — role)](Modele_Domaine.md#Agrégat%20RBAC%20%28D1%20—%20role%29) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md)
-- [§ 4. Règles d'intégrité (invariants du domaine)](Modele_Domaine.md#4.%20Règles%20d'intégrité%20%28invariants%20du%20domaine%29) → [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
+- [§ 4. Règles d'intégrité (invariants du domaine)](Modele_Domaine.md#4.%20Règles%20d'intégrité%20%28invariants%20du%20domaine%29) → [IdentityService.SetRole](../../docs/code/fonctions/identity.IdentityService.SetRole.md) · [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
 
 <!-- liens-obsidian:end -->

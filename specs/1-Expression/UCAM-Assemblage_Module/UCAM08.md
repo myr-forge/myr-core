@@ -1,3 +1,7 @@
+---
+tags:
+  - rm/RM15
+---
 ﻿---
 categorie: Assemblage Module
 titre: "Retirer une instance de composant d'un Module"

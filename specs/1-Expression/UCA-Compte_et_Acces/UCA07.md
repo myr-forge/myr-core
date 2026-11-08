@@ -1,3 +1,7 @@
+---
+tags:
+  - relecture/remarque
+---
 ﻿---
 categorie: Compte et Accès
 titre: "Vérification du rôle attribué"
