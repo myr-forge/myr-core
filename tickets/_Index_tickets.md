@@ -17,7 +17,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 |--------|--------|
 | Ouvert | 17 |
 | À vérifier | 2 |
-| À trancher (PO) | 13 |
+| À trancher (PO) | 14 |
 | Différé | 1 |
 | En cours | 5 |
 | Résolu | 1 |
@@ -71,6 +71,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-016 — Interfaces exposées d'un module sans identité d'instance](FT-016-interfaces-exposees-d-un-module-sans-identite.md) | Écart spec ↔ code | majeure | À trancher (PO) | UCMOD04, UCAM02 |
 | [FT-021 — Identifiant d'un asset décomposé en module](FT-021-identifiant-d-un-asset-decompose-en-module.md) | Décision à prendre | majeure | À trancher (PO) | UCAM05, UCAM09 |
 | [FT-036 — Commissions : composition seule ou aussi chaîne de dérivation](FT-036-commissions-composition-seule-ou-aussi-chaine-de.md) | Décision à prendre | majeure | À trancher (PO) | UCPI02, UCPI04, UCPI01 |
+| [FT-040 — Fonctions propres aux outils extérieurs implémentées dans myr-core](FT-040-fonctions-d-outils-exterieurs-dans-le-coeur.md) | Dette technique | majeure | À trancher (PO) | UCAM01, UCAM02, UCAM03, UCCE01, UCCE06, UCMOD01, UCMOD03, UCMOD06 |
 | [FT-007 — Lecture du catalogue sans compte](FT-007-lecture-du-catalogue-sans-compte.md) | Décision à prendre | mineure | À trancher (PO) | UCA01, UCCL01 |
 | [FT-010 — UCA04 et UCA07 s'appuient sur une commande qui ne couvre pas leur besoin](FT-010-uca04-et-uca07-s-appuient-sur-une.md) | Incohérence documentaire | mineure | À trancher (PO) | UCA04, UCA07 |
 | [FT-022 — Date de retrait des routes legacy /api/modules](FT-022-date-de-retrait-des-routes-legacy-api.md) | Décision à prendre | mineure | À trancher (PO) | UCMOD01, UCMOD04, UCMOD06 |
