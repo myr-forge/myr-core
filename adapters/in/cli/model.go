@@ -241,16 +241,6 @@ func runModelUpdate(w io.Writer, svc model.ModelService, req model.UpdateRequest
 	return nil
 }
 
-// withSignerHint complète ErrSignerRequired (écriture ledger sans wallet de
-// l'utilisateur) par la commande qui y remédie ; les autres erreurs passent
-// telles quelles.
-func withSignerHint(err error) error {
-	if errors.Is(err, model.ErrSignerRequired) {
-		return fmt.Errorf("%w — créez le compte local de votre identité enrôlée : myr session create --name <pseudo> --org-id <org>", err)
-	}
-	return err
-}
-
 var modelUpdateCmd = &cobra.Command{
 	Use:   "update <id>",
 	Short: "Update the metadata of an existing asset",

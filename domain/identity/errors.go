@@ -40,10 +40,16 @@ var (
 	ErrIdentityWithoutRole = errors.New("identity: aucun rôle attribué à cette identité")
 )
 
-// Décision sur une demande d'inscription (ApproveRequest, RejectRequest).
+// Décision sur une demande d'inscription ou de rôle (ApproveRequest, RejectRequest).
 var (
-	ErrRequestNotFound   = errors.New("identity: demande d'inscription introuvable")
+	ErrRequestNotFound   = errors.New("identity: demande introuvable")
 	ErrRequestNotPending = errors.New("identity: la demande n'est plus en attente")
+)
+
+// Demande de rôle (RequestRole, UCA08).
+var (
+	ErrRoleAlreadyHeld       = errors.New("identity: vous possédez déjà ce rôle")
+	ErrRequestAlreadyPending = errors.New("identity: une demande de rôle est déjà en attente pour cette identité")
 )
 
 // IsNoAdminCredentials rapporte si err est ou enveloppe ErrNoAdminCredentials.

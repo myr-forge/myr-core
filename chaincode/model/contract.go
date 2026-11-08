@@ -14,7 +14,8 @@ import (
 // exactement les 5 fonctions attendues par domain/model/ports.go BlockchainPort
 // (StoreModelRecord/UpdateModelMetadata/GetModelRecord/ListModelRecords/
 // VerifyIntegrity), plus IndexHashes, opération de mise en service de l'index
-// des empreintes. Les noms
+// des empreintes, et les 3 fonctions de la table des rôles attendues par
+// domain/role/ports.go Repo (PutRole/DeleteRole/GetRoles, roles.go). Les noms
 // de fonction et le nombre d'arguments reproduisent exactement ce qu'invoque
 // adapters/out/fabric/blockchain.go côté client — ce fichier-là fait foi, pas
 // les signatures indicatives de specs/3-Conception/Chaincode.md §4.
@@ -39,6 +40,12 @@ func (s *SmartContract) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return s.verifyModel(stub, args)
 	case "IndexHashes":
 		return s.indexHashes(stub)
+	case "PutRole":
+		return s.putRole(stub, args)
+	case "DeleteRole":
+		return s.deleteRole(stub, args)
+	case "GetRoles":
+		return s.getRoles(stub)
 	default:
 		return shim.Error(fmt.Sprintf("fonction chaincode inconnue : %s", fn))
 	}

@@ -4,6 +4,9 @@ tags:
   - type/conception
   - rm/RM07
   - rm/RM19
+  - rm/RM46
+  - rm/RM47
+  - rm/RM48
   - enf/ENF10
   - enf/ENF12
   - enf/ENF18
@@ -140,16 +143,16 @@ ENF10 exige que les wallets soient stockés chiffrés — voir `Conception_intro
 
 ### Rôles et permissions
 
-Le RBAC (`domain/role`) est **dynamique**, pas une énumération figée : un rôle est un nom associé à un sous-ensemble du catalogue de permissions (`read`, `write`, `network.admin`, `role.admin`, `identity.admin`, `admin`). Seuls les 4 rôles suivants sont **intégrés** (non supprimables) :
+Le RBAC (`domain/role`) est **dynamique**, pas une énumération figée : un rôle est un nom associé à un sous-ensemble du catalogue de permissions (`read`, `write`, `network.admin`, `role.admin`, `identity.admin`, `admin`). La table des rôles est publiée sur le ledger et appliquée par le chaincode comme par chaque serveur (RM48, ADR-12). Tant qu'aucune n'est publiée, la table initiale s'applique :
 
-| Rôle intégré | Permissions typiques | Droits REST |
+| Rôle initial | Permissions | Droits REST |
 |---------------|----------------------|-------------|
 | `reader` | `read` | `GET /api/*` authentifié |
 | `contributor` | `read`, `write` | Lecture + écriture assets |
-| `auditor` | `read` | Lecture authentifiée (rôle intégré, usage non détaillé dans le code REST actuel) |
+| `auditor` | `read` | Lecture authentifiée |
 | `admin` | toutes | Tous droits + `/api/admin/*` |
 
-D'autres rôles (ex. `consumer`, `manufacturer`) peuvent être créés à la demande via `myr role create --permission ...` — ils n'existent pas par défaut.
+D'autres rôles (ex. `consumer`, `manufacturer`) peuvent être créés à la demande via `myr role create --permission ...` — ils n'existent pas par défaut. Seule une identité dont le rôle porte `role.admin` modifie la table ; `admin` porte toujours toutes les permissions. Un rôle portant une permission d'administration n'est jamais attribué automatiquement, ni à l'inscription (RM46) ni sur demande (RM47).
 
 > **Rôle de session :** le rôle attribué à une session REST doit refléter l'attribut `Myr.role` réel de l'identité CA enrôlée — un changement de rôle via `myr identity set-role` doit se répercuter sur les sessions REST créées ensuite. État de cet écart : `specs/roadmap_dev.md` § Écarts Identité & Session, E1.
 

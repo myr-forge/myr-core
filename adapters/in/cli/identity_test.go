@@ -303,6 +303,32 @@ func TestRunIdentityRequests_NominalCase(t *testing.T) {
 	}
 }
 
+/// @brief  runIdentityRequestRole transmet le wallet du compte local et distingue rôle attribué et demande en attente (RM47)
+/// @input  wallet alice@Org1 (reader) ; demande approuvée puis demande en attente
+/// @expect RequestRole reçoit le wallet et le rôle ; sortie « attribué » puis « en attente »
+func TestRunIdentityRequestRole_RM47_GrantedOrPending(t *testing.T) {
+	wallet := identity.WalletEntry{Handle: "alice@Org1", Role: identity.RoleReader, Status: identity.StatusActive}
+	status := identity.RequestApproved
+	var gotWallet identity.WalletEntry
+	svc := &mockIdentitySvc{
+		wallet: func(string) (identity.WalletEntry, error) { return wallet, nil },
+		requestRole: func(_ context.Context, w identity.WalletEntry, wanted string) (*identity.AccountRequest, error) {
+			gotWallet = w
+			return &identity.AccountRequest{ID: "req-1", Kind: identity.RequestKindRole, Role: wanted, Status: status}, nil
+		},
+	}
+	for want, s := range map[string]string{"attribué": identity.RequestApproved, "en attente": identity.RequestPending} {
+		status = s
+		var buf bytes.Buffer
+		if err := runIdentityRequestRole(&buf, svc, "alice@Org1", "contributor"); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if gotWallet.Handle != "alice@Org1" || !strings.Contains(buf.String(), want) {
+			t.Errorf("statut %s : wallet %q, sortie %q", s, gotWallet.Handle, buf.String())
+		}
+	}
+}
+
 /// @brief  runIdentitySetRole change le rôle et rappelle la nécessité d'un ré-enrôlement
 /// @input  id="alice@org1", role="contributor"
 /// @expect SetRole reçoit les deux valeurs, sortie mentionne le ré-enrôlement

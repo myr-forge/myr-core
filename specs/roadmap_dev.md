@@ -107,7 +107,8 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 - [ ] UCA05 — Contrôle d'accès par rôle
 - [ ] UCA06 — Consultation des assets possédés
 - [ ] UCA07 — Vérification de rôle
-- [ ] UCA08 — Demande d'un rôle supplémentaire depuis le profil *(RM22)*
+- [x] UCA08 — Demande d'un rôle supplémentaire *(RM46, RM47)* — R-03 étape 4 : demande structurée (`myr identity request-role`, `POST /api/identity/roles/request`), attribuée aussitôt si le rôle est en attribution automatique, sinon soumise à `myr identity approve|reject`
+- [x] Table des rôles publiée sur le ledger *(RM48, ADR-12)* — R-03 étape 4 : `adapters/out/fabric/role_store.go` et chaincode `PutRole`/`DeleteRole`/`GetRoles` remplacent `roles.json` ; contrôle d'écriture du chaincode adossé à la table ; mise en production restant à faire (étape 5)
 - [x] Exposition CLI : `identity` (`myr identity ...`), `network` (`myr network/org/node ...`), `session` (`myr session ...`, pas de REST par conception)
 - [ ] Exposition REST : `network` reste partielle (create/update/activate/delete/test/addPeer absents) ; `channel` (org/node) sans route dédiée
 - [ ] UCCL01 — Lecture publique composants sans JWT *(actuellement bloqué par auth)*

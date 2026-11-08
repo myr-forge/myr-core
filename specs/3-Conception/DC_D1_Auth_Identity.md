@@ -2,6 +2,9 @@
 tags:
   - couche/conception
   - type/conception
+  - rm/RM46
+  - rm/RM47
+  - rm/RM48
   - relecture/ecart
 ---
 # DC — D1 : Identité, RBAC et Session
@@ -199,13 +202,14 @@ myrSession ..> Role : Role vérifié via RoleService.HasPermission
 
 ### AccountRequest (`domain/identity`)
 
-- **Rôle :** Demande d'accès soumise par un utilisateur sans compte, acceptée seulement si le réseau autorise l'auto-enregistrement (`RegistrationPolicy`). Stockée localement (`adapters/out/localstorage/request_store.go`, fichier partagé par le CLI et l'API), consultable et décidée par un administrateur.
+- **Rôle :** Demande d'accès soumise par un utilisateur sans compte, acceptée seulement si le réseau autorise l'auto-enregistrement (`RegistrationPolicy`) — ou demande de rôle d'une identité déjà inscrite (`Kind = role`, rôle demandé dans `Role`, UCA08, RM47). Stockée localement (`adapters/out/localstorage/request_store.go`, fichier partagé par le CLI et l'API), consultable et décidée par un administrateur.
 - **Invariants :**
   - Aucune demande n'est conservée sur un réseau fermé (`ErrRegistrationClosed`).
   - L'identité CA `pseudo@org` est créée dès la demande ; la demande ne fait que tracer la décision.
   - `CreatedAt` est une chaîne ISO 8601 (`string`, pas `time.Time`).
-  - **Aucun champ structuré pour un rôle souhaité** — seul `Message` (texte libre) existe (voir Écart E3).
-- **Cycle de vie :** `pending` à l'enregistrement → `approved` (identité créée active) | reste `pending` (identité créée en attente, approbation exigée) → `approved` (`ApproveRequest`) ou `rejected` (`RejectRequest`, identité suspendue) | `failed` si la CA refuse l'enregistrement. Seule une demande `pending` peut être décidée (`ErrRequestNotPending`).
+  - Une identité n'a jamais plus d'une demande de rôle en attente (`ErrRequestAlreadyPending`).
+- **Cycle de vie (inscription) :** `pending` à l'enregistrement → `approved` (identité créée active) | reste `pending` (identité créée en attente, approbation exigée) → `approved` (`ApproveRequest`) ou `rejected` (`RejectRequest`, identité suspendue) | `failed` si la CA refuse l'enregistrement. Seule une demande `pending` peut être décidée (`ErrRequestNotPending`).
+- **Cycle de vie (demande de rôle) :** `approved` dès la demande si le rôle est en attribution automatique (rôle attribué) | `pending` sinon → `approved` (`ApproveRequest`, rôle attribué s'il figure toujours dans la table, RM46) ou `rejected` (`RejectRequest`, identité inchangée) | `failed` si la CA refuse l'attribution automatique.
 
 
 **⚠️ Écart E4 (critique) — l'enregistrement dépend d'une configuration invisible depuis le `NetworkProfile` :** le client CA utilisé par `identitySvc.RequestAccess` (`cmd/api/main.go`) est construit une fois au démarrage depuis les variables d'environnement (`FABRIC_CA_ENDPOINT`, `FABRIC_CA_ADMIN_CERT_PATH`...) ou un `fabric.env` optionnel — jamais depuis les champs `CAEndpoint`/`CAAdminCertPath`/`CAAdminKeyPath` du `NetworkProfile` actif, alors que ces champs existent précisément pour ça et sont déjà utilisés ainsi par le CLI et par le pool blockchain multi-réseau du serveur (`ConfigFromProfile`, voir `specs/roadmap_dev.md` § Écarts Identité & Session pour le détail vérifié). Conséquence : `myr network update --auto-register` peut afficher une configuration entièrement correcte (CLI et `GET /api/identity/policy` inclus) sans que l'auto-enregistrement ne fonctionne réellement — la demande échoue faute de CA.
@@ -215,11 +219,15 @@ myrSession ..> Role : Role vérifié via RoleService.HasPermission
 
 ### Role / Permission (`domain/role`)
 
-- **Rôle :** RBAC dynamique. `Permission` est un catalogue plat de 6 valeurs. `Role` associe un nom à un sous-ensemble de permissions.
-- **Invariants :**
-  - 4 rôles **intégrés** (`reader`, `contributor`, `auditor`, `admin`) existent toujours (créés par `seedBuiltins` à l'initialisation du service) et ne peuvent pas être modifiés ni supprimés (`ErrBuiltIn`).
-  - Le nom d'un rôle personnalisé doit respecter `^[a-z][a-z0-9_-]{1,63}$`.
-  - `HasPermission` échoue fermé : un rôle inconnu ne porte aucune permission.
+- **Rôle :** RBAC dynamique. `Permission` est un catalogue plat de 6 valeurs. `Role` associe un nom à un sous-ensemble de permissions et à un réglage d'attribution sur demande (`AutoGrant`, UCA08, RM47).
+- **Stockage :** la table des rôles est publiée sur le ledger, un exemplaire par canal du réseau (port `role.Repo`, adapter `adapters/out/fabric/role_store.go`, chaincode `PutRole`/`DeleteRole`/`GetRoles` — `Chaincode.md` §4.3, ADR-12). Le CLI la publie avec le wallet du compte local ; l'API la lit seulement, et la relit au plus toutes les 30 secondes (`WithRefresh`).
+- **Invariants (RM48) :**
+  - Tant qu'aucune table n'est publiée, la table initiale s'applique (`DefaultRoles` : `reader`, `contributor`, `auditor`, `admin`, marqués `BuiltIn`) ; la première publication part de cette table.
+  - Tout rôle se modifie ou se supprime, sauf `admin`, qui porte toujours toutes les permissions (`ErrAdminImmutable`) — le domaine le rétablit à chaque lecture.
+  - Le nom d'un rôle doit respecter `^[a-z][a-z0-9_-]{1,63}$`.
+  - Un rôle en attribution automatique ne porte aucune permission d'administration (`ErrAdminAutomatic`).
+  - `HasPermission` échoue fermé : un rôle inconnu, ou supprimé, ne porte aucune permission.
+  - Table illisible (réseau injoignable) : la dernière table lue s'applique, à défaut la table initiale ; sans réseau, la table ne se modifie pas (`ErrNoTable`).
 - **Cycle de vie :** `Create`/`Update`/`Delete` via `myr role ...` (CLI uniquement — pas de CRUD REST, seulement une consultation implicite par le middleware `requireRole`).
 
 ### myrSession (adaptateur REST, `adapters/in/rest/session.go`)

@@ -27,12 +27,6 @@ const (
 	statusActive = "active"
 )
 
-// writerRoles liste les rôles autorisés à écrire sur le ledger. Provisoire :
-// la cible (ADR-12, Chaincode.md §4.1) est la table des rôles du réseau,
-// éditée par l'administrateur et publiée sur le ledger — ce contrôle devra
-// la consulter, seul le rôle admin conservant toutes les permissions.
-var writerRoles = map[string]bool{"contributor": true, "admin": true}
-
 var validID = regexp.MustCompile(`^[a-zA-Z0-9_\-\.]{1,128}$`)
 
 // validateModel vérifie la forme d'un Model3D avant toute lecture du ledger.
@@ -49,37 +43,64 @@ func validateModel(stub shim.ChaincodeStubInterface, m *Model3D) error {
 	return nil
 }
 
-// checkSubmitter vérifie que le signataire de la transaction est le
-// propriétaire déclaré, qu'il appartient à l'organisation de son identifiant
-// et que son certificat l'autorise à écrire (statut actif, rôle d'écriture).
-func checkSubmitter(stub shim.ChaincodeStubInterface, ownerID string) error {
+// signer est l'identité vérifiée du signataire d'une transaction.
+type signer struct {
+	id   string // identifiant d'enrôlement, pseudo@org
+	role string // attribut Myr.role du certificat
+}
+
+// activeSigner vérifie que le signataire de la transaction appartient à
+// l'organisation de son identifiant (pseudo@<org>, MSP <org>MSP) et que son
+// certificat le déclare actif.
+func activeSigner(stub shim.ChaincodeStubInterface) (signer, error) {
 	id, err := cid.New(stub)
 	if err != nil {
-		return fmt.Errorf("identité du signataire illisible : %w", err)
+		return signer{}, fmt.Errorf("identité du signataire illisible : %w", err)
 	}
 	cert, err := id.GetX509Certificate()
 	if err != nil || cert == nil {
-		return fmt.Errorf("certificat du signataire absent : %v", err)
+		return signer{}, fmt.Errorf("certificat du signataire absent : %v", err)
 	}
 	enrollmentID := cert.Subject.CommonName
-	if ownerID != enrollmentID {
-		return fmt.Errorf("OwnerID %q différent du signataire %q", ownerID, enrollmentID)
-	}
 	mspID, err := id.GetMSPID()
 	if err != nil {
-		return fmt.Errorf("MSP du signataire illisible : %w", err)
+		return signer{}, fmt.Errorf("MSP du signataire illisible : %w", err)
 	}
 	_, org, ok := strings.Cut(enrollmentID, "@")
 	if !ok || org == "" || mspID != org+"MSP" {
-		return fmt.Errorf("signataire %q émis par %s : l'identifiant doit être de la forme pseudo@<org> avec le MSP <org>MSP", enrollmentID, mspID)
+		return signer{}, fmt.Errorf("signataire %q émis par %s : l'identifiant doit être de la forme pseudo@<org> avec le MSP <org>MSP", enrollmentID, mspID)
 	}
 	if status, _, _ := id.GetAttributeValue(attrStatus); status != statusActive {
-		return fmt.Errorf("signataire %q : %s vaut %q, %q requis", enrollmentID, attrStatus, status, statusActive)
+		return signer{}, fmt.Errorf("signataire %q : %s vaut %q, %q requis", enrollmentID, attrStatus, status, statusActive)
 	}
-	if role, _, _ := id.GetAttributeValue(attrRole); !writerRoles[role] {
-		return fmt.Errorf("signataire %q : le rôle %q n'autorise pas l'écriture", enrollmentID, role)
+	role, _, _ := id.GetAttributeValue(attrRole)
+	return signer{id: enrollmentID, role: role}, nil
+}
+
+// requirePermission vérifie que le rôle du signataire porte perm dans la
+// table des rôles du canal.
+func requirePermission(stub shim.ChaincodeStubInterface, s signer, perm string) error {
+	ok, err := roleAllows(stub, s.role, perm)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("signataire %q : le rôle %q n'a pas la permission %s", s.id, s.role, perm)
 	}
 	return nil
+}
+
+// checkSubmitter vérifie que le signataire de la transaction est actif, qu'il
+// est le propriétaire déclaré et que son rôle l'autorise à écrire.
+func checkSubmitter(stub shim.ChaincodeStubInterface, ownerID string) error {
+	s, err := activeSigner(stub)
+	if err != nil {
+		return err
+	}
+	if ownerID != s.id {
+		return fmt.Errorf("OwnerID %q différent du signataire %q", ownerID, s.id)
+	}
+	return requirePermission(stub, s, permWrite)
 }
 
 // hashIndexKey retourne la clé composite de l'index pour une empreinte.

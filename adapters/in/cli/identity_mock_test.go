@@ -16,6 +16,7 @@ type mockIdentitySvc struct {
 	reEnroll         func(ctx context.Context, wallet identity.WalletEntry) (identity.WalletEntry, error)
 	loadGuestWallet  func(certPath, keyPath, caCertPath, orgID string) (identity.WalletEntry, error)
 	requestAccess    func(ctx context.Context, req identity.AccountRequest, policy identity.RegistrationPolicy) (*identity.AccountRequest, string, error)
+	requestRole      func(ctx context.Context, w identity.WalletEntry, wanted string) (*identity.AccountRequest, error)
 	approveRequest   func(ctx context.Context, id string) (*identity.AccountRequest, error)
 	rejectRequest    func(ctx context.Context, id string) (*identity.AccountRequest, error)
 	listRequests     func() ([]*identity.AccountRequest, error)
@@ -102,6 +103,12 @@ func (m *mockIdentitySvc) WalletDir() string {
 		return m.walletDir()
 	}
 	return ""
+}
+func (m *mockIdentitySvc) RequestRole(ctx context.Context, w identity.WalletEntry, wanted string) (*identity.AccountRequest, error) {
+	if m.requestRole != nil {
+		return m.requestRole(ctx, w, wanted)
+	}
+	return &identity.AccountRequest{ID: "req-1", Kind: identity.RequestKindRole, Role: wanted, Status: identity.RequestPending}, nil
 }
 func (m *mockIdentitySvc) SetRole(ctx context.Context, name, newRole string) error {
 	if m.setRole != nil {

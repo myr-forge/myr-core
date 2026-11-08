@@ -422,13 +422,15 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCA01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 6 explicite(s) · 8 déduit(s)
+> [!check]- Tests — 8 explicite(s) · 8 déduit(s)
 > - ✅ [TestHandleIdentityRequestDecision_Approve_OK](../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Approve_OK.md) — explicite (le test cite RM44)
 > - ✅ [TestHandleIdentityRequestDecision_Reject_OK](../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Reject_OK.md) — explicite (le test cite RM44)
 > - ✅ [TestAccountRequest_FullFlow](../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — explicite (le test cite RM44)
 > - ✅ [TestApproveRequest_NominalCase](../../docs/tests/domain-identity/TestApproveRequest_NominalCase.md) — explicite (le test cite RM44)
 > - ✅ [TestDecideRequest_NotFoundOrNotPending_Rejected](../../docs/tests/domain-identity/TestDecideRequest_NotFoundOrNotPending_Rejected.md) — explicite (le test cite RM44)
 > - ✅ [TestRejectRequest_NominalCase](../../docs/tests/domain-identity/TestRejectRequest_NominalCase.md) — explicite (le test cite RM44)
+> - ✅ [TestRejectRequest_RM47_RoleRequest_IdentityUnchanged](../../docs/tests/domain-identity/TestRejectRequest_RM47_RoleRequest_IdentityUnchanged.md) — explicite (le test cite RM44)
+> - ✅ [TestRequestRole_RM47_Approval_PendingThenGranted](../../docs/tests/domain-identity/TestRequestRole_RM47_Approval_PendingThenGranted.md) — explicite (le test cite RM44)
 > - 🟡 [TestRunIdentityDecision_Approve_OK](../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : teste commande `myr identity approve`
 > - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : teste commande `myr identity approve`
 > - 🟡 [TestHandleIdentityRequestDecision_Errors](../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Errors.md) — déduit : teste route `/api/identity/requests`
@@ -436,7 +438,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - 🟡 [TestHandleIdentityRequests_Admin_EmptyList](../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_EmptyList.md) — déduit : teste route `/api/identity/requests`
 > - 🟡 [TestHandleIdentityRequests_Admin_ReturnsList](../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_ReturnsList.md) — déduit : teste route `/api/identity/requests`
 > - 🟡 [TestHandleIdentityRequests_NonAdmin_Forbidden](../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
-> - 🟡 [TestHandleIdentitySession_RoleFromCertificate](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_RoleFromCertificate.md) — déduit : teste route `/api/identity/requests`
+> - … et 1 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### RM45 — Connexion réservée aux identités actives dotées d'un rôle
@@ -464,26 +466,74 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 
 ### RM46 — Rôle attribué toujours défini dans la table des rôles
 
-- **Déclencheur** : Attribution d'un rôle à une identité — création de compte (`myr identity register`), inscription (rôle par défaut `--auto-role` du réseau), changement de rôle (`myr identity set-role`)
+- **Déclencheur** : Attribution d'un rôle à une identité — création de compte (`myr identity register`), inscription (rôle par défaut `--auto-role` du réseau), changement de rôle (`myr identity set-role`), demande de rôle et son approbation (`myr identity request-role`, `myr identity approve`)
 - **Condition** : Toujours
-- **Conséquence** : Le rôle attribué doit exister dans la table des rôles du réseau ; un rôle inconnu est refusé, jamais remplacé par un autre. Le rôle attribué par défaut aux inscriptions ne peut porter aucune permission d'administration (`admin`, `identity.admin`, `role.admin`, `network.admin`) : une inscription automatique ne donne jamais de droit d'administration — ce contrôle s'applique dès la configuration du réseau
+- **Conséquence** : Le rôle attribué doit exister dans la table des rôles du réseau ; un rôle inconnu est refusé, jamais remplacé par un autre — y compris à l'approbation d'une demande de rôle dont le rôle a été retiré de la table depuis. Le rôle attribué par défaut aux inscriptions ne peut porter aucune permission d'administration (`admin`, `identity.admin`, `role.admin`, `network.admin`) : une inscription automatique ne donne jamais de droit d'administration — ce contrôle s'applique dès la configuration du réseau
 - **Use cases** : UCA01, UCA08
 
----
-
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 9 explicite(s) · 2 déduit(s)
+> [!check]- Tests — 11 explicite(s) · 6 déduit(s)
 > - ✅ [TestHandleIdentityAccounts_InvalidNameOrRole_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityAccounts_InvalidNameOrRole_Rejected.md) — explicite (le test cite RM46)
+> - ✅ [TestApproveRequest_RM46_RoleRemovedSinceRequest_Rejected](../../docs/tests/domain-identity/TestApproveRequest_RM46_RoleRemovedSinceRequest_Rejected.md) — explicite (le test cite RM46)
 > - ✅ [TestCreateAccount_RM46_CustomAndDefaultRole](../../docs/tests/domain-identity/TestCreateAccount_RM46_CustomAndDefaultRole.md) — explicite (le test cite RM46)
 > - ✅ [TestCreateAccount_RM46_UnknownRole_Rejected](../../docs/tests/domain-identity/TestCreateAccount_RM46_UnknownRole_Rejected.md) — explicite (le test cite RM46)
 > - ✅ [TestRequestAccess_RM46_InvalidDefaultRole_Rejected](../../docs/tests/domain-identity/TestRequestAccess_RM46_InvalidDefaultRole_Rejected.md) — explicite (le test cite RM46)
+> - ✅ [TestRequestRole_RM47_Invalid_Rejected](../../docs/tests/domain-identity/TestRequestRole_RM47_Invalid_Rejected.md) — explicite (le test cite RM46)
 > - ✅ [TestSetRole_RM46_UnknownRole_Rejected](../../docs/tests/domain-identity/TestSetRole_RM46_UnknownRole_Rejected.md) — explicite (le test cite RM46)
 > - ✅ [TestAutoRegisterRole_RM46_Invalid_Rejected](../../docs/tests/domain-network/TestAutoRegisterRole_RM46_Invalid_Rejected.md) — explicite (le test cite RM46)
 > - ✅ [TestAssignableByDefault_RM46_AdminPermission_Rejected](../../docs/tests/domain-role/TestAssignableByDefault_RM46_AdminPermission_Rejected.md) — explicite (le test cite RM46)
 > - ✅ [TestAssignable_RM46_KnownRole_OK](../../docs/tests/domain-role/TestAssignable_RM46_KnownRole_OK.md) — explicite (le test cite RM46)
 > - ✅ [TestAssignable_RM46_UnknownRole_Rejected](../../docs/tests/domain-role/TestAssignable_RM46_UnknownRole_Rejected.md) — explicite (le test cite RM46)
+> - 🟡 [TestRunIdentityDecision_Approve_OK](../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : teste commande `myr identity approve`
+> - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : teste commande `myr identity approve`
 > - 🟡 [TestRunIdentityRegister_NominalCase](../../docs/tests/adapters-in-cli/TestRunIdentityRegister_NominalCase.md) — déduit : teste commande `myr identity register`
-> - 🟡 [TestRunIdentitySetRole_NominalCase](../../docs/tests/adapters-in-cli/TestRunIdentitySetRole_NominalCase.md) — déduit : teste commande `myr identity set-role`
+> - 🟡 [TestRunIdentityRequestRole_RM47_GrantedOrPending](../../docs/tests/adapters-in-cli/TestRunIdentityRequestRole_RM47_GrantedOrPending.md) — déduit : teste commande `myr identity request-role`
+> - … et 2 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
+### RM47 — Demande de rôle, attribution automatique ou approbation
+
+- **Déclencheur** : Demande d'un rôle par une identité inscrite (`myr identity request-role`, `POST /api/identity/roles/request`)
+- **Condition** : L'identité est active ; le rôle demandé figure dans la table des rôles (RM46) et diffère de son rôle actuel ; aucune autre demande de rôle de l'identité n'est en attente
+- **Conséquence** : Chaque rôle de la table porte un réglage d'attribution. En attribution automatique, le rôle est attribué aussitôt ; sinon, la demande attend la décision de l'administrateur : approuver attribue le rôle, refuser laisse l'identité inchangée (RM44). Un rôle portant une permission d'administration n'est jamais attribué automatiquement, quel que soit son réglage. Le nouveau rôle prend effet au prochain enrôlement de l'identité, c'est-à-dire à sa prochaine connexion
+- **Use cases** : UCA08
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 10 explicite(s) · 2 déduit(s)
+> - ✅ [TestRunIdentityRequestRole_RM47_GrantedOrPending](../../docs/tests/adapters-in-cli/TestRunIdentityRequestRole_RM47_GrantedOrPending.md) — explicite (le test cite RM47)
+> - ✅ [TestHandleIdentityRoleRequest_RM47_GrantedOrPending](../../docs/tests/adapters-in-rest/TestHandleIdentityRoleRequest_RM47_GrantedOrPending.md) — explicite (le test cite RM47)
+> - ✅ [TestRejectRequest_RM47_RoleRequest_IdentityUnchanged](../../docs/tests/domain-identity/TestRejectRequest_RM47_RoleRequest_IdentityUnchanged.md) — explicite (le test cite RM47)
+> - ✅ [TestRequestRole_RM47_AdminRole_NeverAutomatic](../../docs/tests/domain-identity/TestRequestRole_RM47_AdminRole_NeverAutomatic.md) — explicite (le test cite RM47)
+> - ✅ [TestRequestRole_RM47_Approval_PendingThenGranted](../../docs/tests/domain-identity/TestRequestRole_RM47_Approval_PendingThenGranted.md) — explicite (le test cite RM47)
+> - ✅ [TestRequestRole_RM47_AutoGrant_Granted](../../docs/tests/domain-identity/TestRequestRole_RM47_AutoGrant_Granted.md) — explicite (le test cite RM47)
+> - ✅ [TestRequestRole_RM47_Invalid_Rejected](../../docs/tests/domain-identity/TestRequestRole_RM47_Invalid_Rejected.md) — explicite (le test cite RM47)
+> - ✅ [TestCreate_RM47_AutoGrantAdminRole_Rejected](../../docs/tests/domain-role/TestCreate_RM47_AutoGrantAdminRole_Rejected.md) — explicite (le test cite RM47)
+> - ✅ [TestGrantedOnRequest_RM47](../../docs/tests/domain-role/TestGrantedOnRequest_RM47.md) — explicite (le test cite RM47)
+> - ✅ [TestUpdate_RM47_AutoGrantWithAdminPermission_Rejected](../../docs/tests/domain-role/TestUpdate_RM47_AutoGrantWithAdminPermission_Rejected.md) — explicite (le test cite RM47)
+> - 🟡 [TestSessionIdentity](../../docs/tests/adapters-in-cli/TestSessionIdentity.md) — déduit : teste commande `myr identity request-role`
+> - 🟡 [TestHandleIdentityRoleRequest_Errors](../../docs/tests/adapters-in-rest/TestHandleIdentityRoleRequest_Errors.md) — déduit : teste route `/api/identity/roles/request`
+<!-- tests-obsidian:end -->
+
+### RM48 — Table des rôles partagée par le réseau, rôle administrateur immuable
+
+- **Déclencheur** : Création, modification ou suppression d'un rôle (`myr role create|update|delete`) ; tout contrôle d'accès
+- **Condition** : Toujours
+- **Conséquence** : La table des rôles et de leurs permissions est publiée sur le ledger, un exemplaire par canal du réseau, et appliquée par le chaincode comme par chaque serveur. Seule une identité dont le rôle porte `role.admin` la modifie. Tous les rôles se modifient ou se suppriment, sauf `admin`, qui porte toujours toutes les permissions. Tant qu'aucune table n'est publiée, la table initiale s'applique (`reader`, `contributor`, `auditor`, `admin`) ; si la table devient illisible, un serveur applique la dernière table lue, à défaut la table initiale. Une identité dont le rôle a été supprimé n'a plus aucune permission
+- **Use cases** : UCA05, UCADM07
+
+---
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 9 explicite(s) · 0 déduit(s)
+> - ✅ [TestFabricRoleStore_RM48_PublishedOnEveryChannel](../../docs/tests/adapters-out-fabric/TestFabricRoleStore_RM48_PublishedOnEveryChannel.md) — explicite (le test cite RM48)
+> - ✅ [TestDelete_RM48_Admin_Rejected](../../docs/tests/domain-role/TestDelete_RM48_Admin_Rejected.md) — explicite (le test cite RM48)
+> - ✅ [TestDelete_RM48_DefaultRoleDeletable](../../docs/tests/domain-role/TestDelete_RM48_DefaultRoleDeletable.md) — explicite (le test cite RM48)
+> - ✅ [TestTable_RM48_AdminAlwaysImmutable](../../docs/tests/domain-role/TestTable_RM48_AdminAlwaysImmutable.md) — explicite (le test cite RM48)
+> - ✅ [TestTable_RM48_NothingPublished_DefaultRoles](../../docs/tests/domain-role/TestTable_RM48_NothingPublished_DefaultRoles.md) — explicite (le test cite RM48)
+> - ✅ [TestTable_RM48_Unreachable_LastKnownTable](../../docs/tests/domain-role/TestTable_RM48_Unreachable_LastKnownTable.md) — explicite (le test cite RM48)
+> - ✅ [TestTable_RM48_Unreachable_NeverRead_DefaultRoles](../../docs/tests/domain-role/TestTable_RM48_Unreachable_NeverRead_DefaultRoles.md) — explicite (le test cite RM48)
+> - ✅ [TestUpdate_RM48_Admin_Rejected](../../docs/tests/domain-role/TestUpdate_RM48_Admin_Rejected.md) — explicite (le test cite RM48)
+> - ✅ [TestUpdate_RM48_DefaultRoleEditable](../../docs/tests/domain-role/TestUpdate_RM48_DefaultRoleEditable.md) — explicite (le test cite RM48)
 <!-- tests-obsidian:end -->
 
 ## 7. Propriété intellectuelle et commissions
@@ -715,6 +765,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | [RM44](#RM44%20—%20Décision%20sur%20une%20demande%20en%20attente) | Approuver active, refuser suspend — rien n'est supprimé, effet au prochain enrôlement | Compte |
 | [RM45](#RM45%20—%20Connexion%20réservée%20aux%20identités%20actives%20dotées%20d'un%20rôle) | Connexion réservée aux identités actives dotées d'un rôle, lus dans le certificat | Compte |
 | [RM46](#RM46%20—%20Rôle%20attribué%20toujours%20défini%20dans%20la%20table%20des%20rôles) | Rôle attribué toujours présent dans la table des rôles ; rôle d'inscription par défaut sans droit d'administration | Compte |
+| [RM47](#RM47%20—%20Demande%20de%20rôle,%20attribution%20automatique%20ou%20approbation) | Demande de rôle attribuée aussitôt si le rôle est en attribution automatique, sinon soumise à l'administrateur ; jamais automatique pour un rôle d'administration | Compte |
+| [RM48](#RM48%20—%20Table%20des%20rôles%20partagée%20par%20le%20réseau,%20rôle%20administrateur%20immuable) | Table des rôles publiée sur le ledger et appliquée par tout le réseau ; `admin` immuable ; table initiale tant qu'aucune n'est publiée | Compte |
 | [RM23](#RM23%20—%20Distribution%20automatique%20des%20commissions) | Commissions distribuées automatiquement à la livraison | PI |
 | [RM24](#RM24%20—%20Répartition%20proportionnelle%20multi-auteurs) | Répartition proportionnelle par auteur | PI |
 | [RM25](#RM25%20—%20Transfert%20de%20propriété%20définitif) | Transfert de propriété définitif et immuable | PI |

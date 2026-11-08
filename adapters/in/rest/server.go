@@ -109,6 +109,7 @@ func (s *Server) buildMux() (http.Handler, error) {
 	mux.HandleFunc("/api/identity/accounts", s.handler.requireRole(rbac.PermIdentityAdmin, s.handler.handleIdentityAccounts))
 	mux.HandleFunc("/api/identity/wallets", s.handler.requireAuth(s.handler.handleIdentityWallets))
 	mux.HandleFunc("/api/identity/status", s.handler.requireAuth(s.handler.handleIdentityStatus))
+	mux.HandleFunc("/api/identity/roles/request", s.handler.requireAuth(s.handler.handleIdentityRoleRequest))
 
 	// Routes de données — lecture : reader+, écriture (POST/PUT/PATCH/DELETE) : contributor+
 	auth := s.handler.requireAuth

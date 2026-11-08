@@ -9,6 +9,8 @@ tags:
   - uc/UCA04
   - uc/UCA07
   - uc/UCA08
+  - rm/RM46
+  - rm/RM47
 ---
 # DC — CLI Identité & Session : Référence des commandes `myr identity` / `myr session`
 
@@ -40,9 +42,10 @@ myr identity
 ├── re-enroll <pseudo@org>               — renouveler le certificat d'un wallet local          UCA08 (suite d'un changement de rôle)
 ├── request                              — soumettre une demande d'accès pour un tiers          UCA01
 │     --pseudo <p> --email <e> --org-id <id> [--display-name <n>] [--message <m>]
-├── requests                             — lister les demandes d'accès et leur statut            UCA01
-├── approve <request-id>                 — approuver une demande en attente (identité active)   UCA01
-├── reject <request-id>                  — refuser une demande en attente (identité suspendue)  UCA01
+├── requests                             — lister les demandes d'inscription et de rôle          UCA01, UCA08
+├── request-role <rôle>                  — demander un rôle pour l'identité du compte local      UCA08
+├── approve <request-id>                 — approuver une demande en attente                     UCA01, UCA08
+├── reject <request-id>                  — refuser une demande en attente                       UCA01, UCA08
 ├── register                             — créer un compte actif (administrateur)               UCA01
 │     --pseudo <p> --org-id <id> [--role <r>] [--email <e>]
 └── set-role --id <pseudo@org> --role <nom>  — changer le rôle CA d'une identité                UCA08
@@ -155,7 +158,7 @@ myr identity approve <request-id>
 myr identity reject <request-id>
 ```
 
-**Comportement :** Décide une demande en attente (UCA01). `approve` passe l'identité à `Myr.status=active` ; `reject` la passe à `Myr.status=suspended` — rien n'est supprimé. La décision s'applique au prochain enrôlement de l'identité. Échoue si la demande est inconnue ou n'est plus en attente. Équivalents REST : `POST /api/identity/requests/{id}/approve|reject`.
+**Comportement :** Décide une demande en attente. Inscription (UCA01) : `approve` passe l'identité à `Myr.status=active` ; `reject` la passe à `Myr.status=suspended`. Demande de rôle (UCA08) : `approve` attribue le rôle demandé (`Myr.role`), s'il figure toujours dans la table des rôles (RM46) ; `reject` laisse l'identité inchangée. Rien n'est supprimé. La décision s'applique au prochain enrôlement de l'identité. Échoue si la demande est inconnue ou n'est plus en attente. Équivalents REST : `POST /api/identity/requests/{id}/approve|reject`.
 
 **Sortie :**
 ```
@@ -191,9 +194,31 @@ Secret d'enrôlement : <secret>
 myr identity requests
 ```
 
-**Comportement :** Liste les demandes d'accès et leur statut (`pending`, `approved`, `rejected`, `failed`). Équivalent CLI de `GET /api/identity/requests`.
+**Comportement :** Liste les demandes d'inscription et de rôle (colonne `TYPE`, rôle demandé dans `RÔLE`) et leur statut (`pending`, `approved`, `rejected`, `failed`). Équivalent CLI de `GET /api/identity/requests`.
 
 **Service :** `identitySvc.ListRequests()`
+
+---
+
+### 3.6b `myr identity request-role`
+
+```
+myr identity request-role <rôle>
+```
+
+**Comportement :** Demande un rôle de la table des rôles pour l'identité du compte local (`myr session`), dont le wallet donne le rôle actuel (UCA08, RM47). Un rôle en attribution automatique est attribué aussitôt ; tout autre attend la décision de l'administrateur (`myr identity approve|reject`). Dans les deux cas, le nouveau rôle s'applique au prochain ré-enrôlement (`myr identity re-enroll`). Échoue sans compte local, si le rôle est déjà détenu ou absent de la table, ou si une autre demande de rôle de l'identité est en attente. Équivalent REST : `POST /api/identity/roles/request`.
+
+**Sortie :**
+```
+Rôle consumer attribué à alice@Org1.
+Il s'applique au prochain ré-enrôlement de l'identité (myr identity re-enroll).
+```
+ou
+```
+Demande req-123 enregistrée : rôle contributor pour alice@Org1, en attente de l'administrateur.
+```
+
+**Service :** `identitySvc.Wallet(handle)`, puis `identitySvc.RequestRole(ctx, wallet, rôle)`
 
 ---
 
@@ -258,6 +283,7 @@ myr session logout
 - [§ 3.5b `myr identity approve` / `reject`](DC_CLI_Identity.md#3.5b%20`myr%20identity%20approve`%20/%20`reject`) → [REST /api/identity/requests](../../docs/code/routes/REST%20api-identity-requests.md) · [CLI myr identity approve](../../docs/code/commandes/CLI%20myr-identity-approve.md) · [CLI myr identity reject](../../docs/code/commandes/CLI%20myr-identity-reject.md) · [IdentityService.ApproveRequest](../../docs/code/fonctions/identity.IdentityService.ApproveRequest.md) · [IdentityService.RejectRequest](../../docs/code/fonctions/identity.IdentityService.RejectRequest.md)
 - [§ 3.5c `myr identity register`](DC_CLI_Identity.md#3.5c%20`myr%20identity%20register`) → [REST /api/identity/accounts](../../docs/code/routes/REST%20api-identity-accounts.md) · [CLI myr identity register](../../docs/code/commandes/CLI%20myr-identity-register.md) · [IdentityService.CreateAccount](../../docs/code/fonctions/identity.IdentityService.CreateAccount.md)
 - [§ 3.6 `myr identity requests`](DC_CLI_Identity.md#3.6%20`myr%20identity%20requests`) → [REST /api/identity/requests](../../docs/code/routes/REST%20api-identity-requests.md) · [CLI myr identity requests](../../docs/code/commandes/CLI%20myr-identity-requests.md) · [IdentityService.ListRequests](../../docs/code/fonctions/identity.IdentityService.ListRequests.md)
+- [§ 3.6b `myr identity request-role`](DC_CLI_Identity.md#3.6b%20`myr%20identity%20request-role`) → [REST /api/identity/roles/request](../../docs/code/routes/REST%20api-identity-roles-request.md) · [CLI myr identity approve](../../docs/code/commandes/CLI%20myr-identity-approve.md) · [CLI myr identity re-enroll](../../docs/code/commandes/CLI%20myr-identity-re-enroll.md) · [CLI myr identity request-role](../../docs/code/commandes/CLI%20myr-identity-request-role.md) · [CLI myr session](../../docs/code/commandes/CLI%20myr-session.md) · [IdentityService.RequestRole](../../docs/code/fonctions/identity.IdentityService.RequestRole.md) · [IdentityService.Wallet](../../docs/code/fonctions/identity.IdentityService.Wallet.md)
 - [§ 3.7 `myr identity set-role`](DC_CLI_Identity.md#3.7%20`myr%20identity%20set-role`) → [CLI myr identity set-role](../../docs/code/commandes/CLI%20myr-identity-set-role.md) · [IdentityService.SetRole](../../docs/code/fonctions/identity.IdentityService.SetRole.md)
 - [§ 3.8 `myr session create` / `show` / `logout`](DC_CLI_Identity.md#3.8%20`myr%20session%20create`%20/%20`show`%20/%20`logout`) → [CLI myr session create](../../docs/code/commandes/CLI%20myr-session-create.md) · [CLI myr session logout](../../docs/code/commandes/CLI%20myr-session-logout.md) · [CLI myr session show](../../docs/code/commandes/CLI%20myr-session-show.md) · [SessionService.Create](../../docs/code/fonctions/session.SessionService.Create.md) · [SessionService.Current](../../docs/code/fonctions/session.SessionService.Current.md) · [SessionService.Logout](../../docs/code/fonctions/session.SessionService.Logout.md)
 - [§ 4. Points ouverts](DC_CLI_Identity.md#4.%20Points%20ouverts) → [IdentityService.LoadGuestWallet](../../docs/code/fonctions/identity.IdentityService.LoadGuestWallet.md) · [IdentityService.WalletDir](../../docs/code/fonctions/identity.IdentityService.WalletDir.md)

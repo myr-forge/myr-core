@@ -16,7 +16,10 @@ tags:
   - rm/RM34
   - rm/RM35
   - rm/RM36
+  - rm/RM47
+  - rm/RM48
   - enf/ENF18
+  - relecture/incoherence
 ---
 
 # Gérer les rôles
@@ -47,7 +50,9 @@ UC3 ..> UC4 : <<include>>
 
 ## Contexte
 
-L'administrateur gère les **rôles** disponibles dans le système MYR. Un rôle est une entité locale (non blockchain) représentée par un nom unique, une description et une liste de droits d'accès. Les rôles sont ensuite attribués aux organisations (UCADM06).
+L'administrateur gère les **rôles** disponibles dans le système MYR. La table des rôles est publiée sur le ledger, un exemplaire par canal du réseau, et appliquée à l'identique par le chaincode et par chaque serveur (RM48, ADR-12) ; seule une identité dont le rôle porte `role.admin` la modifie, avec la signature de son wallet. Un rôle y est représenté par un nom unique, une liste de droits d'accès (permissions) et un réglage d'attribution sur demande (UCA08, RM47). Tant qu'aucune table n'est publiée, la table initiale s'applique (`reader`, `contributor`, `auditor`, `admin`). Les rôles sont ensuite attribués aux organisations (UCADM06).
+
+#incoherence Ce use case et UCADM06 attribuent les rôles aux organisations (`OrgRole`, RM35), alors que l'ADR-12 porte le rôle dans le certificat de chaque identité (`Myr.role`, UCA08) et que la table des rôles ne comporte ni identifiant généré ni description. À trancher : attribution par organisation, par identité, ou les deux.
 
 Le rôle `admin` est natif au système : il est initialisé automatiquement au démarrage du service et ne peut pas être modifié ni supprimé (RM34). Son `ID` est la valeur constante `"admin"`.
 
@@ -204,21 +209,18 @@ end
 
 ## Notes d'implémentation
 
-**État actuel :** Non implémenté.
+**Composants :**
+- Service et règles des rôles (table initiale, `admin` immuable, réglage d'attribution) : `domain/role` (`RoleService` : `Create`, `Update`, `Delete`, `Get`, `List`, `HasPermission`).
+- Publication sur le ledger : `adapters/out/fabric/role_store.go` (port `role.Repo`), qui soumet `PutRole` / `DeleteRole` sur chaque canal du réseau et lit `GetRoles` sur son canal par défaut (`specs/3-Conception/Chaincode.md` §4.3).
+- CLI : `myr role list|show|create|update|delete` (`adapters/in/cli/role.go`), signé par le wallet du compte local (`myr session`).
 
-**Chemin d'implémentation cible :**
-1. Ajouter l'entité `Role` dans `domain/channel/entity.go` : `ID string`, `Name string`, `Description string`, `Rights []string`.
-2. Ajouter `RoleService` dans `domain/channel/port_in.go` : `CreateRole`, `UpdateRole`, `DeleteRole`, `ListRoles`, `GetRole`.
-3. Implémenter dans `domain/channel/service.go` — protection admin via `if id == "admin" { return ErrAdminRoleProtected }`.
-4. Implémenter `RoleStore` dans `adapters/out/localstorage/role_store.go` (JSON — fichier `data/roles.json`).
-5. Créer `adapters/in/cli/role.go` : commandes `myr role list`, `myr role create`, `myr role edit <id>`, `myr role delete <id>`.
-
-**Initialisation du rôle admin :** Le rôle `admin` est créé (ou vérifié) lors de l'appel à `NewService(...)` dans `domain/channel/service.go`. Si absent du store, il est inséré automatiquement avec `ID: "admin"`, `Rights: ["*"]`.
+**Rôle admin :** il n'est jamais stocké différemment de la table initiale : le chaincode refuse de le modifier ou de le supprimer, et le domaine le rétablit dans sa définition complète à chaque lecture de la table.
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
 **Étape suivante — conception**
+- **Chaincode** : [§ 4. Fonctions chaincode — Store/Read (D3/D4/D6)](../../3-Conception/Chaincode.md#4.%20Fonctions%20chaincode%20—%20Store/Read%20%28D3/D4/D6%29)
 - **DC_CLI_Admin** : [§ 5. Groupe `myr role` — Gestion des rôles *(UCADM07)*](../../3-Conception/DC_CLI_Admin.md#5.%20Groupe%20`myr%20role`%20—%20Gestion%20des%20rôles%20*%28UCADM07%29*) · [§ 5.2 `myr role create` *(UCADM07)*](../../3-Conception/DC_CLI_Admin.md#5.2%20`myr%20role%20create`%20*%28UCADM07%29*) · [§ 5.3 `myr role edit <id>` *(UCADM07)*](../../3-Conception/DC_CLI_Admin.md#5.3%20`myr%20role%20edit%20<id>`%20*%28UCADM07%29*) · [§ 5.4 `myr role delete <id>` *(UCADM07)*](../../3-Conception/DC_CLI_Admin.md#5.4%20`myr%20role%20delete%20<id>`%20*%28UCADM07%29*) · [§ 7.2 `RoleService` (port_in) *(UCADM06/07)*](../../3-Conception/DC_CLI_Admin.md#7.2%20`RoleService`%20%28port_in%29%20*%28UCADM06/07%29*) · [§ 7.5 `RoleStore` (port_out) *(UCADM06/07)*](../../3-Conception/DC_CLI_Admin.md#7.5%20`RoleStore`%20%28port_out%29%20*%28UCADM06/07%29*) · [§ 11. Écarts code → specs](../../3-Conception/DC_CLI_Admin.md#11.%20Écarts%20code%20→%20specs)
 - **DC_D2_Administration** : [§ DC — D2 : Administration réseau](../../3-Conception/DC_D2_Administration.md#DC%20—%20D2%20:%20Administration%20réseau) · [§ Entités à concevoir (non présentes dans le code)](../../3-Conception/DC_D2_Administration.md#Entités%20à%20concevoir%20%28non%20présentes%20dans%20le%20code%29) · [§ 8. Écarts code → specs](../../3-Conception/DC_D2_Administration.md#8.%20Écarts%20code%20→%20specs)
 

@@ -13,6 +13,8 @@ tags:
   - domaine/role
   - uc/UCA05
   - rm/RM22
+  - rm/RM45
+  - rm/RM48
   - enf/ENF12
   - enf/ENF18
 ---
@@ -55,14 +57,14 @@ Le contrôle d'accès repose sur deux couches, toutes deux dans `adapters/in/res
 
 Les permissions forment un catalogue plat (pas de hiérarchie implicite) : `read`, `write`, `network.admin`, `role.admin`, `identity.admin`, `admin`. Un rôle est une association arbitraire à un sous-ensemble de ces permissions (RBAC dynamique, `domain/role`), pas une simple étiquette ordonnée.
 
-Quatre rôles **intégrés** existent toujours et ne peuvent pas être modifiés ni supprimés : `reader`, `contributor`, `auditor`, `admin` (voir `myr role list`). Des rôles personnalisés (ex. `consumer`, `manufacturer`) peuvent être créés par un administrateur via `myr role create` avec n'importe quel sous-ensemble de permissions.
+La table des rôles et de leurs permissions est celle du réseau, publiée sur le ledger et appliquée à l'identique par le chaincode et par chaque serveur (RM48, ADR-12). Tant qu'aucune n'est publiée, la table initiale s'applique : `reader`, `contributor`, `auditor`, `admin` (voir `myr role list`). Un administrateur peut ajouter des rôles (ex. `consumer`, `manufacturer`) avec n'importe quel sous-ensemble de permissions, modifier ou supprimer tout rôle sauf `admin`, qui porte toujours toutes les permissions (`myr role create|update|delete`, UCADM07). Le serveur relit la table au plus toutes les 30 secondes ; s'il ne peut plus la lire, il applique la dernière lue, à défaut la table initiale. Un rôle supprimé, encore porté par une identité, ne lui accorde plus aucune permission.
 
 **Si aucun `role.RoleService` n'est injecté** dans le serveur (config minimale), `requireRole` retombe sur une hiérarchie historique câblée en dur : `reader(1) < contributor(2) < admin(3)`, comparée au rang requis par la permission (`legacyRoleRank` / `legacyPermRank` dans `handlers.go`).
 
 ## Pré-conditions
 
 - L'utilisateur dispose d'un token de session valide (UCA02)
-- Un rôle est associé à la session (celui fixé à la connexion — voir écart UCA02 sur le rôle figé à `"contributor"`)
+- Un rôle est associé à la session : celui que porte le certificat de l'identité à la connexion (UCA02, RM45)
 
 ## Scénario
 
@@ -73,9 +75,17 @@ Quatre rôles **intégrés** existent toujours et ne peuvent pas être modifiés
 3. La permission est accordée — l'action est exécutée normalement
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
-> - 🟡 [TestHasPermission_BuiltinDefaults](../../../docs/tests/domain-role/TestHasPermission_BuiltinDefaults.md) — déduit : teste `RoleService.HasPermission`
+> [!check]- Tests — 0 explicite(s) · 10 déduit(s)
+> - 🟡 [TestCreate_NoTable_Rejected](../../../docs/tests/domain-role/TestCreate_NoTable_Rejected.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestDelete_Success](../../../docs/tests/domain-role/TestDelete_Success.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestHasPermission_DefaultTable](../../../docs/tests/domain-role/TestHasPermission_DefaultTable.md) — déduit : teste `RoleService.HasPermission`
 > - 🟡 [TestHasPermission_UnknownRole](../../../docs/tests/domain-role/TestHasPermission_UnknownRole.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestTable_RM48_AdminAlwaysImmutable](../../../docs/tests/domain-role/TestTable_RM48_AdminAlwaysImmutable.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestTable_RM48_Unreachable_LastKnownTable](../../../docs/tests/domain-role/TestTable_RM48_Unreachable_LastKnownTable.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestTable_RM48_Unreachable_NeverRead_DefaultRoles](../../../docs/tests/domain-role/TestTable_RM48_Unreachable_NeverRead_DefaultRoles.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestUpdate_RM47_AutoGrantWithAdminPermission_Rejected](../../../docs/tests/domain-role/TestUpdate_RM47_AutoGrantWithAdminPermission_Rejected.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestUpdate_RM48_DefaultRoleEditable](../../../docs/tests/domain-role/TestUpdate_RM48_DefaultRoleEditable.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestUpdate_Success](../../../docs/tests/domain-role/TestUpdate_Success.md) — déduit : teste `RoleService.HasPermission`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Session absente ou invalide (401)
@@ -94,9 +104,17 @@ Quatre rôles **intégrés** existent toujours et ne peuvent pas être modifiés
 2. `requireRole` retourne `HTTP 403` avec `{"error": "droits insuffisants"}`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
-> - 🟡 [TestHasPermission_BuiltinDefaults](../../../docs/tests/domain-role/TestHasPermission_BuiltinDefaults.md) — déduit : teste `RoleService.HasPermission`
+> [!check]- Tests — 0 explicite(s) · 10 déduit(s)
+> - 🟡 [TestCreate_NoTable_Rejected](../../../docs/tests/domain-role/TestCreate_NoTable_Rejected.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestDelete_Success](../../../docs/tests/domain-role/TestDelete_Success.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestHasPermission_DefaultTable](../../../docs/tests/domain-role/TestHasPermission_DefaultTable.md) — déduit : teste `RoleService.HasPermission`
 > - 🟡 [TestHasPermission_UnknownRole](../../../docs/tests/domain-role/TestHasPermission_UnknownRole.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestTable_RM48_AdminAlwaysImmutable](../../../docs/tests/domain-role/TestTable_RM48_AdminAlwaysImmutable.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestTable_RM48_Unreachable_LastKnownTable](../../../docs/tests/domain-role/TestTable_RM48_Unreachable_LastKnownTable.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestTable_RM48_Unreachable_NeverRead_DefaultRoles](../../../docs/tests/domain-role/TestTable_RM48_Unreachable_NeverRead_DefaultRoles.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestUpdate_RM47_AutoGrantWithAdminPermission_Rejected](../../../docs/tests/domain-role/TestUpdate_RM47_AutoGrantWithAdminPermission_Rejected.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestUpdate_RM48_DefaultRoleEditable](../../../docs/tests/domain-role/TestUpdate_RM48_DefaultRoleEditable.md) — déduit : teste `RoleService.HasPermission`
+> - 🟡 [TestUpdate_Success](../../../docs/tests/domain-role/TestUpdate_Success.md) — déduit : teste `RoleService.HasPermission`
 <!-- tests-obsidian:end -->
 
 ## Post-conditions
@@ -135,6 +153,7 @@ end
 ## Règles métier déclenchées
 
 - **RM22** — Tout accès à une action protégée déclenche une vérification côté serveur (session + permission). Le client ne peut pas contourner ce contrôle : le token est opaque, non forgeable.
+- **RM48** — La permission est lue dans la table des rôles du réseau ; `admin` les porte toutes.
 
 ## Exigences non-fonctionnelles
 
@@ -145,7 +164,7 @@ end
 
 **Composants réels :**
 - `requireAuth`, `requireRole`, `legacyRoleRank`, `legacyPermRank` → `adapters/in/rest/handlers.go`
-- Catalogue de permissions, rôles intégrés, RBAC dynamique → `domain/role/entity.go`, `service.go`
+- Catalogue de permissions, table initiale, RBAC dynamique → `domain/role/entity.go`, `service.go` ; table publiée sur le ledger → `adapters/out/fabric/role_store.go` (chaincode `GetRoles`)
 - Gestion des rôles : `myr role list|show|create|update|delete` (CLI uniquement — aucun endpoint REST de gestion des rôles, seulement une consultation implicite via l'usage du middleware)
 
 **Pas de JWT :** aucune claim signée n'est en jeu ici — la « vérification du rôle » se fait en interrogeant le store de sessions et le service RBAC à chaque requête, pas en décodant un token.
@@ -156,11 +175,6 @@ end
 ## Liens
 
 **Étape suivante — conception**
-- _Aucun document de conception ne traite ce use case : la chaîne s'arrête à l'analyse._
-
-**Code cité par cette analyse (sans conception : non relié)**
-- CLI `myr role create`
-- CLI `myr role list`
-- Fonction `RoleService.HasPermission`
+- **Chaincode** : [§ 4. Fonctions chaincode — Store/Read (D3/D4/D6)](../../3-Conception/Chaincode.md#4.%20Fonctions%20chaincode%20—%20Store/Read%20%28D3/D4/D6%29)
 
 <!-- liens-obsidian:end -->

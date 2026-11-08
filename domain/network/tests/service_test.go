@@ -334,13 +334,13 @@ func TestUpdate_NotFound(t *testing.T) {
 
 // / @brief  Add et Update refusent un rôle d'inscription par défaut inconnu ou d'administration (RM46)
 // / @input  service sans table des rôles (rôles intégrés seuls) ; AutoRegisterRole admin puis "consumer" (inconnu)
-// / @expect une erreur ErrAdminByDefault / ErrNotFound pour Add comme pour Update ; le profil existant n'est pas modifié
+// / @expect une erreur ErrAdminAutomatic / ErrNotFound pour Add comme pour Update ; le profil existant n'est pas modifié
 func TestAutoRegisterRole_RM46_Invalid_Rejected(t *testing.T) {
 	repo := &mockRepo{profiles: []*network.NetworkProfile{
 		{ID: "n1", Name: "Net", PeerEndpoint: "localhost:7051", AutoRegisterRole: "reader"},
 	}}
 	svc := network.NewService(repo, nil)
-	cases := map[string]error{"admin": role.ErrAdminByDefault, "consumer": role.ErrNotFound}
+	cases := map[string]error{"admin": role.ErrAdminAutomatic, "consumer": role.ErrNotFound}
 	for r, want := range cases {
 		if _, err := svc.Add("Net2", "localhost:7051", "", "", "", "", "", "", "", "", "", nil, false, true, r, false); !errors.Is(err, want) {
 			t.Errorf("Add(%q) : %v attendu, obtenu %v", r, want, err)

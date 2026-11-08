@@ -1,7 +1,10 @@
 // domain/network/entity.go
 package network
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 // ChaincodeConfig décrit le chaincode déployé sur ce réseau.
 // C'est réseau-spécifique : chaque entreprise peut avoir son propre chaincode.
@@ -87,4 +90,17 @@ func (n *NetworkProfile) GetChaincodeName() string {
 		return n.Chaincode.Name
 	}
 	return n.ChaincodeName // fallback ancien format
+}
+
+// AllChannels retourne les canaux du réseau, son canal par défaut
+// (FabricChannel) en tête, sans doublon — chacun porte un exemplaire de la
+// table des rôles (ADR-12).
+func (n *NetworkProfile) AllChannels() []string {
+	var out []string
+	for _, ch := range append([]string{n.FabricChannel}, n.Channels...) {
+		if ch != "" && !slices.Contains(out, ch) {
+			out = append(out, ch)
+		}
+	}
+	return out
 }

@@ -429,3 +429,102 @@ func TestUpdateMetadata_NotOwnerOrFrozenField_Rejected(t *testing.T) {
 		t.Error("a1 a été modifié")
 	}
 }
+
+// ── Table des rôles ───────────────────────────────────────────────────────────
+
+func networkAdmin(t *testing.T) []byte {
+	return identity(t, "Org1MSP", "root@Org1", map[string]string{"Myr.role": "admin", "Myr.status": "active"})
+}
+
+// roleNames retourne les noms des rôles de la table du canal (GetRoles).
+func roleNames(t *testing.T, stub *fakeStub) []string {
+	t.Helper()
+	resp := stub.invoke("GetRoles")
+	if resp.Status != shim.OK {
+		t.Fatalf("GetRoles refusé : %s", resp.Message)
+	}
+	var table []struct {
+		Name string `json:"name"`
+	}
+	if err := json.Unmarshal(resp.Payload, &table); err != nil {
+		t.Fatalf("réponse GetRoles : %v", err)
+	}
+	names := make([]string, len(table))
+	for i, r := range table {
+		names[i] = r.Name
+	}
+	return names
+}
+
+// / @brief  Sans table publiée, GetRoles retourne la table initiale (RM48)
+// / @input  canal vierge
+// / @expect admin, auditor, contributor, reader
+func TestGetRoles_RM48_NothingPublished_DefaultTable(t *testing.T) {
+	stub := newStub(t, contributor(t, "alice@Org1"))
+	if got := strings.Join(roleNames(t, stub), ","); got != "admin,auditor,contributor,reader" {
+		t.Errorf("table = %s", got)
+	}
+}
+
+// / @brief  PutRole publie un rôle signé par un gestionnaire des rôles, la première publication gardant la table initiale (RM48)
+// / @input  root@Org1 (admin) publie consumer, avec un champ que le chaincode ne lit pas
+// / @expect table à 5 rôles triés ; le champ auto_grant est conservé ; la table reste absente de ListModels
+func TestPutRole_RM48_ByRoleAdmin_Published(t *testing.T) {
+	stub := newStub(t, networkAdmin(t))
+	resp := stub.invoke("PutRole", `{"name":"consumer","permissions":["read"],"auto_grant":true}`)
+	if resp.Status != shim.OK {
+		t.Fatalf("PutRole refusé : %s", resp.Message)
+	}
+	if got := strings.Join(roleNames(t, stub), ","); got != "admin,auditor,consumer,contributor,reader" {
+		t.Errorf("table = %s", got)
+	}
+	if roles := stub.invoke("GetRoles"); !strings.Contains(string(roles.Payload), `"auto_grant":true`) {
+		t.Errorf("auto_grant perdu : %s", roles.Payload)
+	}
+	list := stub.invoke("ListModels", testChannel)
+	if string(list.Payload) != "[]" && string(list.Payload) != "null" {
+		t.Errorf("ListModels = %s, want vide", list.Payload)
+	}
+}
+
+// / @brief  PutRole et DeleteRole exigent la permission role.admin et refusent de toucher à admin (RM48)
+// / @input  contributor qui publie un rôle ; admin qui modifie puis supprime admin ; suppression d'un rôle absent
+// / @expect quatre refus ; aucune table publiée
+func TestPutRole_RM48_NotRoleAdminOrAdminRole_Rejected(t *testing.T) {
+	stub := newStub(t, contributor(t, "alice@Org1"))
+	expectRejected(t, stub.invoke("PutRole", `{"name":"consumer","permissions":["read"]}`), "role.admin")
+
+	stub.creator = networkAdmin(t)
+	expectRejected(t, stub.invoke("PutRole", `{"name":"admin","permissions":["read"]}`), "immuable")
+	expectRejected(t, stub.invoke("DeleteRole", "admin"), "immuable")
+	expectRejected(t, stub.invoke("DeleteRole", "ghost"), "absent")
+	if len(stub.state) != 0 {
+		t.Errorf("aucune écriture attendue, état : %v", stub.state)
+	}
+}
+
+// / @brief  L'écriture d'un asset suit la table publiée : permission write retirée ou accordée par l'administrateur (ADR-12, RM48)
+// / @input  admin retire write à contributor, crée manufacturer avec write et supprime reader
+// / @expect StoreModel refusé pour contributor, accepté pour manufacturer ; reader absent de la table
+func TestStoreModel_RM48_WritePermissionFromTable(t *testing.T) {
+	stub := newStub(t, networkAdmin(t))
+	for _, r := range []string{`{"name":"contributor","permissions":["read"]}`, `{"name":"manufacturer","permissions":["read","write"]}`} {
+		if resp := stub.invoke("PutRole", r); resp.Status != shim.OK {
+			t.Fatalf("PutRole %s refusé : %s", r, resp.Message)
+		}
+	}
+	if resp := stub.invoke("DeleteRole", "reader"); resp.Status != shim.OK {
+		t.Fatalf("DeleteRole refusé : %s", resp.Message)
+	}
+
+	stub.creator = contributor(t, "alice@Org1")
+	expectRejected(t, stub.invoke("StoreModel", storeJSON(t, asset("a1", "alice@Org1", "sha256:h1"))), "permission write")
+
+	stub.creator = identity(t, "Org1MSP", "carol@Org1", map[string]string{"Myr.role": "manufacturer", "Myr.status": "active"})
+	if resp := stub.invoke("StoreModel", storeJSON(t, asset("a2", "carol@Org1", "sha256:h2"))); resp.Status != shim.OK {
+		t.Fatalf("StoreModel manufacturer refusé : %s", resp.Message)
+	}
+	if got := strings.Join(roleNames(t, stub), ","); got != "admin,auditor,contributor,manufacturer" {
+		t.Errorf("table = %s", got)
+	}
+}

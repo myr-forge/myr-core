@@ -134,7 +134,8 @@ package "Domaine métier\n(domain/)" #fff9c4 {
 package "Adapters sortants" #f0f4e8 {
   [FabricBlockchain\nadapters/out/fabric/\nblockchain.go] as AdFabric
   [JSONBlockchain (fallback)\nadapters/out/localstorage/\njson_blockchain.go] as AdJSON
-  [LocalStore\nadapters/out/localstorage/\nrole_store.go, request_store.go,\nsession_store.go, network_store.go...] as AdLocal
+  [FabricRoleStore\nadapters/out/fabric/\nrole_store.go] as AdFabricRoles
+  [LocalStore\nadapters/out/localstorage/\nrequest_store.go,\nsession_store.go, network_store.go...] as AdLocal
   [Fetcher\nadapters/out/webimage/] as AdWebImg
 }
 
@@ -191,7 +192,7 @@ PThumb <|.. AdLocal
 PWebImg <|.. AdWebImg
 PNet <|.. AdLocal
 PReq <|.. AdLocal
-PRole <|.. AdLocal
+PRole <|.. AdFabricRoles
 PSess <|.. AdLocal
 PCA <|.. AdFabric
 PPay <|.. AdFabric

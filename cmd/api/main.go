@@ -37,6 +37,7 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"time"
 
 	"myr-core/adapters/in/rest"
 	fabricadapter "myr-core/adapters/out/fabric"
@@ -54,6 +55,10 @@ var BuildDate = "dev"
 // version est injectée via -ldflags "-X main.version=..." lors de la compilation
 // (voir Makefile : VERSION dérivé de `git describe --tags`).
 var version = "dev"
+
+// roleRefresh est la durée pendant laquelle la table des rôles lue sur le
+// ledger est réutilisée sans relecture (role.Service.WithRefresh).
+const roleRefresh = 30 * time.Second
 
 func main() {
 	addr := flag.String("addr", "localhost:8765", "adresse d'écoute (ex: localhost:8765 ou 0.0.0.0:8080)")
@@ -87,7 +92,10 @@ func main() {
 	// bc reste nil si Fabric est indisponible — pas de repli silencieux vers un
 	// autre stockage : les opérations sur les modèles retournent alors
 	// model.ErrBlockchainUnavailable (voir domain/model/service.go).
+	// La table des rôles est lue sur le ledger, en lecture seule : l'API ne la
+	// modifie jamais (myr role, signé par le wallet de l'administrateur).
 	var bc model.BlockchainPort
+	var roleRepo role.Repo
 	var fabricConnected bool
 	gw, err := fabricadapter.NewGatewayClient(cfg)
 	if err != nil {
@@ -97,6 +105,7 @@ func main() {
 		defer gw.Close()
 		log.Printf("✓ Fabric → %s (canal: %s)", cfg.PeerEndpoint, cfg.FabricChannel)
 		bc = fabricadapter.NewFabricBlockchain(gw)
+		roleRepo = fabricadapter.NewFabricRoleStore(gw, nil)
 		fabricConnected = true
 	}
 
@@ -128,9 +137,10 @@ func main() {
 	walletDir := filepath.Join(*dataDir, "wallets")
 	_ = os.MkdirAll(walletDir, 0700)
 	// Table des rôles : référence des rôles attribuables, partagée par le
-	// réseau (rôle d'inscription par défaut) et l'identité (RM46).
-	roleStore := localstorage.NewJSONRoleStore(filepath.Join(*dataDir, "roles.json"))
-	roleSvc := role.NewService(roleStore)
+	// réseau (rôle d'inscription par défaut) et l'identité (RM46), appliquée à
+	// chaque contrôle d'accès. Relue au plus toutes les roleRefresh : une
+	// modification publiée sur le ledger s'applique ici dans ce délai.
+	roleSvc := role.NewService(roleRepo).WithRefresh(roleRefresh)
 
 	requestStore := localstorage.NewJSONRequestStore(filepath.Join(*dataDir, "account-requests.json"))
 	identitySvc := identity.NewService(walletDir, caPort).WithRequestStore(requestStore).WithRoles(roleSvc)

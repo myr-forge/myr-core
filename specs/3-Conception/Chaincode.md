@@ -13,6 +13,7 @@ tags:
   - rm/RM24
   - rm/RM25
   - rm/RM26
+  - rm/RM48
 ---
 # Chaincode — Smart Contracts Fabric
 
@@ -127,6 +128,9 @@ type Version struct {
 | `UpdateModelOwner` | `id, newOwnerID string` | `txID string, err` | UCPI07 (transfert PI) |
 | `CloneModel` | `model3dJSON, sourceNetworkID string` | `txID string, err` | UCPI08 |
 | `IndexHashes` | — | `{indexed, duplicates[]}` JSON | Mise en service (ADR-12) — construit l'index empreinte → identifiant des assets déjà enregistrés ; idempotent |
+| `PutRole` | `roleJSON string` (`name`, `permissions`, `auto_grant`…) | `txID string, err` | UCADM07, UCA05 — crée ou remplace un rôle de la table du canal (§4.3) |
+| `DeleteRole` | `name string` | `txID string, err` | UCADM07 — retire un rôle de la table du canal (§4.3) |
+| `GetRoles` | — | `[]roleJSON, err` | Tout contrôle d'accès (serveur), UCA05 — table du canal, table initiale si aucune n'est publiée |
 
 ### 4.1 Invariants appliqués par `StoreModel` (ADR-12)
 
@@ -157,6 +161,30 @@ Seule modification d'un asset enregistré : ses métadonnées descriptives. Une 
 | Le document de métadonnées contient un autre champ que `Name`, `Description`, `Tags`, `Links` | RM19 : empreinte, propriétaire, licence, parent, interfaces et composition sont figés |
 
 Les champs absents du document restent inchangés ; tous les autres champs de l'enregistrement sont recopiés tels quels, y compris ceux que le chaincode ne connaît pas.
+
+### 4.3 Table des rôles (ADR-12, RM48)
+
+Chaque canal porte un exemplaire de la table des rôles du réseau, sous une clé composite (`roles`) qui n'apparaît jamais dans `ListModels`. Le serveur publie une modification sur tous les canaux du réseau et lit la table sur son canal par défaut. Tant qu'aucune table n'est publiée sur un canal, la table initiale s'y applique :
+
+| Rôle | Permissions |
+|------|-------------|
+| `admin` | toutes : `read`, `write`, `network.admin`, `role.admin`, `identity.admin`, `admin` |
+| `auditor` | `read` |
+| `contributor` | `read`, `write` |
+| `reader` | `read` |
+
+Une transaction `PutRole` ou `DeleteRole` est refusée, sans aucune écriture, si :
+
+| Condition de refus | Règle |
+|--------------------|-------|
+| Le rôle visé est `admin` | RM48 : `admin` porte toujours toutes les permissions |
+| Le nom du rôle ne respecte pas `[a-z][a-z0-9_-]{1,63}` (`PutRole`) | — |
+| Le rôle à supprimer est absent de la table (`DeleteRole`) | — |
+| Le signataire n'est pas actif, n'appartient pas à l'organisation de son identifiant, ou son rôle ne porte pas `role.admin` | ADR-12, mêmes contrôles d'identité que `StoreModel` |
+
+La première publication part de la table initiale : les rôles qu'elle ne touche pas y restent. Le chaincode ne lit d'un rôle que son nom et ses permissions ; les autres champs publiés (réglage d'attribution sur demande `auto_grant`, date de création…) sont conservés tels quels. Le contrôle « Rôle autorisé » de `StoreModel` et `UpdateMetadata` lit cette table.
+
+La table initiale est définie deux fois, dans le domaine (`domain/role`) et dans le chaincode, module distinct qui ne peut pas l'importer : les deux définitions doivent rester identiques.
 
 ---
 

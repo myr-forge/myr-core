@@ -338,28 +338,106 @@ func (s *Service) RequestAccess(ctx context.Context, req AccountRequest, policy 
 	return &req, secret, nil
 }
 
-// ApproveRequest approuve une demande en attente : l'identité devient active
-// (Myr.status = active). Le changement s'applique au prochain enrôlement de
-// l'identité, c'est-à-dire à sa prochaine connexion.
+// RequestRole traite la demande du rôle wanted par l'identité active du
+// wallet w (UCA08, RM47). Elle est refusée si l'identité porte déjà ce rôle
+// (ErrRoleAlreadyHeld), si le rôle est absent de la table (ErrInvalidRole,
+// RM46) ou si une autre demande de rôle de l'identité est en attente
+// (ErrRequestAlreadyPending). Un rôle en attribution automatique est
+// attribué aussitôt et la demande est approuvée ; sinon elle reste en attente
+// de l'administrateur (ApproveRequest, RejectRequest). Dans les deux cas, le
+// nouveau rôle s'applique au prochain enrôlement de l'identité, c'est-à-dire
+// à sa prochaine connexion.
+func (s *Service) RequestRole(ctx context.Context, w WalletEntry, wanted string) (*AccountRequest, error) {
+	if wanted == "" {
+		return nil, fmt.Errorf("rôle demandé requis")
+	}
+	if err := w.CanSignIn(); err != nil {
+		return nil, err
+	}
+	if wanted == w.Role {
+		return nil, fmt.Errorf("%w : %s", ErrRoleAlreadyHeld, wanted)
+	}
+	granted, err := role.GrantedOnRequest(s.roles, wanted)
+	if err != nil {
+		return nil, fmt.Errorf("%w : %w", ErrInvalidRole, err)
+	}
+	if s.ca == nil {
+		return nil, fmt.Errorf("aucun CA configuré — impossible de modifier le rôle")
+	}
+	// Sans stockage, une demande en attente ne pourrait jamais être décidée.
+	if !granted && s.requestStore == nil {
+		return nil, fmt.Errorf("stockage des demandes non configuré — approbation impossible")
+	}
+	if err := s.checkNoPendingRoleRequest(w.Handle); err != nil {
+		return nil, err
+	}
+
+	req := &AccountRequest{
+		ID:        fmt.Sprintf("req-%d", time.Now().UnixNano()),
+		Kind:      RequestKindRole,
+		Pseudo:    w.Name,
+		OrgID:     w.OrgID,
+		Role:      wanted,
+		Status:    RequestPending,
+		CreatedAt: time.Now().UTC().Format(time.RFC3339),
+	}
+	if granted {
+		if err := s.ca.UpdateAttributes(ctx, w.Handle, map[string]string{AttrRole: wanted}); err != nil {
+			req.Status = RequestFailed
+			_ = s.saveRequest(req)
+			return nil, fmt.Errorf("attribution du rôle %s à %s : %w", wanted, w.Handle, err)
+		}
+		req.Status = RequestApproved
+	}
+	if err := s.saveRequest(req); err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+// checkNoPendingRoleRequest refuse une nouvelle demande de rôle tant qu'une
+// autre de la même identité attend la décision de l'administrateur.
+func (s *Service) checkNoPendingRoleRequest(handle string) error {
+	if s.requestStore == nil {
+		return nil
+	}
+	all, err := s.requestStore.FindAll()
+	if err != nil {
+		return err
+	}
+	for _, r := range all {
+		if r.Kind == RequestKindRole && r.Status == RequestPending && Handle(r.Pseudo, r.OrgID) == handle {
+			return fmt.Errorf("%w : %s (rôle %s)", ErrRequestAlreadyPending, r.ID, r.Role)
+		}
+	}
+	return nil
+}
+
+// ApproveRequest approuve une demande en attente. Inscription : l'identité
+// devient active (Myr.status = active). Demande de rôle : l'identité reçoit le
+// rôle demandé (Myr.role), s'il figure toujours dans la table (RM46). Le
+// changement s'applique au prochain enrôlement de l'identité, c'est-à-dire à
+// sa prochaine connexion.
 func (s *Service) ApproveRequest(ctx context.Context, id string) (*AccountRequest, error) {
-	return s.decideRequest(ctx, id, StatusActive, RequestApproved)
+	return s.decideRequest(ctx, id, true)
 }
 
-// RejectRequest refuse une demande en attente : l'identité est suspendue
-// (Myr.status = suspended) — elle ne peut ni se connecter ni écrire. Rien
-// n'est supprimé : l'administrateur peut revenir sur sa décision.
+// RejectRequest refuse une demande en attente. Inscription : l'identité est
+// suspendue (Myr.status = suspended) — elle ne peut ni se connecter ni écrire.
+// Demande de rôle : l'identité garde son rôle. Rien n'est supprimé :
+// l'administrateur peut revenir sur sa décision.
 func (s *Service) RejectRequest(ctx context.Context, id string) (*AccountRequest, error) {
-	return s.decideRequest(ctx, id, StatusSuspended, RequestRejected)
+	return s.decideRequest(ctx, id, false)
 }
 
-// decideRequest applique à l'identité d'une demande en attente le statut
-// identityStatus, puis enregistre la décision requestStatus.
-func (s *Service) decideRequest(ctx context.Context, id, identityStatus, requestStatus string) (*AccountRequest, error) {
+// decideRequest applique à l'identité d'une demande en attente la décision
+// approve (decisionAttributes), puis l'enregistre.
+func (s *Service) decideRequest(ctx context.Context, id string, approve bool) (*AccountRequest, error) {
 	if s.ca == nil {
 		return nil, fmt.Errorf("aucun CA configuré — impossible de modifier l'identité")
 	}
 	if s.requestStore == nil {
-		return nil, fmt.Errorf("stockage des demandes d'inscription non configuré")
+		return nil, fmt.Errorf("stockage des demandes non configuré")
 	}
 	all, err := s.requestStore.FindAll()
 	if err != nil {
@@ -378,15 +456,46 @@ func (s *Service) decideRequest(ctx context.Context, id, identityStatus, request
 	if req.Status != RequestPending {
 		return nil, fmt.Errorf("%w : %s est %s", ErrRequestNotPending, id, req.Status)
 	}
-	handle := Handle(req.Pseudo, req.OrgID)
-	if err := s.ca.UpdateAttributes(ctx, handle, map[string]string{AttrStatus: identityStatus}); err != nil {
-		return nil, fmt.Errorf("mise à jour de l'identité %s : %w", handle, err)
+	attrs, err := s.decisionAttributes(req, approve)
+	if err != nil {
+		return nil, err
 	}
-	req.Status = requestStatus
+	handle := Handle(req.Pseudo, req.OrgID)
+	if len(attrs) > 0 {
+		if err := s.ca.UpdateAttributes(ctx, handle, attrs); err != nil {
+			return nil, fmt.Errorf("mise à jour de l'identité %s : %w", handle, err)
+		}
+	}
+	req.Status = RequestRejected
+	if approve {
+		req.Status = RequestApproved
+	}
 	if err := s.saveRequest(req); err != nil {
 		return nil, err
 	}
 	return req, nil
+}
+
+// decisionAttributes retourne les attributs de certificat que la décision
+// approve change pour l'identité de req : son statut pour une inscription,
+// son rôle pour une demande de rôle approuvée — revérifié dans la table, qui
+// a pu changer depuis la demande (RM46) — et rien pour une demande de rôle
+// refusée.
+func (s *Service) decisionAttributes(req *AccountRequest, approve bool) (map[string]string, error) {
+	if req.Kind != RequestKindRole {
+		if approve {
+			return map[string]string{AttrStatus: StatusActive}, nil
+		}
+		return map[string]string{AttrStatus: StatusSuspended}, nil
+	}
+	if !approve {
+		return nil, nil
+	}
+	r, err := s.assignableRole(req.Role, false)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]string{AttrRole: r}, nil
 }
 
 // saveRequest persiste req si un stockage des demandes est configuré.

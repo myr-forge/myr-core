@@ -21,7 +21,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCA01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 42 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 45 déduit(s)
 > - 🟡 [TestRunIdentityDecision_Approve_OK](../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : via UCA01 · Flux alternatif — Auto-enregistrement avec approbation (`RequireApproval=true`)
 > - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : via UCA01 · Flux alternatif — Auto-enregistrement avec approbation (`RequireApproval=true`)
 > - 🟡 [TestRunIdentityRegister_NominalCase](../../docs/tests/adapters-in-cli/TestRunIdentityRegister_NominalCase.md) — déduit : via UCA01 · Flux alternatif — Création de compte par l'administrateur
@@ -37,7 +37,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestHandleIdentityRequestDecision_NonAdmin_Forbidden](../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_NonAdmin_Forbidden.md) — déduit : via UCA01 · Flux alternatif — Auto-enregistrement avec approbation (`RequireApproval=true`)
 > - 🟡 [TestHandleIdentityRequestDecision_Reject_OK](../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Reject_OK.md) — déduit : via UCA01 · Flux alternatif — Auto-enregistrement avec approbation (`RequireApproval=true`)
 > - 🟡 [TestHandleIdentityRequest_InvalidJSON](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidJSON.md) — déduit : via UCA01 · Flux nominal — Auto-enregistrement sans approbation (`AllowAutoRegister=true`, `RequireApproval=false`)
-> - … et 27 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 30 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF02 — Authentifier une identité (enrôlement CA + token de session opaque)
@@ -87,7 +87,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCA05, UCA07
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 14 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 22 déduit(s)
 > - 🟡 [TestChannels_PUT_SwitchesChannel](../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
 > - 🟡 [TestHandleIdentityGuest_AllowedDeliversToken](../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_AllowedDeliversToken.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
 > - 🟡 [TestHandleIdentityGuest_DisallowedReturnsForbidden](../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_DisallowedReturnsForbidden.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
@@ -100,8 +100,10 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestHandleIdentitySession_RoleFromCertificate](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_RoleFromCertificate.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
 > - 🟡 [TestHandleIdentitySession_Success](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_Success.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
 > - 🟡 [TestRequireAuth_BlockchainWithValidToken](../../docs/tests/adapters-in-rest/TestRequireAuth_BlockchainWithValidToken.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
-> - 🟡 [TestHasPermission_BuiltinDefaults](../../docs/tests/domain-role/TestHasPermission_BuiltinDefaults.md) — déduit : via UCA05 · Flux nominal — Action autorisée
-> - 🟡 [TestHasPermission_UnknownRole](../../docs/tests/domain-role/TestHasPermission_UnknownRole.md) — déduit : via UCA05 · Flux nominal — Action autorisée
+> - 🟡 [TestCreate_NoTable_Rejected](../../docs/tests/domain-role/TestCreate_NoTable_Rejected.md) — déduit : via UCA05 · Flux nominal — Action autorisée
+> - 🟡 [TestDelete_Success](../../docs/tests/domain-role/TestDelete_Success.md) — déduit : via UCA05 · Flux nominal — Action autorisée
+> - 🟡 [TestHasPermission_DefaultTable](../../docs/tests/domain-role/TestHasPermission_DefaultTable.md) — déduit : via UCA05 · Flux nominal — Action autorisée
+> - … et 7 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF06 — Consulter les assets possédés par l'utilisateur

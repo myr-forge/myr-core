@@ -28,6 +28,7 @@ type mockIdentitySvc struct {
 	reEnroll        func(ctx context.Context, wallet identity.WalletEntry) (identity.WalletEntry, error)
 	loadGuestWallet func(certPath, keyPath, caCertPath, orgID string) (identity.WalletEntry, error)
 	requestAccess   func(ctx context.Context, req identity.AccountRequest, policy identity.RegistrationPolicy) (*identity.AccountRequest, string, error)
+	requestRole     func(ctx context.Context, w identity.WalletEntry, wanted string) (*identity.AccountRequest, error)
 	approveRequest  func(ctx context.Context, id string) (*identity.AccountRequest, error)
 	rejectRequest   func(ctx context.Context, id string) (*identity.AccountRequest, error)
 	listRequests    func() ([]*identity.AccountRequest, error)
@@ -121,6 +122,12 @@ func (m *mockIdentitySvc) WalletDir() string {
 	}
 	return "/tmp/wallets"
 }
+func (m *mockIdentitySvc) RequestRole(ctx context.Context, w identity.WalletEntry, wanted string) (*identity.AccountRequest, error) {
+	if m.requestRole != nil {
+		return m.requestRole(ctx, w, wanted)
+	}
+	return &identity.AccountRequest{ID: "req-1", Kind: identity.RequestKindRole, Role: wanted, Status: identity.RequestPending}, nil
+}
 func (m *mockIdentitySvc) SetRole(ctx context.Context, name, newRole string) error {
 	if m.setRole != nil {
 		return m.setRole(ctx, name, newRole)
@@ -152,9 +159,9 @@ func (m *mockNetworkSvc) SetRequireApproval(id string, require bool) (*network.N
 	return nil, nil
 }
 func (m *mockNetworkSvc) List() ([]*network.NetworkProfile, error) { return nil, nil }
-func (m *mockNetworkSvc) Activate(id string) error                  { return nil }
-func (m *mockNetworkSvc) Delete(id string) error                    { return nil }
-func (m *mockNetworkSvc) TestConnection(id string) error            { return nil }
+func (m *mockNetworkSvc) Activate(id string) error                 { return nil }
+func (m *mockNetworkSvc) Delete(id string) error                   { return nil }
+func (m *mockNetworkSvc) TestConnection(id string) error           { return nil }
 func (m *mockNetworkSvc) AddPeer(networkID string, req network.AddPeerRequest) (*network.PeerCredentials, error) {
 	return nil, nil
 }
@@ -188,15 +195,15 @@ type mockRoleSvc struct {
 	hasPermission func(roleName string, p rbac.Permission) bool
 }
 
-func (m *mockRoleSvc) Create(name string, permissions []rbac.Permission) (*rbac.Role, error) {
+func (m *mockRoleSvc) Create(name string, permissions []rbac.Permission, autoGrant bool) (*rbac.Role, error) {
 	return nil, nil
 }
-func (m *mockRoleSvc) Update(name string, permissions []rbac.Permission) (*rbac.Role, error) {
+func (m *mockRoleSvc) Update(name string, change rbac.Change) (*rbac.Role, error) {
 	return nil, nil
 }
-func (m *mockRoleSvc) Delete(name string) error       { return nil }
+func (m *mockRoleSvc) Delete(name string) error            { return nil }
 func (m *mockRoleSvc) Get(name string) (*rbac.Role, error) { return nil, nil }
-func (m *mockRoleSvc) List() ([]*rbac.Role, error)    { return nil, nil }
+func (m *mockRoleSvc) List() ([]*rbac.Role, error)         { return nil, nil }
 func (m *mockRoleSvc) HasPermission(roleName string, p rbac.Permission) bool {
 	if m.hasPermission != nil {
 		return m.hasPermission(roleName, p)
@@ -289,7 +296,9 @@ func TestHandleIdentityWallets_Admin_ReturnsAll(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("code attendu 200, obtenu %d", w.Code)
 	}
-	var dtos []struct{ Handle string `json:"handle"` }
+	var dtos []struct {
+		Handle string `json:"handle"`
+	}
 	if err := json.NewDecoder(w.Body).Decode(&dtos); err != nil {
 		t.Fatalf("JSON invalide : %v", err)
 	}
@@ -303,7 +312,9 @@ func TestHandleIdentityWallets_EmptyList(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("code attendu 200, obtenu %d", w.Code)
 	}
-	var dtos []struct{ Handle string `json:"handle"` }
+	var dtos []struct {
+		Handle string `json:"handle"`
+	}
 	json.NewDecoder(w.Body).Decode(&dtos)
 	if len(dtos) != 0 {
 		t.Errorf("liste vide attendue, obtenu %d éléments", len(dtos))
@@ -653,7 +664,9 @@ func TestRequireAuth_BlockchainWithValidToken(t *testing.T) {
 	if w1.Code != http.StatusOK {
 		t.Fatalf("création session: got %d, want 200 (body: %s)", w1.Code, w1.Body.String())
 	}
-	var sess struct{ Token string `json:"token"` }
+	var sess struct {
+		Token string `json:"token"`
+	}
 	json.NewDecoder(w1.Body).Decode(&sess)
 
 	// Étape 2 : accès à /api/refs avec token valide
@@ -891,6 +904,71 @@ func TestHandleIdentityRequestDecision_Errors(t *testing.T) {
 	}
 }
 
+// ── POST /api/identity/roles/request ──────────────────────────────────────────
+
+// / @brief  POST /api/identity/roles/request transmet le wallet de la session et le rôle demandé (RM47)
+// / @input  session test@TestMSP ; rôle consumer attribué aussitôt, rôle auditor mis en attente
+// / @expect 200 (approved) puis 202 (pending) ; RequestRole reçoit le wallet de l'identité de la session
+func TestHandleIdentityRoleRequest_RM47_GrantedOrPending(t *testing.T) {
+	var gotHandle string
+	svc := &mockIdentitySvc{
+		wallet: func(handle string) (identity.WalletEntry, error) {
+			return identity.WalletEntry{Handle: handle, Status: identity.StatusActive, Role: identity.RoleReader}, nil
+		},
+		requestRole: func(_ context.Context, w identity.WalletEntry, wanted string) (*identity.AccountRequest, error) {
+			gotHandle = w.Handle
+			status := identity.RequestPending
+			if wanted == "consumer" {
+				status = identity.RequestApproved
+			}
+			return &identity.AccountRequest{ID: "req-1", Kind: identity.RequestKindRole, Role: wanted, Status: status}, nil
+		},
+	}
+	mux := newIdentityMux(t, svc)
+	for role, want := range map[string]int{"consumer": http.StatusOK, "auditor": http.StatusAccepted} {
+		w := do(t, mux, http.MethodPost, "/api/identity/roles/request", `{"role":"`+role+`"}`)
+		if w.Code != want {
+			t.Fatalf("%s : code %d attendu, obtenu %d — body: %s", role, want, w.Code, w.Body.String())
+		}
+		var resp identity.AccountRequest
+		decodeJSON(t, w, &resp)
+		if resp.Role != role || gotHandle != "test@TestMSP" {
+			t.Errorf("%s : réponse %+v, wallet %q", role, resp, gotHandle)
+		}
+	}
+}
+
+// / @brief  Erreurs d'une demande de rôle traduites en codes HTTP ; la route exige une session
+// / @input  rôle déjà détenu, rôle inconnu, demande déjà en attente, identité suspendue ; requête sans jeton
+// / @expect 400, 400, 409, 403 ; 401 sans jeton
+func TestHandleIdentityRoleRequest_Errors(t *testing.T) {
+	errs := map[string]error{
+		"reader":      identity.ErrRoleAlreadyHeld,
+		"ghost":       identity.ErrInvalidRole,
+		"auditor":     identity.ErrRequestAlreadyPending,
+		"contributor": identity.ErrIdentitySuspended,
+	}
+	svc := &mockIdentitySvc{
+		wallet: func(handle string) (identity.WalletEntry, error) { return identity.WalletEntry{Handle: handle}, nil },
+		requestRole: func(_ context.Context, _ identity.WalletEntry, wanted string) (*identity.AccountRequest, error) {
+			return nil, errs[wanted]
+		},
+	}
+	mux := newIdentityMux(t, svc)
+	want := map[string]int{"reader": http.StatusBadRequest, "ghost": http.StatusBadRequest, "auditor": http.StatusConflict, "contributor": http.StatusForbidden}
+	for role, code := range want {
+		if w := do(t, mux, http.MethodPost, "/api/identity/roles/request", `{"role":"`+role+`"}`); w.Code != code {
+			t.Errorf("%s : code %d attendu, obtenu %d", role, code, w.Code)
+		}
+	}
+	r := httptest.NewRequest(http.MethodPost, "/api/identity/roles/request", strings.NewReader(`{"role":"auditor"}`))
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, r)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("sans jeton : code 401 attendu, obtenu %d", w.Code)
+	}
+}
+
 // ── POST /api/identity/accounts ───────────────────────────────────────────────
 
 // / @brief  POST /api/identity/accounts crée un compte actif à l'initiative de l'admin
@@ -1010,9 +1088,9 @@ func TestHandleIdentityRequests_Admin_EmptyList(t *testing.T) {
 
 // ── POST /api/identity/session ────────────────────────────────────────────────
 
-/// @brief  POST /api/identity/session crée une session et retourne un token
-/// @input  service Enroll retourne succès, champs name/secret/org_id valides
-/// @expect HTTP 200, token non vide, role="contributor"
+// / @brief  POST /api/identity/session crée une session et retourne un token
+// / @input  service Enroll retourne succès, champs name/secret/org_id valides
+// / @expect HTTP 200, token non vide, role="contributor"
 func TestHandleIdentitySession_Success(t *testing.T) {
 	svc := &mockIdentitySvc{}
 	mux := newIdentityMux(t, svc)
@@ -1041,9 +1119,9 @@ func TestHandleIdentitySession_Success(t *testing.T) {
 	}
 }
 
-/// @brief  POST /api/identity/session retourne 400 si des champs obligatoires sont absents
-/// @input  cas : name vide, secret vide, org_id vide
-/// @expect HTTP 400 dans chaque cas
+// / @brief  POST /api/identity/session retourne 400 si des champs obligatoires sont absents
+// / @input  cas : name vide, secret vide, org_id vide
+// / @expect HTTP 400 dans chaque cas
 func TestHandleIdentitySession_MissingFields(t *testing.T) {
 	mux := newIdentityMux(t, &mockIdentitySvc{})
 	cases := []map[string]string{
@@ -1063,9 +1141,9 @@ func TestHandleIdentitySession_MissingFields(t *testing.T) {
 	}
 }
 
-/// @brief  POST /api/identity/session retourne 400 pour un corps JSON invalide
-/// @input  corps "{bad"
-/// @expect HTTP 400
+// / @brief  POST /api/identity/session retourne 400 pour un corps JSON invalide
+// / @input  corps "{bad"
+// / @expect HTTP 400
 func TestHandleIdentitySession_InvalidJSON(t *testing.T) {
 	r := httptest.NewRequest(http.MethodPost, "/api/identity/session", bytes.NewBufferString("{bad"))
 	w := httptest.NewRecorder()
@@ -1075,9 +1153,9 @@ func TestHandleIdentitySession_InvalidJSON(t *testing.T) {
 	}
 }
 
-/// @brief  POST /api/identity/session retourne 503 si aucun service identité n'est configuré
-/// @input  handler sans WithIdentityService, corps valide
-/// @expect HTTP 503
+// / @brief  POST /api/identity/session retourne 503 si aucun service identité n'est configuré
+// / @input  handler sans WithIdentityService, corps valide
+// / @expect HTTP 503
 func TestHandleIdentitySession_NoIdentityService(t *testing.T) {
 	store := &mockStore{}
 	h := rest.NewHandler(&mockSvc{}, store, store)
@@ -1094,9 +1172,9 @@ func TestHandleIdentitySession_NoIdentityService(t *testing.T) {
 	}
 }
 
-/// @brief  GET /api/identity/session retourne 405 (seul POST est autorisé)
-/// @input  GET /api/identity/session
-/// @expect HTTP 405
+// / @brief  GET /api/identity/session retourne 405 (seul POST est autorisé)
+// / @input  GET /api/identity/session
+// / @expect HTTP 405
 func TestHandleIdentitySession_MethodNotAllowed(t *testing.T) {
 	w := do(t, newIdentityMux(t, &mockIdentitySvc{}), http.MethodGet, "/api/identity/session", "")
 	if w.Code != http.StatusMethodNotAllowed {
@@ -1104,9 +1182,9 @@ func TestHandleIdentitySession_MethodNotAllowed(t *testing.T) {
 	}
 }
 
-/// @brief  POST /api/identity/session retourne 401 si Enroll échoue
-/// @input  mockIdentitySvc.Enroll retourne une erreur "secret invalide"
-/// @expect HTTP 401
+// / @brief  POST /api/identity/session retourne 401 si Enroll échoue
+// / @input  mockIdentitySvc.Enroll retourne une erreur "secret invalide"
+// / @expect HTTP 401
 func TestHandleIdentitySession_EnrollError(t *testing.T) {
 	svc := &mockIdentitySvc{
 		enroll: func(_ context.Context, _, _, _ string) (identity.WalletEntry, error) {
@@ -1191,9 +1269,9 @@ func TestHandleIdentitySession_ReaderCannotWrite(t *testing.T) {
 
 // ── /api/channels PUT ─────────────────────────────────────────────────────────
 
-/// @brief  PUT /api/channels sans token retourne 401
-/// @input  PUT /api/channels sans en-tête X-Myr-Token
-/// @expect HTTP 401
+// / @brief  PUT /api/channels sans token retourne 401
+// / @input  PUT /api/channels sans en-tête X-Myr-Token
+// / @expect HTTP 401
 func TestChannels_PUT_WithoutToken(t *testing.T) {
 	r := httptest.NewRequest(http.MethodPut, "/api/channels", strings.NewReader(`{"channel":"sandbox"}`))
 	r.Header.Set("Content-Type", "application/json")
@@ -1204,9 +1282,9 @@ func TestChannels_PUT_WithoutToken(t *testing.T) {
 	}
 }
 
-/// @brief  PUT /api/channels avec token valide change le canal de la session
-/// @input  POST /api/identity/session pour obtenir un token, puis PUT /api/channels
-/// @expect HTTP 200, channel="sandbox" dans la réponse
+// / @brief  PUT /api/channels avec token valide change le canal de la session
+// / @input  POST /api/identity/session pour obtenir un token, puis PUT /api/channels
+// / @expect HTTP 200, channel="sandbox" dans la réponse
 func TestChannels_PUT_SwitchesChannel(t *testing.T) {
 	mux := newIdentityMux(t, &mockIdentitySvc{})
 
@@ -1219,7 +1297,9 @@ func TestChannels_PUT_SwitchesChannel(t *testing.T) {
 	if w1.Code != http.StatusOK {
 		t.Fatalf("création session: got %d, want 200 (body: %s)", w1.Code, w1.Body.String())
 	}
-	var sess struct{ Token string `json:"token"` }
+	var sess struct {
+		Token string `json:"token"`
+	}
 	json.NewDecoder(w1.Body).Decode(&sess)
 	if sess.Token == "" {
 		t.Fatal("token absent dans la réponse de session")
@@ -1234,7 +1314,9 @@ func TestChannels_PUT_SwitchesChannel(t *testing.T) {
 	if w2.Code != http.StatusOK {
 		t.Fatalf("PUT channels: got %d, want 200 (body: %s)", w2.Code, w2.Body.String())
 	}
-	var resp struct{ Channel string `json:"channel"` }
+	var resp struct {
+		Channel string `json:"channel"`
+	}
 	json.NewDecoder(w2.Body).Decode(&resp)
 	if resp.Channel != "sandbox" {
 		t.Errorf("channel: got %q, want sandbox", resp.Channel)

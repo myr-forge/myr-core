@@ -48,16 +48,10 @@ func main() {
 	data := dataDir()
 	_ = os.MkdirAll(data, 0700)
 
-	// Table des rôles : référence des rôles attribuables, partagée par le
-	// réseau (rôle d'inscription par défaut) et l'identité (RM46).
-	roleStore := localstorage.NewJSONRoleStore(filepath.Join(data, "roles.json"))
-	roleSvc := role.NewService(roleStore)
-
 	networkStore := localstorage.NewJSONNetworkStore(filepath.Join(data, "networks.json"))
 	networkSvc := network.NewService(networkStore, fabricadapter.GatewayTester{}).
 		WithProvisioner(fabricadapter.NewFabricPeerProvisioner()).
-		WithBootstrapper(fabricadapter.NewFabricNetworkBootstrapper()).
-		WithRoles(roleSvc)
+		WithBootstrapper(fabricadapter.NewFabricNetworkBootstrapper())
 
 	active, _ := networkSvc.GetActive()
 
@@ -72,7 +66,7 @@ func main() {
 	_ = os.MkdirAll(walletDir, 0700)
 	// Même fichier que myr-api : une demande reçue par l'API se décide en CLI.
 	requestStore := localstorage.NewJSONRequestStore(filepath.Join(data, "account-requests.json"))
-	identitySvc := identity.NewService(walletDir, caPort).WithRequestStore(requestStore).WithRoles(roleSvc)
+	identitySvc := identity.NewService(walletDir, caPort).WithRequestStore(requestStore)
 
 	sessionStore := localstorage.NewJSONSessionStore(filepath.Join(data, "session.json"))
 	sessionSvc := session.NewService(sessionStore)
@@ -83,17 +77,24 @@ func main() {
 	// model.ErrBlockchainUnavailable (voir domain/model/service.go).
 	// L'identité du profil réseau ne fait que lire : les écritures sont signées
 	// par le wallet de l'identité du compte local CLI (myr session, ADR-12).
+	// La table des rôles est celle publiée sur le ledger du réseau actif, sur
+	// chacun de ses canaux ; sans réseau joignable, la table initiale
+	// s'applique et ne peut pas être modifiée (role.ErrNoTable).
 	var bc model.BlockchainPort
+	var roleRepo role.Repo
 	if active != nil {
 		cfg := fabricadapter.ConfigFromProfile(active)
 		if gw, err := fabricadapter.NewGatewayClient(cfg); err == nil {
 			defer gw.Close()
+			channels := active.AllChannels()
 			bc = fabricadapter.NewFabricBlockchain(gw)
+			roleRepo = fabricadapter.NewFabricRoleStore(gw, channels)
 			if handle, ok := cli.SessionIdentity(sessionSvc); ok {
 				if w, err := identitySvc.Wallet(handle); err == nil {
 					if ugw, err := gw.ForIdentity(w.OrgID, w.CertPath(), w.KeyPath()); err == nil {
 						defer ugw.Close()
 						bc = fabricadapter.NewUserFabricBlockchain(ugw)
+						roleRepo = fabricadapter.NewUserFabricRoleStore(ugw, channels)
 					} else {
 						fmt.Fprintf(os.Stderr, "myr: wallet %s inutilisable, accès au ledger en lecture seule : %v\n", handle, err)
 					}
@@ -101,6 +102,12 @@ func main() {
 			}
 		}
 	}
+	// Table des rôles : référence des rôles attribuables, partagée par le
+	// réseau (rôle d'inscription par défaut) et l'identité (RM46).
+	roleSvc := role.NewService(roleRepo)
+	networkSvc.WithRoles(roleSvc)
+	identitySvc.WithRoles(roleSvc)
+
 	// store partage le même fichier assets.json que myr-api (voir dataDir ci-dessus) —
 	// donne au CLI accès aux connexions/miniatures/interfaces hors blockchain gérées côté GUI.
 	store := localstorage.NewJSONBlockchain(filepath.Join(data, "assets.json"))

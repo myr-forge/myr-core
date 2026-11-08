@@ -150,16 +150,25 @@ const (
 // (RegistrationPolicy). L'identité est créée dans la CA dès la demande ; si le
 // réseau exige une approbation, la demande reste en attente jusqu'à la décision
 // de l'administrateur (ApproveRequest, RejectRequest).
+//
+// Une demande de rôle (Kind = RequestKindRole, UCA08) suit le même cycle pour
+// une identité déjà inscrite : Role est le rôle demandé, Pseudo et OrgID ceux
+// de l'identité qui le demande.
 type AccountRequest struct {
 	ID          string `json:"id"`
-	Pseudo      string `json:"pseudo"`       // identifiant souhaité
-	DisplayName string `json:"display_name"` // nom affiché
+	Kind        string `json:"kind,omitempty"` // vide : inscription ; RequestKindRole : demande de rôle
+	Pseudo      string `json:"pseudo"`         // identifiant souhaité
+	DisplayName string `json:"display_name"`   // nom affiché
 	Email       string `json:"email"`
 	OrgID       string `json:"org_id"`            // organisation souhaitée (ex: Org1MSP)
+	Role        string `json:"role,omitempty"`    // rôle demandé (demande de rôle uniquement)
 	Message     string `json:"message,omitempty"` // message libre pour l'admin
 	Status      string `json:"status"`            // "pending" | "approved" | "rejected" | "failed"
 	CreatedAt   string `json:"created_at"`        // ISO 8601
 }
+
+// RequestKindRole identifie une demande de rôle (AccountRequest.Kind).
+const RequestKindRole = "role"
 
 // Statuts d'une demande de compte
 const (

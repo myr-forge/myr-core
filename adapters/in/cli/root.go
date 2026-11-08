@@ -2,6 +2,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -23,6 +24,16 @@ var (
 	roleSvc     role.RoleService
 	identitySvc identity.IdentityService
 )
+
+// withSignerHint complète une écriture ledger refusée faute de wallet de
+// l'utilisateur (model ou role ErrSignerRequired) par la commande qui y
+// remédie ; les autres erreurs passent telles quelles.
+func withSignerHint(err error) error {
+	if errors.Is(err, model.ErrSignerRequired) || errors.Is(err, role.ErrSignerRequired) {
+		return fmt.Errorf("%w — créez le compte local de votre identité enrôlée : myr session create --name <pseudo> --org-id <org>", err)
+	}
+	return err
+}
 
 // Version est injectée par cmd/cli/main.go (elle-même reçue via -ldflags
 // "-X main.version=..." à la compilation — voir Makefile). Affichée par

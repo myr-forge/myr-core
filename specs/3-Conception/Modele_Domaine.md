@@ -32,6 +32,8 @@ tags:
   - rm/RM44
   - rm/RM45
   - rm/RM46
+  - rm/RM47
+  - rm/RM48
 ---
 # Modèle de domaine — Agrégats et relations
 
@@ -262,7 +264,7 @@ end note
 
 ### Agrégat RBAC (D1 — role)
 
-4 rôles intégrés (`reader`, `contributor`, `auditor`, `admin`) — non supprimables. Rôles personnalisés créés via `myr role create`.
+Table des rôles du réseau, publiée sur le ledger (un exemplaire par canal, RM48) : nom, permissions et réglage d'attribution sur demande (RM47). Table initiale : `reader`, `contributor`, `auditor`, `admin` ; tout rôle se modifie ou se supprime via `myr role ...`, sauf `admin`, immuable.
 
 > Il n'existe pas d'agrégat « Utilisateur/compte web » — voir `DC_D1_Auth_Identity.md`. L'identité de référence est `MyrIdentity` (agrégat suivant).
 
@@ -354,7 +356,7 @@ Entité `Payment` implémentée (paiement manuel).
 ## Liens
 
 **Étape suivante — code, par section**
-- [§ Agrégat RBAC (D1 — role)](Modele_Domaine.md#Agrégat%20RBAC%20%28D1%20—%20role%29) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md)
+- [§ Agrégat RBAC (D1 — role)](Modele_Domaine.md#Agrégat%20RBAC%20%28D1%20—%20role%29) → [CLI myr role](../../docs/code/commandes/CLI%20myr-role.md)
 - [§ 4. Règles d'intégrité (invariants du domaine)](Modele_Domaine.md#4.%20Règles%20d'intégrité%20%28invariants%20du%20domaine%29) → [IdentityService.SetRole](../../docs/code/fonctions/identity.IdentityService.SetRole.md) · [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
 
 <!-- liens-obsidian:end -->

@@ -754,10 +754,20 @@ func TestApproveRequest_CAError_StaysPending(t *testing.T) {
 
 // ── Rôle attribué (RM46) ──────────────────────────────────────────────────────
 
-// memRoleRepo est une table des rôles en mémoire (Pattern A).
+// memRoleRepo est une table des rôles publiée en mémoire (Pattern A) : la
+// première publication part de la table initiale, comme sur le ledger.
 type memRoleRepo struct{ roles map[string]*role.Role }
 
-func (m *memRoleRepo) Save(r *role.Role) error { m.roles[r.Name] = r; return nil }
+func (m *memRoleRepo) published() map[string]*role.Role {
+	if m.roles == nil {
+		m.roles = make(map[string]*role.Role)
+		for _, r := range role.DefaultRoles() {
+			m.roles[r.Name] = r
+		}
+	}
+	return m.roles
+}
+func (m *memRoleRepo) Save(r *role.Role) error { m.published()[r.Name] = r; return nil }
 func (m *memRoleRepo) FindAll() ([]*role.Role, error) {
 	out := make([]*role.Role, 0, len(m.roles))
 	for _, r := range m.roles {
@@ -765,15 +775,19 @@ func (m *memRoleRepo) FindAll() ([]*role.Role, error) {
 	}
 	return out, nil
 }
-func (m *memRoleRepo) FindByName(name string) (*role.Role, error) { return m.roles[name], nil }
-func (m *memRoleRepo) Delete(name string) error                   { delete(m.roles, name); return nil }
+func (m *memRoleRepo) Delete(name string) error { delete(m.published(), name); return nil }
 
-// rolesWith retourne une table amorcée des rôles intégrés et du rôle
-// personnalisé name, de permissions perms.
+// rolesWith retourne une table composée des rôles initiaux et du rôle name,
+// de permissions perms, attribué sur approbation.
 func rolesWith(t *testing.T, name string, perms ...role.Permission) role.RoleService {
+	return rolesWithGrant(t, name, false, perms...)
+}
+
+// rolesWithGrant est rolesWith avec le réglage d'attribution autoGrant.
+func rolesWithGrant(t *testing.T, name string, autoGrant bool, perms ...role.Permission) role.RoleService {
 	t.Helper()
-	svc := role.NewService(&memRoleRepo{roles: map[string]*role.Role{}})
-	if _, err := svc.Create(name, perms); err != nil {
+	svc := role.NewService(&memRoleRepo{})
+	if _, err := svc.Create(name, perms, autoGrant); err != nil {
 		t.Fatalf("Create(%q) : %v", name, err)
 	}
 	return svc
@@ -976,5 +990,147 @@ func TestLoadGuestWallet_MissingCert(t *testing.T) {
 	_, err := svc.LoadGuestWallet("/no/such/cert.pem", "/no/such/key.pem", "", "Org1MSP")
 	if err == nil {
 		t.Fatal("erreur attendue pour certificat introuvable")
+	}
+}
+
+// ── Demande de rôle (RM47) ────────────────────────────────────────────────────
+
+// bobWallet est le wallet d'une identité active de rôle reader.
+func bobWallet() identity.WalletEntry {
+	return identity.WalletEntry{Handle: "bob@Org1", Name: "bob", OrgID: "Org1MSP", Status: identity.StatusActive, Role: identity.RoleReader}
+}
+
+// / @brief  RequestRole attribue aussitôt un rôle en attribution automatique (RM47)
+// / @input  bob (reader) demande "consumer", automatique
+// / @expect la CA reçoit Myr.role=consumer pour bob@Org1 ; demande de rôle approved conservée
+func TestRequestRole_RM47_AutoGrant_Granted(t *testing.T) {
+	ca := &stubCA{}
+	store := &mockRequestStore{}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store).
+		WithRoles(rolesWithGrant(t, "consumer", true, role.PermRead))
+	got, err := svc.RequestRole(context.Background(), bobWallet(), "consumer")
+	if err != nil {
+		t.Fatalf("RequestRole : %v", err)
+	}
+	if ca.lastUpdateName != "bob@Org1" || ca.lastUpdateAttrs[identity.AttrRole] != "consumer" {
+		t.Errorf("mise à jour CA inattendue : %q %v", ca.lastUpdateName, ca.lastUpdateAttrs)
+	}
+	if got.Kind != identity.RequestKindRole || got.Role != "consumer" || got.Status != identity.RequestApproved {
+		t.Errorf("demande de rôle approved attendue, obtenu %+v", got)
+	}
+	if len(store.requests) != 1 {
+		t.Errorf("1 demande conservée attendue, obtenu %d", len(store.requests))
+	}
+}
+
+// / @brief  RequestRole met en attente un rôle sur approbation, puis ApproveRequest l'attribue (RM47, RM44)
+// / @input  bob (reader) demande contributor, sur approbation ; l'administrateur approuve
+// / @expect demande pending sans appel CA ; à l'approbation, la CA reçoit Myr.role=contributor et jamais Myr.status
+func TestRequestRole_RM47_Approval_PendingThenGranted(t *testing.T) {
+	ca := &stubCA{}
+	store := &mockRequestStore{}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store).WithRoles(rolesWith(t, "consumer", role.PermRead))
+	got, err := svc.RequestRole(context.Background(), bobWallet(), identity.RoleContributor)
+	if err != nil {
+		t.Fatalf("RequestRole : %v", err)
+	}
+	if got.Status != identity.RequestPending || ca.lastUpdateName != "" {
+		t.Fatalf("demande pending sans appel CA attendue, obtenu %+v / %q", got, ca.lastUpdateName)
+	}
+	if _, err := svc.ApproveRequest(context.Background(), got.ID); err != nil {
+		t.Fatalf("ApproveRequest : %v", err)
+	}
+	if ca.lastUpdateAttrs[identity.AttrRole] != identity.RoleContributor || ca.lastUpdateAttrs[identity.AttrStatus] != "" {
+		t.Errorf("attributs CA inattendus : %v", ca.lastUpdateAttrs)
+	}
+}
+
+// / @brief  RejectRequest d'une demande de rôle laisse l'identité inchangée (RM44, RM47)
+// / @input  demande de rôle pending de bob, refusée
+// / @expect la CA n'est pas modifiée ; demande rejected
+func TestRejectRequest_RM47_RoleRequest_IdentityUnchanged(t *testing.T) {
+	ca := &stubCA{updateAttrsFn: func(context.Context, string, map[string]string) error {
+		t.Fatal("la CA ne doit pas être modifiée")
+		return nil
+	}}
+	store := &mockRequestStore{requests: []*identity.AccountRequest{
+		{ID: "req-1", Kind: identity.RequestKindRole, Pseudo: "bob", OrgID: "Org1MSP", Role: identity.RoleContributor, Status: identity.RequestPending},
+	}}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store)
+	got, err := svc.RejectRequest(context.Background(), "req-1")
+	if err != nil || got.Status != identity.RequestRejected {
+		t.Fatalf("demande rejected attendue, obtenu %+v, %v", got, err)
+	}
+}
+
+// / @brief  ApproveRequest refuse un rôle retiré de la table depuis la demande (RM46)
+// / @input  demande de rôle pending pour "superviseur", absent de la table
+// / @expect ErrInvalidRole ; la CA n'est pas modifiée, la demande reste pending
+func TestApproveRequest_RM46_RoleRemovedSinceRequest_Rejected(t *testing.T) {
+	ca := &stubCA{updateAttrsFn: func(context.Context, string, map[string]string) error {
+		t.Fatal("la CA ne doit pas être modifiée")
+		return nil
+	}}
+	store := &mockRequestStore{requests: []*identity.AccountRequest{
+		{ID: "req-1", Kind: identity.RequestKindRole, Pseudo: "bob", OrgID: "Org1MSP", Role: "superviseur", Status: identity.RequestPending},
+	}}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store).WithRoles(rolesWith(t, "consumer", role.PermRead))
+	if _, err := svc.ApproveRequest(context.Background(), "req-1"); !errors.Is(err, identity.ErrInvalidRole) {
+		t.Errorf("ErrInvalidRole attendu, obtenu %v", err)
+	}
+	if store.requests[0].Status != identity.RequestPending {
+		t.Errorf("la demande doit rester pending, obtenu %q", store.requests[0].Status)
+	}
+}
+
+// / @brief  RequestRole refuse un rôle déjà porté, inconnu, ou une seconde demande en attente (RM46, RM47)
+// / @input  bob (reader) demande reader ; puis "superviseur" ; puis contributor, puis auditor
+// / @expect ErrRoleAlreadyHeld, ErrInvalidRole, puis ErrRequestAlreadyPending ; la CA n'est jamais modifiée
+func TestRequestRole_RM47_Invalid_Rejected(t *testing.T) {
+	ca := &stubCA{updateAttrsFn: func(context.Context, string, map[string]string) error {
+		t.Fatal("la CA ne doit pas être modifiée")
+		return nil
+	}}
+	store := &mockRequestStore{}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store).WithRoles(rolesWith(t, "consumer", role.PermRead))
+	ctx := context.Background()
+	if _, err := svc.RequestRole(ctx, bobWallet(), identity.RoleReader); !errors.Is(err, identity.ErrRoleAlreadyHeld) {
+		t.Errorf("ErrRoleAlreadyHeld attendu, obtenu %v", err)
+	}
+	if _, err := svc.RequestRole(ctx, bobWallet(), "superviseur"); !errors.Is(err, identity.ErrInvalidRole) {
+		t.Errorf("ErrInvalidRole attendu, obtenu %v", err)
+	}
+	if _, err := svc.RequestRole(ctx, bobWallet(), identity.RoleContributor); err != nil {
+		t.Fatalf("première demande : %v", err)
+	}
+	if _, err := svc.RequestRole(ctx, bobWallet(), identity.RoleAuditor); !errors.Is(err, identity.ErrRequestAlreadyPending) {
+		t.Errorf("ErrRequestAlreadyPending attendu, obtenu %v", err)
+	}
+}
+
+// / @brief  RequestRole n'attribue jamais automatiquement un rôle d'administration (RM47)
+// / @input  bob demande admin (table initiale, admin jamais automatique)
+// / @expect demande pending ; la CA n'est pas modifiée
+func TestRequestRole_RM47_AdminRole_NeverAutomatic(t *testing.T) {
+	ca := &stubCA{updateAttrsFn: func(context.Context, string, map[string]string) error {
+		t.Fatal("la CA ne doit pas être modifiée")
+		return nil
+	}}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(&mockRequestStore{})
+	got, err := svc.RequestRole(context.Background(), bobWallet(), identity.RoleAdmin)
+	if err != nil || got.Status != identity.RequestPending {
+		t.Fatalf("demande pending attendue, obtenu %+v, %v", got, err)
+	}
+}
+
+// / @brief  RequestRole refuse une identité inactive
+// / @input  wallet de bob suspendu
+// / @expect ErrIdentitySuspended
+func TestRequestRole_SuspendedIdentity_Rejected(t *testing.T) {
+	svc := identity.NewService(t.TempDir(), &stubCA{}).WithRequestStore(&mockRequestStore{})
+	w := bobWallet()
+	w.Status = identity.StatusSuspended
+	if _, err := svc.RequestRole(context.Background(), w, identity.RoleContributor); !errors.Is(err, identity.ErrIdentitySuspended) {
+		t.Errorf("ErrIdentitySuspended attendu, obtenu %v", err)
 	}
 }

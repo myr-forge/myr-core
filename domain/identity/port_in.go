@@ -26,9 +26,15 @@ type IdentityService interface {
 	// (ErrRegistrationClosed), sinon l'identité est créée dans la CA, active ou
 	// en attente d'approbation. Retourne la demande et le secret d'enrôlement.
 	RequestAccess(ctx context.Context, req AccountRequest, policy RegistrationPolicy) (*AccountRequest, string, error)
-	// ApproveRequest active l'identité d'une demande en attente.
+	// RequestRole traite la demande du rôle wanted par l'identité du wallet w
+	// (UCA08, RM47) : attribué aussitôt si le rôle est en attribution
+	// automatique (demande approuvée), sinon en attente de l'administrateur.
+	RequestRole(ctx context.Context, w WalletEntry, wanted string) (*AccountRequest, error)
+	// ApproveRequest approuve une demande en attente : l'identité d'une
+	// inscription devient active, celle d'une demande de rôle reçoit ce rôle.
 	ApproveRequest(ctx context.Context, id string) (*AccountRequest, error)
-	// RejectRequest suspend l'identité d'une demande en attente.
+	// RejectRequest refuse une demande en attente : l'identité d'une
+	// inscription est suspendue, celle d'une demande de rôle garde son rôle.
 	RejectRequest(ctx context.Context, id string) (*AccountRequest, error)
 	// ListRequests retourne toutes les demandes enregistrées (usage admin).
 	ListRequests() ([]*AccountRequest, error)

@@ -246,7 +246,7 @@ func newIntegrationServer(t *testing.T) *httptest.Server {
 		WithDraftStore(db).
 		WithRemovedStore(db)
 
-	roleSvc := role.NewService(localstorage.NewJSONRoleStore(filepath.Join(dataDir, "roles.json")))
+	roleSvc := role.NewService(nil) // table initiale, comme sans réseau joignable
 	idSvc := identity.NewService(filepath.Join(dataDir, "wallets"), newMemCA()).
 		WithRequestStore(localstorage.NewJSONRequestStore(filepath.Join(dataDir, "account-requests.json"))).
 		WithRoles(roleSvc)

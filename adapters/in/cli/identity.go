@@ -233,16 +233,20 @@ func runIdentityRequests(w io.Writer, svc identity.IdentityService) error {
 		return err
 	}
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "ID\tPSEUDO\tEMAIL\tORG\tSTATUT")
+	fmt.Fprintln(tw, "ID\tTYPE\tPSEUDO\tEMAIL\tORG\tRÔLE\tSTATUT")
 	for _, r := range reqs {
-		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n", r.ID, r.Pseudo, r.Email, r.OrgID, r.Status)
+		kind := "inscription"
+		if r.Kind == identity.RequestKindRole {
+			kind = "rôle"
+		}
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n", r.ID, kind, r.Pseudo, r.Email, r.OrgID, r.Role, r.Status)
 	}
 	return tw.Flush()
 }
 
 var identityRequestsCmd = &cobra.Command{
 	Use:   "requests",
-	Short: "List pending access requests",
+	Short: "List access and role requests",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if identitySvc == nil {
 			return fmt.Errorf("service identité non disponible")
@@ -265,9 +269,11 @@ func runIdentityDecision(w io.Writer, decide func(context.Context, string) (*ide
 
 var identityApproveCmd = &cobra.Command{
 	Use:   "approve <request-id>",
-	Short: "Approve a pending access request and activate its identity",
-	Long: `Approve an access request awaiting approval (see myr identity requests):
-the identity created at request time becomes active and can sign in.
+	Short: "Approve a pending access or role request",
+	Long: `Approve a request awaiting approval (see myr identity requests). For an
+access request, the identity created at request time becomes active and can
+sign in. For a role request, the identity receives the requested role, if it
+is still in the network's role table.
 
 Example:
   myr identity approve 3f2a9c`,
@@ -282,10 +288,10 @@ Example:
 
 var identityRejectCmd = &cobra.Command{
 	Use:   "reject <request-id>",
-	Short: "Reject a pending access request and suspend its identity",
-	Long: `Reject an access request awaiting approval: the identity created at
-request time is suspended — it can neither sign in nor write. Nothing is
-deleted.
+	Short: "Reject a pending access or role request",
+	Long: `Reject a request awaiting approval. For an access request, the identity
+created at request time is suspended — it can neither sign in nor write. For
+a role request, the identity keeps its role. Nothing is deleted.
 
 Example:
   myr identity reject 3f2a9c`,
@@ -295,6 +301,49 @@ Example:
 			return fmt.Errorf("service identité non disponible")
 		}
 		return runIdentityDecision(cmd.OutOrStdout(), identitySvc.RejectRequest, args[0])
+	},
+}
+
+// ── request-role ──────────────────────────────────────────────────────────────
+
+func runIdentityRequestRole(w io.Writer, svc identity.IdentityService, handle, wanted string) error {
+	wallet, err := svc.Wallet(handle)
+	if err != nil {
+		return err
+	}
+	req, err := svc.RequestRole(context.Background(), wallet, wanted)
+	if err != nil {
+		return err
+	}
+	if req.Status == identity.RequestApproved {
+		fmt.Fprintf(w, "Rôle %s attribué à %s.\n", req.Role, handle)
+		fmt.Fprintln(w, "Il s'applique au prochain ré-enrôlement de l'identité (myr identity re-enroll).")
+		return nil
+	}
+	fmt.Fprintf(w, "Demande %s enregistrée : rôle %s pour %s, en attente de l'administrateur.\n", req.ID, req.Role, handle)
+	return nil
+}
+
+var identityRequestRoleCmd = &cobra.Command{
+	Use:   "request-role <role>",
+	Short: "Request a role for the identity of the local account",
+	Long: `Request a role of the network's role table for the identity of the local
+account (myr session). A role marked auto-grant is granted at once; any other
+role waits for the administrator's decision (myr identity approve|reject).
+Either way, the new role applies once the identity re-enrolls.
+
+Example:
+  myr identity request-role contributor`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if identitySvc == nil {
+			return fmt.Errorf("service identité non disponible")
+		}
+		handle, ok := SessionIdentity(sessionSvc)
+		if !ok {
+			return fmt.Errorf("aucun compte local — créez-le : myr session create --name <pseudo> --org-id <org>")
+		}
+		return runIdentityRequestRole(cmd.OutOrStdout(), identitySvc, handle, args[0])
 	},
 }
 
@@ -376,7 +425,7 @@ Examples:
 func init() {
 	identityCmd.AddCommand(
 		identityWalletsCmd, identityStatusCmd, identityEnrollCmd, identityReEnrollCmd,
-		identityRequestCmd, identityRequestsCmd, identityApproveCmd, identityRejectCmd,
+		identityRequestCmd, identityRequestsCmd, identityRequestRoleCmd, identityApproveCmd, identityRejectCmd,
 		identityRegisterCmd, identitySetRoleCmd,
 	)
 

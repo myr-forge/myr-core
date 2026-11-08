@@ -12,9 +12,10 @@ tags:
   - domaine/identity
   - domaine/role
   - uc/UCA08
-  - rm/RM22
+  - rm/RM44
   - rm/RM45
   - rm/RM46
+  - rm/RM47
   - enf/ENF12
 ---
 
@@ -26,133 +27,190 @@ tags:
 @startuml
 left to right direction
 
-actor "Utilisateur\n(tout rôle authentifié)" as U
+actor "Utilisateur\n(identité active)" as U
 actor "Administrateur" as ADM
 
 rectangle "API myr" {
-    usecase "Soumettre une demande\n(message libre)" as UC1
-    usecase "Changer le rôle d'une identité\n(myr identity set-role)" as UC2
+    usecase "Demander un rôle\n(myr identity request-role)" as UC1
+    usecase "Décider la demande\n(myr identity approve|reject)" as UC2
+    usecase "Changer le rôle d'une identité\n(myr identity set-role)" as UC3
 }
 
 U --> UC1
 ADM --> UC2
+ADM --> UC3
+UC1 .> UC2 : <<extend>> (rôle sur approbation)
 
 @enduml
 ```
 
 ## Contexte
 
-**Il n'existe aucun mécanisme en libre-service pour qu'un utilisateur change son propre rôle.** Le changement de rôle est une opération strictement administrateur :
+Une identité inscrite et active demande un rôle de la table des rôles du réseau (RM46) :
 
 ```
-myr identity set-role --id <pseudo@org> --role <nom-du-rôle>
+myr identity request-role <rôle>
+POST /api/identity/roles/request   {"role": "<rôle>"}
 ```
 
-Cette commande CLI modifie l'attribut `Myr.role` de l'identité auprès de la Fabric CA (`identitySvc.SetRole` → `CAPort.UpdateAttributes`). **Le nouveau rôle ne s'applique qu'au prochain ré-enrôlement de l'identité** (propriété de la Fabric CA, pas une limitation de `myr`) — l'utilisateur doit donc se reconnecter (UCA02) après le changement.
+Le CLI agit pour l'identité de son compte local (`myr session`), l'API pour l'identité de la session REST (`X-Myr-Token`). Les deux appellent `IdentityService.RequestRole` avec le wallet de cette identité, dont le certificat donne le rôle actuel.
 
-Le rôle demandé doit exister dans la table des rôles (`domain/role`, RM46) — soit l'un des 4 rôles intégrés (`reader`, `contributor`, `auditor`, `admin`), soit un rôle personnalisé déjà créé par un administrateur (`myr role create`, voir UCA05). Un rôle inconnu est refusé, jamais remplacé par un autre.
+Chaque rôle de la table porte un réglage d'attribution sur demande (`auto_grant`, `myr role create|update --auto-grant`, UCADM07) (RM47) :
 
-Un utilisateur ne peut transmettre une requête d'accès qu'en texte libre : le champ `message` de `POST /api/identity/request` (UCA01) permet d'écrire une demande, mais **il n'existe pas de champ structuré « rôle souhaité » dans `AccountRequest`** — l'administrateur doit lire le message et agir manuellement via `myr identity set-role`.
+| Réglage du rôle demandé | Effet de la demande |
+|-------------------------|---------------------|
+| Attribution automatique | Le rôle est attribué aussitôt (`Myr.role` mis à jour auprès de la CA) ; la demande est enregistrée approuvée |
+| Sur approbation (défaut) | La demande est enregistrée en attente ; l'administrateur l'approuve (le rôle est attribué) ou la refuse (l'identité garde son rôle) |
 
-Le rôle de la session REST est lu dans le certificat émis à la connexion (UCA02, RM45) : le nouveau rôle devient effectif à la connexion suivante de l'utilisateur.
+Un rôle portant une permission d'administration (`admin`, `identity.admin`, `role.admin`, `network.admin`) n'est jamais attribué automatiquement, quel que soit son réglage : sa demande attend toujours l'approbation.
+
+Une demande de rôle est une `AccountRequest` de type `role` (`Kind`), avec le rôle demandé (`Role`). Elle suit le cycle des demandes d'inscription : elle apparaît dans `myr identity requests` / `GET /api/identity/requests` et se décide par `myr identity approve|reject` / `POST /api/identity/requests/{id}/approve|reject` (RM44).
+
+Le rôle d'une identité est un attribut de son certificat (`Myr.role`) : le nouveau rôle s'applique au prochain enrôlement de l'identité — à sa prochaine connexion (`POST /api/identity/session`, RM45) ou par `myr identity re-enroll <pseudo@org>`. C'est une propriété de la Fabric CA.
+
+L'administrateur peut aussi changer directement le rôle d'une identité, sans demande : `myr identity set-role --id <pseudo@org> --role <rôle>` (`IdentityService.SetRole` → `CAPort.UpdateAttributes`).
 
 ## Pré-conditions
 
-- L'identité existe déjà auprès de la CA (UCA01 complété)
-- L'administrateur dispose des droits pour exécuter `myr identity set-role` (accès CLI serveur)
+- L'identité existe auprès de la CA et son certificat la déclare active (UCA01, UCA02)
+- CLI : un compte local (`myr session`) désigne l'identité et son wallet est présent sur le nœud ; API : une session REST est ouverte pour l'identité
 
 ## Scénario
 
-### Flux nominal — Demande informelle puis changement manuel
+### Flux nominal — Rôle en attribution automatique
 
-1. L'utilisateur transmet sa demande de rôle par le champ `message` libre d'une requête `POST /api/identity/request`, ou par un canal hors `myr` (email, ticket, etc.)
-2. L'administrateur consulte les demandes en attente via `GET /api/identity/requests`
-3. L'administrateur exécute `myr identity set-role --id <pseudo@org> --role <nouveau-rôle>`
-4. Le service appelle `CAPort.UpdateAttributes(ctx, name, {"Myr.role": newRole})`
-5. Le CLI affiche : « Rôle de "pseudo@org" mis à jour : nouveau-rôle. Le nouveau rôle s'applique au prochain ré-enrôlement de l'identité. »
-6. L'identité doit être ré-enrôlée pour qu'un nouveau certificat portant l'attribut à jour soit émis — soit côté CLI via `myr identity re-enroll <pseudo@org>` (renouvelle le wallet local sans passer par une session REST), soit côté REST via une nouvelle connexion (`POST /api/identity/session`), dont la session porte alors le nouveau rôle
+1. L'identité demande le rôle `consumer`, en attribution automatique : `myr identity request-role consumer`
+2. Le service vérifie que l'identité est active, que le rôle figure dans la table et diffère de son rôle actuel, et qu'aucune autre demande de rôle de l'identité n'est en attente
+3. Le service attribue le rôle : `CAPort.UpdateAttributes(ctx, "pseudo@org", {"Myr.role": "consumer"})`
+4. La demande est enregistrée au statut `approved`
+5. Le CLI affiche : « Rôle consumer attribué à pseudo@org. Il s'applique au prochain ré-enrôlement de l'identité (myr identity re-enroll). » ; l'API répond `200 OK` avec la demande
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 26 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 4 déduit(s)
 > - 🟡 [TestRunIdentityReEnroll_NoLocalWallet_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityReEnroll_NoLocalWallet_Rejected.md) — déduit : teste commande `myr identity re-enroll`
 > - 🟡 [TestRunIdentityReEnroll_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentityReEnroll_NominalCase.md) — déduit : teste commande `myr identity re-enroll`
-> - 🟡 [TestRunIdentitySetRole_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentitySetRole_NominalCase.md) — déduit : teste commande `myr identity set-role`
-> - 🟡 [TestChannels_PUT_SwitchesChannel](../../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : teste route `/api/identity/session`
-> - 🟡 [TestHandleIdentityRequestDecision_Approve_OK](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Approve_OK.md) — déduit : teste route `/api/identity/requests`
-> - 🟡 [TestHandleIdentityRequestDecision_Errors](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Errors.md) — déduit : teste route `/api/identity/requests`
-> - 🟡 [TestHandleIdentityRequestDecision_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
-> - 🟡 [TestHandleIdentityRequestDecision_Reject_OK](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Reject_OK.md) — déduit : teste route `/api/identity/requests`
-> - 🟡 [TestHandleIdentityRequest_InvalidJSON](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidJSON.md) — déduit : teste route `/api/identity/request`
-> - 🟡 [TestHandleIdentityRequest_InvalidName_Rejected](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidName_Rejected.md) — déduit : teste route `/api/identity/request`
-> - 🟡 [TestHandleIdentityRequest_MissingFields](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_MissingFields.md) — déduit : teste route `/api/identity/request`
-> - 🟡 [TestHandleIdentityRequest_RegistrationClosed_Rejected](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_RegistrationClosed_Rejected.md) — déduit : teste route `/api/identity/request`
-> - 🟡 [TestHandleIdentityRequest_ServiceError](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_ServiceError.md) — déduit : teste route `/api/identity/request`
-> - 🟡 [TestHandleIdentityRequest_Success](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_Success.md) — déduit : teste route `/api/identity/request`
-> - 🟡 [TestHandleIdentityRequests_Admin_EmptyList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_EmptyList.md) — déduit : teste route `/api/identity/requests`
-> - … et 11 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestRunIdentityRequestRole_RM47_GrantedOrPending](../../../docs/tests/adapters-in-cli/TestRunIdentityRequestRole_RM47_GrantedOrPending.md) — déduit : teste commande `myr identity request-role`
+> - 🟡 [TestSessionIdentity](../../../docs/tests/adapters-in-cli/TestSessionIdentity.md) — déduit : teste commande `myr identity request-role`
 <!-- tests-obsidian:end -->
 
-### Flux erreur — Identité ou rôle invalide
+### Flux alternatif — Rôle sur approbation
 
-1. `--id` ou `--role` manquant : cobra refuse la commande (`MarkFlagRequired`)
-2. Rôle absent de la table des rôles : `SetRole` refuse le changement (`ErrInvalidRole`, RM46) sans modifier la CA — le rôle doit d'abord être créé (`myr role create`)
+1. L'identité demande le rôle `contributor`, sur approbation
+2. Mêmes vérifications qu'au flux nominal ; la CA n'est pas modifiée
+3. La demande est enregistrée au statut `pending` ; l'API répond `202 Accepted` avec la demande
+4. L'administrateur la voit dans `myr identity requests` (type `rôle`, rôle demandé) et l'approuve : `myr identity approve <id>`
+5. Le service vérifie que le rôle figure toujours dans la table (RM46), puis l'attribue (`Myr.role`) ; la demande passe au statut `approved`
+6. S'il la refuse (`myr identity reject <id>`), l'identité garde son rôle — son statut n'est pas modifié — et la demande passe au statut `rejected`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
-> - 🟡 [TestSetRole_CAError](../../../docs/tests/domain-identity/TestSetRole_CAError.md) — déduit : teste `IdentityService.SetRole`
-> - 🟡 [TestSetRole_MissingName](../../../docs/tests/domain-identity/TestSetRole_MissingName.md) — déduit : teste `IdentityService.SetRole`
-> - 🟡 [TestSetRole_NoCA](../../../docs/tests/domain-identity/TestSetRole_NoCA.md) — déduit : teste `IdentityService.SetRole`
-> - 🟡 [TestSetRole_RM46_UnknownRole_Rejected](../../../docs/tests/domain-identity/TestSetRole_RM46_UnknownRole_Rejected.md) — déduit : teste `IdentityService.SetRole`
-> - 🟡 [TestSetRole_Success](../../../docs/tests/domain-identity/TestSetRole_Success.md) — déduit : teste `IdentityService.SetRole`
+> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> - 🟡 [TestRunIdentityDecision_Approve_OK](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : teste commande `myr identity approve`, commande `myr identity reject`
+> - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : teste commande `myr identity approve`, commande `myr identity reject`
+> - 🟡 [TestRunIdentityRequests_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentityRequests_NominalCase.md) — déduit : teste commande `myr identity requests`
+<!-- tests-obsidian:end -->
+
+### Flux alternatif — Changement direct par l'administrateur
+
+1. L'administrateur exécute `myr identity set-role --id <pseudo@org> --role <rôle>`
+2. Le service vérifie que le rôle figure dans la table (RM46) et met à jour `Myr.role` auprès de la CA
+3. Le CLI affiche : « Rôle de "pseudo@org" mis à jour : rôle. Le nouveau rôle s'applique au prochain ré-enrôlement de l'identité. »
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> - 🟡 [TestRunIdentitySetRole_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentitySetRole_NominalCase.md) — déduit : teste commande `myr identity set-role`
+<!-- tests-obsidian:end -->
+
+### Flux erreur — Demande refusée
+
+1. Rôle déjà détenu : `ErrRoleAlreadyHeld`, « Vous possédez déjà ce rôle » — `400 Bad Request`
+2. Rôle absent de la table : `ErrInvalidRole` (RM46) — `400 Bad Request`
+3. Autre demande de rôle de l'identité déjà en attente : `ErrRequestAlreadyPending` — `409 Conflict`
+4. Identité en attente, suspendue ou sans rôle : `403 Forbidden`
+5. Sans session REST : `401 Unauthorized` ; sans compte local CLI : la commande indique de le créer (`myr session create`)
+
+Aucune demande n'est enregistrée et la CA n'est pas modifiée.
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestRunSessionCreate_AlreadyExists_Rejected](../../../docs/tests/adapters-in-cli/TestRunSessionCreate_AlreadyExists_Rejected.md) — déduit : teste commande `myr session create`
+> - 🟡 [TestRunSessionCreate_NominalCase](../../../docs/tests/adapters-in-cli/TestRunSessionCreate_NominalCase.md) — déduit : teste commande `myr session create`
+<!-- tests-obsidian:end -->
+
+### Flux erreur — Approbation d'un rôle retiré de la table
+
+1. Le rôle demandé a été supprimé de la table depuis la demande
+2. `myr identity approve <id>` est refusé (`ErrInvalidRole`, RM46) — `400 Bad Request` côté API
+3. La demande reste en attente ; la CA n'est pas modifiée
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
+> - 🟡 [TestRunIdentityDecision_Approve_OK](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : teste commande `myr identity approve`
+> - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : teste commande `myr identity approve`
 <!-- tests-obsidian:end -->
 
 ## Post-conditions
 
-- L'attribut `Myr.role` de l'identité CA est mis à jour
-- Le nouveau rôle ne prend effet qu'au prochain enrôlement CA — pas immédiatement
-- La session REST en cours (et toute nouvelle session créée via `POST /api/identity/session` tant que l'écart de rôle figé n'est pas corrigé) n'est pas affectée par ce changement
+- Attribution automatique ou demande approuvée : l'attribut `Myr.role` de l'identité est mis à jour auprès de la CA ; le nouveau rôle prend effet au prochain enrôlement de l'identité
+- Demande en attente : l'identité garde son rôle jusqu'à la décision de l'administrateur
+- Demande refusée : l'identité garde son rôle et son statut ; la demande est conservée
 
 ## Diagramme de séquence
 
 ```plantuml
 @startuml
-participant "Administrateur" as ADM
-participant "CLI\n(adapters/in/cli/identity.go)" as CLI
+participant "Client\n(CLI ou API REST)" as Client
 participant "Identity Service\n(domain/identity/service.go)" as Service
+participant "Role Service\n(domain/role)" as Roles
+database "Demandes\n(RequestStore)" as Store
 participant "Fabric CA" as CA
 
-ADM -> CLI : myr identity set-role --id alice@org1 --role contributor
-CLI -> Service : SetRole(ctx, "alice@org1", "contributor")
-Service -> CA : UpdateAttributes(ctx, "alice@org1", {"Myr.role": "contributor"})
-CA --> Service : ok
-Service --> CLI : nil
-CLI --> ADM : "Rôle de alice@org1 mis à jour : contributor.\nLe nouveau rôle s'applique au prochain ré-enrôlement."
+Client -> Service : RequestRole(ctx, wallet, rôle)
+Service -> Service : identité active, rôle différent du rôle actuel
+Service -> Roles : GrantedOnRequest(rôle)
+alt rôle absent de la table
+  Roles --> Service : ErrNotFound
+  Service --> Client : ErrInvalidRole (400)
+else rôle connu
+  Roles --> Service : attribution automatique ?
+  Service -> Store : aucune autre demande de rôle en attente ?
+  alt attribution automatique (jamais pour un rôle d'administration)
+    Service -> CA : UpdateAttributes(pseudo@org, {Myr.role: rôle})
+    CA --> Service : ok
+    Service -> Store : Save(demande approved)
+    Service --> Client : demande approved (200)
+  else sur approbation
+    Service -> Store : Save(demande pending)
+    Service --> Client : demande pending (202)
+  end
+end
 @enduml
 ```
 
 ## Règles métier déclenchées
 
-- **RM22** — Le changement de rôle est réservé à l'administrateur ; aucun utilisateur ne peut se l'auto-attribuer.
-- **RM46** — Le nouveau rôle doit exister dans la table des rôles ; un rôle inconnu est refusé.
+- **RM44** — Une demande en attente se décide une seule fois ; refuser une demande de rôle laisse l'identité inchangée.
+- **RM46** — Le rôle demandé, puis approuvé, doit figurer dans la table des rôles ; un rôle inconnu est refusé.
+- **RM47** — Le réglage du rôle décide : attribution automatique ou approbation ; jamais automatique pour un rôle d'administration.
 
 ## Exigences non-fonctionnelles
 
-- **ENF12** — L'attribution de rôle est strictement côté serveur/CA — le client ne peut pas s'auto-attribuer un rôle (le token de session est opaque, non falsifiable).
+- **ENF12** — L'attribution de rôle est strictement côté serveur/CA : le client ne transmet que le rôle souhaité, jamais son rôle actuel, lu dans le certificat de l'identité.
 
 ## Notes d'implémentation
 
-**Commande réelle :** `myr identity set-role --id <pseudo@org> --role <nom>` (`adapters/in/cli/identity.go`) → `IdentityService.SetRole` (`domain/identity/service.go`) → `CAPort.UpdateAttributes`.
+**Commandes et routes :** `myr identity request-role <rôle>` et `POST /api/identity/roles/request` → `IdentityService.RequestRole` (`domain/identity/service.go`) ; décision : `myr identity approve|reject <id>`, `POST /api/identity/requests/{id}/approve|reject` → `ApproveRequest` / `RejectRequest` ; changement direct : `myr identity set-role` → `SetRole`.
 
-**Ré-enrôlement CLI :** `myr identity re-enroll <pseudo@org>` (`adapters/in/cli/identity.go`) → `IdentityService.ReEnroll` (retrouve le wallet local correspondant au handle via `ListLocalWallets`, puis émet un nouveau certificat). Ferme l'écart qui obligeait auparavant à passer par une session REST (`POST /api/identity/session`) pour tout ré-enrôlement — utile en particulier quand l'identité n'a pas vocation à obtenir de session REST.
+**Réglage d'attribution :** champ `AutoGrant` de `domain/role.Role`, publié avec la table des rôles sur le ledger (`specs/3-Conception/Chaincode.md` §4.3) ; décision par `role.GrantedOnRequest`.
 
-**⚠️ Écart — pas de canal structuré pour la demande :** `AccountRequest` (`domain/identity/entity.go`) n'a pas de champ « rôle souhaité » — seul un champ `message` libre existe. Une future itération pourrait ajouter un champ `requested_role` décidé par la même approbation que l'inscription (UCA01, `myr identity approve`).
-
-**Pas d'auto-distribution configurée par réseau :** contrairement à un système de règles par réseau (auto vs validation), il n'existe qu'un seul mécanisme aujourd'hui : l'action manuelle de l'administrateur via `myr identity set-role`.
+**Ré-enrôlement CLI :** `myr identity re-enroll <pseudo@org>` (`adapters/in/cli/identity.go`) → `IdentityService.ReEnroll` : émet un nouveau certificat portant le rôle à jour, sans passer par une session REST.
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens
 
 **Étape suivante — conception**
-- **DC_CLI_Identity** : [§ DC — CLI Identité & Session : Référence des commandes `myr identity` / `myr session`](../../3-Conception/DC_CLI_Identity.md#DC%20—%20CLI%20Identité%20&%20Session%20:%20Référence%20des%20commandes%20`myr%20identity`%20/%20`myr%20session`) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Identity.md#2.%20Arbre%20de%20commandes) · [§ 3.4 `myr identity re-enroll`](../../3-Conception/DC_CLI_Identity.md#3.4%20`myr%20identity%20re-enroll`) · [§ 3.7 `myr identity set-role`](../../3-Conception/DC_CLI_Identity.md#3.7%20`myr%20identity%20set-role`)
+- **API_REST** : [§ 2. D1 — Identité & RBAC](../../3-Conception/API_REST.md#2.%20D1%20—%20Identité%20&%20RBAC)
+- **Conception_intro** : [§ ADR-12 — Invariants portés par le chaincode, signature par l'utilisateur, autorisation par le certificat](../../3-Conception/Conception_intro.md#ADR-12%20—%20Invariants%20portés%20par%20le%20chaincode,%20signature%20par%20l'utilisateur,%20autorisation%20par%20le%20certificat)
+- **DC_CLI_Identity** : [§ DC — CLI Identité & Session : Référence des commandes `myr identity` / `myr session`](../../3-Conception/DC_CLI_Identity.md#DC%20—%20CLI%20Identité%20&%20Session%20:%20Référence%20des%20commandes%20`myr%20identity`%20/%20`myr%20session`) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Identity.md#2.%20Arbre%20de%20commandes) · [§ 3.4 `myr identity re-enroll`](../../3-Conception/DC_CLI_Identity.md#3.4%20`myr%20identity%20re-enroll`) · [§ 3.5b `myr identity approve` / `reject`](../../3-Conception/DC_CLI_Identity.md#3.5b%20`myr%20identity%20approve`%20/%20`reject`) · [§ 3.6b `myr identity request-role`](../../3-Conception/DC_CLI_Identity.md#3.6b%20`myr%20identity%20request-role`) · [§ 3.7 `myr identity set-role`](../../3-Conception/DC_CLI_Identity.md#3.7%20`myr%20identity%20set-role`)
+- **DC_D1_Auth_Identity** : [§ AccountRequest (`domain/identity`)](../../3-Conception/DC_D1_Auth_Identity.md#AccountRequest%20%28`domain/identity`%29) · [§ Role / Permission (`domain/role`)](../../3-Conception/DC_D1_Auth_Identity.md#Role%20/%20Permission%20%28`domain/role`%29)
 
 <!-- liens-obsidian:end -->

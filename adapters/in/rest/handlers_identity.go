@@ -275,10 +275,12 @@ func (h *Handler) registrationPolicy() identity.RegistrationPolicy {
 }
 
 // handleIdentityRequestDecision approuve ou refuse une demande d'inscription
-// en attente — réservé aux identités portant la permission identity.admin.
-// Approuver active l'identité ; refuser la suspend (ADR-12).
+// ou de rôle en attente — réservé aux identités portant la permission
+// identity.admin. Inscription : approuver active l'identité, refuser la
+// suspend (ADR-12). Demande de rôle : approuver attribue le rôle, refuser le
+// laisse inchangé.
 //
-//	@Summary	Approuver ou refuser une demande d'inscription
+//	@Summary	Approuver ou refuser une demande d'inscription ou de rôle
 //	@Tags		identity
 //	@Produce	json
 //	@Param		id		path		string	true	"identifiant de la demande"
@@ -286,6 +288,7 @@ func (h *Handler) registrationPolicy() identity.RegistrationPolicy {
 //	@Success	200	{object}	identity.AccountRequest
 //	@Failure	403	{object}	map[string]string
 //	@Failure	404	{object}	map[string]string
+//	@Failure	400	{object}	map[string]string	"rôle demandé retiré de la table des rôles depuis la demande"
 //	@Failure	409	{object}	map[string]string	"la demande n'est plus en attente"
 //	@Security	MyrToken
 //	@Router		/identity/requests/{id}/{action} [post]
@@ -316,8 +319,77 @@ func (h *Handler) handleIdentityRequestDecision(w http.ResponseWriter, r *http.R
 		jsonError(w, err.Error(), http.StatusNotFound)
 	case errors.Is(err, identity.ErrRequestNotPending):
 		jsonError(w, err.Error(), http.StatusConflict)
+	case errors.Is(err, identity.ErrInvalidRole):
+		jsonError(w, err.Error(), http.StatusBadRequest)
 	case err != nil:
 		h.internalErr(w, err)
+	default:
+		jsonOK(w, req)
+	}
+}
+
+// roleRequestDTO est le corps attendu pour POST /api/identity/roles/request.
+type roleRequestDTO struct {
+	Role string `json:"role"`
+}
+
+// handleIdentityRoleRequest traite la demande d'un rôle par l'identité de la
+// session (UCA08, identity.RequestRole) : un rôle en attribution automatique
+// est attribué aussitôt (200), tout autre attend la décision de
+// l'administrateur (202). Le nouveau rôle s'applique à la prochaine connexion.
+//
+//	@Summary	Demander un rôle
+//	@Tags		identity
+//	@Accept		json
+//	@Produce	json
+//	@Param		body	body		roleRequestDTO	true	"rôle demandé"
+//	@Success	200	{object}	identity.AccountRequest	"rôle attribué (status approved)"
+//	@Success	202	{object}	identity.AccountRequest	"demande en attente de l'administrateur (status pending)"
+//	@Failure	400	{object}	map[string]string	"rôle déjà détenu ou absent de la table des rôles"
+//	@Failure	403	{object}	map[string]string	"identité inactive"
+//	@Failure	409	{object}	map[string]string	"une demande de rôle est déjà en attente"
+//	@Failure	503	{object}	map[string]string
+//	@Security	MyrToken
+//	@Router		/identity/roles/request [post]
+func (h *Handler) handleIdentityRoleRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if h.identitySvc == nil {
+		jsonError(w, "service identité non configuré", http.StatusServiceUnavailable)
+		return
+	}
+	sess := sessionFromCtx(r)
+	if sess == nil || sess.Handle == "" {
+		jsonError(w, "session liée à une identité requise", http.StatusForbidden)
+		return
+	}
+	var dto roleRequestDTO
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		jsonError(w, "corps JSON invalide", http.StatusBadRequest)
+		return
+	}
+	wallet, err := h.identitySvc.Wallet(sess.Handle)
+	if err != nil {
+		h.internalErr(w, err)
+		return
+	}
+	req, err := h.identitySvc.RequestRole(r.Context(), wallet, strings.TrimSpace(dto.Role))
+	switch {
+	case errors.Is(err, identity.ErrRoleAlreadyHeld), errors.Is(err, identity.ErrInvalidRole):
+		jsonError(w, err.Error(), http.StatusBadRequest)
+	case errors.Is(err, identity.ErrRequestAlreadyPending):
+		jsonError(w, err.Error(), http.StatusConflict)
+	case errors.Is(err, identity.ErrIdentityPending), errors.Is(err, identity.ErrIdentitySuspended),
+		errors.Is(err, identity.ErrIdentityInactive), errors.Is(err, identity.ErrIdentityWithoutRole):
+		jsonError(w, err.Error(), http.StatusForbidden)
+	case err != nil:
+		h.internalErr(w, err)
+	case req.Status == identity.RequestPending:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusAccepted)
+		_ = json.NewEncoder(w).Encode(req)
 	default:
 		jsonOK(w, req)
 	}

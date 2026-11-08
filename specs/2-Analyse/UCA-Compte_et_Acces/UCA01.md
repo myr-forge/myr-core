@@ -116,7 +116,7 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 6. À sa prochaine connexion, l'utilisateur reçoit un certificat portant `Myr.status=active` et ouvre sa session
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 17 déduit(s)
 > - 🟡 [TestRunIdentityDecision_Approve_OK](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : teste commande `myr identity approve`
 > - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : teste commande `myr identity approve`
 > - 🟡 [TestRunIdentityRequests_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentityRequests_NominalCase.md) — déduit : teste commande `myr identity requests`
@@ -131,7 +131,8 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 > - 🟡 [TestAccountRequest_FullFlow](../../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — déduit : teste `IdentityService.ApproveRequest`
 > - 🟡 [TestApproveRequest_CAError_StaysPending](../../../docs/tests/domain-identity/TestApproveRequest_CAError_StaysPending.md) — déduit : teste `IdentityService.ApproveRequest`
 > - 🟡 [TestApproveRequest_NominalCase](../../../docs/tests/domain-identity/TestApproveRequest_NominalCase.md) — déduit : teste `IdentityService.ApproveRequest`
-> - 🟡 [TestDecideRequest_NotFoundOrNotPending_Rejected](../../../docs/tests/domain-identity/TestDecideRequest_NotFoundOrNotPending_Rejected.md) — déduit : teste `IdentityService.ApproveRequest`
+> - 🟡 [TestApproveRequest_RM46_RoleRemovedSinceRequest_Rejected](../../../docs/tests/domain-identity/TestApproveRequest_RM46_RoleRemovedSinceRequest_Rejected.md) — déduit : teste `IdentityService.ApproveRequest`
+> - … et 2 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Demande refusée
@@ -141,7 +142,7 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 3. L'identité ne peut ni se connecter ni écrire ; rien n'est supprimé (ni l'identité CA, ni la demande)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 12 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 13 déduit(s)
 > - 🟡 [TestRunIdentityDecision_Approve_OK](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : teste commande `myr identity reject`
 > - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : teste commande `myr identity reject`
 > - 🟡 [TestHandleIdentityRequestDecision_Approve_OK](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequestDecision_Approve_OK.md) — déduit : teste route `/api/identity/requests`
@@ -154,6 +155,7 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 > - 🟡 [TestHandleIdentitySession_RoleFromCertificate](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_RoleFromCertificate.md) — déduit : teste route `/api/identity/requests`
 > - 🟡 [TestDecideRequest_NotFoundOrNotPending_Rejected](../../../docs/tests/domain-identity/TestDecideRequest_NotFoundOrNotPending_Rejected.md) — déduit : teste `IdentityService.RejectRequest`
 > - 🟡 [TestRejectRequest_NominalCase](../../../docs/tests/domain-identity/TestRejectRequest_NominalCase.md) — déduit : teste `IdentityService.RejectRequest`
+> - 🟡 [TestRejectRequest_RM47_RoleRequest_IdentityUnchanged](../../../docs/tests/domain-identity/TestRejectRequest_RM47_RoleRequest_IdentityUnchanged.md) — déduit : teste `IdentityService.RejectRequest`
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Création de compte par l'administrateur
