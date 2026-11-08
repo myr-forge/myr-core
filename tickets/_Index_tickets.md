@@ -19,7 +19,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | À vérifier | 2 |
 | À trancher (PO) | 13 |
 | Différé | 1 |
-| En cours | 4 |
+| En cours | 5 |
 | Résolu | 1 |
 
 ## Critiques à traiter en premier
@@ -92,6 +92,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-004 — Échec de l'auto-enregistrement CA non journalisé](FT-004-echec-de-l-auto-enregistrement-ca-non.md) | Anomalie | majeure | En cours | UCA01 |
 | [FT-005 — Aucune approbation manuelle des demandes de compte](FT-005-aucune-approbation-manuelle-des-demandes-de-compte.md) | Écart spec ↔ code | majeure | En cours | UCA01, UCA08 |
 | [FT-034 — Modèle de domaine : ligne RM22 décrivant un écart](FT-034-modele-de-domaine-ligne-rm22-decrivant-un.md) | Incohérence documentaire | mineure | En cours | UCA02 |
+| [FT-039 — Tests d'intégration REST en échec depuis l'authentification obligatoire](FT-039-tests-d-integration-rest-en-echec.md) | Anomalie | majeure | En cours | UCDEV01, UCMOD06, UCCE06 |
 
 ## Résolu
 
