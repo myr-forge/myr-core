@@ -7,10 +7,13 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"io"
 	"math/big"
 	"net/http"
 	"net/http/httptest"
@@ -121,5 +124,62 @@ func TestCAClient_ReEnroll_UsesCertificateEnrollmentID(t *testing.T) {
 	}
 	if gotCN != "alice@Test" {
 		t.Errorf("CN du CSR : %q, attendu alice@Test", gotCN)
+	}
+}
+
+// verifyCAToken vérifie un jeton d'authentification comme la Fabric CA :
+// signature ECDSA de méthode.b64(URI reçue).b64(corps).b64(certificat).
+func verifyCAToken(r *http.Request, body []byte) bool {
+	cert64, sig64, ok := strings.Cut(r.Header.Get("Authorization"), ".")
+	if !ok {
+		return false
+	}
+	certPEM, _ := base64.StdEncoding.DecodeString(cert64)
+	sig, _ := base64.StdEncoding.DecodeString(sig64)
+	block, _ := pem.Decode(certPEM)
+	if block == nil {
+		return false
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return false
+	}
+	payload := r.Method + "." + base64.StdEncoding.EncodeToString([]byte(r.URL.RequestURI())) + "." +
+		base64.StdEncoding.EncodeToString(body) + "." + cert64
+	sum := sha256.Sum256([]byte(payload))
+	return ecdsa.VerifyASN1(cert.PublicKey.(*ecdsa.PublicKey), sum[:], sig)
+}
+
+// / @brief  Le jeton d'un appel à l'API d'identité est signé sur le chemin encodé que reçoit la CA, y compris pour un identifiant non ASCII
+// / @input  CA simulée vérifiant la signature sur l'URI reçue ; UpdateAttributes et GetStatus pour « Christophe@là »
+// / @expect les deux jetons sont valides ; la CA reçoit le chemin encodé
+func TestCAClient_IdentityPath_NonASCIIEnrollmentID(t *testing.T) {
+	var uris []string
+	ca := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		uris = append(uris, r.URL.RequestURI())
+		if !verifyCAToken(r, body) {
+			_, _ = w.Write([]byte(`{"success":false,"result":"","errors":[{"message":"Authentication failure"}]}`))
+			return
+		}
+		_, _ = w.Write([]byte(`{"success":true,"result":{"attrs":[{"name":"Myr.status","value":"suspended"}]}}`))
+	}))
+	defer ca.Close()
+
+	certPath, keyPath := writeRegistrar(t, t.TempDir(), "PRIVATE KEY")
+	c, err := fabric.NewCAClient(fabric.Config{CAEndpoint: ca.URL, CAName: "ca-test", CAAdminCertPath: certPath, CAAdminKeyPath: keyPath})
+	if err != nil {
+		t.Fatalf("NewCAClient : %v", err)
+	}
+	if err := c.UpdateAttributes(context.Background(), "Christophe@là", map[string]string{"Myr.status": "suspended"}); err != nil {
+		t.Errorf("UpdateAttributes : %v", err)
+	}
+	if st, err := c.GetStatus(context.Background(), "Christophe@là"); err != nil || st != "suspended" {
+		t.Errorf("GetStatus : %q, %v", st, err)
+	}
+	for _, u := range uris {
+		if u != "/api/v1/identities/Christophe@l%C3%A0" {
+			t.Errorf("chemin reçu par la CA : %q", u)
+		}
 	}
 }

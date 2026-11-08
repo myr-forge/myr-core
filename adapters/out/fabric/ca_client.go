@@ -20,6 +20,7 @@ import (
 	"io"
 	"math/big"
 	"net/http"
+	"net/url"
 	"os"
 
 	"myr-core/domain/identity"
@@ -347,12 +348,13 @@ type caIdentityResp struct {
 }
 
 func (c *CAClient) GetStatus(ctx context.Context, name string) (string, error) {
-	token, err := c.adminToken(nil, "GET", "/api/v1/identities/"+name)
+	path := identityPath(name)
+	token, err := c.adminToken(nil, "GET", path)
 	if err != nil {
 		return "", fmt.Errorf("token admin : %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", c.caURL+"/api/v1/identities/"+name, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", c.caURL+path, nil)
 	if err != nil {
 		return "", err
 	}
@@ -409,7 +411,7 @@ func (c *CAClient) UpdateAttributes(ctx context.Context, name string, attrs map[
 		return err
 	}
 
-	path := "/api/v1/identities/" + name
+	path := identityPath(name)
 	token, err := c.adminToken(data, "PUT", path)
 	if err != nil {
 		return fmt.Errorf("token admin : %w", err)
@@ -553,6 +555,13 @@ func (c *CAClient) certToken(certPEM []byte, privKey *ecdsa.PrivateKey, body []b
 // vérificateur BCCSP de Fabric rejette toute signature ECDSA dont S dépasse la
 // moitié de l'ordre de la courbe (protection anti-malléabilité) — une omission
 // silencieuse ici fait échouer ~50% des requêtes de façon aléatoire.
+// identityPath retourne le chemin de l'API d'identité de la CA pour name, sous
+// la forme encodée qu'envoie le client HTTP : la CA vérifie la signature du
+// jeton sur ce chemin encodé (identifiants non ASCII, ex. « Christophe@là »).
+func identityPath(name string) string {
+	return "/api/v1/identities/" + url.PathEscape(name)
+}
+
 func fabricCAToken(certPEM []byte, privKey *ecdsa.PrivateKey, method, uri string, body []byte) (string, error) {
 	b64Cert := base64.StdEncoding.EncodeToString(certPEM)
 	b64Body := base64.StdEncoding.EncodeToString(body)
