@@ -5,7 +5,7 @@ type: anomalie
 statut: a-verifier
 severite: critique
 detecte: 2026-07-29
-maj: 2026-10-02
+maj: 2026-11-08
 composants: [chaincode, adapters/out/fabric]
 uc: [UCCL01, UCCE01, UCMOD06]
 rm: [RM06]
@@ -51,8 +51,8 @@ Vérifier sur le serveur : `peer lifecycle chaincode querycommitted -C sandbox`.
 
 ## Critères de clôture
 
-- [ ] Chaincode `myrcc` commité sur `sandbox`
-- [ ] `GET /api/components` répond 200 en production
+- [x] Chaincode `myrcc` commité sur `sandbox`
+- [x] `GET /api/components` répond 200 en production
 - [ ] Entité chaincode alignée avec `Model3D` (E6 clos)
 - [ ] Procédure de déploiement documentée (install.md)
 
@@ -71,3 +71,4 @@ Vérifier sur le serveur : `peer lifecycle chaincode querycommitted -C sandbox`.
 - 2026-07-29 — Constaté sur le serveur de production
 - — — Code du chaincode ajouté (commit `e98b814`)
 - 2026-10-02 — Ticket créé ; déploiement à revérifier sur le serveur
+- 2026-11-08 — Déployé en production depuis `feature/ledger-invariants` (API et CLI `94307f4`, chaincode `myrcc` 2.0 séquence 2 sur `sandbox`) après une campagne sur un réseau de test séparé (`docs/rapports/2026-11-08-R-03-rapport-tests.md`, local) : vérifié : `myrcc` 2.0 commité sur `sandbox` (installé sur peer0 et peer1, servi par le conteneur `myrcc-v2`) et `GET /api/components` répond 200 en production. Restent l'alignement de l'entité (E6) et la procédure dans `install.md`.
