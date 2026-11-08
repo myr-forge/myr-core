@@ -86,7 +86,7 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 5. Le Module passe en lecture seule (RM19)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 21 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 32 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
@@ -96,13 +96,13 @@ Une fois soumis, le Module est visible sur le réseau par tous les acteurs autor
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_VerifyIntegrity](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyIntegrity.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.SubmitModule`
-> - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.SubmitModule`
-> - 🟡 [TestCreateModule_RM19_ForkOfSubmitted_Submittable](../../../docs/tests/domain-model/TestCreateModule_RM19_ForkOfSubmitted_Submittable.md) — déduit : teste `ModelService.SubmitModule`
-> - … et 6 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestIntegration_ModelService_SubmittedAsset](../../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_OwnerNotSigner_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_OwnerNotSigner_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_PendingOrReader_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_PendingOrReader_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM01_DuplicateHash_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_RM01_DuplicateHash_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM05_ParentMustExist](../../../docs/tests/adapters-out-fabric/TestIntegration_RM05_ParentMustExist.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM06_WriteOnce](../../../docs/tests/adapters-out-fabric/TestIntegration_RM06_WriteOnce.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - … et 17 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Module avec composants dérivés (licences parentales)
@@ -184,15 +184,23 @@ Les métadonnées descriptives d'un module soumis (`name`, `description`, `tags`
 5. Les `ModuleVersions` partiellement créées ne sont **pas** persistées (atomicité de `StoreModelRecord`)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 19 déduit(s)
 > - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricAdapter_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_VerifyIntegrity](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyIntegrity.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_ModelService_SubmittedAsset](../../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_OwnerNotSigner_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_OwnerNotSigner_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_PendingOrReader_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_PendingOrReader_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM01_DuplicateHash_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_RM01_DuplicateHash_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM05_ParentMustExist](../../../docs/tests/adapters-out-fabric/TestIntegration_RM05_ParentMustExist.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM06_WriteOnce](../../../docs/tests/adapters-out-fabric/TestIntegration_RM06_WriteOnce.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM19_DraftRejected](../../../docs/tests/adapters-out-fabric/TestIntegration_RM19_DraftRejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM48_WritePermissionFollowsTable](../../../docs/tests/adapters-out-fabric/TestIntegration_RM48_WritePermissionFollowsTable.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_SharedIdentity_ChaincodeRefuses](../../../docs/tests/adapters-out-fabric/TestIntegration_SharedIdentity_ChaincodeRefuses.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_SharedIdentity_ClientRefuses](../../../docs/tests/adapters-out-fabric/TestIntegration_SharedIdentity_ClientRefuses.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - … et 4 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## Post-conditions

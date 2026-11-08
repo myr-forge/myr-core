@@ -256,7 +256,8 @@ func (s *Service) ReEnroll(ctx context.Context, wallet WalletEntry) (WalletEntry
 		return WalletEntry{}, fmt.Errorf("clé privée illisible : %w", err)
 	}
 
-	newCert, err := s.ca.ReEnroll(ctx, wallet.Name, string(certPEM), string(keyPEM))
+	// L'identifiant d'enrôlement est le handle pseudo@org (ADR-12), pas le pseudo.
+	newCert, err := s.ca.ReEnroll(ctx, wallet.Handle, string(certPEM), string(keyPEM))
 	if err != nil {
 		return WalletEntry{}, fmt.Errorf("re-enrollment : %w", err)
 	}
@@ -548,6 +549,24 @@ func (s *Service) SetRole(ctx context.Context, name, newRole string) error {
 		return err
 	}
 	return s.ca.UpdateAttributes(ctx, name, map[string]string{AttrRole: newRole})
+}
+
+// SetStatus change le statut enregistré d'une identité existante auprès de la
+// CA (attribut Myr.status) : active ou suspended. Comme pour SetRole, le
+// changement s'applique au prochain enrôlement de l'identité. Sert à activer
+// une identité créée avant que le statut ne soit porté par le certificat
+// (ADR-12), ou à suspendre puis réactiver une identité.
+func (s *Service) SetStatus(ctx context.Context, name, status string) error {
+	if s.ca == nil {
+		return fmt.Errorf("aucun CA configuré — impossible de modifier le statut")
+	}
+	if name == "" {
+		return fmt.Errorf("identité requise")
+	}
+	if status != StatusActive && status != StatusSuspended {
+		return fmt.Errorf("%w : %q (active ou suspended)", ErrInvalidStatus, status)
+	}
+	return s.ca.UpdateAttributes(ctx, name, map[string]string{AttrStatus: status})
 }
 
 // ListRequests retourne toutes les demandes enregistrées.

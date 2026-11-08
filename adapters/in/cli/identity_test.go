@@ -349,3 +349,21 @@ func TestRunIdentitySetRole_NominalCase(t *testing.T) {
 		t.Fatalf("unexpected output: %q", buf.String())
 	}
 }
+
+/// @brief  runIdentitySetStatus transmet l'identité et le statut, et rappelle le ré-enrôlement
+/// @input  id="alice@Org1", status="active"
+/// @expect SetStatus reçoit les deux valeurs, sortie mentionne le ré-enrôlement
+func TestRunIdentitySetStatus_NominalCase(t *testing.T) {
+	var gotID, gotStatus string
+	svc := &mockIdentitySvc{setStatus: func(_ context.Context, id, status string) error {
+		gotID, gotStatus = id, status
+		return nil
+	}}
+	var buf bytes.Buffer
+	if err := runIdentitySetStatus(&buf, svc, "alice@Org1", "active"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if gotID != "alice@Org1" || gotStatus != "active" || !strings.Contains(buf.String(), "ré-enrôlement") {
+		t.Errorf("SetStatus(%q, %q), sortie %q", gotID, gotStatus, buf.String())
+	}
+}

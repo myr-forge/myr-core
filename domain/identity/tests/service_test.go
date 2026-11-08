@@ -432,14 +432,16 @@ func TestReEnroll_NoCA(t *testing.T) {
 	}
 }
 
-// / @brief  ReEnroll réussi renouvelle le certificat et l'écrit sur disque
-// / @input  wallet enrôlé préalablement, stubCA retournant un nouveau PEM
-// / @expect WalletEntry conserve le même handle, fichier cert.pem mis à jour
+// / @brief  ReEnroll réussi renouvelle le certificat de l'identité pseudo@org et l'écrit sur disque
+// / @input  wallet enrôlé préalablement (alice@Org1), stubCA retournant un nouveau PEM
+// / @expect la CA reçoit l'identifiant d'enrôlement alice@Org1 ; WalletEntry conserve le même handle, cert.pem mis à jour
 func TestReEnroll_Success(t *testing.T) {
 	walletDir := t.TempDir()
 	newCert := "-----BEGIN CERTIFICATE-----\nMIIBnewcert==\n-----END CERTIFICATE-----\n"
+	var gotName string
 	ca := &stubCA{
-		reEnrollFn: func(_ context.Context, _, _, _ string) (string, error) {
+		reEnrollFn: func(_ context.Context, name, _, _ string) (string, error) {
+			gotName = name
 			return newCert, nil
 		},
 	}
@@ -455,6 +457,9 @@ func TestReEnroll_Success(t *testing.T) {
 	}
 	if updated.Handle != entry.Handle {
 		t.Errorf("Handle: got %q, want %q", updated.Handle, entry.Handle)
+	}
+	if gotName != "alice@Org1" {
+		t.Errorf("identifiant d'enrôlement transmis à la CA : %q, attendu alice@Org1", gotName)
 	}
 	data, err := os.ReadFile(filepath.Join(entry.MSPDir, "signcerts", "cert.pem"))
 	if err != nil {
@@ -1132,5 +1137,33 @@ func TestRequestRole_SuspendedIdentity_Rejected(t *testing.T) {
 	w.Status = identity.StatusSuspended
 	if _, err := svc.RequestRole(context.Background(), w, identity.RoleContributor); !errors.Is(err, identity.ErrIdentitySuspended) {
 		t.Errorf("ErrIdentitySuspended attendu, obtenu %v", err)
+	}
+}
+
+// ── Statut d'une identité (ADR-12) ────────────────────────────────────────────
+
+// / @brief  SetStatus active ou suspend une identité auprès de la CA ; tout autre statut est refusé (ADR-12)
+// / @input  SetStatus active puis suspended pour bob@Org1 ; puis "pending" et ""
+// / @expect la CA reçoit Myr.status ; ErrInvalidStatus pour pending et vide, sans nouvel appel CA
+func TestSetStatus_ActiveOrSuspended(t *testing.T) {
+	ca := &stubCA{}
+	svc := identity.NewService(t.TempDir(), ca)
+	ctx := context.Background()
+	for _, st := range []string{identity.StatusActive, identity.StatusSuspended} {
+		if err := svc.SetStatus(ctx, "bob@Org1", st); err != nil {
+			t.Fatalf("SetStatus(%s) : %v", st, err)
+		}
+		if ca.lastUpdateName != "bob@Org1" || ca.lastUpdateAttrs[identity.AttrStatus] != st || len(ca.lastUpdateAttrs) != 1 {
+			t.Errorf("mise à jour CA inattendue : %q %v", ca.lastUpdateName, ca.lastUpdateAttrs)
+		}
+	}
+	ca.updateAttrsFn = func(context.Context, string, map[string]string) error {
+		t.Fatal("la CA ne doit pas être modifiée")
+		return nil
+	}
+	for _, st := range []string{identity.StatusPending, ""} {
+		if err := svc.SetStatus(ctx, "bob@Org1", st); !errors.Is(err, identity.ErrInvalidStatus) {
+			t.Errorf("SetStatus(%q) : ErrInvalidStatus attendu, obtenu %v", st, err)
+		}
 	}
 }

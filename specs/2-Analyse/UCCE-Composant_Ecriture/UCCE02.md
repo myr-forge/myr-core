@@ -79,8 +79,9 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 7. L'API retourne `200 OK` avec le `Model3D` mis à jour.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 6 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
 > - 🟡 [TestFabricBlockchain_UpdateModelMetadata](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_UpdateModelMetadata.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
+> - 🟡 [TestIntegration_UpdateMetadata_OwnerOnly](../../../docs/tests/adapters-out-fabric/TestIntegration_UpdateMetadata_OwnerOnly.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
 > - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM03_IncompatibleLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM03_IncompatibleLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
@@ -132,7 +133,7 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 2. L'API retourne `404 Not Found` : `{ "error": "asset introuvable" }`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 11 déduit(s)
 > - 🟡 [TestFabricAdapter_GetModelRecord_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_EvaluateError.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricAdapter_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
@@ -140,7 +141,10 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 > - 🟡 [TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricBlockchain_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestIntegration_GetModelRecord_NotFound](../../../docs/tests/adapters-out-fabric/TestIntegration_GetModelRecord_NotFound.md) — déduit : teste `BlockchainPort.GetModelRecord`
-> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestIntegration_ModelService_SubmittedAsset](../../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestIntegration_RM06_WriteOnce](../../../docs/tests/adapters-out-fabric/TestIntegration_RM06_WriteOnce.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestIntegration_StoreAndGet_UserSigned](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet_UserSigned.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestIntegration_UpdateMetadata_OwnerOnly](../../../docs/tests/adapters-out-fabric/TestIntegration_UpdateMetadata_OwnerOnly.md) — déduit : teste `BlockchainPort.GetModelRecord`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Échec endorsement Fabric
@@ -150,8 +154,9 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 3. L'API retourne une erreur avec sa référence (`503` si le réseau est indisponible).
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 1 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
 > - 🟡 [TestFabricBlockchain_UpdateModelMetadata](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_UpdateModelMetadata.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
+> - 🟡 [TestIntegration_UpdateMetadata_OwnerOnly](../../../docs/tests/adapters-out-fabric/TestIntegration_UpdateMetadata_OwnerOnly.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
 <!-- tests-obsidian:end -->
 
 ## Post-conditions

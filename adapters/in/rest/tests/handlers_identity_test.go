@@ -34,6 +34,7 @@ type mockIdentitySvc struct {
 	listRequests    func() ([]*identity.AccountRequest, error)
 	walletDir       func() string
 	setRole         func(ctx context.Context, name, newRole string) error
+	setStatus       func(ctx context.Context, name, status string) error
 }
 
 func (m *mockIdentitySvc) ListLocalWallets() ([]identity.WalletEntry, error) {
@@ -127,6 +128,12 @@ func (m *mockIdentitySvc) RequestRole(ctx context.Context, w identity.WalletEntr
 		return m.requestRole(ctx, w, wanted)
 	}
 	return &identity.AccountRequest{ID: "req-1", Kind: identity.RequestKindRole, Role: wanted, Status: identity.RequestPending}, nil
+}
+func (m *mockIdentitySvc) SetStatus(ctx context.Context, name, status string) error {
+	if m.setStatus != nil {
+		return m.setStatus(ctx, name, status)
+	}
+	return nil
 }
 func (m *mockIdentitySvc) SetRole(ctx context.Context, name, newRole string) error {
 	if m.setRole != nil {

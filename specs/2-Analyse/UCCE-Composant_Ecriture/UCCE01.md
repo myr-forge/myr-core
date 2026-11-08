@@ -87,7 +87,7 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 11. L'API retourne `201 Created` avec le `Model3D` JSON (ID, name, hash, blockID…).
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 41 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 51 déduit(s)
 > - 🟡 [TestFabricAdapter_ListModelRecords_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_ListModelRecords_EvaluateError.md) — déduit : teste `BlockchainPort.ListModelRecords`
 > - 🟡 [TestFabricAdapter_ListModelRecords_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_ListModelRecords_Success.md) — déduit : teste `BlockchainPort.ListModelRecords`
 > - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
@@ -98,12 +98,12 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_ListModelRecords](../../../docs/tests/adapters-out-fabric/TestIntegration_ListModelRecords.md) — déduit : teste `BlockchainPort.ListModelRecords`
-> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_VerifyIntegrity](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyIntegrity.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestAddFull_AllFields](../../../docs/tests/domain-model/TestAddFull_AllFields.md) — déduit : teste `ModelService.AddFull`
-> - … et 26 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestIntegration_ModelService_SubmittedAsset](../../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_OwnerNotSigner_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_OwnerNotSigner_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_PendingOrReader_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_PendingOrReader_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM01_DuplicateHash_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_RM01_DuplicateHash_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM05_ParentMustExist](../../../docs/tests/adapters-out-fabric/TestIntegration_RM05_ParentMustExist.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - … et 36 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Import depuis un format CAO non natif (STL, STEP, OBJ)
@@ -202,15 +202,23 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 3. L'API retourne `500 Internal Server Error` : `{ "error": "Erreur blockchain : <message>. Aucune donnée enregistrée." }`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 8 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 19 déduit(s)
 > - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricAdapter_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_Success.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestIntegration_VerifyIntegrity](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyIntegrity.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - 🟡 [TestNetworkPool_BlockchainForSigner](../../../docs/tests/adapters-out-fabric/TestNetworkPool_BlockchainForSigner.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_ModelService_SubmittedAsset](../../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_OwnerNotSigner_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_OwnerNotSigner_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_PendingOrReader_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_PendingOrReader_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM01_DuplicateHash_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_RM01_DuplicateHash_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM05_ParentMustExist](../../../docs/tests/adapters-out-fabric/TestIntegration_RM05_ParentMustExist.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM06_WriteOnce](../../../docs/tests/adapters-out-fabric/TestIntegration_RM06_WriteOnce.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM19_DraftRejected](../../../docs/tests/adapters-out-fabric/TestIntegration_RM19_DraftRejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_RM48_WritePermissionFollowsTable](../../../docs/tests/adapters-out-fabric/TestIntegration_RM48_WritePermissionFollowsTable.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_SharedIdentity_ChaincodeRefuses](../../../docs/tests/adapters-out-fabric/TestIntegration_SharedIdentity_ChaincodeRefuses.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - 🟡 [TestIntegration_SharedIdentity_ClientRefuses](../../../docs/tests/adapters-out-fabric/TestIntegration_SharedIdentity_ClientRefuses.md) — déduit : teste `BlockchainPort.StoreModelRecord`
+> - … et 4 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## Post-conditions

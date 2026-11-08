@@ -144,7 +144,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 > - 🟡 [TestFabricBlockchain_ListModelRecords_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_EvaluateError.md) — déduit : teste `BlockchainPort.ListModelRecords`
 > - 🟡 [TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable.md) — déduit : teste `BlockchainPort.ListModelRecords`
 > - 🟡 [TestFabricBlockchain_ListModelRecords_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_Success.md) — déduit : teste `BlockchainPort.ListModelRecords`
-> - 🟡 [TestIntegration_ListModelRecords](../../../docs/tests/adapters-out-fabric/TestIntegration_ListModelRecords.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestIntegration_VerifyAndList](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyAndList.md) — déduit : teste `BlockchainPort.ListModelRecords`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Blockchain indisponible, aucune donnée locale
@@ -159,7 +159,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 > - 🟡 [TestFabricBlockchain_ListModelRecords_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_EvaluateError.md) — déduit : teste `BlockchainPort.ListModelRecords`
 > - 🟡 [TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable.md) — déduit : teste `BlockchainPort.ListModelRecords`
 > - 🟡 [TestFabricBlockchain_ListModelRecords_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_Success.md) — déduit : teste `BlockchainPort.ListModelRecords`
-> - 🟡 [TestIntegration_ListModelRecords](../../../docs/tests/adapters-out-fabric/TestIntegration_ListModelRecords.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestIntegration_VerifyAndList](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyAndList.md) — déduit : teste `BlockchainPort.ListModelRecords`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Écriture non authentifiée

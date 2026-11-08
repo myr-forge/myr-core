@@ -46,6 +46,10 @@ var (
 	ErrRequestNotPending = errors.New("identity: la demande n'est plus en attente")
 )
 
+// ErrInvalidStatus est retourné quand le statut à attribuer n'est ni active
+// ni suspended (SetStatus).
+var ErrInvalidStatus = errors.New("identity: statut non attribuable")
+
 // Demande de rôle (RequestRole, UCA08).
 var (
 	ErrRoleAlreadyHeld       = errors.New("identity: vous possédez déjà ce rôle")

@@ -43,4 +43,7 @@ type IdentityService interface {
 	// Le nouveau rôle ne s'applique qu'aux prochains certificats émis — un
 	// ré-enrôlement (ReEnroll) est nécessaire pour l'appliquer immédiatement.
 	SetRole(ctx context.Context, name, newRole string) error
+	// SetStatus change le statut (active ou suspended) d'une identité existante
+	// auprès de la CA, avec la même prise d'effet que SetRole.
+	SetStatus(ctx context.Context, name, status string) error
 }

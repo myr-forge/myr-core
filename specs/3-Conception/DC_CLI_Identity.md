@@ -9,6 +9,7 @@ tags:
   - uc/UCA04
   - uc/UCA07
   - uc/UCA08
+  - rm/RM45
   - rm/RM46
   - rm/RM47
 ---
@@ -48,7 +49,8 @@ myr identity
 ├── reject <request-id>                  — refuser une demande en attente                       UCA01, UCA08
 ├── register                             — créer un compte actif (administrateur)               UCA01
 │     --pseudo <p> --org-id <id> [--role <r>] [--email <e>]
-└── set-role --id <pseudo@org> --role <nom>  — changer le rôle CA d'une identité                UCA08
+├── set-role --id <pseudo@org> --role <nom>  — changer le rôle CA d'une identité                UCA08
+└── set-status --id <pseudo@org> --status active|suspended — activer ou suspendre une identité  UCA01, UCA02
 
 myr session                              — compte local de la machine exécutant le CLI (bootstrap, un seul enregistrement)
 ├── create --name <n> [--org-id <id>]    — créer le compte local (premier lancement)
@@ -234,6 +236,24 @@ myr identity set-role --id <pseudo@org> --role <nom>
 
 ---
 
+### 3.7b `myr identity set-status`
+
+```
+myr identity set-status --id <pseudo@org> --status active|suspended
+```
+
+**Comportement :** Change l'attribut `Myr.status` d'une identité déjà enregistrée auprès de la CA : `active` ou `suspended` (tout autre statut est refusé, `ErrInvalidStatus`). Une identité suspendue ne peut ni se connecter (RM45) ni écrire sur le ledger (ADR-12). Comme pour `set-role`, le nouveau statut s'applique au prochain ré-enrôlement de l'identité (`myr identity re-enroll`, ou sa prochaine connexion). Sert à activer les identités créées avant que le statut ne soit porté par le certificat, et à suspendre ou réactiver une identité hors demande d'inscription.
+
+**Sortie :**
+```
+Statut de "alice@Org1" mis à jour : active.
+Le nouveau statut s'applique au prochain ré-enrôlement de l'identité.
+```
+
+**Service :** `identitySvc.SetStatus(ctx, id, status)`
+
+---
+
 ### 3.8 `myr session create` / `show` / `logout`
 
 ```
@@ -285,6 +305,7 @@ myr session logout
 - [§ 3.6 `myr identity requests`](DC_CLI_Identity.md#3.6%20`myr%20identity%20requests`) → [REST /api/identity/requests](../../docs/code/routes/REST%20api-identity-requests.md) · [CLI myr identity requests](../../docs/code/commandes/CLI%20myr-identity-requests.md) · [IdentityService.ListRequests](../../docs/code/fonctions/identity.IdentityService.ListRequests.md)
 - [§ 3.6b `myr identity request-role`](DC_CLI_Identity.md#3.6b%20`myr%20identity%20request-role`) → [REST /api/identity/roles/request](../../docs/code/routes/REST%20api-identity-roles-request.md) · [CLI myr identity approve](../../docs/code/commandes/CLI%20myr-identity-approve.md) · [CLI myr identity re-enroll](../../docs/code/commandes/CLI%20myr-identity-re-enroll.md) · [CLI myr identity request-role](../../docs/code/commandes/CLI%20myr-identity-request-role.md) · [CLI myr session](../../docs/code/commandes/CLI%20myr-session.md) · [IdentityService.RequestRole](../../docs/code/fonctions/identity.IdentityService.RequestRole.md) · [IdentityService.Wallet](../../docs/code/fonctions/identity.IdentityService.Wallet.md)
 - [§ 3.7 `myr identity set-role`](DC_CLI_Identity.md#3.7%20`myr%20identity%20set-role`) → [CLI myr identity set-role](../../docs/code/commandes/CLI%20myr-identity-set-role.md) · [IdentityService.SetRole](../../docs/code/fonctions/identity.IdentityService.SetRole.md)
+- [§ 3.7b `myr identity set-status`](DC_CLI_Identity.md#3.7b%20`myr%20identity%20set-status`) → [CLI myr identity re-enroll](../../docs/code/commandes/CLI%20myr-identity-re-enroll.md) · [CLI myr identity set-status](../../docs/code/commandes/CLI%20myr-identity-set-status.md) · [IdentityService.SetStatus](../../docs/code/fonctions/identity.IdentityService.SetStatus.md)
 - [§ 3.8 `myr session create` / `show` / `logout`](DC_CLI_Identity.md#3.8%20`myr%20session%20create`%20/%20`show`%20/%20`logout`) → [CLI myr session create](../../docs/code/commandes/CLI%20myr-session-create.md) · [CLI myr session logout](../../docs/code/commandes/CLI%20myr-session-logout.md) · [CLI myr session show](../../docs/code/commandes/CLI%20myr-session-show.md) · [SessionService.Create](../../docs/code/fonctions/session.SessionService.Create.md) · [SessionService.Current](../../docs/code/fonctions/session.SessionService.Current.md) · [SessionService.Logout](../../docs/code/fonctions/session.SessionService.Logout.md)
 - [§ 4. Points ouverts](DC_CLI_Identity.md#4.%20Points%20ouverts) → [IdentityService.LoadGuestWallet](../../docs/code/fonctions/identity.IdentityService.LoadGuestWallet.md) · [IdentityService.WalletDir](../../docs/code/fonctions/identity.IdentityService.WalletDir.md)
 - [§ 5. Décisions de conception](DC_CLI_Identity.md#5.%20Décisions%20de%20conception) → [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [CLI myr identity approve](../../docs/code/commandes/CLI%20myr-identity-approve.md) · [CLI myr identity register](../../docs/code/commandes/CLI%20myr-identity-register.md) · [CLI myr identity request](../../docs/code/commandes/CLI%20myr-identity-request.md) · [CLI myr session](../../docs/code/commandes/CLI%20myr-session.md) · [IdentityService.RequestAccess](../../docs/code/fonctions/identity.IdentityService.RequestAccess.md)

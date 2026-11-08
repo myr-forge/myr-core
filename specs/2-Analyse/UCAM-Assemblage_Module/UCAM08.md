@@ -104,7 +104,7 @@ Le retrait d'un composant d'un module supprime une **instance spécifique** (`Wo
 3. Le handler retourne HTTP 500
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 11 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 14 déduit(s)
 > - 🟡 [TestFabricAdapter_GetModelRecord_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_EvaluateError.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricAdapter_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
@@ -112,7 +112,10 @@ Le retrait d'un composant d'un module supprime une **instance spécifique** (`Wo
 > - 🟡 [TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricBlockchain_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestIntegration_GetModelRecord_NotFound](../../../docs/tests/adapters-out-fabric/TestIntegration_GetModelRecord_NotFound.md) — déduit : teste `BlockchainPort.GetModelRecord`
-> - 🟡 [TestIntegration_StoreAndGet](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestIntegration_ModelService_SubmittedAsset](../../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestIntegration_RM06_WriteOnce](../../../docs/tests/adapters-out-fabric/TestIntegration_RM06_WriteOnce.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestIntegration_StoreAndGet_UserSigned](../../../docs/tests/adapters-out-fabric/TestIntegration_StoreAndGet_UserSigned.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestIntegration_UpdateMetadata_OwnerOnly](../../../docs/tests/adapters-out-fabric/TestIntegration_UpdateMetadata_OwnerOnly.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestModuleComposition_RM19_Submitted_Rejected](../../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
 > - 🟡 [TestWorkspace_AddRemoveInstance](../../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`
 > - 🟡 [TestWorkspace_NilStore_ReturnsError](../../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.RemoveAssetFromWorkspace`

@@ -116,7 +116,7 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 6. À sa prochaine connexion, l'utilisateur reçoit un certificat portant `Myr.status=active` et ouvre sa session
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 17 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 18 déduit(s)
 > - 🟡 [TestRunIdentityDecision_Approve_OK](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_Approve_OK.md) — déduit : teste commande `myr identity approve`
 > - 🟡 [TestRunIdentityDecision_NotPending_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityDecision_NotPending_Rejected.md) — déduit : teste commande `myr identity approve`
 > - 🟡 [TestRunIdentityRequests_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentityRequests_NominalCase.md) — déduit : teste commande `myr identity requests`
@@ -128,11 +128,11 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 > - 🟡 [TestHandleIdentityRequests_Admin_ReturnsList](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_Admin_ReturnsList.md) — déduit : teste route `/api/identity/requests`
 > - 🟡 [TestHandleIdentityRequests_NonAdmin_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityRequests_NonAdmin_Forbidden.md) — déduit : teste route `/api/identity/requests`
 > - 🟡 [TestHandleIdentitySession_RoleFromCertificate](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_RoleFromCertificate.md) — déduit : teste route `/api/identity/requests`
+> - 🟡 [TestCAClient_UpdateAttributes_SEC1AndPKCS8Keys](../../../docs/tests/adapters-out-fabric/TestCAClient_UpdateAttributes_SEC1AndPKCS8Keys.md) — déduit : teste `CAPort.UpdateAttributes`
 > - 🟡 [TestAccountRequest_FullFlow](../../../docs/tests/domain-identity/TestAccountRequest_FullFlow.md) — déduit : teste `IdentityService.ApproveRequest`
 > - 🟡 [TestApproveRequest_CAError_StaysPending](../../../docs/tests/domain-identity/TestApproveRequest_CAError_StaysPending.md) — déduit : teste `IdentityService.ApproveRequest`
 > - 🟡 [TestApproveRequest_NominalCase](../../../docs/tests/domain-identity/TestApproveRequest_NominalCase.md) — déduit : teste `IdentityService.ApproveRequest`
-> - 🟡 [TestApproveRequest_RM46_RoleRemovedSinceRequest_Rejected](../../../docs/tests/domain-identity/TestApproveRequest_RM46_RoleRemovedSinceRequest_Rejected.md) — déduit : teste `IdentityService.ApproveRequest`
-> - … et 2 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 3 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Demande refusée

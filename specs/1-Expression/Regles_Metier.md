@@ -22,8 +22,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCCE01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 1 explicite(s) · 0 déduit(s)
+> - ✅ [TestIntegration_RM01_DuplicateHash_Rejected](../../docs/tests/adapters-out-fabric/TestIntegration_RM01_DuplicateHash_Rejected.md) — explicite (le test cite RM01)
 <!-- tests-obsidian:end -->
 
 ### RM02 — Catégorie d'asset obligatoire
@@ -73,8 +73,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCCE04, UCCE05
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 1 explicite(s) · 0 déduit(s)
+> - ✅ [TestIntegration_RM05_ParentMustExist](../../docs/tests/adapters-out-fabric/TestIntegration_RM05_ParentMustExist.md) — explicite (le test cite RM05)
 <!-- tests-obsidian:end -->
 
 ### RM42 — Traçabilité et alerte des emplacements externes
@@ -101,8 +101,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCCE01, UCMOD06, UCPI07–09
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 1 explicite(s) · 0 déduit(s)
+> - ✅ [TestIntegration_RM06_WriteOnce](../../docs/tests/adapters-out-fabric/TestIntegration_RM06_WriteOnce.md) — explicite (le test cite RM06)
 <!-- tests-obsidian:end -->
 
 ### RM07 — Validation préalable obligatoire
@@ -239,7 +239,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD01, UCCE01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> [!check]- Tests — 1 explicite(s) · 3 déduit(s)
+> - ✅ [TestIntegration_RM19_DraftRejected](../../docs/tests/adapters-out-fabric/TestIntegration_RM19_DraftRejected.md) — explicite (le test cite RM16)
 > - 🟡 [TestResolveOwner](../../docs/tests/adapters-in-cli/TestResolveOwner.md) — déduit : teste commande `myr model add`
 > - 🟡 [TestRunModelAdd_NominalCase](../../docs/tests/adapters-in-cli/TestRunModelAdd_NominalCase.md) — déduit : teste commande `myr model add`
 > - 🟡 [TestRunModelAdd_ServiceError_Rejected](../../docs/tests/adapters-in-cli/TestRunModelAdd_ServiceError_Rejected.md) — déduit : teste commande `myr model add`
@@ -286,8 +287,12 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD06, UCCE06, UCCE02, UCMOD03
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 6 explicite(s) · 0 déduit(s)
+> [!check]- Tests — 10 explicite(s) · 0 déduit(s)
 > - ✅ [TestDomainErrors_SubmittedAndLicense_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_SubmittedAndLicense_MappedToHTTP.md) — explicite (le test cite RM19)
+> - ✅ [TestIntegration_ModelService_SubmittedAsset](../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — explicite (le test cite RM19)
+> - ✅ [TestIntegration_RM06_WriteOnce](../../docs/tests/adapters-out-fabric/TestIntegration_RM06_WriteOnce.md) — explicite (le test cite RM19)
+> - ✅ [TestIntegration_RM19_DraftRejected](../../docs/tests/adapters-out-fabric/TestIntegration_RM19_DraftRejected.md) — explicite (le test cite RM19)
+> - ✅ [TestIntegration_UpdateMetadata_OwnerOnly](../../docs/tests/adapters-out-fabric/TestIntegration_UpdateMetadata_OwnerOnly.md) — explicite (le test cite RM19)
 > - ✅ [TestCreateModule_RM19_ForkOfSubmitted_Submittable](../../docs/tests/domain-model/TestCreateModule_RM19_ForkOfSubmitted_Submittable.md) — explicite (le test cite RM19)
 > - ✅ [TestModuleComposition_RM19_Submitted_Rejected](../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — explicite (le test cite RM19)
 > - ✅ [TestSubmitModule_RM19_AlreadySubmitted_Rejected](../../docs/tests/domain-model/TestSubmitModule_RM19_AlreadySubmitted_Rejected.md) — explicite (le test cite RM19)
@@ -499,9 +504,10 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCA08
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 10 explicite(s) · 2 déduit(s)
+> [!check]- Tests — 11 explicite(s) · 2 déduit(s)
 > - ✅ [TestRunIdentityRequestRole_RM47_GrantedOrPending](../../docs/tests/adapters-in-cli/TestRunIdentityRequestRole_RM47_GrantedOrPending.md) — explicite (le test cite RM47)
 > - ✅ [TestHandleIdentityRoleRequest_RM47_GrantedOrPending](../../docs/tests/adapters-in-rest/TestHandleIdentityRoleRequest_RM47_GrantedOrPending.md) — explicite (le test cite RM47)
+> - ✅ [TestIntegration_RoleService_PublishedAndApplied](../../docs/tests/adapters-out-fabric/TestIntegration_RoleService_PublishedAndApplied.md) — explicite (le test cite RM47)
 > - ✅ [TestRejectRequest_RM47_RoleRequest_IdentityUnchanged](../../docs/tests/domain-identity/TestRejectRequest_RM47_RoleRequest_IdentityUnchanged.md) — explicite (le test cite RM47)
 > - ✅ [TestRequestRole_RM47_AdminRole_NeverAutomatic](../../docs/tests/domain-identity/TestRequestRole_RM47_AdminRole_NeverAutomatic.md) — explicite (le test cite RM47)
 > - ✅ [TestRequestRole_RM47_Approval_PendingThenGranted](../../docs/tests/domain-identity/TestRequestRole_RM47_Approval_PendingThenGranted.md) — explicite (le test cite RM47)
@@ -524,8 +530,13 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 9 explicite(s) · 0 déduit(s)
+> [!check]- Tests — 14 explicite(s) · 0 déduit(s)
 > - ✅ [TestFabricRoleStore_RM48_PublishedOnEveryChannel](../../docs/tests/adapters-out-fabric/TestFabricRoleStore_RM48_PublishedOnEveryChannel.md) — explicite (le test cite RM48)
+> - ✅ [TestIntegration_PendingOrReader_Rejected](../../docs/tests/adapters-out-fabric/TestIntegration_PendingOrReader_Rejected.md) — explicite (le test cite RM48)
+> - ✅ [TestIntegration_RM48_RolePublishedOnEveryChannel](../../docs/tests/adapters-out-fabric/TestIntegration_RM48_RolePublishedOnEveryChannel.md) — explicite (le test cite RM48)
+> - ✅ [TestIntegration_RM48_RoleTableGuards](../../docs/tests/adapters-out-fabric/TestIntegration_RM48_RoleTableGuards.md) — explicite (le test cite RM48)
+> - ✅ [TestIntegration_RM48_WritePermissionFollowsTable](../../docs/tests/adapters-out-fabric/TestIntegration_RM48_WritePermissionFollowsTable.md) — explicite (le test cite RM48)
+> - ✅ [TestIntegration_RoleService_PublishedAndApplied](../../docs/tests/adapters-out-fabric/TestIntegration_RoleService_PublishedAndApplied.md) — explicite (le test cite RM48)
 > - ✅ [TestDelete_RM48_Admin_Rejected](../../docs/tests/domain-role/TestDelete_RM48_Admin_Rejected.md) — explicite (le test cite RM48)
 > - ✅ [TestDelete_RM48_DefaultRoleDeletable](../../docs/tests/domain-role/TestDelete_RM48_DefaultRoleDeletable.md) — explicite (le test cite RM48)
 > - ✅ [TestTable_RM48_AdminAlwaysImmutable](../../docs/tests/domain-role/TestTable_RM48_AdminAlwaysImmutable.md) — explicite (le test cite RM48)

@@ -248,15 +248,37 @@ type caEnrollReq struct {
 	Profile            string `json:"profile"`
 	CAName             string `json:"caname,omitempty"`
 }
-type caEnrollResp struct {
-	Success bool `json:"success"`
-	Result  struct {
-		Cert       string `json:"Cert"`
-		ServerInfo struct {
-			CAChain string `json:"CAChain"`
-		} `json:"ServerInfo"`
-	} `json:"result"`
-	Errors []struct{ Message string } `json:"errors"`
+// caEnrollResult est le résultat d'un enrôlement ou d'un ré-enrôlement réussi.
+type caEnrollResult struct {
+	Cert       string `json:"Cert"`
+	ServerInfo struct {
+		CAChain string `json:"CAChain"`
+	} `json:"ServerInfo"`
+}
+
+// decodeEnrollResp lit la réponse de la CA à un enrôlement (op : enroll,
+// re-enroll). En cas d'échec, la CA renvoie un résultat qui n'est pas un objet
+// (chaîne vide) : seul le message d'erreur est alors lu.
+func decodeEnrollResp(body []byte, op string) (*caEnrollResult, error) {
+	var r struct {
+		Success bool                       `json:"success"`
+		Result  json.RawMessage            `json:"result"`
+		Errors  []struct{ Message string } `json:"errors"`
+	}
+	if err := json.Unmarshal(body, &r); err != nil {
+		return nil, fmt.Errorf("CA %s : réponse illisible : %w", op, err)
+	}
+	if !r.Success {
+		if len(r.Errors) > 0 {
+			return nil, fmt.Errorf("CA %s : %s", op, r.Errors[0].Message)
+		}
+		return nil, fmt.Errorf("CA %s : échec inconnu", op)
+	}
+	var res caEnrollResult
+	if err := json.Unmarshal(r.Result, &res); err != nil {
+		return nil, fmt.Errorf("CA %s : résultat illisible : %w", op, err)
+	}
+	return &res, nil
 }
 
 func (c *CAClient) Enroll(ctx context.Context, name, secret string) (certPEM, keyPEM, caCertPEM string, err error) {
@@ -292,19 +314,13 @@ func (c *CAClient) Enroll(ctx context.Context, name, secret string) (certPEM, ke
 		return "", "", "", e
 	}
 
-	var r caEnrollResp
-	if e := json.Unmarshal(resp, &r); e != nil {
+	r, e := decodeEnrollResp(resp, "enroll")
+	if e != nil {
 		return "", "", "", e
-	}
-	if !r.Success {
-		if len(r.Errors) > 0 {
-			return "", "", "", fmt.Errorf("CA enroll : %s", r.Errors[0].Message)
-		}
-		return "", "", "", fmt.Errorf("CA enroll : échec inconnu")
 	}
 
 	// 4. Décoder le certificat (base64(PEM), cf. decodeCAEnrollCert)
-	certPEM = decodeCAEnrollCert(r.Result.Cert)
+	certPEM = decodeCAEnrollCert(r.Cert)
 
 	// 5. Encoder la clé privée en PEM
 	keyDER, e := x509.MarshalECPrivateKey(privKey)
@@ -314,7 +330,7 @@ func (c *CAClient) Enroll(ctx context.Context, name, secret string) (certPEM, ke
 	keyPEMBytes := pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: keyDER})
 
 	// 6. Décoder la chaîne CA
-	caCertPEM = decodeCAEnrollCert(r.Result.ServerInfo.CAChain)
+	caCertPEM = decodeCAEnrollCert(r.ServerInfo.CAChain)
 
 	return certPEM, string(keyPEMBytes), caCertPEM, nil
 }
@@ -434,12 +450,19 @@ func (c *CAClient) ReEnroll(ctx context.Context, name, certPEM, keyPEM string) (
 	if block == nil {
 		return "", fmt.Errorf("re-enroll : clé privée invalide")
 	}
-	privKey, err := x509.ParseECPrivateKey(block.Bytes)
+	privKey, err := parseECKey(block.Bytes)
 	if err != nil {
 		return "", fmt.Errorf("re-enroll : parse clé : %w", err)
 	}
 
-	// Créer un CSR avec la même clé
+	// Créer un CSR avec la même clé. La Fabric CA exige que son nom commun soit
+	// l'identifiant d'enrôlement : celui du certificat actuel fait foi, name ne
+	// sert que si ce certificat est illisible.
+	if cb, _ := pem.Decode([]byte(certPEM)); cb != nil {
+		if cur, err := x509.ParseCertificate(cb.Bytes); err == nil && cur.Subject.CommonName != "" {
+			name = cur.Subject.CommonName
+		}
+	}
 	csrTemplate := &x509.CertificateRequest{
 		Subject: pkix.Name{CommonName: name},
 	}
@@ -468,18 +491,11 @@ func (c *CAClient) ReEnroll(ctx context.Context, name, certPEM, keyPEM string) (
 	if err != nil {
 		return "", err
 	}
-	var r caEnrollResp
-	if err := json.Unmarshal(resp, &r); err != nil {
+	r, err := decodeEnrollResp(resp, "re-enroll")
+	if err != nil {
 		return "", err
 	}
-	if !r.Success {
-		if len(r.Errors) > 0 {
-			return "", fmt.Errorf("CA re-enroll : %s", r.Errors[0].Message)
-		}
-		return "", fmt.Errorf("CA re-enroll : échec inconnu")
-	}
-
-	return decodeCAEnrollCert(r.Result.Cert), nil
+	return decodeCAEnrollCert(r.Cert), nil
 }
 
 // ─── Helpers HTTP ─────────────────────────────────────────────────────────────
@@ -511,7 +527,7 @@ func (c *CAClient) adminToken(body []byte, method, endpoint string) (string, err
 	if block == nil {
 		return "", fmt.Errorf("clé admin : PEM invalide")
 	}
-	privKey, err := x509.ParseECPrivateKey(block.Bytes)
+	privKey, err := parseECKey(block.Bytes)
 	if err != nil {
 		return "", fmt.Errorf("clé admin : parse : %w", err)
 	}

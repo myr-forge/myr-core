@@ -254,20 +254,13 @@ func (c *peerCAClient) enroll(ctx context.Context, name, secret, profile string,
 	if e != nil {
 		return "", "", "", e
 	}
-	var r caEnrollResp
-	if e := json.Unmarshal(resp, &r); e != nil {
+	r, e := decodeEnrollResp(resp, "enroll")
+	if e != nil {
 		return "", "", "", e
-	}
-	if !r.Success {
-		msg := "échec inconnu"
-		if len(r.Errors) > 0 {
-			msg = r.Errors[0].Message
-		}
-		return "", "", "", fmt.Errorf("%s", msg)
 	}
 
 	// Décoder le certificat — base64(PEM), cf. decodeCAEnrollCert.
-	certPEM = decodeCAEnrollCert(r.Result.Cert)
+	certPEM = decodeCAEnrollCert(r.Cert)
 
 	keyDER, e := x509.MarshalECPrivateKey(privKey)
 	if e != nil {
@@ -275,7 +268,7 @@ func (c *peerCAClient) enroll(ctx context.Context, name, secret, profile string,
 	}
 	keyBytes := pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: keyDER})
 
-	caCert := decodeCAEnrollCert(r.Result.ServerInfo.CAChain)
+	caCert := decodeCAEnrollCert(r.ServerInfo.CAChain)
 
 	return certPEM, string(keyBytes), caCert, nil
 }

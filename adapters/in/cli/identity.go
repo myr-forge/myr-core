@@ -422,11 +422,48 @@ Examples:
 	},
 }
 
+// ── set-status ────────────────────────────────────────────────────────────────
+
+func runIdentitySetStatus(w io.Writer, svc identity.IdentityService, id, status string) error {
+	if err := svc.SetStatus(context.Background(), id, status); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Statut de %q mis à jour : %s.\n", id, status)
+	fmt.Fprintln(w, "Le nouveau statut s'applique au prochain ré-enrôlement de l'identité.")
+	return nil
+}
+
+var (
+	identitySetStatusID    string
+	identitySetStatusValue string
+)
+
+var identitySetStatusCmd = &cobra.Command{
+	Use:   "set-status",
+	Short: "Activate or suspend an existing identity",
+	Long: `Change the status attribute (Myr.status) of an identity already registered
+with the certificate authority: active or suspended. A suspended identity can
+neither sign in nor write to the blockchain.
+
+As with set-role, the new status only applies once the identity re-enrolls
+(myr identity re-enroll, or its next sign-in).
+
+Examples:
+  myr identity set-status --id alice@Org1 --status active
+  myr identity set-status --id bob@Org1 --status suspended`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if identitySvc == nil {
+			return fmt.Errorf("service identité non disponible")
+		}
+		return runIdentitySetStatus(cmd.OutOrStdout(), identitySvc, identitySetStatusID, identitySetStatusValue)
+	},
+}
+
 func init() {
 	identityCmd.AddCommand(
 		identityWalletsCmd, identityStatusCmd, identityEnrollCmd, identityReEnrollCmd,
 		identityRequestCmd, identityRequestsCmd, identityRequestRoleCmd, identityApproveCmd, identityRejectCmd,
-		identityRegisterCmd, identitySetRoleCmd,
+		identityRegisterCmd, identitySetRoleCmd, identitySetStatusCmd,
 	)
 
 	identityStatusCmd.Flags().StringVar(&identityStatusHandle, "handle", "", "Identité CA, ex: alice@Org1 (requis)")
@@ -457,6 +494,10 @@ func init() {
 
 	identitySetRoleCmd.Flags().StringVar(&identitySetRoleID, "id", "", "Identité CA cible, ex: alice@org1 (requis)")
 	identitySetRoleCmd.Flags().StringVar(&identitySetRoleName, "role", "", "Nouveau rôle, existant dans la table des rôles (requis)")
+	identitySetStatusCmd.Flags().StringVar(&identitySetStatusID, "id", "", "Identité CA cible, ex: alice@Org1 (requis)")
+	identitySetStatusCmd.Flags().StringVar(&identitySetStatusValue, "status", "", "Nouveau statut : active ou suspended (requis)")
+	_ = identitySetStatusCmd.MarkFlagRequired("id")
+	_ = identitySetStatusCmd.MarkFlagRequired("status")
 	_ = identitySetRoleCmd.MarkFlagRequired("id")
 	_ = identitySetRoleCmd.MarkFlagRequired("role")
 }
