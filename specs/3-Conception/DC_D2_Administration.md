@@ -63,7 +63,8 @@ package "domain/network" {
     + ServerURL : string <<URL MYR Server central>>
     + AllowAutoGuest : bool
     + AllowAutoRegister : bool
-    + AutoRegisterRole : string <<reader|contributor|auditor>>
+    + RequireApproval : bool
+    + AutoRegisterRole : string <<rôle existant, sans droit d'administration>>
     + Active : bool
     + CreatedAt : time.Time
     --
@@ -156,7 +157,7 @@ NetworkProfile "1" --> "0..*" Channel : FabricChannel\n(default channel)
   - `MSPID` identifie l'organisation Fabric (ex. `Org1MSP`).
   - `TLSCertPath` pointe vers le certificat TLS du peer — requis pour mTLS.
   - Un seul `NetworkProfile` peut être `Active: true` à la fois (la session active).
-  - `AutoRegisterRole` ne peut prendre que les valeurs `reader`, `contributor`, `auditor`.
+  - `AutoRegisterRole` désigne un rôle existant de la table des rôles qui ne porte aucune permission d'administration (`admin`, `identity.admin`, `role.admin`, `network.admin`) — vérifié par `Add`/`Update` via `role.AssignableByDefault` (RM46) ; vide = `reader` (RM21).
 - **Cycle de vie :** Créé par l'admin via CLI ou import de profil de connexion. Activé via `PUT /api/networks/active`. Ne peut pas être supprimé si `Active: true`. Supprimable via `myr network destroy` (UCADM05) uniquement si `IsProduction: false`.
 
 ### ChaincodeConfig (domain/network)
@@ -215,8 +216,9 @@ NetworkProfile "1" --> "0..*" Channel : FabricChannel\n(default channel)
 | Paramètre | Valeur par défaut | Comportement |
 |-----------|-------------------|-------------|
 | `AllowAutoGuest` | `false` | `false` : tout accès requiert une identité validée. `true` : `POST /api/identity/guest` délivre immédiatement un token `reader`. |
-| `AllowAutoRegister` | `false` | `false` : la demande reste en attente, l'admin crée le compte manuellement. `true` : `POST /api/identity/request` enregistre directement dans la CA Fabric. |
-| `AutoRegisterRole` | `""` → `reader` | Rôle attribué lors d'un auto-register. `""` = `reader`. |
+| `AllowAutoRegister` | `false` | `false` : aucune demande d'inscription n'est acceptée (`POST /api/identity/request` → 403), seul l'administrateur crée des comptes (`myr identity register`). `true` : la demande crée directement l'identité dans la CA Fabric (RM43). |
+| `RequireApproval` | `false` | Avec `AllowAutoRegister=true` : `true` crée l'identité en attente, activée ou suspendue par la décision de l'administrateur (`myr identity approve|reject`, RM44) ; `false` la crée active. |
+| `AutoRegisterRole` | `""` → `reader` | Rôle attribué lors d'un auto-register : rôle existant, sans droit d'administration (RM46). `""` = `reader`. |
 
 ---
 

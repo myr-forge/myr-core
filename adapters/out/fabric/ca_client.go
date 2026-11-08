@@ -120,15 +120,6 @@ func decodeCAEnrollCert(raw string) string {
 	return string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: decoded}))
 }
 
-func roleOrDefault(role string) string {
-	switch role {
-	case identity.RoleContributor, identity.RoleAuditor, identity.RoleAdmin:
-		return role
-	default:
-		return identity.RoleReader
-	}
-}
-
 // statusOrDefault retourne le statut d'enregistrement demandé — en attente si
 // aucun n'est précisé.
 func statusOrDefault(status string) string {
@@ -203,13 +194,18 @@ type caRegisterResp struct {
 }
 
 func (c *CAClient) Register(ctx context.Context, req identity.RegisterRequest) (string, error) {
+	// Le domaine choisit et valide le rôle (RM21, RM46) : l'adapter l'inscrit
+	// tel quel, sans jamais le remplacer par un autre.
+	if req.Role == "" {
+		return "", fmt.Errorf("enregistrement CA de %s : rôle requis", req.Name)
+	}
 	body := caRegisterReq{
 		ID:     req.Name,
 		Type:   "client",
 		CAName: c.caName,
 		Attrs: []caAttr{
 			{Name: identity.AttrStatus, Value: statusOrDefault(req.Status), ECert: true},
-			{Name: identity.AttrRole, Value: roleOrDefault(req.Role), ECert: true},
+			{Name: identity.AttrRole, Value: req.Role, ECert: true},
 			{Name: "Myr.channels", Value: "green,red,blue", ECert: true},
 			{Name: "Myr.displayName", Value: req.DisplayName, ECert: false},
 			{Name: "Myr.legalName", Value: req.LegalName, ECert: false},

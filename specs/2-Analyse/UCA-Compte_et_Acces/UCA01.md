@@ -14,6 +14,9 @@ tags:
   - uc/UCA01
   - rm/RM20
   - rm/RM21
+  - rm/RM43
+  - rm/RM44
+  - rm/RM46
   - enf/ENF12
   - relecture/incoherence
 ---
@@ -58,7 +61,7 @@ Les règles d'inscription sont un réglage du profil réseau, fixé par l'admini
 | `AllowAutoRegister=true`, `RequireApproval=false` | ouverte | identité créée `Myr.status=active`, demande `approved` |
 | `AllowAutoRegister=true`, `RequireApproval=true` | ouverte avec approbation | identité créée `Myr.status=pending`, demande `pending` jusqu'à la décision de l'administrateur |
 
-Le rôle attribué à l'inscription est `AutoRegisterRole` du profil réseau, ou `reader` par défaut (RM21). L'identité est créée dans la CA **dès la demande**, y compris lorsqu'une approbation est exigée : l'approbation ne fait que changer son statut (`CAPort.UpdateAttributes`), elle ne la crée pas. Le changement s'applique au prochain enrôlement, c'est-à-dire à la prochaine connexion (UCA02), qui ré-enrôle systématiquement.
+Le rôle attribué à l'inscription est `AutoRegisterRole` du profil réseau, ou `reader` par défaut (RM21) ; il doit exister dans la table des rôles et ne porter aucun droit d'administration, ce que vérifient la configuration du réseau (`myr network add|update --auto-role`) puis chaque demande (RM46). L'identité est créée dans la CA **dès la demande**, y compris lorsqu'une approbation est exigée : l'approbation ne fait que changer son statut (`CAPort.UpdateAttributes`), elle ne la crée pas. Le changement s'applique au prochain enrôlement, c'est-à-dire à la prochaine connexion (UCA02), qui ré-enrôle systématiquement.
 
 Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POST /api/identity/guest`), qui n'entre pas dans ce use case.
 
@@ -135,6 +138,11 @@ Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POS
 
 1. Le pseudo ou l'organisation est réduit à `.`/`..`, ou contient `@`, `:`, `/`, `\`, une espace ou un caractère de contrôle
 2. `ErrInvalidIdentityName` → `HTTP 400` (demande comme création par l'administrateur)
+
+### Flux erreur — Rôle non attribuable (RM46)
+
+1. Création par l'administrateur avec un rôle absent de la table des rôles → `ErrInvalidRole` → `HTTP 400`, la CA n'est pas appelée
+2. Demande d'accès alors que le rôle par défaut du réseau est inconnu ou porte un droit d'administration → `ErrInvalidRole` → `HTTP 500` (configuration du réseau à corriger), rien n'est conservé — ce cas ne survient que si la table des rôles a changé après la configuration du réseau, qui refuse déjà un tel rôle
 
 ### Flux erreur — Enregistrement refusé par la CA
 
@@ -216,6 +224,9 @@ REST --> Client : HTTP 200 AccountRequest
 
 - **RM20** — Il n'existe pas de compte séparé de l'identité blockchain : la « création de compte » est l'obtention d'un secret d'enrôlement CA.
 - **RM21** — Une identité auto-enregistrée reçoit le rôle **Lecteur** par défaut, sauf rôle explicite configuré sur le réseau (`AutoRegisterRole`).
+- **RM43** — Inscription selon les règles du réseau : fermé → refus, ouvert → identité active, ou en attente si une approbation est exigée.
+- **RM44** — Approuver active l'identité, refuser la suspend ; rien n'est supprimé, et seule une demande en attente peut être décidée.
+- **RM46** — Le rôle attribué (création par l'administrateur, rôle par défaut du réseau) existe dans la table des rôles ; le rôle par défaut ne porte aucun droit d'administration.
 
 ## Exigences non-fonctionnelles
 
@@ -232,7 +243,7 @@ REST --> Client : HTTP 200 AccountRequest
 
 **Commandes CLI :** `myr identity request` (même service, même politique lue sur le réseau actif), `myr identity requests`, `myr identity approve <id>`, `myr identity reject <id>`, `myr identity register`. Les règles d'inscription se règlent par `myr network add|update --auto-register --require-approval --auto-role <r>` et s'affichent dans `myr network show`. Le CLI et l'API partagent le même stockage des demandes (`account-requests.json` du répertoire de données serveur) : une demande reçue par l'API se décide en CLI.
 
-**Rôle par défaut :** le rôle vide est remplacé par `reader` à l'enregistrement CA (`adapters/out/fabric/ca_client.go`), conformément à RM21.
+**Rôle attribué :** le domaine (`identity`) remplace un rôle vide par `reader` (RM21) et vérifie le rôle contre la table des rôles (`role.Assignable`, `role.AssignableByDefault` pour le rôle par défaut — RM46) avant tout enregistrement CA ; l'adapter CA inscrit le rôle tel quel, sans jamais le remplacer.
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens

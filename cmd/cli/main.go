@@ -48,10 +48,16 @@ func main() {
 	data := dataDir()
 	_ = os.MkdirAll(data, 0700)
 
+	// Table des rôles : référence des rôles attribuables, partagée par le
+	// réseau (rôle d'inscription par défaut) et l'identité (RM46).
+	roleStore := localstorage.NewJSONRoleStore(filepath.Join(data, "roles.json"))
+	roleSvc := role.NewService(roleStore)
+
 	networkStore := localstorage.NewJSONNetworkStore(filepath.Join(data, "networks.json"))
 	networkSvc := network.NewService(networkStore, fabricadapter.GatewayTester{}).
 		WithProvisioner(fabricadapter.NewFabricPeerProvisioner()).
-		WithBootstrapper(fabricadapter.NewFabricNetworkBootstrapper())
+		WithBootstrapper(fabricadapter.NewFabricNetworkBootstrapper()).
+		WithRoles(roleSvc)
 
 	active, _ := networkSvc.GetActive()
 
@@ -66,7 +72,7 @@ func main() {
 	_ = os.MkdirAll(walletDir, 0700)
 	// Même fichier que myr-api : une demande reçue par l'API se décide en CLI.
 	requestStore := localstorage.NewJSONRequestStore(filepath.Join(data, "account-requests.json"))
-	identitySvc := identity.NewService(walletDir, caPort).WithRequestStore(requestStore)
+	identitySvc := identity.NewService(walletDir, caPort).WithRequestStore(requestStore).WithRoles(roleSvc)
 
 	sessionStore := localstorage.NewJSONSessionStore(filepath.Join(data, "session.json"))
 	sessionSvc := session.NewService(sessionStore)
@@ -113,9 +119,6 @@ func main() {
 	channelStore := localstorage.NewJSONChannelStore(filepath.Join(data, "channels.json"))
 	channelSvc := channel.NewService(channelStore).
 		WithFabricConfig(fabricadapter.NewFabricChannelConfig(networkSvc, nodeStore))
-
-	roleStore := localstorage.NewJSONRoleStore(filepath.Join(data, "roles.json"))
-	roleSvc := role.NewService(roleStore)
 
 	paymentSvc := payment.NewService(noopPaymentGateway{})
 

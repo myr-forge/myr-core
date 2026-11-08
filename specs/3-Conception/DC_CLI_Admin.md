@@ -152,8 +152,9 @@ myr network add --name <nom> --node <host:port> --org-id <id> [options]
 | `--ca-name` | string | — | Nom de l'autorité de certification (ex: `ca-org1`) |
 | `--server` | string | — | URL du MYR Server central (`https://host:port`) |
 | `--auto-guest` | bool | — | Autoriser les accès invité automatiques (défaut: `false`) |
-| `--auto-register` | bool | — | Autoriser l'enregistrement CA automatique (défaut: `false`) |
-| `--auto-role` | string | — | Rôle auto-register : `reader`, `contributor`, `auditor` (défaut: `reader`) |
+| `--auto-register` | bool | — | Accepter les demandes d'inscription, qui créent l'identité dans la CA (défaut: `false` — seul l'administrateur crée des comptes) |
+| `--require-approval` | bool | — | Créer les identités auto-enregistrées en attente de l'approbation d'un administrateur (défaut: `false`) |
+| `--auto-role` | string | — | Rôle attribué aux inscriptions : rôle existant de la table des rôles, sans droit d'administration — RM46 (défaut: `reader`) |
 | `--production` | bool | — | Marquer ce réseau comme réseau de production — protège contre `destroy` (défaut: `false`) |
 
 > **Note :** certains flags sont spécifiques à un backend. Si un flag non supporté par le `--blockchain` choisi est fourni, le CLI émet un avertissement et l'ignore. La documentation des flags par backend est dans `adapters/in/cli/network_<type>.go` (à créer pour chaque nouveau backend).

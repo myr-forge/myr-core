@@ -401,13 +401,13 @@ func init() {
 
 	identityRegisterCmd.Flags().StringVar(&identityRegisterPseudo, "pseudo", "", "Pseudo (requis)")
 	identityRegisterCmd.Flags().StringVar(&identityRegisterOrgID, "org-id", "", "Organisation, ex: Org1MSP (requis)")
-	identityRegisterCmd.Flags().StringVar(&identityRegisterRole, "role", identity.RoleReader, "Rôle attribué")
+	identityRegisterCmd.Flags().StringVar(&identityRegisterRole, "role", identity.RoleReader, "Rôle attribué, existant dans la table des rôles (myr role list)")
 	identityRegisterCmd.Flags().StringVar(&identityRegisterEmail, "email", "", "E-mail (optionnel)")
 	_ = identityRegisterCmd.MarkFlagRequired("pseudo")
 	_ = identityRegisterCmd.MarkFlagRequired("org-id")
 
 	identitySetRoleCmd.Flags().StringVar(&identitySetRoleID, "id", "", "Identité CA cible, ex: alice@org1 (requis)")
-	identitySetRoleCmd.Flags().StringVar(&identitySetRoleName, "role", "", "Nouveau rôle (requis)")
+	identitySetRoleCmd.Flags().StringVar(&identitySetRoleName, "role", "", "Nouveau rôle, existant dans la table des rôles (requis)")
 	_ = identitySetRoleCmd.MarkFlagRequired("id")
 	_ = identitySetRoleCmd.MarkFlagRequired("role")
 }

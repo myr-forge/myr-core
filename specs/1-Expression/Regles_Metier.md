@@ -405,6 +405,34 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Conséquence** : Seul l'administrateur peut modifier le rôle (`Myr.role`) d'une identité existante auprès de la CA. Le nouveau rôle ne s'applique qu'au prochain ré-enrôlement de l'identité — ce n'est pas immédiat
 - **Use cases** : UCA08
 
+### RM43 — Inscription selon les règles du réseau
+
+- **Déclencheur** : Demande d'accès (`POST /api/identity/request`, `myr identity request`)
+- **Condition** : Toujours
+- **Conséquence** : Les règles d'inscription sont propres à chaque réseau et fixées par son administrateur. Sans auto-enregistrement, aucune demande n'est acceptée et rien n'est conservé : seul l'administrateur crée des comptes (`myr identity register`, `POST /api/identity/accounts`), actifs d'emblée avec le rôle qu'il choisit. Avec auto-enregistrement, l'identité est créée dès la demande avec le rôle par défaut du réseau (RM21) : active si le réseau n'exige pas d'approbation, en attente sinon
+- **Use cases** : UCA01
+
+### RM44 — Décision sur une demande en attente
+
+- **Déclencheur** : `myr identity approve|reject`, `POST /api/identity/requests/{id}/approve|reject`
+- **Condition** : La demande est en attente ; l'appelant dispose de la permission d'administration des identités
+- **Conséquence** : Approuver active l'identité ; refuser la suspend — rien n'est supprimé, ni l'identité ni la demande. Une demande déjà décidée ne peut plus l'être. La décision prend effet au prochain enrôlement de l'identité, c'est-à-dire à sa prochaine connexion
+- **Use cases** : UCA01
+
+### RM45 — Connexion réservée aux identités actives dotées d'un rôle
+
+- **Déclencheur** : Connexion (`POST /api/identity/session`)
+- **Condition** : Toujours
+- **Conséquence** : Le statut et le rôle de l'identité sont lus dans le certificat émis à la connexion, jamais fournis par le client. Une identité en attente, suspendue, sans statut reconnu ou sans rôle n'ouvre aucune session. La session porte le rôle du certificat
+- **Use cases** : UCA02
+
+### RM46 — Rôle attribué toujours défini dans la table des rôles
+
+- **Déclencheur** : Attribution d'un rôle à une identité — création de compte (`myr identity register`), inscription (rôle par défaut `--auto-role` du réseau), changement de rôle (`myr identity set-role`)
+- **Condition** : Toujours
+- **Conséquence** : Le rôle attribué doit exister dans la table des rôles du réseau ; un rôle inconnu est refusé, jamais remplacé par un autre. Le rôle attribué par défaut aux inscriptions ne peut porter aucune permission d'administration (`admin`, `identity.admin`, `role.admin`, `network.admin`) : une inscription automatique ne donne jamais de droit d'administration — ce contrôle s'applique dès la configuration du réseau
+- **Use cases** : UCA01, UCA08
+
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
@@ -634,6 +662,10 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | [RM20](#RM20%20—%20Identité%20=%20enrôlement%20CA,%20pas%20un%20compte%20séparé) | Identité = enrôlement CA — pas de compte email/mot de passe séparé | Compte |
 | [RM21](#RM21%20—%20Rôle%20Lecteur%20par%20défaut%20à%20l'auto-enregistrement) | Rôle Lecteur par défaut à l'auto-enregistrement, sauf rôle explicite | Compte |
 | [RM22](#RM22%20—%20Changement%20de%20rôle%20réservé%20à%20l'administrateur) | Changement de rôle réservé à l'administrateur (`myr identity set-role`) | Compte |
+| [RM43](#RM43%20—%20Inscription%20selon%20les%20règles%20du%20réseau) | Inscription selon les règles du réseau : fermé → refus ; ouvert → identité active, ou en attente si approbation exigée | Compte |
+| [RM44](#RM44%20—%20Décision%20sur%20une%20demande%20en%20attente) | Approuver active, refuser suspend — rien n'est supprimé, effet au prochain enrôlement | Compte |
+| [RM45](#RM45%20—%20Connexion%20réservée%20aux%20identités%20actives%20dotées%20d'un%20rôle) | Connexion réservée aux identités actives dotées d'un rôle, lus dans le certificat | Compte |
+| [RM46](#RM46%20—%20Rôle%20attribué%20toujours%20défini%20dans%20la%20table%20des%20rôles) | Rôle attribué toujours présent dans la table des rôles ; rôle d'inscription par défaut sans droit d'administration | Compte |
 | [RM23](#RM23%20—%20Distribution%20automatique%20des%20commissions) | Commissions distribuées automatiquement à la livraison | PI |
 | [RM24](#RM24%20—%20Répartition%20proportionnelle%20multi-auteurs) | Répartition proportionnelle par auteur | PI |
 | [RM25](#RM25%20—%20Transfert%20de%20propriété%20définitif) | Transfert de propriété définitif et immuable | PI |

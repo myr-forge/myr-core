@@ -14,6 +14,7 @@ tags:
   - uc/UCA02
   - rm/RM20
   - rm/RM22
+  - rm/RM45
   - enf/ENF01
   - enf/ENF12
 ---
@@ -184,6 +185,7 @@ end
 
 - **RM20** — Se connecter et enrôler l'identité CA sont la même opération : il n'y a pas de provisionnement blockchain différé à une étape ultérieure.
 - **RM22** — Le rôle qui conditionne l'accès aux ressources protégées est celui porté par la session REST, lu dans le certificat émis à la connexion : un changement de rôle par l'administrateur s'applique à la connexion suivante.
+- **RM45** — Seule une identité active dotée d'un rôle ouvre une session ; statut et rôle sont lus dans le certificat, jamais fournis par le client.
 
 ## Exigences non-fonctionnelles
 

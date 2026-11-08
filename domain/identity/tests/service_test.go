@@ -11,6 +11,7 @@ import (
 
 	"myr-core/domain/identity"
 	"myr-core/domain/network"
+	"myr-core/domain/role"
 )
 
 type stubCA struct {
@@ -330,7 +331,7 @@ func TestService_ListLocalWallets_AfterEnroll(t *testing.T) {
 	}
 }
 
-// / @brief  Flux complet d'inscription avec approbation : demande, enrôlement, approbation, connexion
+// / @brief  Flux complet d'inscription avec approbation : demande, enrôlement, approbation, connexion (RM43, RM44, RM45)
 // / @details Simule une CA qui retient les attributs de chaque identité et les inscrit dans les
 // / certificats qu'elle émet — le statut d'une identité ne change qu'au prochain enrôlement
 // / @input  réseau ouvert exigeant une approbation, rôle par défaut reader, identité "carol@Org1"
@@ -547,7 +548,7 @@ func bobRequest() identity.AccountRequest {
 	return identity.AccountRequest{Pseudo: "bob", Email: "bob@example.com", OrgID: "Org1MSP", DisplayName: "Bob"}
 }
 
-// / @brief  RequestAccess refuse toute demande quand le réseau n'accepte pas l'auto-enregistrement
+// / @brief  RequestAccess refuse toute demande quand le réseau n'accepte pas l'auto-enregistrement (RM43)
 // / @input  politique fermée (AllowAutoRegister=false), demande valide
 // / @expect ErrRegistrationClosed ; rien n'est conservé, la CA n'est pas appelée
 func TestRequestAccess_RegistrationClosed_Rejected(t *testing.T) {
@@ -566,7 +567,7 @@ func TestRequestAccess_RegistrationClosed_Rejected(t *testing.T) {
 	}
 }
 
-// / @brief  RequestAccess sans approbation : l'identité est créée active avec le rôle par défaut
+// / @brief  RequestAccess sans approbation : l'identité est créée active avec le rôle par défaut (RM43)
 // / @input  politique ouverte sans approbation, rôle par défaut reader
 // / @expect demande approved conservée ; la CA reçoit "bob@Org1", statut active, rôle reader ; secret renvoyé
 func TestRequestAccess_NoApproval_Active(t *testing.T) {
@@ -589,7 +590,7 @@ func TestRequestAccess_NoApproval_Active(t *testing.T) {
 	}
 }
 
-// / @brief  RequestAccess avec approbation : l'identité est créée en attente
+// / @brief  RequestAccess avec approbation : l'identité est créée en attente (RM43)
 // / @input  politique ouverte exigeant une approbation, rôle par défaut contributor
 // / @expect demande pending conservée ; la CA reçoit le statut pending et le rôle contributor
 func TestRequestAccess_RequireApproval_Pending(t *testing.T) {
@@ -677,7 +678,7 @@ func pendingStore() *mockRequestStore {
 	}}
 }
 
-// / @brief  ApproveRequest active l'identité de la demande et enregistre la décision
+// / @brief  ApproveRequest active l'identité de la demande et enregistre la décision (RM44)
 // / @input  demande pending "req-1" de bob@Org1
 // / @expect la CA reçoit Myr.status=active pour "bob@Org1" ; demande approved
 func TestApproveRequest_NominalCase(t *testing.T) {
@@ -696,7 +697,7 @@ func TestApproveRequest_NominalCase(t *testing.T) {
 	}
 }
 
-// / @brief  RejectRequest suspend l'identité sans rien supprimer
+// / @brief  RejectRequest suspend l'identité sans rien supprimer (RM44)
 // / @input  demande pending "req-1" de bob@Org1
 // / @expect la CA reçoit Myr.status=suspended ; demande rejected, toujours présente dans le store
 func TestRejectRequest_NominalCase(t *testing.T) {
@@ -715,7 +716,7 @@ func TestRejectRequest_NominalCase(t *testing.T) {
 	}
 }
 
-// / @brief  Une décision ne porte que sur une demande existante et encore en attente
+// / @brief  Une décision ne porte que sur une demande existante et encore en attente (RM44)
 // / @input  identifiant inconnu ; demande déjà approuvée
 // / @expect ErrRequestNotFound puis ErrRequestNotPending ; la CA n'est jamais modifiée
 func TestDecideRequest_NotFoundOrNotPending_Rejected(t *testing.T) {
@@ -751,9 +752,103 @@ func TestApproveRequest_CAError_StaysPending(t *testing.T) {
 	}
 }
 
+// ── Rôle attribué (RM46) ──────────────────────────────────────────────────────
+
+// memRoleRepo est une table des rôles en mémoire (Pattern A).
+type memRoleRepo struct{ roles map[string]*role.Role }
+
+func (m *memRoleRepo) Save(r *role.Role) error { m.roles[r.Name] = r; return nil }
+func (m *memRoleRepo) FindAll() ([]*role.Role, error) {
+	out := make([]*role.Role, 0, len(m.roles))
+	for _, r := range m.roles {
+		out = append(out, r)
+	}
+	return out, nil
+}
+func (m *memRoleRepo) FindByName(name string) (*role.Role, error) { return m.roles[name], nil }
+func (m *memRoleRepo) Delete(name string) error                   { delete(m.roles, name); return nil }
+
+// rolesWith retourne une table amorcée des rôles intégrés et du rôle
+// personnalisé name, de permissions perms.
+func rolesWith(t *testing.T, name string, perms ...role.Permission) role.RoleService {
+	t.Helper()
+	svc := role.NewService(&memRoleRepo{roles: map[string]*role.Role{}})
+	if _, err := svc.Create(name, perms); err != nil {
+		t.Fatalf("Create(%q) : %v", name, err)
+	}
+	return svc
+}
+
+// / @brief  CreateAccount refuse un rôle absent de la table des rôles, sans le remplacer (RM46)
+// / @input  table amorcée sans "superviseur", CreateAccount(role=superviseur)
+// / @expect ErrInvalidRole ; la CA n'est jamais appelée
+func TestCreateAccount_RM46_UnknownRole_Rejected(t *testing.T) {
+	ca := &stubCA{registerFn: func(context.Context, identity.RegisterRequest) (string, error) {
+		t.Fatal("la CA ne doit pas être appelée")
+		return "", nil
+	}}
+	svc := identity.NewService(t.TempDir(), ca).WithRoles(rolesWith(t, "consumer", role.PermRead))
+	_, _, err := svc.CreateAccount(context.Background(), "alice", "Org1MSP", "superviseur", "")
+	if !errors.Is(err, identity.ErrInvalidRole) {
+		t.Fatalf("ErrInvalidRole attendu, obtenu %v", err)
+	}
+}
+
+// / @brief  CreateAccount accepte un rôle personnalisé de la table et applique reader à un rôle vide (RM21, RM46)
+// / @input  table avec "consumer" ; CreateAccount(role=consumer) puis CreateAccount(role="")
+// / @expect la CA reçoit consumer, puis reader
+func TestCreateAccount_RM46_CustomAndDefaultRole(t *testing.T) {
+	ca := &stubCA{}
+	svc := identity.NewService(t.TempDir(), ca).WithRoles(rolesWith(t, "consumer", role.PermRead))
+	for _, c := range []struct{ in, want string }{{"consumer", "consumer"}, {"", identity.RoleReader}} {
+		if _, _, err := svc.CreateAccount(context.Background(), "alice", "Org1MSP", c.in, ""); err != nil {
+			t.Fatalf("CreateAccount(%q) : %v", c.in, err)
+		}
+		if ca.lastRegisterReq.Role != c.want {
+			t.Errorf("rôle %q : la CA a reçu %q, attendu %q", c.in, ca.lastRegisterReq.Role, c.want)
+		}
+	}
+}
+
+// / @brief  RequestAccess refuse la demande si le rôle par défaut du réseau est inconnu ou d'administration (RM46)
+// / @input  politique ouverte avec DefaultRole admin, puis "moderateur" (identity.admin), puis "inconnu"
+// / @expect ErrInvalidRole dans chaque cas ; ni demande conservée, ni appel à la CA
+func TestRequestAccess_RM46_InvalidDefaultRole_Rejected(t *testing.T) {
+	ca := &stubCA{registerFn: func(context.Context, identity.RegisterRequest) (string, error) {
+		t.Fatal("la CA ne doit pas être appelée")
+		return "", nil
+	}}
+	store := &mockRequestStore{}
+	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store).
+		WithRoles(rolesWith(t, "moderateur", role.PermRead, role.PermIdentityAdmin))
+	for _, r := range []string{identity.RoleAdmin, "moderateur", "inconnu"} {
+		policy := identity.RegistrationPolicy{AllowAutoRegister: true, DefaultRole: r}
+		if _, _, err := svc.RequestAccess(context.Background(), bobRequest(), policy); !errors.Is(err, identity.ErrInvalidRole) {
+			t.Errorf("rôle par défaut %q : ErrInvalidRole attendu, obtenu %v", r, err)
+		}
+	}
+	if len(store.requests) != 0 {
+		t.Errorf("aucune demande ne doit être conservée, obtenu %d", len(store.requests))
+	}
+}
+
+// / @brief  SetRole refuse un rôle absent de la table des rôles (RM46)
+// / @input  service sans table (rôles intégrés seuls), SetRole(role=consumer)
+// / @expect ErrInvalidRole ; la CA n'est pas modifiée
+func TestSetRole_RM46_UnknownRole_Rejected(t *testing.T) {
+	ca := &stubCA{updateAttrsFn: func(context.Context, string, map[string]string) error {
+		t.Fatal("la CA ne doit pas être modifiée")
+		return nil
+	}}
+	svc := identity.NewService(t.TempDir(), ca)
+	if err := svc.SetRole(context.Background(), "alice@Org1", "consumer"); !errors.Is(err, identity.ErrInvalidRole) {
+		t.Fatalf("ErrInvalidRole attendu, obtenu %v", err)
+	}
+}
+
 // ── CanSignIn ─────────────────────────────────────────────────────────────────
 
-// / @brief  Seule une identité active dotée d'un rôle peut ouvrir une session
+// / @brief  Seule une identité active dotée d'un rôle peut ouvrir une session (RM45)
 // / @input  combinaisons de statut et de rôle lues dans le certificat
 // / @expect nil pour active+rôle ; erreur dédiée sinon (pending, suspended, statut inconnu, sans rôle)
 func TestWalletEntry_CanSignIn(t *testing.T) {

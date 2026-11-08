@@ -127,15 +127,17 @@ func main() {
 
 	walletDir := filepath.Join(*dataDir, "wallets")
 	_ = os.MkdirAll(walletDir, 0700)
-	requestStore := localstorage.NewJSONRequestStore(filepath.Join(*dataDir, "account-requests.json"))
-	identitySvc := identity.NewService(walletDir, caPort).WithRequestStore(requestStore)
-
+	// Table des rôles : référence des rôles attribuables, partagée par le
+	// réseau (rôle d'inscription par défaut) et l'identité (RM46).
 	roleStore := localstorage.NewJSONRoleStore(filepath.Join(*dataDir, "roles.json"))
 	roleSvc := role.NewService(roleStore)
 
+	requestStore := localstorage.NewJSONRequestStore(filepath.Join(*dataDir, "account-requests.json"))
+	identitySvc := identity.NewService(walletDir, caPort).WithRequestStore(requestStore).WithRoles(roleSvc)
+
 	// ── Service réseau + NetworkPool multi-réseau ────────────────────────────
 	networkStore := localstorage.NewJSONNetworkStore(filepath.Join(*dataDir, "networks.json"))
-	networkSvc := network.NewService(networkStore, nil)
+	networkSvc := network.NewService(networkStore, nil).WithRoles(roleSvc)
 
 	pool := fabricadapter.NewNetworkPool()
 	networkSvc.WithPoolSync(pool)

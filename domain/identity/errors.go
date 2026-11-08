@@ -27,6 +27,11 @@ var ErrRegistrationClosed = errors.New("identity: ce réseau n'accepte pas les d
 // peut pas former un identifiant « pseudo@org ».
 var ErrInvalidIdentityName = errors.New("identity: pseudo ou organisation invalide")
 
+// ErrInvalidRole est retourné quand le rôle à attribuer n'existe pas dans la
+// table des rôles, ou porte des droits d'administration alors qu'il serait
+// attribué par défaut à une inscription (RM46).
+var ErrInvalidRole = errors.New("identity: rôle non attribuable")
+
 // Refus d'ouverture de session (WalletEntry.CanSignIn, ADR-12).
 var (
 	ErrIdentityPending     = errors.New("identity: compte en attente d'approbation par l'administrateur")

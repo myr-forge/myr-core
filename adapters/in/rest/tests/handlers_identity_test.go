@@ -731,7 +731,7 @@ func TestHandleIdentityRequest_Success(t *testing.T) {
 	}
 }
 
-// / @brief  POST /api/identity/request est refusé quand l'inscription est fermée
+// / @brief  POST /api/identity/request est refusé quand l'inscription est fermée (RM43)
 // / @input  aucun réseau actif (politique fermée), mock appliquant ErrRegistrationClosed
 // / @expect 403
 func TestHandleIdentityRequest_RegistrationClosed_Rejected(t *testing.T) {
@@ -810,7 +810,7 @@ func TestHandleIdentityRequest_ServiceError(t *testing.T) {
 
 // ── POST /api/identity/requests/{id}/{approve|reject} ─────────────────────────
 
-// / @brief  POST /api/identity/requests/{id}/approve active l'identité de la demande
+// / @brief  POST /api/identity/requests/{id}/approve active l'identité de la demande (RM44)
 // / @input  session admin, ApproveRequest renvoie la demande approuvée
 // / @expect 200 ; ApproveRequest reçoit l'identifiant de l'URL ; RejectRequest jamais appelé
 func TestHandleIdentityRequestDecision_Approve_OK(t *testing.T) {
@@ -834,7 +834,7 @@ func TestHandleIdentityRequestDecision_Approve_OK(t *testing.T) {
 	}
 }
 
-// / @brief  POST /api/identity/requests/{id}/reject suspend l'identité de la demande
+// / @brief  POST /api/identity/requests/{id}/reject suspend l'identité de la demande (RM44)
 // / @input  session admin, RejectRequest renvoie la demande refusée
 // / @expect 200, statut rejected renvoyé
 func TestHandleIdentityRequestDecision_Reject_OK(t *testing.T) {
@@ -933,16 +933,18 @@ func TestHandleIdentityAccounts_NonAdmin_Forbidden(t *testing.T) {
 	}
 }
 
-// / @brief  POST /api/identity/accounts rejette un pseudo invalide
-// / @input  session admin, CreateAccount renvoie ErrInvalidIdentityName
-// / @expect 400
-func TestHandleIdentityAccounts_InvalidName_Rejected(t *testing.T) {
-	svc := asAdmin(&mockIdentitySvc{createAccount: func(context.Context, string, string, string, string) (string, string, error) {
-		return "", "", identity.ErrInvalidIdentityName
-	}})
-	w := do(t, newIdentityMux(t, svc), http.MethodPost, "/api/identity/accounts", `{"pseudo":"a/b","org_id":"Org1MSP"}`)
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("code 400 attendu, obtenu %d", w.Code)
+// / @brief  POST /api/identity/accounts rejette un pseudo invalide ou un rôle absent de la table (RM46)
+// / @input  session admin, CreateAccount renvoie ErrInvalidIdentityName puis ErrInvalidRole
+// / @expect 400 dans les deux cas
+func TestHandleIdentityAccounts_InvalidNameOrRole_Rejected(t *testing.T) {
+	for _, want := range []error{identity.ErrInvalidIdentityName, identity.ErrInvalidRole} {
+		svc := asAdmin(&mockIdentitySvc{createAccount: func(context.Context, string, string, string, string) (string, string, error) {
+			return "", "", want
+		}})
+		w := do(t, newIdentityMux(t, svc), http.MethodPost, "/api/identity/accounts", `{"pseudo":"alice","org_id":"Org1MSP","role":"x"}`)
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("%v : code 400 attendu, obtenu %d", want, w.Code)
+		}
 	}
 }
 
@@ -1121,7 +1123,7 @@ func TestHandleIdentitySession_EnrollError(t *testing.T) {
 	}
 }
 
-// / @brief  POST /api/identity/session n'ouvre aucune session pour une identité inactive ou sans rôle
+// / @brief  POST /api/identity/session n'ouvre aucune session pour une identité inactive ou sans rôle (RM45)
 // / @input  certificat enrôlé : en attente, suspendu, statut absent, ou actif sans Myr.role
 // / @expect HTTP 403 dans chaque cas, aucun token délivré
 func TestHandleIdentitySession_CannotSignIn_Forbidden(t *testing.T) {
@@ -1150,7 +1152,7 @@ func TestHandleIdentitySession_CannotSignIn_Forbidden(t *testing.T) {
 	}
 }
 
-// / @brief  La session porte le rôle inscrit dans le certificat enrôlé
+// / @brief  La session porte le rôle inscrit dans le certificat enrôlé (RM45)
 // / @input  certificat actif portant Myr.role=admin, aucun RoleService injecté
 // / @expect role="admin" dans la réponse ; la session accède à une route identity.admin
 func TestHandleIdentitySession_RoleFromCertificate(t *testing.T) {

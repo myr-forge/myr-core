@@ -341,7 +341,7 @@ type accountDTO struct {
 //	@Produce	json
 //	@Param		body	body		accountDTO	true	"pseudo et org_id requis — role vide = reader"
 //	@Success	201	{object}	map[string]string	"{handle, secret}"
-//	@Failure	400	{object}	map[string]string
+//	@Failure	400	{object}	map[string]string	"pseudo, organisation ou rôle invalide (rôle absent de la table des rôles)"
 //	@Failure	403	{object}	map[string]string
 //	@Failure	503	{object}	map[string]string
 //	@Security	MyrToken
@@ -364,7 +364,7 @@ func (h *Handler) handleIdentityAccounts(w http.ResponseWriter, r *http.Request)
 		strings.TrimSpace(dto.Pseudo), strings.TrimSpace(dto.OrgID),
 		strings.TrimSpace(dto.Role), strings.TrimSpace(dto.Email))
 	switch {
-	case errors.Is(err, identity.ErrInvalidIdentityName):
+	case errors.Is(err, identity.ErrInvalidIdentityName), errors.Is(err, identity.ErrInvalidRole):
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		return
 	case err != nil:

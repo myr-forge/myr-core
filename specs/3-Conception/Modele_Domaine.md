@@ -28,7 +28,10 @@ tags:
   - rm/RM40
   - rm/RM41
   - rm/RM42
-  - relecture/incoherence
+  - rm/RM43
+  - rm/RM44
+  - rm/RM45
+  - rm/RM46
 ---
 # Modèle de domaine — Agrégats et relations
 
@@ -84,14 +87,15 @@ package "Agrégat Identité (D1)" {
     ip_agreement : bool
     ip_agreed_at : timestamp
     status : enum(pending,active,suspended)
-    role : enum(reader,contributor,auditor,admin)
+    role : string <<rôle de la table des rôles (RM46)>>
     created_at : timestamp
   }
   class WalletEntry <<PEM>> {
     handle : string <<pseudo@org>>
     name : string
     org_id : string
-    status : string <<lu depuis le certificat X.509>>
+    status : string <<Myr.status du certificat X.509>>
+    role : string <<Myr.role du certificat X.509>>
     msp_dir : string <<chemin absolu, fichiers PEM non chiffrés>>
   }
   class AccountRequest <<JSON>> {
@@ -101,7 +105,7 @@ package "Agrégat Identité (D1)" {
     email : string
     org_id : string
     message : string
-    status : enum(pending,approved,rejected)
+    status : enum(pending,approved,rejected,failed)
     created_at : string <<ISO 8601>>
   }
   class Session <<JSON, compte local CLI>> {
@@ -110,8 +114,8 @@ package "Agrégat Identité (D1)" {
     created_at : timestamp
   }
   MyrIdentity ..> WalletEntry : "handle = pseudo@org"
-  AccountRequest ..> MyrIdentity : "admin crée l'identité\n(pas de flux d'approbation\nautomatisé — écart)"
-  Session ..> WalletEntry : "lien conceptuel (Name = Handle)\nnon exploité par du code câblé\nactuellement"
+  AccountRequest ..> MyrIdentity : "identité créée à la demande,\nactivée ou suspendue par\nla décision de l'admin (RM43, RM44)"
+  Session ..> WalletEntry : "Name = Handle : wallet qui signe\nles écritures du CLI (ADR-12)"
 }
 
 package "Agrégat Réseau (D2)" {
@@ -157,7 +161,7 @@ package "Agrégat Asset (D3-D6)" {
     block_id : string <<Fabric txID>>
     hash : string <<SHA-256 fichier CAO>>
     channel_id : string <<réf. Channel>>
-    owner_id : string <<pseudo, non validé vs\nsession — écart sécurité>>
+    owner_id : string <<identité pseudo@org\nsignataire de l'écriture (ADR-12)>>
     license_id : string
     tags : json
     locations : json <<[]string, URLs\nboutique/dépôt tiers>>
@@ -233,7 +237,7 @@ package "Agrégat Paiement (D7)" {
 }
 
 ' -- Relations inter-agrégats (références logiques par ID, pas de FK enforced) --
-MyrIdentity ..> Model3D : "owns (OwnerID)\n#incoherence — non validé vs session"
+MyrIdentity ..> Model3D : "owns (OwnerID = signataire)"
 Model3D ..> Channel : "canal (ChannelID)"
 Model3D ..> Model3D : "dérivé de (ParentID)"
 Payment ..> Model3D : "pour asset (ModelID)"
@@ -325,7 +329,11 @@ Entité `Payment` implémentée (paiement manuel).
 | RM40 | — | `decompose preview` (UCAM09) ne persiste aucune entité — proposition temporaire seulement |
 | RM41 | `Connection` | Connexion issue d'une suggestion de découpage soumise aux mêmes critères RM10/RM11 qu'une liaison manuelle, sans dérogation |
 | RM21 | `MyrIdentity.Role` | rôle `reader` par défaut à l'auto-enregistrement, sauf rôle explicite |
-| RM22 | `myrSession.Role` (REST) | déterminé à la connexion depuis `MyrIdentity.Role` #incoherence — cette ligne décrit un écart de synchronisation (état de suivi : `specs/roadmap_dev.md` § Écarts Identité & Session, E1), pas la règle RM22 telle que formulée dans `Regles_Metier.md` (changement de rôle réservé à l'admin, effectif au prochain ré-enrôlement) ; à réconcilier |
+| RM22 | `MyrIdentity.Role` | modifié par l'administrateur seul (`SetRole`, attribut `Myr.role`) ; effectif au prochain ré-enrôlement — la session suivante porte le nouveau rôle |
+| RM43 | `AccountRequest` | refusée sans auto-enregistrement (`RegistrationPolicy`) ; sinon identité créée dès la demande, `active` ou `pending` selon `RequireApproval` |
+| RM44 | `AccountRequest` | `pending` → `approved` (identité `active`) ou `rejected` (identité `suspended`) ; rien n'est supprimé |
+| RM45 | `WalletEntry` | `CanSignIn` : session ouverte seulement si `status = active` et `role` non vide, lus dans le certificat |
+| RM46 | `MyrIdentity.Role`, `NetworkProfile.AutoRegisterRole` | rôle présent dans la table des rôles ; rôle d'inscription par défaut sans permission d'administration |
 | RM25 | `Model3D.OwnerID` | transfert définitif et immuable sur Fabric |
 | RM26 | `Model3D.ID` | UUID préservé lors du clonage inter-réseaux |
 | RM42 | `LocationCheck` | vérification d'accessibilité à la demande, un statut par emplacement externe — Myr ne conservant aucune copie du fichier ressource, cette vérification ne porte jamais sur son contenu |

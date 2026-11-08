@@ -8,4 +8,5 @@ var (
 	ErrBuiltIn           = errors.New("role: rôle intégré — non modifiable ni supprimable")
 	ErrInvalidPermission = errors.New("role: permission inconnue")
 	ErrInvalidName       = errors.New("role: nom invalide")
+	ErrAdminByDefault    = errors.New("role: un rôle d'administration ne peut pas être attribué par défaut")
 )

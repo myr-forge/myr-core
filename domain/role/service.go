@@ -126,6 +126,49 @@ func (s *Service) HasPermission(roleName string, p Permission) bool {
 	return r.Has(p)
 }
 
+// adminPermissions sont les permissions d'administration, jamais accordées par
+// une inscription automatique.
+var adminPermissions = []Permission{PermNetworkAdmin, PermRoleAdmin, PermIdentityAdmin, PermAdmin}
+
+// Assignable vérifie qu'un rôle peut être attribué à une identité : il doit
+// figurer dans la table des rôles — un rôle inconnu est refusé, jamais remplacé
+// par un autre (RM46). Sans table (roles nil), seuls les 4 rôles intégrés sont
+// connus.
+func Assignable(roles RoleService, name string) error {
+	_, err := lookup(roles, name)
+	return err
+}
+
+// AssignableByDefault vérifie qu'un rôle peut être attribué d'office à toute
+// identité auto-enregistrée : il est attribuable et ne porte aucune permission
+// d'administration — une inscription ne donne jamais de droit d'administration
+// (RM46).
+func AssignableByDefault(roles RoleService, name string) error {
+	r, err := lookup(roles, name)
+	if err != nil {
+		return err
+	}
+	for _, p := range adminPermissions {
+		if r.Has(p) {
+			return fmt.Errorf("%w : %q porte %s", ErrAdminByDefault, name, p)
+		}
+	}
+	return nil
+}
+
+// lookup retourne le rôle name de la table roles, ou du jeu des rôles intégrés
+// si roles est nil.
+func lookup(roles RoleService, name string) (*Role, error) {
+	if roles != nil {
+		return roles.Get(name)
+	}
+	perms, ok := builtinPermissions[name]
+	if !ok {
+		return nil, fmt.Errorf("%w: %q", ErrNotFound, name)
+	}
+	return &Role{ID: name, Name: name, Permissions: perms, BuiltIn: true}, nil
+}
+
 func validatePermissions(perms []Permission) error {
 	for _, p := range perms {
 		if !IsValidPermission(string(p)) {

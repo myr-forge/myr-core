@@ -9,12 +9,15 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"myr-core/domain/role"
 )
 
 type Service struct {
 	walletDir    string // ~/.Myr/wallets/
 	ca           CAPort
-	requestStore RequestStore // nil = demandes non persistées
+	requestStore RequestStore     // nil = demandes non persistées
+	roles        role.RoleService // nil = seuls les rôles intégrés sont attribuables
 }
 
 func NewService(walletDir string, ca CAPort) *Service {
@@ -27,12 +30,37 @@ func (s *Service) WithRequestStore(rs RequestStore) *Service {
 	return s
 }
 
+// WithRoles injecte la table des rôles, référence des rôles attribuables à
+// une identité (RM46).
+func (s *Service) WithRoles(roles role.RoleService) *Service {
+	s.roles = roles
+	return s
+}
+
 // WalletDir retourne le chemin du répertoire des wallets locaux.
 func (s *Service) WalletDir() string { return s.walletDir }
 
 // NewWithCA retourne un nouveau Service avec le même walletDir mais un CA différent.
 func (s *Service) NewWithCA(ca CAPort) *Service {
-	return &Service{walletDir: s.walletDir, ca: ca, requestStore: s.requestStore}
+	return &Service{walletDir: s.walletDir, ca: ca, requestStore: s.requestStore, roles: s.roles}
+}
+
+// assignableRole retourne le rôle à attribuer — RoleReader si r est vide
+// (RM21) — après avoir vérifié qu'il figure dans la table des rôles et, pour
+// le rôle par défaut d'une inscription (byDefault), qu'il ne porte aucun droit
+// d'administration (RM46).
+func (s *Service) assignableRole(r string, byDefault bool) (string, error) {
+	if r == "" {
+		r = RoleReader
+	}
+	check := role.Assignable
+	if byDefault {
+		check = role.AssignableByDefault
+	}
+	if err := check(s.roles, r); err != nil {
+		return "", fmt.Errorf("%w : %w", ErrInvalidRole, err)
+	}
+	return r, nil
 }
 
 // ListLocalWallets parcourt ~/.Myr/wallets/ et retourne les wallets trouvés.
@@ -106,10 +134,15 @@ func (s *Service) applyCertAttributes(w *WalletEntry, certPEM string) {
 // CreateAccount crée, à l'initiative de l'administrateur, l'identité
 // « pseudo@org » d'un utilisateur, active d'emblée avec le rôle donné (vide =
 // RoleReader) — seule voie d'inscription sur un réseau qui n'accepte pas
-// l'auto-enregistrement (ADR-12). Retourne l'identifiant de l'identité et le
-// secret d'enrôlement à transmettre à l'utilisateur.
-func (s *Service) CreateAccount(ctx context.Context, pseudo, orgID, role, email string) (string, string, error) {
+// l'auto-enregistrement (ADR-12). Le rôle doit exister dans la table des rôles
+// (RM46). Retourne l'identifiant de l'identité et le secret d'enrôlement à
+// transmettre à l'utilisateur.
+func (s *Service) CreateAccount(ctx context.Context, pseudo, orgID, roleName, email string) (string, string, error) {
 	if err := validateIdentityName(pseudo, orgID); err != nil {
+		return "", "", err
+	}
+	roleName, err := s.assignableRole(roleName, false)
+	if err != nil {
 		return "", "", err
 	}
 	if s.ca == nil {
@@ -119,7 +152,7 @@ func (s *Service) CreateAccount(ctx context.Context, pseudo, orgID, role, email 
 	secret, err := s.ca.Register(ctx, RegisterRequest{
 		Name:   handle,
 		OrgID:  orgID,
-		Role:   role,
+		Role:   roleName,
 		Status: StatusActive,
 		Email:  email,
 	})
@@ -245,7 +278,8 @@ func (s *Service) ReEnroll(ctx context.Context, wallet WalletEntry) (WalletEntry
 //     et rien n'est conservé — seul l'administrateur crée des comptes ;
 //   - sinon l'identité « pseudo@org » est créée dans la CA avec le rôle par
 //     défaut du réseau, active si aucune approbation n'est requise, en attente
-//     sinon (activée par ApproveRequest).
+//     sinon (activée par ApproveRequest). Un rôle par défaut inconnu ou portant
+//     des droits d'administration refuse la demande (ErrInvalidRole, RM46).
 //
 // Retourne la demande enregistrée et le secret d'enrôlement de l'identité.
 // Si la CA refuse l'enregistrement, la demande est conservée au statut
@@ -259,6 +293,10 @@ func (s *Service) RequestAccess(ctx context.Context, req AccountRequest, policy 
 	}
 	if err := validateIdentityName(req.Pseudo, req.OrgID); err != nil {
 		return nil, "", err
+	}
+	defaultRole, err := s.assignableRole(policy.DefaultRole, true)
+	if err != nil {
+		return nil, "", fmt.Errorf("rôle par défaut du réseau : %w", err)
 	}
 	if s.ca == nil {
 		return nil, "", fmt.Errorf("aucun CA configuré — impossible d'enregistrer l'identité")
@@ -283,7 +321,7 @@ func (s *Service) RequestAccess(ctx context.Context, req AccountRequest, policy 
 	secret, err := s.ca.Register(ctx, RegisterRequest{
 		Name:        handle,
 		OrgID:       req.OrgID,
-		Role:        policy.DefaultRole,
+		Role:        defaultRole,
 		Status:      identityStatus,
 		DisplayName: req.DisplayName,
 		Email:       req.Email,
@@ -385,7 +423,8 @@ func validateIdentityName(names ...string) error {
 // (attribut Myr.role). Le nouveau rôle ne s'applique qu'aux certificats émis
 // après l'appel — l'identité doit se ré-enrôler (ReEnroll) pour l'obtenir dans
 // son certificat actif : c'est une propriété de la Fabric CA, pas une
-// limitation de myr.
+// limitation de myr. Le nouveau rôle doit exister dans la table des rôles
+// (ErrInvalidRole, RM46).
 func (s *Service) SetRole(ctx context.Context, name, newRole string) error {
 	if s.ca == nil {
 		return fmt.Errorf("aucun CA configuré — impossible de modifier le rôle")
@@ -395,6 +434,9 @@ func (s *Service) SetRole(ctx context.Context, name, newRole string) error {
 	}
 	if newRole == "" {
 		return fmt.Errorf("nouveau rôle requis")
+	}
+	if _, err := s.assignableRole(newRole, false); err != nil {
+		return err
 	}
 	return s.ca.UpdateAttributes(ctx, name, map[string]string{AttrRole: newRole})
 }

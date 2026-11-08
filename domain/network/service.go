@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net"
 	"time"
+
+	"myr-core/domain/role"
 )
 
 type Service struct {
@@ -13,10 +15,30 @@ type Service struct {
 	provisioner  PeerProvisioner     // nil = fonctionnalité désactivée
 	bootstrapper NetworkBootstrapper // nil = "network create" indisponible
 	poolSync     PoolSync            // nil = pas de resynchronisation (redémarrage requis)
+	roles        role.RoleService    // nil = seuls les rôles intégrés sont connus
 }
 
 func NewService(repo Repo, tester ConnectionTester) *Service {
 	return &Service{repo: repo, tester: tester}
+}
+
+// WithRoles injecte la table des rôles, contre laquelle est vérifié le rôle
+// attribué par défaut aux inscriptions (AutoRegisterRole, RM46).
+func (s *Service) WithRoles(roles role.RoleService) *Service {
+	s.roles = roles
+	return s
+}
+
+// checkAutoRegisterRole refuse un rôle d'inscription par défaut inconnu ou
+// portant des droits d'administration (RM46) — vide = reader (RM21).
+func (s *Service) checkAutoRegisterRole(name string) error {
+	if name == "" {
+		return nil
+	}
+	if err := role.AssignableByDefault(s.roles, name); err != nil {
+		return fmt.Errorf("rôle d'inscription par défaut : %w", err)
+	}
+	return nil
 }
 
 // WithPoolSync injecte la resynchronisation du pool de connexions blockchain :
@@ -58,6 +80,9 @@ func (s *Service) Add(name, peerEndpoint, gatewayPeer, mspID, certPath, keyPath,
 	}
 	if _, _, err := net.SplitHostPort(peerEndpoint); err != nil {
 		return nil, fmt.Errorf("adresse du peer invalide %q : utilisez le format host:port ou [ipv6]:port", peerEndpoint)
+	}
+	if err := s.checkAutoRegisterRole(autoRegisterRole); err != nil {
+		return nil, err
 	}
 	id := fmt.Sprintf("net-%d", time.Now().UnixNano())
 	n := &NetworkProfile{
@@ -155,6 +180,9 @@ func (s *Service) Activate(id string) error {
 
 // Update modifie les champs d'un profil réseau existant.
 func (s *Service) Update(id, name, peerEndpoint, gatewayPeer, mspID, certPath, keyPath, tlsCertPath, fabricChannel, chaincodeName, caEndpoint, caName string, allowAutoGuest, allowAutoRegister bool, autoRegisterRole string, isProduction bool) (*NetworkProfile, error) {
+	if err := s.checkAutoRegisterRole(autoRegisterRole); err != nil {
+		return nil, err
+	}
 	all, err := s.repo.FindAll()
 	if err != nil {
 		return nil, err

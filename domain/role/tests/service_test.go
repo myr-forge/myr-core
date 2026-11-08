@@ -2,6 +2,7 @@
 package role_test
 
 import (
+	"errors"
 	"testing"
 
 	"myr-core/domain/role"
@@ -255,5 +256,55 @@ func TestList_IncludesBuiltinAndCustom(t *testing.T) {
 	}
 	if len(all) != 6 {
 		t.Errorf("got %d rôles, want 6 (4 intégrés + 2 personnalisés)", len(all))
+	}
+}
+
+// ── Attribution d'un rôle (RM46) ──────────────────────────────────────────────
+
+// / @brief  Assignable accepte un rôle de la table, intégré ou personnalisé (RM46)
+// / @input  table amorcée + rôle personnalisé "consumer"
+// / @expect aucune erreur pour reader et consumer
+func TestAssignable_RM46_KnownRole_OK(t *testing.T) {
+	svc := role.NewService(newMockRepo())
+	svc.Create("consumer", []role.Permission{role.PermRead})
+	for _, name := range []string{role.NameReader, "consumer"} {
+		if err := role.Assignable(svc, name); err != nil {
+			t.Errorf("Assignable(%q) : %v", name, err)
+		}
+	}
+}
+
+// / @brief  Assignable refuse un rôle absent de la table, sans le remplacer (RM46)
+// / @input  table amorcée, rôle "superviseur" inexistant ; puis table absente (nil) et rôle personnalisé
+// / @expect ErrNotFound dans les deux cas ; sans table, seuls les rôles intégrés sont connus
+func TestAssignable_RM46_UnknownRole_Rejected(t *testing.T) {
+	svc := role.NewService(newMockRepo())
+	if err := role.Assignable(svc, "superviseur"); !errors.Is(err, role.ErrNotFound) {
+		t.Errorf("table : ErrNotFound attendu, obtenu %v", err)
+	}
+	if err := role.Assignable(nil, "consumer"); !errors.Is(err, role.ErrNotFound) {
+		t.Errorf("sans table : ErrNotFound attendu, obtenu %v", err)
+	}
+	if err := role.Assignable(nil, role.NameContributor); err != nil {
+		t.Errorf("sans table, rôle intégré : %v", err)
+	}
+}
+
+// / @brief  AssignableByDefault refuse tout rôle portant une permission d'administration (RM46)
+// / @input  admin (intégré), rôle personnalisé "moderateur" avec identity.admin, contributor
+// / @expect ErrAdminByDefault pour admin et moderateur, aucune erreur pour contributor
+func TestAssignableByDefault_RM46_AdminPermission_Rejected(t *testing.T) {
+	svc := role.NewService(newMockRepo())
+	svc.Create("moderateur", []role.Permission{role.PermRead, role.PermIdentityAdmin})
+	for _, name := range []string{role.NameAdmin, "moderateur"} {
+		if err := role.AssignableByDefault(svc, name); !errors.Is(err, role.ErrAdminByDefault) {
+			t.Errorf("AssignableByDefault(%q) : ErrAdminByDefault attendu, obtenu %v", name, err)
+		}
+	}
+	if err := role.AssignableByDefault(svc, role.NameContributor); err != nil {
+		t.Errorf("AssignableByDefault(contributor) : %v", err)
+	}
+	if err := role.AssignableByDefault(nil, role.NameAdmin); !errors.Is(err, role.ErrAdminByDefault) {
+		t.Errorf("sans table, admin : ErrAdminByDefault attendu, obtenu %v", err)
 	}
 }

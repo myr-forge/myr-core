@@ -843,7 +843,7 @@ func init() {
 	networkAddCmd.Flags().BoolVar(&networkAddAutoGuest, "auto-guest", false, "Autoriser les accès invité automatiques")
 	networkAddCmd.Flags().BoolVar(&networkAddAutoRegister, "auto-register", false, "Autoriser l'enregistrement CA automatique")
 	networkAddCmd.Flags().BoolVar(&networkAddRequireApproval, "require-approval", false, "Exiger l'approbation d'un administrateur pour activer une identité auto-enregistrée")
-	networkAddCmd.Flags().StringVar(&networkAddAutoRole, "auto-role", "reader", "Rôle auto-register : reader, contributor ou auditor")
+	networkAddCmd.Flags().StringVar(&networkAddAutoRole, "auto-role", "reader", "Rôle attribué aux inscriptions : rôle existant (myr role list), sans droit d'administration")
 	networkAddCmd.Flags().BoolVar(&networkAddProduction, "production", false, "Marquer ce réseau comme réseau de production — protège contre destroy")
 	_ = networkAddCmd.MarkFlagRequired("name")
 	_ = networkAddCmd.MarkFlagRequired("node")
@@ -864,7 +864,7 @@ func init() {
 	networkUpdateCmd.Flags().Bool("auto-guest", false, "Autoriser les accès invité automatiques")
 	networkUpdateCmd.Flags().Bool("auto-register", false, "Autoriser l'enregistrement CA automatique")
 	networkUpdateCmd.Flags().Bool("require-approval", false, "Exiger l'approbation d'un administrateur pour activer une identité auto-enregistrée")
-	networkUpdateCmd.Flags().String("auto-role", "", "Rôle auto-register : reader, contributor ou auditor")
+	networkUpdateCmd.Flags().String("auto-role", "", "Rôle attribué aux inscriptions : rôle existant (myr role list), sans droit d'administration")
 	networkUpdateCmd.Flags().Bool("production", false, "Marquer ce réseau comme réseau de production — protège contre destroy")
 
 	// delete flags
