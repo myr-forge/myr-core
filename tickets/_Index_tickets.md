@@ -15,18 +15,17 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 
 | Statut | Nombre |
 |--------|--------|
-| Ouvert | 20 |
+| Ouvert | 18 |
 | À vérifier | 2 |
-| À trancher (PO) | 14 |
+| À trancher (PO) | 13 |
 | Différé | 1 |
-| Résolu | 1 |
+| Résolu | 4 |
 
 ## Critiques à traiter en premier
 
 | Ticket | Type | Sévérité | Statut | Use cases |
 |--------|------|----------|--------|-----------|
 | [FT-001 — Propriété des assets non contrôlée côté serveur](FT-001-propriete-des-assets-non-controlee-cote-serveur.md) | Sécurité | critique | Ouvert | UCCE01, UCCE02, UCCE07, UCMOD03, UCMOD04, UCMOD08, UCPI07 |
-| [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md) | Sécurité | critique | Ouvert | UCA02, UCA05, UCA07 |
 | [FT-003 — Le client CA du serveur REST ignore le profil réseau actif](FT-003-le-client-ca-du-serveur-rest-ignore.md) | Anomalie | critique | À trancher (PO) | UCA01 |
 | [FT-024 — Chaincode myrcc absent du canal de production](FT-024-chaincode-myrcc-absent-du-canal-de-production.md) | Anomalie | critique | À vérifier | UCCL01, UCCE01, UCMOD06 |
 
@@ -35,8 +34,6 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | Ticket | Type | Sévérité | Statut | Use cases |
 |--------|------|----------|--------|-----------|
 | [FT-001 — Propriété des assets non contrôlée côté serveur](FT-001-propriete-des-assets-non-controlee-cote-serveur.md) | Sécurité | critique | Ouvert | UCCE01, UCCE02, UCCE07, UCMOD03, UCMOD04, UCMOD08, UCPI07 |
-| [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md) | Sécurité | critique | Ouvert | UCA02, UCA05, UCA07 |
-| [FT-004 — Échec de l'auto-enregistrement CA non journalisé](FT-004-echec-de-l-auto-enregistrement-ca-non.md) | Anomalie | majeure | Ouvert | UCA01 |
 | [FT-012 — Un module soumis peut être soumis à nouveau sans fork](FT-012-un-module-soumis-peut-etre-soumis-a.md) | Écart spec ↔ code | majeure | Ouvert | UCMOD06 |
 | [FT-014 — Catégorie d'asset decoupage absente](FT-014-categorie-d-asset-decoupage-absente.md) | Écart spec ↔ code | majeure | Ouvert | UCAM05, UCAM09 |
 | [FT-018 — Identifiant de bloc des versions de module simulé](FT-018-identifiant-de-bloc-des-versions-de-module.md) | Anomalie | majeure | Ouvert | UCMOD06 |
@@ -67,7 +64,6 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | Ticket | Type | Sévérité | Statut | Use cases |
 |--------|------|----------|--------|-----------|
 | [FT-003 — Le client CA du serveur REST ignore le profil réseau actif](FT-003-le-client-ca-du-serveur-rest-ignore.md) | Anomalie | critique | À trancher (PO) | UCA01 |
-| [FT-005 — Aucune approbation manuelle des demandes de compte](FT-005-aucune-approbation-manuelle-des-demandes-de-compte.md) | Écart spec ↔ code | majeure | À trancher (PO) | UCA01, UCA08 |
 | [FT-006 — Demandes de compte stockées sur un seul nœud](FT-006-demandes-de-compte-stockees-sur-un-seul.md) | Décision à prendre | majeure | À trancher (PO) | UCA01 |
 | [FT-008 — Wallets non chiffrés au repos](FT-008-wallets-non-chiffres-au-repos.md) | Risque | majeure | À trancher (PO) | UCA02 |
 | [FT-013 — Anti-plagiat sans comparaison avec les assets existants](FT-013-anti-plagiat-sans-comparaison-avec-les-assets.md) | Écart spec ↔ code | majeure | À trancher (PO) | UCCE01, UCPI06 |
@@ -92,6 +88,9 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | Ticket | Type | Sévérité | Statut | Use cases |
 |--------|------|----------|--------|-----------|
 | [FT-017 — GetModuleInterfaces n'exposait qu'une interface par asset partagé](FT-017-getmoduleinterfaces-n-exposait-qu-une-interface-par.md) | Anomalie | majeure | Résolu | UCMOD04, UCAM02 |
+| [FT-002 — Rôle de session REST codé en dur à contributor](FT-002-role-de-session-rest-code-en-dur.md) | Sécurité | critique | Résolu | UCA02, UCA05, UCA07 |
+| [FT-004 — Échec de l'auto-enregistrement CA non journalisé](FT-004-echec-de-l-auto-enregistrement-ca-non.md) | Anomalie | majeure | Résolu | UCA01 |
+| [FT-005 — Aucune approbation manuelle des demandes de compte](FT-005-aucune-approbation-manuelle-des-demandes-de-compte.md) | Écart spec ↔ code | majeure | Résolu | UCA01, UCA08 |
 
 ## Fonctionnement
 

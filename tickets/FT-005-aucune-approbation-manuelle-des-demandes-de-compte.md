@@ -2,10 +2,10 @@
 id: FT-005
 titre: "Aucune approbation manuelle des demandes de compte"
 type: ecart
-statut: a-trancher
+statut: resolu
 severite: majeure
 detecte: 2026-07-17
-maj: 2026-10-02
+maj: 2026-11-08
 composants: [domain/identity, adapters/in/rest, adapters/in/cli]
 uc: [UCA01, UCA08]
 rm: [RM20, RM22]
@@ -13,7 +13,7 @@ enf: []
 tags:
   - ticket
   - ticket/ecart
-  - statut/a-trancher
+  - statut/resolu
   - severite/majeure
   - domaine/identity
   - uc/UCA01
@@ -23,7 +23,7 @@ tags:
 ---
 # FT-005 — Aucune approbation manuelle des demandes de compte
 
-> **Écart spec ↔ code** · sévérité **majeure** · statut **À trancher (PO)** · détecté le 2026-07-17
+> **Écart spec ↔ code** · sévérité **majeure** · statut **Résolu** · détecté le 2026-07-17
 > Source : DC_D1_Auth_Identity.md (écarts E2/E3, annotation #ecart) ; note « TODO MYR-CORE (backend) » du vault
 
 ## Constat
@@ -49,9 +49,9 @@ Ajouter au domaine une approbation (et un refus) de demande par un administrateu
 
 ## Critères de clôture
 
-- [ ] Un administrateur peut approuver ou refuser une demande en CLI et en REST
-- [ ] La demande approuvée produit une identité CA et passe à `approved`
-- [ ] Spécification UCA01/UCA08 mise à jour si le flux change
+- [x] Un administrateur peut approuver ou refuser une demande en CLI et en REST
+- [x] La demande approuvée produit une identité CA et passe à `approved`
+- [x] Spécification UCA01/UCA08 mise à jour si le flux change
 
 ## Liens
 
@@ -66,3 +66,5 @@ Ajouter au domaine une approbation (et un refus) de demande par un administrateu
 
 - 2026-07-17 — Écart E2 documenté
 - 2026-10-02 — Ticket créé ; remontée myr-web (comptes en attente) rattachée
+- 2026-11-07 — Tranché par le PO (ADR-12) : l'administrateur fixe sur le réseau si l'auto-enregistrement est permis et, s'il l'est, si une approbation est exigée ; sans auto-enregistrement, aucune demande n'est acceptée et seul l'administrateur crée des comptes
+- 2026-11-08 — Corrigé — commit `e2724c9` : `myr identity approve|reject` et `POST /api/identity/requests/{id}/approve|reject` ; l'identité est créée dès la demande (en attente si l'approbation est exigée), l'approbation l'active, le refus la suspend sans rien supprimer ; création de compte par l'administrateur (`myr identity register`, `POST /api/identity/accounts`) ; UCA01 mis à jour (UCA08 inchangé). Le champ « rôle souhaité » d'une demande relève de la table des rôles sur le ledger (R-03 étape 4). Branche `feature/ledger-invariants`, ni fusionnée ni déployée

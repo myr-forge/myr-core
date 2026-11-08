@@ -2,10 +2,10 @@
 id: FT-002
 titre: "Rôle de session REST codé en dur à contributor"
 type: securite
-statut: ouvert
+statut: resolu
 severite: critique
 detecte: 2026-07-17
-maj: 2026-10-02
+maj: 2026-11-08
 composants: [adapters/in/rest]
 uc: [UCA02, UCA05, UCA07]
 rm: [RM21, RM22]
@@ -13,7 +13,7 @@ enf: [ENF12]
 tags:
   - ticket
   - ticket/securite
-  - statut/ouvert
+  - statut/resolu
   - severite/critique
   - domaine/identity
   - domaine/role
@@ -26,7 +26,7 @@ tags:
 ---
 # FT-002 — Rôle de session REST codé en dur à contributor
 
-> **Sécurité** · sévérité **critique** · statut **Ouvert** · détecté le 2026-07-17
+> **Sécurité** · sévérité **critique** · statut **Résolu** · détecté le 2026-07-17
 > Source : roadmap_dev.md § Écarts Identité & Session ; écart E3 (Analyse_des_besoins.md)
 
 ## Constat
@@ -52,9 +52,9 @@ Lire le rôle depuis l'attribut `Myr.role` du certificat enrôlé (via `domain/i
 
 ## Critères de clôture
 
-- [ ] Le rôle de session reflète le rôle CA de l'identité
-- [ ] Un compte sans rôle CA obtient `reader`
-- [ ] Test REST couvrant un compte `reader` refusé en écriture
+- [x] Le rôle de session reflète le rôle CA de l'identité
+- [x] ~~Un compte sans rôle CA obtient `reader`~~ — remplacé par la décision PO (R-03 étape 2) : un certificat sans `Myr.role` n'ouvre aucune session (403)
+- [x] Test REST couvrant un compte `reader` refusé en écriture
 
 ## Liens
 
@@ -70,3 +70,4 @@ Lire le rôle depuis l'attribut `Myr.role` du certificat enrôlé (via `domain/i
 
 - 2026-07-17 — Écart documenté dans la roadmap (E3)
 - 2026-10-02 — Ticket créé ; constat revérifié au commit `2aa69c1`
+- 2026-11-08 — Corrigé — commit `e2724c9` : le rôle et le statut de session sont lus dans le certificat émis à la connexion (`Myr.role`, `Myr.status`) ; seule une identité active dotée d'un rôle ouvre une session, sinon 403 (décision PO, ADR-12). Un changement de rôle prend effet à la connexion suivante (chaque connexion ré-enrôle). Tests `TestHandleIdentitySession_RoleFromCertificate`, `TestHandleIdentitySession_CannotSignIn_Forbidden`, `TestHandleIdentitySession_ReaderCannotWrite` (commit `492ccb1`). Branche `feature/ledger-invariants`, ni fusionnée ni déployée

@@ -2,10 +2,10 @@
 id: FT-004
 titre: "Échec de l'auto-enregistrement CA non journalisé"
 type: anomalie
-statut: ouvert
+statut: resolu
 severite: majeure
 detecte: 2026-07-17
-maj: 2026-10-02
+maj: 2026-11-08
 composants: [adapters/in/rest]
 uc: [UCA01]
 rm: []
@@ -13,7 +13,7 @@ enf: [ENF11]
 tags:
   - ticket
   - ticket/anomalie
-  - statut/ouvert
+  - statut/resolu
   - severite/majeure
   - domaine/identity
   - uc/UCA01
@@ -21,7 +21,7 @@ tags:
 ---
 # FT-004 — Échec de l'auto-enregistrement CA non journalisé
 
-> **Anomalie** · sévérité **majeure** · statut **Ouvert** · détecté le 2026-07-17
+> **Anomalie** · sévérité **majeure** · statut **Résolu** · détecté le 2026-07-17
 > Source : roadmap_dev.md § Écart connexe — échec AutoRegister avalé sans trace
 
 ## Constat
@@ -46,8 +46,8 @@ Journaliser l'échec sans données sensibles (pseudo et cause, jamais le secret)
 
 ## Critères de clôture
 
-- [ ] Un échec d'`AutoRegister` produit une ligne de log exploitable
-- [ ] Aucun secret ni donnée personnelle superflue dans le log (ENF11)
+- [x] Un échec d'`AutoRegister` produit une ligne de log exploitable
+- [x] Aucun secret ni donnée personnelle superflue dans le log (ENF11)
 
 ## Liens
 
@@ -61,3 +61,4 @@ Journaliser l'échec sans données sensibles (pseudo et cause, jamais le secret)
 
 - 2026-07-17 — Écart documenté dans la roadmap
 - 2026-10-02 — Ticket créé ; constat revérifié au commit `2aa69c1`
+- 2026-11-08 — Corrigé — commit `e2724c9` : `AutoRegister` est remplacé par `RequestAccess`, qui ne masque plus l'échec CA — la demande est conservée au statut `failed` et l'erreur est retournée (500, journalisée par `internalErr` ; message d'erreur en CLI) ; commit `e8498f3` : le message nomme l'identité `pseudo@org`, sans secret ni e-mail (test `TestRequestAccess_CAError_Failed`). La cause racine FT-003 reste ouverte. Branche `feature/ledger-invariants`, ni fusionnée ni déployée
