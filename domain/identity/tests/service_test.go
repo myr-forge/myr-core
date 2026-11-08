@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"myr-core/domain/identity"
@@ -655,8 +656,13 @@ func TestRequestAccess_CAError_Failed(t *testing.T) {
 	ca := &stubCA{registerFn: func(context.Context, identity.RegisterRequest) (string, error) { return "", expected }}
 	store := &mockRequestStore{}
 	svc := identity.NewService(t.TempDir(), ca).WithRequestStore(store)
-	if _, _, err := svc.RequestAccess(context.Background(), bobRequest(), openPolicy); !errors.Is(err, expected) {
+	_, _, err := svc.RequestAccess(context.Background(), bobRequest(), openPolicy)
+	if !errors.Is(err, expected) {
 		t.Fatalf("erreur attendue %v, obtenu %v", expected, err)
+	}
+	// L'erreur, journalisée par les adapters, nomme l'identité sans exposer l'e-mail.
+	if msg := err.Error(); !strings.Contains(msg, "bob@Org1") || strings.Contains(msg, "bob@example.com") {
+		t.Errorf("message d'erreur inattendu : %q", msg)
 	}
 	if len(store.requests) != 1 || store.requests[0].Status != identity.RequestFailed {
 		t.Errorf("store : 1 demande failed attendue, obtenu %+v", store.requests)

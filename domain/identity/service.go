@@ -124,7 +124,7 @@ func (s *Service) CreateAccount(ctx context.Context, pseudo, orgID, role, email 
 		Email:  email,
 	})
 	if err != nil {
-		return "", "", fmt.Errorf("enregistrement de l'identité auprès de la CA : %w", err)
+		return "", "", fmt.Errorf("enregistrement de l'identité %s auprès de la CA : %w", handle, err)
 	}
 	return handle, secret, nil
 }
@@ -279,8 +279,9 @@ func (s *Service) RequestAccess(ctx context.Context, req AccountRequest, policy 
 		return nil, "", err
 	}
 
+	handle := Handle(req.Pseudo, req.OrgID)
 	secret, err := s.ca.Register(ctx, RegisterRequest{
-		Name:        Handle(req.Pseudo, req.OrgID),
+		Name:        handle,
 		OrgID:       req.OrgID,
 		Role:        policy.DefaultRole,
 		Status:      identityStatus,
@@ -290,7 +291,7 @@ func (s *Service) RequestAccess(ctx context.Context, req AccountRequest, policy 
 	if err != nil {
 		req.Status = RequestFailed
 		_ = s.saveRequest(&req)
-		return nil, "", fmt.Errorf("enregistrement de l'identité auprès de la CA : %w", err)
+		return nil, "", fmt.Errorf("enregistrement de l'identité %s auprès de la CA : %w", handle, err)
 	}
 	req.Status = requestStatus
 	if err := s.saveRequest(&req); err != nil {
