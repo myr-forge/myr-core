@@ -76,3 +76,4 @@ Faire porter l'identité appelante jusqu'au domaine (paramètre explicite ou con
 
 - 2026-10-02 — Ticket créé ; constat vérifié dans le code au commit `2aa69c1`
 - 2026-11-09 — Deux failles qui aggravaient ce constat sont corrigées (commit `3c48a30`, FT-040 B et C) : un identifiant d'interface fourni par le client n'est plus repris (il permettait d'écraser l'interface d'un autre asset), et `PATCH /api/interfaces/{id}` refuse de changer l'asset porteur. Le contrôle de propriété lui-même reste ouvert : un contributeur peut toujours modifier le brouillon d'un autre
+- 2026-11-09 — Déployé en production : API et CLI `b5ed57f` depuis `feature/ledger-invariants`, après répétition sur myr-test (42 OK, 0 NOK) et 19 tests d'intégration Fabric OK ; sauvegarde `~/.Myr/server-data.bak-20261109-185157`, anciens binaires conservés en `.prev` (corrections des deux failles aggravantes)
