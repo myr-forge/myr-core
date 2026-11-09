@@ -253,8 +253,14 @@ type mockDraftStore struct {
 	drafts map[string]*model.Model3D
 }
 
-func newMockDraftStore() *mockDraftStore {
-	return &mockDraftStore{drafts: make(map[string]*model.Model3D)}
+// newMockDraftStore retourne un stockage de brouillons contenant déjà un
+// brouillon pour chacun des identifiants assets.
+func newMockDraftStore(assets ...string) *mockDraftStore {
+	s := &mockDraftStore{drafts: make(map[string]*model.Model3D)}
+	for _, id := range assets {
+		s.drafts[id] = &model.Model3D{ID: id, Name: id, ChannelID: "ch1", Status: model.ModuleDraft}
+	}
+	return s
 }
 
 func (s *mockDraftStore) SaveDraft(m *model.Model3D) error {
@@ -318,13 +324,15 @@ func tempFile(t *testing.T, content string) string {
 	return f.Name()
 }
 
-func newFullSvc(t *testing.T) *model.Service {
+// newFullSvc retourne un service doté de tous ses stockages simulés ; assets
+// sont des brouillons qui existent déjà (porteurs d'interfaces, instances).
+func newFullSvc(t *testing.T, assets ...string) *model.Service {
 	t.Helper()
 	return model.NewService(newMockBC(), &mockFS{}).
 		WithConnStore(newMockConnStore()).
 		WithThumbStore(newMockThumbStore()).
 		WithIfaceStore(newMockIfaceStore()).
-		WithDraftStore(newMockDraftStore()).
+		WithDraftStore(newMockDraftStore(assets...)).
 		WithRemovedStore(newMockRemovedStore())
 }
 
@@ -792,7 +800,8 @@ func TestConnection_ListNilStore_ReturnsNil(t *testing.T) {
 // / @expect ID généré, interface présente dans List et Get, absente après Remove
 func TestInterface_AddListRemove(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).
-		WithIfaceStore(newMockIfaceStore())
+		WithIfaceStore(newMockIfaceStore()).
+		WithDraftStore(newMockDraftStore("asset1"))
 
 	iface := &model.AssetInterface{
 		AssetID:   "asset1",
@@ -895,7 +904,8 @@ func TestInterface_ListNilStore_ReturnsNil(t *testing.T) {
 func TestAddAssemblyLink(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).
 		WithConnStore(newMockConnStore()).
-		WithIfaceStore(newMockIfaceStore())
+		WithIfaceStore(newMockIfaceStore()).
+		WithDraftStore(newMockDraftStore("asset1", "asset2"))
 
 	ifaceA := &model.AssetInterface{AssetID: "asset1", Category: "ELEC", Type: "USB-C", Direction: model.IfaceOut}
 	ifaceB := &model.AssetInterface{AssetID: "asset2", Category: "ELEC", Type: "USB-C", Direction: model.IfaceIn}
@@ -1279,7 +1289,7 @@ func TestModule_NotFound_ReturnsError(t *testing.T) {
 }
 
 func TestModule_AddRemoveAssembly(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "a1", "a2")
 
 	p, _ := svc.CreateModule(model.ModuleRequest{Name: "P1", ChannelID: "ch1", OwnerID: "o1"})
 	connID := assembleInModule(t, svc, p.ID, "a1", "a2")
@@ -1301,7 +1311,7 @@ func TestModule_AddRemoveAssembly(t *testing.T) {
 }
 
 func TestModule_Submit(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "a1", "a2")
 
 	p, _ := svc.CreateModule(model.ModuleRequest{Name: "P1", ChannelID: "ch1", OwnerID: "o1"})
 	connID := assembleInModule(t, svc, p.ID, "a1", "a2")
@@ -1364,7 +1374,7 @@ func TestModule_Remove(t *testing.T) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 func TestWorkspace_AddRemoveInstance(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "asset1")
 
 	p, _ := svc.CreateModule(model.ModuleRequest{Name: "P1", ChannelID: "ch1", OwnerID: "o1"})
 
@@ -1413,7 +1423,7 @@ func TestWorkspace_TwoDifferentAssets_BothPresent(t *testing.T) {
 	// Scénario : ajout de 2 composants distincts au module.
 	// Chaque appel à AddAssetToWorkspace doit lire l'état courant du module
 	// et y ajouter sa propre instance sans écraser la précédente.
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "asset1", "asset2")
 
 	p, _ := svc.CreateModule(model.ModuleRequest{Name: "Module", ChannelID: "ch1", OwnerID: "o1"})
 
@@ -1447,7 +1457,7 @@ func TestWorkspace_TwoDifferentAssets_BothPresent(t *testing.T) {
 
 func TestWorkspace_ThreeAssets_AllPresent(t *testing.T) {
 	// Vérifie que N ajouts séquentiels cumulent correctement.
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "a1", "a2", "a3")
 
 	p, _ := svc.CreateModule(model.ModuleRequest{Name: "M", ChannelID: "ch1", OwnerID: "o1"})
 	for i, id := range []string{"a1", "a2", "a3"} {
@@ -1833,7 +1843,7 @@ func addTestIface(t *testing.T, svc *model.Service, iface *model.AssetInterface)
 // / @input  physique ELEC/USB-C/out, virtuelle ELEC/**/bidir Virtual=true
 // / @expect virtuelle.Direction=in, Category=ELEC, Type=USB-C, Virtual=false
 func TestConnectVirtualToPhysical_OutBecomesIn(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	physID := addTestIface(t, svc, &model.AssetInterface{
 		AssetID:   "compA",
@@ -1880,7 +1890,7 @@ func TestConnectVirtualToPhysical_OutBecomesIn(t *testing.T) {
 // / @input  physique MECA/Vis M3/in, virtuelle Virtual=true
 // / @expect virtuelle.Direction=out
 func TestConnectVirtualToPhysical_InBecomesOut(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	physID := addTestIface(t, svc, &model.AssetInterface{
 		AssetID:   "compA",
@@ -1911,7 +1921,7 @@ func TestConnectVirtualToPhysical_InBecomesOut(t *testing.T) {
 // / @input  physique HYD/Push-fit 6mm/bidir, virtuelle Virtual=true
 // / @expect virtuelle.Direction=bidir
 func TestConnectVirtualToPhysical_BidirStaysBidir(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	physID := addTestIface(t, svc, &model.AssetInterface{
 		AssetID:   "compA",
@@ -1942,7 +1952,7 @@ func TestConnectVirtualToPhysical_BidirStaysBidir(t *testing.T) {
 // / @input  popupValues.Name="Alimentation principale"
 // / @expect virtuelle.Name="Alimentation principale"
 func TestConnectVirtualToPhysical_UserOverridesName(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	physID := addTestIface(t, svc, &model.AssetInterface{
 		AssetID:   "compA",
@@ -1975,7 +1985,7 @@ func TestConnectVirtualToPhysical_UserOverridesName(t *testing.T) {
 // / @input  popupValues vide, physique.Name="Sortie alim"
 // / @expect virtuelle.Name="Sortie alim"
 func TestConnectVirtualToPhysical_InheritsPhysicalName(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	physID := addTestIface(t, svc, &model.AssetInterface{
 		AssetID:   "compA",
@@ -2007,7 +2017,7 @@ func TestConnectVirtualToPhysical_InheritsPhysicalName(t *testing.T) {
 // / @input  popupValues.ValueMin=3, ValueMax=5, IsRange=true, Unit="V"
 // / @expect virtuelle.ValueMin=3, ValueMax=5, IsRange=true, Unit="V"
 func TestConnectVirtualToPhysical_UserOverridesValues(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	physID := addTestIface(t, svc, &model.AssetInterface{
 		AssetID:   "compA",
@@ -2046,7 +2056,7 @@ func TestConnectVirtualToPhysical_UserOverridesValues(t *testing.T) {
 // / @input  popupValues vide, physique.ValueMin=12, ValueMax=12, Unit="V"
 // / @expect virtuelle.ValueMin=12, ValueMax=12, Unit="V"
 func TestConnectVirtualToPhysical_InheritsPhysicalValues(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	physID := addTestIface(t, svc, &model.AssetInterface{
 		AssetID:   "compA",
@@ -2081,7 +2091,7 @@ func TestConnectVirtualToPhysical_InheritsPhysicalValues(t *testing.T) {
 // / @input  physique AssetID="compA", virtuelle AssetID="compB"
 // / @expect conn.ID non vide, conn.From=compA, conn.To=compB
 func TestConnectVirtualToPhysical_AssemblyLinkCreated(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	physID := addTestIface(t, svc, &model.AssetInterface{
 		AssetID:   "compA",
@@ -2124,7 +2134,7 @@ func TestConnectVirtualToPhysical_AssemblyLinkCreated(t *testing.T) {
 // / @input  interface avec Virtual=false
 // / @expect retourne une erreur non nil
 func TestConnectVirtualToPhysical_NotVirtual_Error(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	physID := addTestIface(t, svc, &model.AssetInterface{
 		AssetID:   "compA",
@@ -2219,7 +2229,7 @@ func findVirtual(t *testing.T, svc *model.Service, assetID string) *model.AssetI
 // / @input  module vide, asset "compA" sans interface
 // / @expect ListInterfacesForAsset("compA") contient au moins un Virtual=true
 func TestWorkspace_AlwaysHasVirtualInterface_AfterAdd(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA")
 
 	mod, err := svc.CreateModule(model.ModuleRequest{Name: "Module", ChannelID: "ch1", OwnerID: "o1"})
 	if err != nil {
@@ -2239,7 +2249,7 @@ func TestWorkspace_AlwaysHasVirtualInterface_AfterAdd(t *testing.T) {
 // / @input  même asset "compA" ajouté deux fois
 // / @expect exactement 1 slot virtuel (idempotent)
 func TestWorkspace_VirtualSlot_Idempotent(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA")
 
 	mod, _ := svc.CreateModule(model.ModuleRequest{Name: "Module", ChannelID: "ch1", OwnerID: "o1"})
 	svc.AddAssetToWorkspace(mod.ID, "compA")
@@ -2254,7 +2264,7 @@ func TestWorkspace_VirtualSlot_Idempotent(t *testing.T) {
 // / @input  "compA" et "compB" ajoutés dans le même module
 // / @expect chacun dispose d'au moins un slot virtuel indépendant
 func TestWorkspace_VirtualSlot_PerAsset(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	mod, _ := svc.CreateModule(model.ModuleRequest{Name: "Module", ChannelID: "ch1", OwnerID: "o1"})
 	svc.AddAssetToWorkspace(mod.ID, "compA")
@@ -2272,7 +2282,7 @@ func TestWorkspace_VirtualSlot_PerAsset(t *testing.T) {
 // / @input  compA (physique, out) et compB (virtuel), tous deux instances du même module
 // / @expect connexion créée avec succès via le slot virtuel issu de l'invariant
 func TestWorkspace_VirtualIsClickable(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	// Interface physique sur compA (le composant source)
 	physID := addTestIface(t, svc, &model.AssetInterface{
@@ -2308,7 +2318,7 @@ func TestWorkspace_VirtualIsClickable(t *testing.T) {
 // / @input  compB a 1 slot virtuel ; on le matérialise → le service doit en recréer un
 // / @expect countVirtual("compB") ≥ 1 après ConnectVirtualToPhysical
 func TestWorkspace_AlwaysHasVirtualInterface_AfterConnect(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	physID := addTestIface(t, svc, &model.AssetInterface{
 		AssetID:   "compA",
@@ -2341,7 +2351,7 @@ func TestWorkspace_AlwaysHasVirtualInterface_AfterConnect(t *testing.T) {
 // / @input  deux liaisons successives via des slots virtuels régénérés
 // / @expect les deux connexions sont créées sans erreur
 func TestWorkspace_VirtualSlot_ChainedConnections(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "compA", "compB")
 
 	// Deux interfaces physiques sur compA
 	phys1 := addTestIface(t, svc, &model.AssetInterface{
@@ -2659,7 +2669,7 @@ func TestRemove_UnknownID_Rejected(t *testing.T) {
 func TestRemoveModule_Submitted_HidesLocally(t *testing.T) {
 	bc := newMockBC()
 	svc := model.NewService(bc, &mockFS{}).
-		WithDraftStore(newMockDraftStore()).
+		WithDraftStore(newMockDraftStore("a1", "a2")).
 		WithConnStore(newMockConnStore()).
 		WithRemovedStore(newMockRemovedStore())
 
@@ -2701,7 +2711,7 @@ func TestRemoveModule_Submitted_HidesLocally(t *testing.T) {
 // / @input  Module parent soumis, 2 instances liées par une liaison d'assemblage (AddAssemblyLink)
 // / @expect Le nouveau module a 2 WorkspaceInstances (nouveaux IDs) et 1 Assemblies (nouvelle Connection, instances remappées) ; le module parent reste inchangé
 func TestCreateModule_ParentID_CopiesComposition(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "comp-a", "comp-b")
 
 	parent, _ := svc.CreateModule(model.ModuleRequest{Name: "Chassis v1", ChannelID: "ch1", OwnerID: "o1"})
 	parent, _ = svc.AddAssetToWorkspace(parent.ID, "comp-a")
@@ -2782,7 +2792,7 @@ func TestCreateModule_ParentID_CopiesComposition(t *testing.T) {
 // / @input  Module parent soumis sous licence "proprietary" (CompatibleWith limité à elle-même), nouvelle licence "cc0"
 // / @expect CreateModule retourne une erreur, aucun brouillon n'est créé
 func TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "comp-a", "comp-b")
 
 	parent, _ := svc.CreateModule(model.ModuleRequest{
 		Name: "Chassis v1", ChannelID: "ch1", OwnerID: "o1", LicenseID: "proprietary",

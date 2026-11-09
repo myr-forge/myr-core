@@ -953,6 +953,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: asset ajouté introuvable
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "409":
           description: asset déjà soumis (RM19)
           schema:
@@ -991,6 +997,12 @@ paths:
             $ref: '#/definitions/adapters_in_rest.componentDTO'
         "400":
           description: composition cyclique
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: asset ajouté introuvable
           schema:
             additionalProperties:
               type: string
@@ -1089,11 +1101,13 @@ paths:
     get:
       consumes:
       - application/json
-      description: GET renvoie les interfaces physiques directes si l'asset n'a aucune
-        instance, ou les interfaces exposées (non connectées en interne) s'il en a
-        (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l'asset porteur
+      description: 'GET renvoie les interfaces physiques directes si l''asset n''a
+        aucune instance, ou les interfaces exposées (non connectées en interne) s''il
+        en a (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l''asset porteur
         est en brouillon, les interfaces sont éditées librement en local et ne rejoignent
-        la blockchain qu'à la soumission de l'asset (règle 27).
+        la blockchain qu''à la soumission de l''asset (règle 27). POST : l''asset
+        doit exister (404) et être un brouillon (409) ; l''identifiant de l''interface
+        est attribué par le serveur, un champ id envoyé est ignoré.'
       parameters:
       - description: identifiant du composant
         in: path
@@ -1120,6 +1134,18 @@ paths:
             $ref: '#/definitions/myr-core_domain_model.AssetInterface'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: asset introuvable
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: asset déjà soumis (RM19)
           schema:
             additionalProperties:
               type: string
@@ -1138,11 +1164,13 @@ paths:
     post:
       consumes:
       - application/json
-      description: GET renvoie les interfaces physiques directes si l'asset n'a aucune
-        instance, ou les interfaces exposées (non connectées en interne) s'il en a
-        (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l'asset porteur
+      description: 'GET renvoie les interfaces physiques directes si l''asset n''a
+        aucune instance, ou les interfaces exposées (non connectées en interne) s''il
+        en a (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l''asset porteur
         est en brouillon, les interfaces sont éditées librement en local et ne rejoignent
-        la blockchain qu'à la soumission de l'asset (règle 27).
+        la blockchain qu''à la soumission de l''asset (règle 27). POST : l''asset
+        doit exister (404) et être un brouillon (409) ; l''identifiant de l''interface
+        est attribué par le serveur, un champ id envoyé est ignoré.'
       parameters:
       - description: identifiant du composant
         in: path
@@ -1169,6 +1197,18 @@ paths:
             $ref: '#/definitions/myr-core_domain_model.AssetInterface'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: asset introuvable
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: asset déjà soumis (RM19)
           schema:
             additionalProperties:
               type: string
@@ -1957,7 +1997,8 @@ paths:
       - application/json
       description: 'DELETE maintient l''invariant qu''un asset possède toujours au
         moins un slot virtuel (règle 13) : un nouveau slot virtuel est recréé si l''interface
-        supprimée était physique et la dernière restante.'
+        supprimée était physique et la dernière restante. PATCH ne change jamais l''asset
+        porteur : un asset_id différent est refusé (400).'
       parameters:
       - description: identifiant de l'interface
         in: path
@@ -1979,7 +2020,7 @@ paths:
         "204":
           description: pas de contenu (DELETE)
         "400":
-          description: Bad Request
+          description: changement d'asset porteur
           schema:
             additionalProperties:
               type: string
@@ -2000,7 +2041,8 @@ paths:
       - application/json
       description: 'DELETE maintient l''invariant qu''un asset possède toujours au
         moins un slot virtuel (règle 13) : un nouveau slot virtuel est recréé si l''interface
-        supprimée était physique et la dernière restante.'
+        supprimée était physique et la dernière restante. PATCH ne change jamais l''asset
+        porteur : un asset_id différent est refusé (400).'
       parameters:
       - description: identifiant de l'interface
         in: path
@@ -2022,7 +2064,7 @@ paths:
         "204":
           description: pas de contenu (DELETE)
         "400":
-          description: Bad Request
+          description: changement d'asset porteur
           schema:
             additionalProperties:
               type: string

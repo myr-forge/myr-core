@@ -214,7 +214,7 @@ func (s *Service) getAsset(id, channelID string) (*Model3D, bool, error) {
 func (s *Service) draftAsset(id string) (*Model3D, error) {
 	m, isDraft, err := s.getAsset(id, "")
 	if err != nil {
-		return nil, err
+		return nil, assetLookupErr(id, err)
 	}
 	if !isDraft {
 		return nil, fmt.Errorf("%w : %s", ErrAssetSubmitted, id)
@@ -246,6 +246,16 @@ func (s *Service) saveDraft(m *Model3D) error {
 		return fmt.Errorf("stockage de brouillons non configuré")
 	}
 	return s.draftStore.SaveDraft(m)
+}
+
+// assetLookupErr qualifie l'échec de lecture de l'asset id : une blockchain
+// indisponible est remontée telle quelle, tout autre échec signifie que
+// l'asset n'existe ni en brouillon ni sur le ledger (ErrNotFound).
+func assetLookupErr(id string, err error) error {
+	if errors.Is(err, ErrBlockchainUnavailable) || errors.Is(err, ErrBlockchainUnreachable) {
+		return err
+	}
+	return fmt.Errorf("%w : asset %s", ErrNotFound, id)
 }
 
 // editDraft applique change au brouillon id puis l'enregistre, sous le verrou
@@ -692,28 +702,36 @@ func (s *Service) requireDraftCarrier(assetID string) error {
 	return nil
 }
 
-// AddInterface ajoute une interface à un asset en brouillon.
+// AddInterface ajoute une interface à un asset en brouillon, qui doit exister
+// (ErrNotFound). Son identifiant est toujours attribué ici : un identifiant
+// fourni par le client remplacerait l'interface existante qui le porte.
 func (s *Service) AddInterface(iface *AssetInterface) error {
 	if s.ifaceStore == nil {
 		return fmt.Errorf("interface store non configuré")
 	}
-	if err := s.requireDraftCarrier(iface.AssetID); err != nil {
+	if _, err := s.draftAsset(iface.AssetID); err != nil {
 		return err
 	}
-	if iface.ID == "" {
-		iface.ID = generateID()
-	}
+	iface.ID = generateID()
 	return s.ifaceStore.SaveInterface(iface)
 }
 
 // UpdateInterface met à jour une interface d'un asset en brouillon et marque
 // les connexions qui l'utilisent comme incompatibles si elles ne satisfont
-// plus les contraintes.
+// plus les contraintes. L'asset porteur ne change pas
+// (ErrInterfaceCarrierChange).
 func (s *Service) UpdateInterface(iface *AssetInterface) error {
 	if s.ifaceStore == nil {
 		return fmt.Errorf("interface store non configuré")
 	}
-	if err := s.requireDraftCarrierOf(iface.ID); err != nil {
+	existing, err := s.ifaceStore.GetInterface(iface.ID)
+	if err != nil {
+		return fmt.Errorf("%w : interface %s", ErrNotFound, iface.ID)
+	}
+	if iface.AssetID != existing.AssetID {
+		return fmt.Errorf("%w : %s appartient à %s", ErrInterfaceCarrierChange, iface.ID, existing.AssetID)
+	}
+	if err := s.requireDraftCarrier(existing.AssetID); err != nil {
 		return err
 	}
 	if err := s.ifaceStore.SaveInterface(iface); err != nil {
@@ -1161,11 +1179,15 @@ func (s *Service) SubmitModule(moduleID, note string) (*Model3D, error) {
 // Invariant : chaque asset dispose toujours d'au moins une interface virtuelle
 // (slot utilisable pour créer une liaison). Un slot est créé automatiquement
 // si aucune interface virtuelle n'existe encore pour cet asset.
-// Un asset qui est le module ou le contient, même indirectement, est refusé
-// (ErrCyclicComposition, RM52).
+// L'asset ajouté doit exister (ErrNotFound) ; s'il est le module ou le
+// contient, même indirectement, il est refusé (ErrCyclicComposition, RM52).
 func (s *Service) AddAssetToWorkspace(moduleID, assetID string) (*Model3D, error) {
 	m, err := s.editDraft(moduleID, func(m *Model3D) error {
-		if err := s.checkNotContaining(assetID, moduleID); err != nil {
+		added, _, err := s.getAsset(assetID, "")
+		if err != nil {
+			return assetLookupErr(assetID, err)
+		}
+		if err := s.checkNotContaining(added, moduleID); err != nil {
 			return err
 		}
 		m.WorkspaceInstances = append(m.WorkspaceInstances, WorkspaceInstance{ID: generateID(), AssetID: assetID})
@@ -1178,33 +1200,29 @@ func (s *Service) AddAssetToWorkspace(moduleID, assetID string) (*Model3D, error
 	return m, nil
 }
 
-// checkNotContaining refuse d'ajouter assetID au module moduleID si assetID
+// checkNotContaining refuse d'ajouter l'asset added au module moduleID s'il
 // est ce module ou le contient, même indirectement : une composition cyclique
 // n'aurait pas de fin (GetModuleInterfaces la parcourt récursivement).
-func (s *Service) checkNotContaining(assetID, moduleID string) error {
+func (s *Service) checkNotContaining(added *Model3D, moduleID string) error {
 	seen := map[string]bool{}
-	var contains func(id string) bool
-	contains = func(id string) bool {
-		if id == moduleID {
+	var contains func(a *Model3D) bool
+	contains = func(a *Model3D) bool {
+		if a.ID == moduleID {
 			return true
 		}
-		if seen[id] {
+		if seen[a.ID] {
 			return false
 		}
-		seen[id] = true
-		a, _, err := s.getAsset(id, "")
-		if err != nil {
-			return false
-		}
+		seen[a.ID] = true
 		for _, inst := range a.WorkspaceInstances {
-			if contains(inst.AssetID) {
+			if sub, _, err := s.getAsset(inst.AssetID, ""); err == nil && contains(sub) {
 				return true
 			}
 		}
 		return false
 	}
-	if contains(assetID) {
-		return fmt.Errorf("%w : %s contient %s", ErrCyclicComposition, assetID, moduleID)
+	if contains(added) {
+		return fmt.Errorf("%w : %s contient %s", ErrCyclicComposition, added.ID, moduleID)
 	}
 	return nil
 }

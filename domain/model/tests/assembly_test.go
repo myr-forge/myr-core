@@ -38,7 +38,7 @@ func connCount(t *testing.T, svc *model.Service) int {
 // / @input  liaison out(inst-a1) → in(inst-b1), puis out(inst-a1) → in(inst-b2) et out(inst-a2) → in(inst-b1)
 // / @expect ErrInterfaceInUse pour les deux réutilisations ; une seule liaison enregistrée
 func TestAddAssemblyLink_RM09_InterfaceUsedOnce(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "asset1", "asset2")
 	out, in := usbPair(t, svc)
 	if _, err := svc.AddAssemblyLink(out, in, "", "inst-a1", "inst-b1", ""); err != nil {
 		t.Fatalf("première liaison : %v", err)
@@ -58,7 +58,7 @@ func TestAddAssemblyLink_RM09_InterfaceUsedOnce(t *testing.T) {
 // / @input  liaison out(inst-a1) → in(inst-b1), puis out(inst-a2) → in(inst-b2)
 // / @expect les deux liaisons sont acceptées
 func TestAddAssemblyLink_RM09_SameInterfaceOtherInstance_OK(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "asset1", "asset2")
 	out, in := usbPair(t, svc)
 	if _, err := svc.AddAssemblyLink(out, in, "", "inst-a1", "inst-b1", ""); err != nil {
 		t.Fatalf("première liaison : %v", err)
@@ -72,7 +72,7 @@ func TestAddAssemblyLink_RM09_SameInterfaceOtherInstance_OK(t *testing.T) {
 // / @input  liaison out → in sans instance, puis la même paire sans instance
 // / @expect ErrInterfaceInUse pour la seconde
 func TestAddAssemblyLink_RM09_NoInstance_InterfaceUsedOnce(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "asset1", "asset2")
 	out, in := usbPair(t, svc)
 	if _, err := svc.AddAssemblyLink(out, in, "", "", "", ""); err != nil {
 		t.Fatalf("première liaison : %v", err)
@@ -86,7 +86,7 @@ func TestAddAssemblyLink_RM09_NoInstance_InterfaceUsedOnce(t *testing.T) {
 // / @input  interface bidirectionnelle reliée à elle-même, sur la même instance puis sans instance
 // / @expect ErrSelfLink dans les deux cas ; aucune liaison enregistrée
 func TestAddAssemblyLink_RM09_SelfLink_Rejected(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "asset1")
 	bidi := addTestIface(t, svc, &model.AssetInterface{AssetID: "asset1", Category: "NUM", Type: "bus", Direction: model.IfaceBidi})
 	if _, err := svc.AddAssemblyLink(bidi, bidi, "", "inst-a", "inst-a", ""); !errors.Is(err, model.ErrSelfLink) {
 		t.Errorf("même instance : ErrSelfLink attendu, obtenu %v", err)
@@ -103,7 +103,7 @@ func TestAddAssemblyLink_RM09_SelfLink_Rejected(t *testing.T) {
 // / @input  interface bidirectionnelle d'un composant, de l'instance inst-a vers l'instance inst-b
 // / @expect liaison acceptée
 func TestAddAssemblyLink_RM09_SameInterfaceTwoInstances_OK(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "asset1")
 	bidi := addTestIface(t, svc, &model.AssetInterface{AssetID: "asset1", Category: "NUM", Type: "bus", Direction: model.IfaceBidi})
 	if _, err := svc.AddAssemblyLink(bidi, bidi, "", "inst-a", "inst-b", ""); err != nil {
 		t.Errorf("liaison attendue, obtenu %v", err)
@@ -114,7 +114,7 @@ func TestAddAssemblyLink_RM09_SameInterfaceTwoInstances_OK(t *testing.T) {
 // / @input  ELEC/DIN sortante ↔ MECA/vis entrante, sans asset d'accroche
 // / @expect ErrIncompatibleInterfaces ; aucune liaison enregistrée
 func TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "asset1", "asset2")
 	din := addTestIface(t, svc, &model.AssetInterface{AssetID: "asset1", Category: "ELEC", Type: "DIN", Direction: model.IfaceOut})
 	vis := addTestIface(t, svc, &model.AssetInterface{AssetID: "asset2", Category: "MECA", Type: "vis M3", Direction: model.IfaceIn})
 	if _, err := svc.AddAssemblyLink(din, vis, "", "inst-a", "inst-b", ""); !errors.Is(err, model.ErrIncompatibleInterfaces) {
@@ -141,7 +141,7 @@ func TestAddAssemblyLink_RM11_ValueRanges(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			svc := newFullSvc(t)
+			svc := newFullSvc(t, "asset1", "asset2")
 			out, in := c.out, c.in
 			out.AssetID, out.Category, out.Type, out.Direction = "asset1", "ELEC", "alim", model.IfaceOut
 			in.AssetID, in.Category, in.Type, in.Direction = "asset2", "ELEC", "alim", model.IfaceIn
@@ -160,7 +160,7 @@ func TestAddAssemblyLink_RM11_ValueRanges(t *testing.T) {
 // / @input  interface physique déjà engagée sur l'instance inst-p ; ConnectVirtualToPhysical depuis le slot d'un brouillon vers cette interface et cette instance
 // / @expect ErrInterfaceInUse ; le slot reste virtuel ; aucune nouvelle liaison
 func TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "asset1", "asset2")
 	carrier, err := svc.AddFull(model.AddRequest{Name: "boîtier", ChannelID: "ch1"})
 	if err != nil {
 		t.Fatalf("AddFull : %v", err)
@@ -234,7 +234,7 @@ func TestList_R14_LeftoverDraft_ListedOnce(t *testing.T) {
 // / @input  module avec deux instances ; liaison inconnue ; liaison entre assets hors du module ; liaison entre instances d'un autre module
 // / @expect ErrConnectionNotInModule pour les trois ; le module n'a aucun assemblage
 func TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "a1", "a2", "asset1", "asset2", "x1", "x2")
 	mod, _ := svc.CreateModule(model.ModuleRequest{Name: "drone", ChannelID: "ch1"})
 	svc.AddAssetToWorkspace(mod.ID, "a1")
 	svc.AddAssetToWorkspace(mod.ID, "a2")
@@ -277,7 +277,7 @@ func TestAddAssemblyToModule_RM51_Component_StaysComponent(t *testing.T) {
 // / @input  module avec une instance de asset1 et une de asset2 ; liaison d'interfaces entre ces instances
 // / @expect AddAssemblyToModule accepte la liaison
 func TestAddAssemblyToModule_RM51_InstanceLink_OK(t *testing.T) {
-	svc := newFullSvc(t)
+	svc := newFullSvc(t, "asset1", "asset2")
 	mod, _ := svc.CreateModule(model.ModuleRequest{Name: "drone", ChannelID: "ch1"})
 	svc.AddAssetToWorkspace(mod.ID, "asset1")
 	mod, _ = svc.AddAssetToWorkspace(mod.ID, "asset2")
@@ -333,6 +333,61 @@ func TestGetModuleInterfaces_RM52_LegacyCycle_Terminates(t *testing.T) {
 	}
 }
 
+// / @brief  Une interface ou une instance ne se rattache qu'à un asset existant
+// / @input  AddInterface sur l'asset « fantome » ; AddAssetToWorkspace de « fantome » dans un module brouillon
+// / @expect ErrNotFound dans les deux cas ; ni interface ni instance enregistrée
+func TestAssembly_UnknownAsset_Rejected(t *testing.T) {
+	svc := newFullSvc(t)
+	if err := svc.AddInterface(&model.AssetInterface{AssetID: "fantome", Category: "ELEC", Type: "USB-C", Direction: model.IfaceOut}); !errors.Is(err, model.ErrNotFound) {
+		t.Errorf("AddInterface : ErrNotFound attendu, obtenu %v", err)
+	}
+	if ifaces, _ := svc.ListInterfacesForAsset("fantome"); len(ifaces) != 0 {
+		t.Errorf("aucune interface attendue : %+v", ifaces)
+	}
+	mod, _ := svc.CreateModule(model.ModuleRequest{Name: "drone", ChannelID: "ch1"})
+	if _, err := svc.AddAssetToWorkspace(mod.ID, "fantome"); !errors.Is(err, model.ErrNotFound) {
+		t.Errorf("AddAssetToWorkspace : ErrNotFound attendu, obtenu %v", err)
+	}
+	if got, _ := svc.GetModule(mod.ID); len(got.WorkspaceInstances) != 0 {
+		t.Errorf("aucune instance attendue : %+v", got.WorkspaceInstances)
+	}
+}
+
+// / @brief  L'identifiant d'une interface est attribué par le serveur : un identifiant fourni ne remplace pas l'interface existante qui le porte
+// / @input  interface de asset1 ; AddInterface sur asset2 avec l'identifiant de cette interface
+// / @expect nouvel identifiant attribué ; l'interface de asset1 est inchangée
+func TestAddInterface_ClientID_NoOverwrite(t *testing.T) {
+	svc := newFullSvc(t, "asset1", "asset2")
+	out, _ := usbPair(t, svc)
+	hijack := &model.AssetInterface{ID: out, AssetID: "asset2", Category: "MECA", Type: "vis", Direction: model.IfaceIn}
+	if err := svc.AddInterface(hijack); err != nil {
+		t.Fatalf("AddInterface : %v", err)
+	}
+	if hijack.ID == out {
+		t.Error("l'identifiant fourni par le client ne doit pas être repris")
+	}
+	if got, _ := svc.GetInterface(out); got == nil || got.AssetID != "asset1" || got.Category != "ELEC" {
+		t.Errorf("l'interface d'origine ne doit pas changer : %+v", got)
+	}
+}
+
+// / @brief  Une interface ne change pas d'asset porteur
+// / @input  interface de asset1 ; UpdateInterface avec AssetID = asset2
+// / @expect ErrInterfaceCarrierChange ; l'interface reste sur asset1
+func TestUpdateInterface_CarrierChange_Rejected(t *testing.T) {
+	svc := newFullSvc(t, "asset1", "asset2")
+	out, _ := usbPair(t, svc)
+	moved, _ := svc.GetInterface(out)
+	changed := *moved
+	changed.AssetID = "asset2"
+	if err := svc.UpdateInterface(&changed); !errors.Is(err, model.ErrInterfaceCarrierChange) {
+		t.Errorf("ErrInterfaceCarrierChange attendu, obtenu %v", err)
+	}
+	if got, _ := svc.GetInterface(out); got == nil || got.AssetID != "asset1" {
+		t.Errorf("l'interface doit rester sur asset1 : %+v", got)
+	}
+}
+
 // syncDraftStore est un DraftStore sûr en concurrence qui, comme un stockage
 // fichier, rend une copie à chaque lecture.
 type syncDraftStore struct {
@@ -375,12 +430,16 @@ func (s *syncDraftStore) ListDrafts(string) ([]*model.Model3D, error) { return n
 // / @input  stockage qui rend une copie à chaque lecture ; 20 ajouts d'instance simultanés sur un module
 // / @expect le module compte 20 instances
 func TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate(t *testing.T) {
-	svc := model.NewService(nil, &mockFS{}).WithDraftStore(&syncDraftStore{drafts: map[string][]byte{}})
+	store := &syncDraftStore{drafts: map[string][]byte{}}
+	svc := model.NewService(nil, &mockFS{}).WithDraftStore(store)
 	mod, err := svc.CreateModule(model.ModuleRequest{Name: "drone", ChannelID: "ch1"})
 	if err != nil {
 		t.Fatalf("CreateModule : %v", err)
 	}
 	const n = 20
+	for i := 0; i < n; i++ {
+		store.SaveDraft(&model.Model3D{ID: fmt.Sprintf("asset%d", i), Status: model.ModuleDraft})
+	}
 	var wg sync.WaitGroup
 	for i := 0; i < n; i++ {
 		wg.Add(1)

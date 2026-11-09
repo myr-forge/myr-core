@@ -259,7 +259,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCCE04, UCCE05
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 63 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 65 déduit(s)
 > - 🟡 [TestFabricAdapter_GetModelRecord_EvaluateError](../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_EvaluateError.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
 > - 🟡 [TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel](../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
 > - 🟡 [TestFabricAdapter_GetModelRecord_Success](../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_Success.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
@@ -275,7 +275,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestIntegration_ModelService_SubmittedAsset](../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
 > - 🟡 [TestIntegration_OwnerNotSigner_Rejected](../../docs/tests/adapters-out-fabric/TestIntegration_OwnerNotSigner_Rejected.md) — déduit : via UCCE04 · Flux erreur — Échec endorsement Fabric
 > - 🟡 [TestIntegration_PendingOrReader_Rejected](../../docs/tests/adapters-out-fabric/TestIntegration_PendingOrReader_Rejected.md) — déduit : via UCCE04 · Flux erreur — Échec endorsement Fabric
-> - … et 48 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 50 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF14 — Ajouter une interface à un composant existant
@@ -283,7 +283,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCCE06
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 110 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 113 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : via UCCE06 · Flux alternatif — Mise à jour d'une interface existante (UpdateInterface)
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : via UCCE06 · Flux alternatif — Mise à jour d'une interface existante (UpdateInterface)
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : via UCCE06 · Flux alternatif — Mise à jour d'une interface existante (UpdateInterface)
@@ -299,7 +299,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : via UCCE06 · Flux alternatif — Mise à jour d'une interface existante (UpdateInterface)
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : via UCCE06 · Flux alternatif — Mise à jour d'une interface existante (UpdateInterface)
 > - 🟡 [TestComponent_DELETE_NoContent](../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : via UCCE06 · Flux alternatif — Mise à jour d'une interface existante (UpdateInterface)
-> - … et 95 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 98 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF15 — Vérifier l'unicité d'un composant (anti-plagiat SHA-256 + SCM > 50 %)
@@ -331,7 +331,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCCE04, UCMOD01, UCMOD06
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 181 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 182 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
@@ -347,7 +347,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
 > - 🟡 [TestComponent_DELETE_NoContent](../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
-> - … et 166 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 167 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF60 — Supprimer un composant (masquage local des listes, ledger jamais modifié)
@@ -407,9 +407,10 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCAM01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 39 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 41 déduit(s)
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : via UCAM01 · Flux — Liaison devenue incompatible après modification
 > - 🟡 [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — déduit : via UCAM01 · Flux alternatif — Liaison via slot virtuel (UCAM03)
+> - 🟡 [TestDomainErrors_InterfaceCarrierChange_BadRequest](../../docs/tests/adapters-in-rest/TestDomainErrors_InterfaceCarrierChange_BadRequest.md) — déduit : via UCAM01 · Flux — Liaison devenue incompatible après modification
 > - 🟡 [TestInterface_DELETE](../../docs/tests/adapters-in-rest/TestInterface_DELETE.md) — déduit : via UCAM01 · Flux — Liaison devenue incompatible après modification
 > - 🟡 [TestInterface_PATCH_NotFound](../../docs/tests/adapters-in-rest/TestInterface_PATCH_NotFound.md) — déduit : via UCAM01 · Flux — Liaison devenue incompatible après modification
 > - 🟡 [TestInterface_PATCH_OK](../../docs/tests/adapters-in-rest/TestInterface_PATCH_OK.md) — déduit : via UCAM01 · Flux — Liaison devenue incompatible après modification
@@ -422,8 +423,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestAddAssemblyLink_RM09_SameInterfaceOtherInstance_OK](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SameInterfaceOtherInstance_OK.md) — déduit : via UCAM01 · Flux nominal A — Liaison directe
 > - 🟡 [TestAddAssemblyLink_RM09_SameInterfaceTwoInstances_OK](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SameInterfaceTwoInstances_OK.md) — déduit : via UCAM01 · Flux nominal A — Liaison directe
 > - 🟡 [TestAddAssemblyLink_RM09_SelfLink_Rejected](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SelfLink_Rejected.md) — déduit : via UCAM01 · Flux nominal A — Liaison directe
-> - 🟡 [TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected](../../docs/tests/domain-model/TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected.md) — déduit : via UCAM01 · Flux nominal A — Liaison directe
-> - … et 24 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 26 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF19 — Visualiser les interfaces physiques d'un composant
@@ -455,7 +455,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCAM03
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 125 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 127 déduit(s)
 > - 🟡 [TestRunModelInterfaceAdd_NominalCase](../../docs/tests/adapters-in-cli/TestRunModelInterfaceAdd_NominalCase.md) — déduit : via UCAM03 · Flux B — Attributs explicites
 > - 🟡 [TestRunModelInterfaceAdd_ServiceError_Rejected](../../docs/tests/adapters-in-cli/TestRunModelInterfaceAdd_ServiceError_Rejected.md) — déduit : via UCAM03 · Flux B — Attributs explicites
 > - 🟡 [TestRunModelLinkConnectVirtual_MissingVirtual_Rejected](../../docs/tests/adapters-in-cli/TestRunModelLinkConnectVirtual_MissingVirtual_Rejected.md) — déduit : via UCAM03 · Flux A — Connexion virtuelle (déduction automatique)
@@ -471,7 +471,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : via UCAM03 · Flux B — Attributs explicites
 > - 🟡 [TestComponent_AddAssembly](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : via UCAM03 · Flux B — Attributs explicites
 > - 🟡 [TestComponent_AddAssembly_MissingConnectionID](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly_MissingConnectionID.md) — déduit : via UCAM03 · Flux B — Attributs explicites
-> - … et 110 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 112 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF21 — *(retiré)* — sélection multiple/jauge de progression pour l'ajout d'instances : ergonomie 100 % frontend, sans logique domaine propre (le placement unitaire `AddAssetToWorkspace` reste couvert par EF26/UCMOD01 et UCAM05)
@@ -488,7 +488,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCAM05
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 59 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 60 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : via UCAM05 · Flux nominal — Conversion réussie
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : via UCAM05 · Flux nominal — Conversion réussie
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : via UCAM05 · Flux nominal — Conversion réussie
@@ -504,7 +504,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestIntegration_RM01_DuplicateHash_Rejected](../../docs/tests/adapters-out-fabric/TestIntegration_RM01_DuplicateHash_Rejected.md) — déduit : via UCAM05 · Flux erreur — Erreur blockchain à la soumission
 > - 🟡 [TestIntegration_RM05_ParentMustExist](../../docs/tests/adapters-out-fabric/TestIntegration_RM05_ParentMustExist.md) — déduit : via UCAM05 · Flux erreur — Erreur blockchain à la soumission
 > - 🟡 [TestIntegration_RM06_WriteOnce](../../docs/tests/adapters-out-fabric/TestIntegration_RM06_WriteOnce.md) — déduit : via UCAM05 · Flux erreur — Erreur blockchain à la soumission
-> - … et 44 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 45 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF23 — Choisir un asset d'accroche (fastener) pour une liaison
@@ -558,7 +558,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCAM03
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 125 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 127 déduit(s)
 > - 🟡 [TestRunModelInterfaceAdd_NominalCase](../../docs/tests/adapters-in-cli/TestRunModelInterfaceAdd_NominalCase.md) — déduit : via UCAM03 · Flux B — Attributs explicites
 > - 🟡 [TestRunModelInterfaceAdd_ServiceError_Rejected](../../docs/tests/adapters-in-cli/TestRunModelInterfaceAdd_ServiceError_Rejected.md) — déduit : via UCAM03 · Flux B — Attributs explicites
 > - 🟡 [TestRunModelLinkConnectVirtual_MissingVirtual_Rejected](../../docs/tests/adapters-in-cli/TestRunModelLinkConnectVirtual_MissingVirtual_Rejected.md) — déduit : via UCAM03 · Flux A — Connexion virtuelle (déduction automatique)
@@ -574,7 +574,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : via UCAM03 · Flux B — Attributs explicites
 > - 🟡 [TestComponent_AddAssembly](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : via UCAM03 · Flux B — Attributs explicites
 > - 🟡 [TestComponent_AddAssembly_MissingConnectionID](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly_MissingConnectionID.md) — déduit : via UCAM03 · Flux B — Attributs explicites
-> - … et 110 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 112 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF64 — Proposer un découpage automatique (sous-pièces + connexions candidates) d'un composant STEP en amont d'une transformation composant → module
@@ -593,7 +593,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCMOD01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 124 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 125 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
@@ -609,7 +609,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
 > - 🟡 [TestComponent_DELETE_NoContent](../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
-> - … et 109 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 110 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF27 — Soumettre un module à la blockchain (ModuleVersion immuable)
@@ -641,7 +641,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCMOD02 — #incoherence : cette ligne référençait aussi UCMOD03 et UCMOD05 ; UCMOD03 ne couvre pas cet EF (il documente la modification des métadonnées d'un module, sans rapport avec l'ajout d'un module existant comme instance) et UCMOD05 ne correspond à aucun fichier existant dans `specs/1-Expression/UCMOD-Module/` ni `specs/2-Analyse/UCMOD-Module/` — origine de ces deux références à clarifier avant de les retirer définitivement
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 30 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 31 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
@@ -652,12 +652,12 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestAddAssemblyToModule_RM51_InstanceLink_OK](../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_InstanceLink_OK.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
 > - 🟡 [TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate](../../docs/tests/domain-model/TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
 > - 🟡 [TestAddAssetToWorkspace_RM52_Cycle_Rejected](../../docs/tests/domain-model/TestAddAssetToWorkspace_RM52_Cycle_Rejected.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
+> - 🟡 [TestAssembly_UnknownAsset_Rejected](../../docs/tests/domain-model/TestAssembly_UnknownAsset_Rejected.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
 > - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
 > - 🟡 [TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed](../../docs/tests/domain-model/TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed.md) — déduit : via UCMOD02 · Flux nominal — Module ajouté (première instance)
-> - 🟡 [TestLicense_UnknownLicense_Rejected](../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : via UCMOD03 · Flux nominal — Renommage du module
-> - … et 15 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 16 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF29 — Visualiser la composition d'un module

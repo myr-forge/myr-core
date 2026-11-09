@@ -118,10 +118,11 @@ tags:
 | PATCH | `/api/components/{id}` | Contributor | Modifier les métadonnées (patch : name, description, tags, locations, license_id — UCCE02/UCMOD03, mêmes champs quel que soit le nombre d'instances). Brouillon : modification locale, licence vérifiée contre le catalogue et le parent (RM03, `400` si refusée). Asset soumis (RM19) : seuls name, description, tags et liens changent, sur le ledger via l'opération chaincode `UpdateMetadata` signée par le propriétaire ; un changement de licence est refusé (`409`) — #incoherence la méthode documentée ici était PUT, mais le handler (`adapters/in/rest/handlers.go`, `patchComponent`) répond uniquement à PATCH ; corrigé pour refléter le comportement réel, à confirmer que PUT n'était pas l'intention initiale |
 | DELETE | `/api/components/{id}` | Contributor | Supprimer (UCCE07/UCMOD08) — brouillon retiré du stockage local ; asset déjà soumis masqué localement (disparaît des listes), son enregistrement blockchain (y compris ses `ModuleVersion` éventuelles) n'est jamais modifié (RM08) |
 | GET | `/api/components/{id}/interfaces` | Auth | Interfaces physiques directes si l'asset n'a aucune instance, interfaces exposées (non connectées en interne) s'il en a (UCAM02, UCMOD04) |
+| POST | `/api/components/{id}/interfaces` | Contributor | Ajouter une interface à l'asset (UCCE06, UCAM03) — l'asset doit exister (`404`) et être un brouillon (`409`, RM19) ; l'identifiant est attribué par le serveur, un `id` envoyé est ignoré |
 | GET | `/api/components/{id}/compatible` | Auth | Composants compatibles (type d'interface, catégorie, sens — `DC_D8_Recherche.md` §2, UCREC02) |
 | GET | `/api/components/{id}/versions` | Auth | Arbre de versions / historique de dérivation (`DC_D8_Recherche.md` §3, UCREC03) |
 | GET | `/api/components/{id}/instances` | Auth | Instances de l'asset (UCMOD04) — liste vide si l'asset n'a jamais été décomposé |
-| POST | `/api/components/{id}/instances` | Contributor | Ajouter un composant existant comme instance (`AddAssetToWorkspace`) — applicable à n'importe quel `id`, y compris un asset qui n'a encore aucune instance ; brouillon local, sans effet blockchain avant soumission (UCMOD01, UCAM05). Un asset qui est l'asset hôte ou le contient, même indirectement, est refusé (RM52, `400`) ; asset hôte soumis : `409` (RM19) |
+| POST | `/api/components/{id}/instances` | Contributor | Ajouter un composant existant comme instance (`AddAssetToWorkspace`) — applicable à n'importe quel `id`, y compris un asset qui n'a encore aucune instance ; brouillon local, sans effet blockchain avant soumission (UCMOD01, UCAM05). L'asset ajouté doit exister (`404`) ; s'il est l'asset hôte ou le contient, même indirectement, il est refusé (RM52, `400`) ; asset hôte soumis : `409` (RM19) |
 | DELETE | `/api/components/{id}/instances/{instanceId}` | Contributor | Retirer une instance (cascade sur ses connexions, RM14 — UCAM08) |
 | GET | `/api/components/{id}/assemblies` | Auth | Connexions internes de l'asset (UCMOD04) — liste vide si l'asset n'a aucune instance |
 | POST | `/api/components/{id}/assemblies` | Contributor | Rattacher une connexion existante (`connection_id`) à l'asset — brouillon local, sans effet blockchain avant soumission (UCMOD02). La connexion doit relier deux instances de l'asset, sinon `400` (RM51) ; asset soumis : `409` (RM19) |
@@ -148,7 +149,7 @@ tags:
 | POST | `/api/assembly-links` | Contributor | Créer une liaison interface→interface (UCAM01) — interface déjà engagée sur son instance : `409` (RM09) ; interfaces incompatibles (RM10/RM11) ou interface reliée à elle-même : `400` |
 | POST | `/api/virtual-connect` | Contributor | Relier interface virtuelle → physique — mêmes refus que `/api/assembly-links`, le slot restant alors virtuel (RM13) ; porteur du slot soumis : `409` (RM19) |
 | GET | `/api/interfaces/{id}` | Auth | Détail d'une interface |
-| PUT | `/api/interfaces/{id}` | Contributor | Modifier une interface |
+| PATCH | `/api/interfaces/{id}` | Contributor | Modifier une interface d'un asset en brouillon — l'asset porteur ne change jamais : un `asset_id` différent est refusé (`400`) |
 | DELETE | `/api/interfaces/{id}` | Contributor | Supprimer une interface |
 | GET | `/api/refs` | Auth | Vocabulaire de référence (catégories, types, unités) |
 | POST | `/api/refs/categories` | Contributor | Ajouter une catégorie |

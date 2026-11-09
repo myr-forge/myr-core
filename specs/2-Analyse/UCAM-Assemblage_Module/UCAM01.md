@@ -140,14 +140,16 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 5. Elle peut être supprimée manuellement — le système ne la supprime jamais automatiquement
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 9 déduit(s)
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/interfaces`
+> - 🟡 [TestDomainErrors_InterfaceCarrierChange_BadRequest](../../../docs/tests/adapters-in-rest/TestDomainErrors_InterfaceCarrierChange_BadRequest.md) — déduit : teste route `/api/interfaces`
 > - 🟡 [TestInterface_DELETE](../../../docs/tests/adapters-in-rest/TestInterface_DELETE.md) — déduit : teste route `/api/interfaces`
 > - 🟡 [TestInterface_PATCH_NotFound](../../../docs/tests/adapters-in-rest/TestInterface_PATCH_NotFound.md) — déduit : teste route `/api/interfaces`
 > - 🟡 [TestInterface_PATCH_OK](../../../docs/tests/adapters-in-rest/TestInterface_PATCH_OK.md) — déduit : teste route `/api/interfaces`
 > - 🟡 [TestUpdateConnection](../../../docs/tests/adapters-out-localstorage/TestUpdateConnection.md) — déduit : teste `ConnectionStore.UpdateConnection`
 > - 🟡 [TestUpdateConnection_NotFound](../../../docs/tests/adapters-out-localstorage/TestUpdateConnection_NotFound.md) — déduit : teste `ConnectionStore.UpdateConnection`
 > - 🟡 [TestInterfaces_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestInterfaces_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.UpdateInterface`
+> - 🟡 [TestUpdateInterface_CarrierChange_Rejected](../../../docs/tests/domain-model/TestUpdateInterface_CarrierChange_Rejected.md) — déduit : teste `ModelService.UpdateInterface`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Interface déjà utilisée (RM09)

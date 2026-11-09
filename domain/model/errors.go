@@ -93,4 +93,6 @@ var (
 	// ErrCyclicComposition : un asset ne peut pas contenir, même indirectement,
 	// le module auquel on l'ajoute.
 	ErrCyclicComposition = errors.New("model: composition cyclique — un module ne peut pas se contenir lui-même")
+	// ErrInterfaceCarrierChange : une interface ne change pas d'asset porteur.
+	ErrInterfaceCarrierChange = errors.New("model: une interface ne change pas d'asset porteur")
 )

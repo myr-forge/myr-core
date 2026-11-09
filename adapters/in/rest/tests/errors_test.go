@@ -154,6 +154,7 @@ func TestDomainErrors_AssemblyRules_MappedToHTTP(t *testing.T) {
 		{model.ErrInterfaceInUse, "/api/virtual-connect", `{"virtual_iface_id":"v","physical_iface_id":"p"}`, http.StatusConflict},
 		{model.ErrConnectionNotInModule, "/api/components/m1/assemblies", `{"connection_id":"c1"}`, http.StatusBadRequest},
 		{model.ErrCyclicComposition, "/api/components/m1/instances", `{"asset_id":"m1"}`, http.StatusBadRequest},
+		{model.ErrNotFound, "/api/components/m1/instances", `{"asset_id":"fantome"}`, http.StatusNotFound},
 	}
 	for _, c := range cases {
 		next = c.err
@@ -161,5 +162,21 @@ func TestDomainErrors_AssemblyRules_MappedToHTTP(t *testing.T) {
 		if w.Code != c.want || !strings.Contains(w.Body.String(), strings.TrimPrefix(c.err.Error(), "model: ")) {
 			t.Errorf("POST %s (%v) : code %d attendu, obtenu %d — %s", c.path, c.err, c.want, w.Code, w.Body.String())
 		}
+	}
+}
+
+// / @brief  PATCH d'une interface qui changerait d'asset porteur renvoie 400 au lieu d'une erreur interne
+// / @input  PATCH /api/interfaces/i1 avec asset_id ; le service refuse (ErrInterfaceCarrierChange)
+// / @expect 400 avec le message du refus
+func TestDomainErrors_InterfaceCarrierChange_BadRequest(t *testing.T) {
+	svc := &mockSvc{
+		getInterface: func(id string) (*model.AssetInterface, error) {
+			return &model.AssetInterface{ID: id, AssetID: "a1", Category: "ELEC"}, nil
+		},
+		updateInterface: func(*model.AssetInterface) error { return model.ErrInterfaceCarrierChange },
+	}
+	w := do(t, newTestMux(t, svc), http.MethodPatch, "/api/interfaces/i1", `{"asset_id":"a2"}`)
+	if w.Code != http.StatusBadRequest || !strings.Contains(w.Body.String(), "porteur") {
+		t.Errorf("400 attendu, obtenu %d — %s", w.Code, w.Body.String())
 	}
 }

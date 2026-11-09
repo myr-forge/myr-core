@@ -1310,6 +1310,7 @@ func (h *Handler) removeComponentAssembly(w http.ResponseWriter, r *http.Request
 //	@Success		200	{array}		model.WorkspaceInstance
 //	@Success		200	{object}	componentDTO
 //	@Failure		400	{object}	map[string]string	"composition cyclique"
+//	@Failure		404	{object}	map[string]string	"asset ajouté introuvable"
 //	@Failure		409	{object}	map[string]string	"asset déjà soumis (RM19)"
 //	@Security		MyrToken
 //	@Router			/components/{id}/instances [get]
@@ -1935,7 +1936,7 @@ func (h *Handler) assetCount(r *http.Request, channel string) int {
 // handleComponentInterfaces liste ou ajoute les interfaces d'un composant.
 //
 //	@Summary		Interfaces d'un composant
-//	@Description	GET renvoie les interfaces physiques directes si l'asset n'a aucune instance, ou les interfaces exposées (non connectées en interne) s'il en a (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l'asset porteur est en brouillon, les interfaces sont éditées librement en local et ne rejoignent la blockchain qu'à la soumission de l'asset (règle 27).
+//	@Description	GET renvoie les interfaces physiques directes si l'asset n'a aucune instance, ou les interfaces exposées (non connectées en interne) s'il en a (ADR-11) — GetModuleInterfaces gère les deux cas. Tant que l'asset porteur est en brouillon, les interfaces sont éditées librement en local et ne rejoignent la blockchain qu'à la soumission de l'asset (règle 27). POST : l'asset doit exister (404) et être un brouillon (409) ; l'identifiant de l'interface est attribué par le serveur, un champ id envoyé est ignoré.
 //	@Tags			components
 //	@Accept			json
 //	@Produce		json
@@ -1944,6 +1945,8 @@ func (h *Handler) assetCount(r *http.Request, channel string) int {
 //	@Success		200	{array}		model.AssetInterface
 //	@Success		201	{object}	model.AssetInterface
 //	@Failure		400	{object}	map[string]string
+//	@Failure		404	{object}	map[string]string	"asset introuvable"
+//	@Failure		409	{object}	map[string]string	"asset déjà soumis (RM19)"
 //	@Failure		500	{object}	map[string]string
 //	@Security		MyrToken
 //	@Router			/components/{id}/interfaces [get]
@@ -1983,7 +1986,7 @@ func (h *Handler) handleComponentInterfaces(w http.ResponseWriter, r *http.Reque
 // handleInterface modifie ou supprime une interface existante.
 //
 //	@Summary		Modifier ou supprimer une interface
-//	@Description	DELETE maintient l'invariant qu'un asset possède toujours au moins un slot virtuel (règle 13) : un nouveau slot virtuel est recréé si l'interface supprimée était physique et la dernière restante.
+//	@Description	DELETE maintient l'invariant qu'un asset possède toujours au moins un slot virtuel (règle 13) : un nouveau slot virtuel est recréé si l'interface supprimée était physique et la dernière restante. PATCH ne change jamais l'asset porteur : un asset_id différent est refusé (400).
 //	@Tags			components
 //	@Accept			json
 //	@Produce		json
@@ -1991,7 +1994,7 @@ func (h *Handler) handleComponentInterfaces(w http.ResponseWriter, r *http.Reque
 //	@Param			body	body		model.AssetInterface	false	"interface mise à jour — PATCH uniquement"
 //	@Success		200	{object}	model.AssetInterface
 //	@Success		204	"pas de contenu (DELETE)"
-//	@Failure		400	{object}	map[string]string
+//	@Failure		400	{object}	map[string]string	"changement d'asset porteur"
 //	@Failure		404	{object}	map[string]string
 //	@Security		MyrToken
 //	@Router			/interfaces/{id} [patch]
@@ -2185,7 +2188,8 @@ func jsonError(w http.ResponseWriter, msg string, code int) {
 // l'indisponibilité de la blockchain — non configurée (ErrBlockchainUnavailable)
 // ou injoignable (ErrBlockchainUnreachable), toutes deux transitoires et non des
 // erreurs de données (503) —, l'écriture sur le ledger sans identité signataire
-// (ErrSignerRequired, ADR-12, 403), la modification d'un asset soumis
+// (ErrSignerRequired, ADR-12, 403), l'asset ou l'interface introuvable
+// (ErrNotFound, 404), la modification d'un asset soumis
 // (ErrAssetSubmitted, RM19, 409), l'interface déjà engagée (RM09) ou la liaison
 // déjà existante (409), la licence refusée (catalogue ou RM03, 400) et la
 // liaison ou la composition refusée (RM10, liaison d'une interface à elle-même,
@@ -2201,6 +2205,8 @@ func (h *Handler) internalErr(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, model.ErrBlockchainUnavailable), errors.Is(err, model.ErrBlockchainUnreachable):
 		code, msg = http.StatusServiceUnavailable, err.Error()
+	case errors.Is(err, model.ErrNotFound):
+		code, msg = http.StatusNotFound, err.Error()
 	case errors.Is(err, model.ErrSignerRequired):
 		code, msg = http.StatusForbidden, err.Error()+" — reconnectez-vous avec votre identité (POST /api/identity/session)"
 	case errors.Is(err, model.ErrAssetSubmitted), errors.Is(err, model.ErrInterfaceInUse), errors.Is(err, model.ErrConnectionExists):
@@ -2209,7 +2215,8 @@ func (h *Handler) internalErr(w http.ResponseWriter, err error) {
 		code, msg = http.StatusRequestEntityTooLarge, err.Error()
 	case errors.Is(err, model.ErrUnknownLicense), errors.Is(err, model.ErrLicenseIncompatible),
 		errors.Is(err, model.ErrIncompatibleInterfaces), errors.Is(err, model.ErrSelfLink),
-		errors.Is(err, model.ErrConnectionNotInModule), errors.Is(err, model.ErrCyclicComposition):
+		errors.Is(err, model.ErrConnectionNotInModule), errors.Is(err, model.ErrCyclicComposition),
+		errors.Is(err, model.ErrInterfaceCarrierChange):
 		code, msg = http.StatusBadRequest, err.Error()
 	case h.debugErrors:
 		msg = err.Error()

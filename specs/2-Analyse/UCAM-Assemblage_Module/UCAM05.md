@@ -89,7 +89,7 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 8. Le module passe en état `submitted`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 40 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 41 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
@@ -98,14 +98,14 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 > - 🟡 [TestAddAssemblyToModule_RM51_InstanceLink_OK](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_InstanceLink_OK.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
 > - 🟡 [TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate](../../../docs/tests/domain-model/TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
 > - 🟡 [TestAddAssetToWorkspace_RM52_Cycle_Rejected](../../../docs/tests/domain-model/TestAddAssetToWorkspace_RM52_Cycle_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
+> - 🟡 [TestAssembly_UnknownAsset_Rejected](../../../docs/tests/domain-model/TestAssembly_UnknownAsset_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
 > - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.EnsureVirtualSlot`
 > - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.EnsureVirtualSlot`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`, `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_ParentID_NotFound_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_NotFound_Rejected.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.CreateModule`, `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_RM19_ForkOfSubmitted_Submittable](../../../docs/tests/domain-model/TestCreateModule_RM19_ForkOfSubmitted_Submittable.md) — déduit : teste `ModelService.CreateModule`, `ModelService.SubmitModule`
-> - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
-> - … et 25 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 26 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Composant sans interfaces définies

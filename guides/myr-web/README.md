@@ -209,6 +209,9 @@ Toujours dans cet ordre, sur un module en brouillon :
 | liaison déjà existante | `409` | `POST /api/connections` : une connexion directe relie déjà le même `from` au même `to` (RM50) | La retrouver dans `GET /api/connections` — myr-core ne la renvoie pas à votre place et n'en crée pas de copie |
 | liaison étrangère au module | `400` | `POST …/assemblies` : la connexion n'existe pas ou ne relie pas deux instances du module (RM51) | Créer d'abord les instances et la liaison entre elles |
 | composition cyclique | `400` | `POST …/instances` : l'asset ajouté est le module ou le contient (RM52) | — |
+| asset introuvable | `404` | `POST …/instances` ou `POST …/interfaces` : l'asset n'existe pas | Ne référencer que des assets existants |
+
+Les interfaces : l'identifiant est attribué par le serveur à la création (`POST …/interfaces`, un `id` envoyé est ignoré), et une interface ne change jamais d'asset porteur (`PATCH /api/interfaces/{id}` avec un autre `asset_id` : `400`).
 
 La même interface d'un composant reste libre dans ses **autres** instances : deux vis identiques se relient chacune à leur propre écrou. Une liaison créée sans `from_instance_id`/`to_instance_id` engage l'interface elle-même, quelle que soit l'instance : à éviter dans un module.
 
@@ -237,7 +240,7 @@ Une erreur interne (`500`) porte une référence : `{"error": "erreur interne (r
 | `400` | Requête invalide, licence refusée, rôle inconnu, liaison ou composition refusée (§ 4.1) |
 | `401` | Pas de session, ou jeton invalide ou expiré |
 | `403` | Droits insuffisants, identité inactive, écriture sans identité signataire |
-| `404` | Introuvable — y compris un brouillon demandé par un visiteur |
+| `404` | Introuvable — y compris un brouillon demandé par un visiteur, ou un asset inconnu référencé par une instance ou une interface |
 | `409` | Asset soumis (figé), demande déjà décidée ou déjà en attente, interface déjà engagée, liaison déjà existante (§ 4.1) |
 | `413` | Corps trop volumineux (§ 5.2) |
 | `429` | Trop de tentatives (§ 5.2) — « réessayez dans une minute » |

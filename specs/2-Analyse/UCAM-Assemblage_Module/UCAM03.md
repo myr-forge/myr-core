@@ -117,7 +117,7 @@ Une interface peut être créée de deux façons :
 4. La réponse `201 Created` retourne l'interface créée
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 97 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 99 déduit(s)
 > - 🟡 [TestRunModelInterfaceAdd_NominalCase](../../../docs/tests/adapters-in-cli/TestRunModelInterfaceAdd_NominalCase.md) — déduit : teste commande `myr model interface add`
 > - 🟡 [TestRunModelInterfaceAdd_ServiceError_Rejected](../../../docs/tests/adapters-in-cli/TestRunModelInterfaceAdd_ServiceError_Rejected.md) — déduit : teste commande `myr model interface add`
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
@@ -133,7 +133,7 @@ Une interface peut être créée de deux façons :
 > - 🟡 [TestComponent_AddAssembly_MissingConnectionID](../../../docs/tests/adapters-in-rest/TestComponent_AddAssembly_MissingConnectionID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddInstance](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
-> - … et 82 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 84 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif A2 — Ajustement des valeurs déduites
@@ -338,6 +338,7 @@ end
 ## Liens
 
 **Étape suivante — conception**
+- **API_REST** : [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](../../3-Conception/API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29)
 - **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29) · [§ 3. Diagramme d'états — Model3D](../../3-Conception/Architecture_Composition.md#3.%20Diagramme%20d'états%20—%20Model3D)
 - **Conception_intro** : [§ ADR-02 — Interfaces enregistrées sur la blockchain via le cycle brouillon → soumission (généralisé à tout asset)](../../3-Conception/Conception_intro.md#ADR-02%20—%20Interfaces%20enregistrées%20sur%20la%20blockchain%20via%20le%20cycle%20brouillon%20→%20soumission%20%28généralisé%20à%20tout%20asset%29)
 - **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 3.1 `myr model add`](../../3-Conception/DC_CLI_Model.md#3.1%20`myr%20model%20add`) · [§ 3.2 `myr model interface add`](../../3-Conception/DC_CLI_Model.md#3.2%20`myr%20model%20interface%20add`) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case)
