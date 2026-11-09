@@ -35,6 +35,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -194,6 +195,25 @@ func main() {
 		WithFabricConnected(fabricConnected).
 		WithBuildDate(BuildDate).
 		WithVersion(version)
+
+	// MYR_TRUSTED_PROXIES : proxys (adresses IP ou plages CIDR, séparées par des
+	// virgules) dont l'en-tête X-Forwarded-For désigne le client, pour la limite
+	// de débit. Par défaut, la boucle locale : un nginx sur ce serveur. Quand
+	// myr-web et son proxy tournent sur un autre serveur, y mettre son adresse.
+	if v, ok := os.LookupEnv("MYR_TRUSTED_PROXIES"); ok {
+		if _, err := handler.WithTrustedProxies(strings.Split(v, ",")); err != nil {
+			log.Fatalf("MYR_TRUSTED_PROXIES : %v", err)
+		}
+	}
+	// MYR_MAX_UPLOAD_MB : taille maximale d'un envoi de fichier, en Mo (256 par
+	// défaut) — le fichier n'est reçu que pour en calculer l'empreinte (RM42).
+	if v := os.Getenv("MYR_MAX_UPLOAD_MB"); v != "" {
+		mb, err := strconv.Atoi(v)
+		if err != nil || mb <= 0 {
+			log.Fatalf("MYR_MAX_UPLOAD_MB : entier positif attendu, obtenu %q", v)
+		}
+		handler = handler.WithMaxUpload(int64(mb) << 20)
+	}
 
 	// MYR_DEBUG_ERRORS=1 (serveurs de test uniquement) : le détail des erreurs
 	// internes est renvoyé au client, en plus de la référence toujours présente.

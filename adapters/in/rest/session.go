@@ -106,10 +106,21 @@ func (s *sessionStore) create(pseudo, handle, role, channel string) (*myrSession
 		ExpiresAt: time.Now().Add(sessionTTL),
 	}
 	s.mu.Lock()
+	s.purgeExpired(time.Now())
 	s.data[sess.Token] = sess
 	s.mu.Unlock()
 	s.saveToFile()
 	return sess, nil
+}
+
+// purgeExpired retire de la mémoire les sessions expirées : get les refuse
+// déjà, mais elles s'accumulaient sans fin (R-06). L'appelant détient s.mu.
+func (s *sessionStore) purgeExpired(now time.Time) {
+	for token, sess := range s.data {
+		if !now.Before(sess.ExpiresAt) {
+			delete(s.data, token)
+		}
+	}
 }
 
 // setNetwork met à jour le réseau actif d'une session existante.

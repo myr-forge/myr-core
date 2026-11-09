@@ -1,6 +1,7 @@
 package model_test
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -929,6 +930,26 @@ func TestAddAssemblyLink_UnknownInterface(t *testing.T) {
 // ══════════════════════════════════════════════════════════════════════════════
 // Tests — miniatures
 // ══════════════════════════════════════════════════════════════════════════════
+
+// / @brief  SaveThumbnail refuse une image au-delà de MaxThumbnailBytes, et accepte la taille limite (R-07)
+// / @input  data URL d'une image de MaxThumbnailBytes octets, puis d'une image de MaxThumbnailBytes + 3 octets
+// / @expect la première est enregistrée ; la seconde est refusée (ErrThumbnailTooLarge) et la miniature reste la première
+func TestThumbnail_R07_TooLarge_Rejected(t *testing.T) {
+	svc := model.NewService(newMockBC(), &mockFS{}).WithThumbStore(newMockThumbStore())
+	encode := func(n int) string {
+		return "data:image/png;base64," + base64.StdEncoding.EncodeToString(make([]byte, n))
+	}
+	limit := encode(model.MaxThumbnailBytes)
+	if err := svc.SaveThumbnail("asset1", limit); err != nil {
+		t.Fatalf("taille limite : %v", err)
+	}
+	if err := svc.SaveThumbnail("asset1", encode(model.MaxThumbnailBytes+3)); !errors.Is(err, model.ErrThumbnailTooLarge) {
+		t.Errorf("ErrThumbnailTooLarge attendu, obtenu %v", err)
+	}
+	if got, _ := svc.GetThumbnail("asset1"); got != limit {
+		t.Error("la miniature enregistrée ne doit pas avoir changé")
+	}
+}
 
 // / @brief  Sauvegarde puis récupération d'une miniature (data URL)
 // / @input  Service avec mockThumbStore, dataURL "data:image/png;base64,abc123" pour "asset1"

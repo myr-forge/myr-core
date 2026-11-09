@@ -36,6 +36,10 @@ var ErrAssetSubmitted = errors.New("model: asset soumis, immuable — créez un 
 // n'existe pas dans le catalogue.
 var ErrUnknownLicense = errors.New("model: licence absente du catalogue")
 
+// ErrThumbnailTooLarge est retournée par SaveThumbnail pour une image
+// dépassant MaxThumbnailBytes.
+var ErrThumbnailTooLarge = errors.New("model: miniature trop volumineuse")
+
 // ErrLicenseIncompatible est retournée quand la licence proposée pour un
 // asset dérivé n'est pas compatible avec celle de son parent (RM03).
 var ErrLicenseIncompatible = errors.New("model: incompatibilité de licence avec l'asset parent")

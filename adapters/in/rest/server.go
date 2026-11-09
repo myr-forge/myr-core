@@ -60,7 +60,30 @@ func (s *Server) Start() error {
 		return err
 	}
 	log.Printf("Serveur REST démarré sur http://%s\n", s.addr)
-	return http.ListenAndServe(s.addr, mux)
+	return newHTTPServer(s.addr, mux).ListenAndServe()
+}
+
+// Délais du serveur HTTP (R-07) : un client qui envoie ses en-têtes ou son
+// corps au compte-gouttes ne bloque pas une connexion indéfiniment. Les délais
+// de lecture et d'écriture laissent passer un envoi de fichier de taille
+// maximale sur un lien lent, et une transaction Fabric (ENF02).
+const (
+	readHeaderTimeout = 10 * time.Second
+	readTimeout       = 10 * time.Minute
+	writeTimeout      = 15 * time.Minute
+	idleTimeout       = 2 * time.Minute
+)
+
+// newHTTPServer retourne le serveur HTTP de l'API, avec ses délais.
+func newHTTPServer(addr string, h http.Handler) *http.Server {
+	return &http.Server{
+		Addr:              addr,
+		Handler:           h,
+		ReadHeaderTimeout: readHeaderTimeout,
+		ReadTimeout:       readTimeout,
+		WriteTimeout:      writeTimeout,
+		IdleTimeout:       idleTimeout,
+	}
 }
 
 // StartWithShutdown démarre le serveur et se termine proprement quand ctx est annulé.
@@ -70,10 +93,7 @@ func (s *Server) StartWithShutdown(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	srv := &http.Server{
-		Addr:    s.addr,
-		Handler: mux,
-	}
+	srv := newHTTPServer(s.addr, mux)
 	log.Printf("Serveur REST démarré sur http://%s\n", s.addr)
 
 	errCh := make(chan error, 1)
@@ -158,5 +178,5 @@ func (s *Server) buildMux() (http.Handler, error) {
 	mux.HandleFunc("/api/admin/sessions", adminOnly(s.handler.handleAdminSessions))
 	mux.HandleFunc("/api/admin/sessions/", adminOnly(s.handler.handleAdminSession))
 
-	return secureHeaders(mux), nil
+	return secureHeaders(s.handler.limitBodies(mux)), nil
 }

@@ -102,11 +102,18 @@ func (h *Handler) handleIdentityWallets(w http.ResponseWriter, r *http.Request) 
 //	@Param		body	body		object	true	"name, secret, org_id requis"
 //	@Success	200	{object}	walletDTO
 //	@Failure	400	{object}	map[string]string
+//	@Failure	429	{object}	map[string]string	"trop de tentatives (10 par minute et par adresse)"
 //	@Failure	503	{object}	map[string]string
 //	@Router		/identity/enroll [post]
 func (h *Handler) handleIdentityEnroll(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	// Route publique : sans limite, on pourrait y essayer des secrets
+	// d'enrôlement par force brute (R-06).
+	if !h.authLimiter.allow(h.clientIP(r)) {
+		jsonError(w, "trop de tentatives, réessayez dans une minute", http.StatusTooManyRequests)
 		return
 	}
 	if h.identitySvc == nil {
@@ -130,7 +137,7 @@ func (h *Handler) handleIdentityEnroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entry, err := h.identitySvc.Enroll(context.Background(), req.Name, req.Secret, req.OrgID)
+	entry, err := h.identitySvc.Enroll(r.Context(), req.Name, req.Secret, req.OrgID)
 	if err != nil {
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		return
@@ -173,7 +180,7 @@ func (h *Handler) handleIdentityStatus(w http.ResponseWriter, r *http.Request) {
 		Name:   parts[0],
 		OrgID:  parts[1] + "MSP",
 	}
-	status, err := h.identitySvc.GetStatus(context.Background(), we)
+	status, err := h.identitySvc.GetStatus(r.Context(), we)
 	if err != nil {
 		h.internalErr(w, err)
 		return
@@ -212,7 +219,7 @@ func (h *Handler) handleIdentityRequest(w http.ResponseWriter, r *http.Request) 
 		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	if !h.authLimiter.allow(clientIP(r)) {
+	if !h.authLimiter.allow(h.clientIP(r)) {
 		jsonError(w, "trop de tentatives, réessayez dans une minute", http.StatusTooManyRequests)
 		return
 	}
@@ -533,7 +540,7 @@ func (h *Handler) handleIdentitySession(w http.ResponseWriter, r *http.Request) 
 		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	if !h.authLimiter.allow(clientIP(r)) {
+	if !h.authLimiter.allow(h.clientIP(r)) {
 		jsonError(w, "trop de tentatives, réessayez dans une minute", http.StatusTooManyRequests)
 		return
 	}
@@ -559,7 +566,7 @@ func (h *Handler) handleIdentitySession(w http.ResponseWriter, r *http.Request) 
 		jsonError(w, "service identité non configuré", http.StatusServiceUnavailable)
 		return
 	}
-	entry, err := h.identitySvc.Enroll(context.Background(), req.Name, req.Secret, req.OrgID)
+	entry, err := h.identitySvc.Enroll(r.Context(), req.Name, req.Secret, req.OrgID)
 	if err != nil {
 		jsonError(w, err.Error(), http.StatusUnauthorized)
 		return
@@ -602,7 +609,7 @@ func (h *Handler) handleIdentityGuest(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	if !h.authLimiter.allow(clientIP(r)) {
+	if !h.authLimiter.allow(h.clientIP(r)) {
 		jsonError(w, "trop de tentatives, réessayez dans une minute", http.StatusTooManyRequests)
 		return
 	}

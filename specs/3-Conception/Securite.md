@@ -4,9 +4,11 @@ tags:
   - type/conception
   - rm/RM07
   - rm/RM19
+  - rm/RM42
   - rm/RM46
   - rm/RM47
   - rm/RM48
+  - enf/ENF02
   - enf/ENF10
   - enf/ENF12
   - enf/ENF18
@@ -206,13 +208,30 @@ Appliqués à toutes les réponses par le middleware `secureHeaders` :
 
 ## 8. Rate limiting
 
-`authLimiter` (`ipRateLimiter`, `adapters/in/rest/handlers.go`) limite à **10 tentatives par minute par IP** (`clientIP(r)`) sur les routes sensibles :
+`authLimiter` (`ipRateLimiter`, `adapters/in/rest/handlers.go`) limite à **10 tentatives par minute par adresse IP du client** sur les routes publiques sensibles :
 
 - `POST /api/identity/request`
 - `POST /api/identity/session`
 - `POST /api/identity/guest`
+- `POST /api/identity/enroll` (essais de secrets d'enrôlement par force brute)
 
 Au-delà, `HTTP 429` est retourné.
+
+**Adresse du client** (`clientIP`, `adapters/in/rest/limits.go`) : l'adresse réseau de la connexion, sauf si celle-ci vient d'un **proxy de confiance** (`MYR_TRUSTED_PROXIES`, adresses IP ou plages CIDR ; par défaut la boucle locale, `127.0.0.0/8` et `::1`, c'est-à-dire un proxy inverse installé sur le même serveur). Dans ce cas, le client est la dernière adresse de `X-Forwarded-For` qui n'est pas elle-même un proxy de confiance : les adresses plus à gauche sont fournies par le client et ne sont jamais crues. Quand myr-web et son proxy inverse tournent sur un autre serveur que `myr-api`, l'adresse de ce proxy doit figurer dans `MYR_TRUSTED_PROXIES` ; un client qui joint `myr-api` directement ne peut pas se faire passer pour un autre.
+
+### 8.1 Bornes des requêtes
+
+| Borne | Valeur | Effet |
+|-------|--------|-------|
+| Corps JSON | 1 Mo | `413` au-delà |
+| Miniature (`/thumbnail`) | image de 2 Mo (`model.MaxThumbnailBytes`), soit un corps de 3 Mo encodé en base64 | `413` au-delà |
+| Envoi de fichier (multipart) | `MYR_MAX_UPLOAD_MB`, 256 Mo par défaut — le fichier n'est reçu que pour son empreinte (RM42) | `413` au-delà, y compris pour les fichiers temporaires de l'analyse multipart |
+| En-têtes HTTP | 10 s pour les recevoir | connexion fermée (protection Slowloris) |
+| Lecture / écriture d'une requête | 10 min / 15 min | couvre un envoi de taille maximale sur un lien lent et une transaction Fabric (ENF02) |
+| Connexion inactive | 2 min | connexion fermée |
+| Appel à la CA | 30 s | erreur renvoyée au client au lieu d'une requête bloquée ; la requête est aussi interrompue si le client se déconnecte |
+| `GET /api/status` (public) | nombre d'assets recalculé au plus toutes les 30 s par canal | un appel répété ne parcourt plus le ledger à chaque fois |
+| Sessions REST | sessions expirées retirées de la mémoire à chaque création de session | la mémoire ne croît plus avec les sessions expirées |
 
 ---
 
@@ -220,7 +239,8 @@ Au-delà, `HTTP 429` est retourné.
 
 | Surface | Risque | Mitigation attendue |
 |---------|--------|-----------|
-| Enrôlement/connexion | Brute force du secret CA sur `POST /api/identity/session` | Rate limiting 10/min/IP (`authLimiter`, § 8) |
+| Enrôlement/connexion | Brute force du secret CA sur `POST /api/identity/session` ou `POST /api/identity/enroll` | Rate limiting 10/min par adresse du client (`authLimiter`, § 8) ; `X-Forwarded-For` cru seulement d'un proxy de confiance |
+| Corps de requête, connexions lentes | Saturation de la mémoire ou du disque, connexions tenues indéfiniment (Slowloris) | Bornes de taille et délais du serveur HTTP (§ 8.1) |
 | Messages d'erreur interne | Le détail d'une erreur révèle l'état interne au client : identités déjà enregistrées (énumération des pseudos par `POST /api/identity/request`), chemins, erreurs d'infrastructure | Réponse `500` générique portant une référence (`ref`, en-tête `X-Myr-Error-Ref`) ; détail dans le journal serveur sous cette référence, renvoyé au client seulement sur un serveur de test démarré avec `MYR_DEBUG_ERRORS=1` (OWASP A05) |
 | Token de session | Vol de token (`X-Myr-Token`) | Pas de recommandation de stockage client imposée par `myr` ; comparaison serveur en temps constant |
 | `owner_id` | Client peut forger n'importe quel `owner_id` en lecture (`GET /api/components?owner_id=`) et en écriture (`POST /api/components`) | À la création, le propriétaire est l'identité de la session (`pseudo@org`), jamais la valeur fournie par le client ; à la soumission, le chaincode n'accepte l'asset que si son propriétaire est le signataire de la transaction (ADR-12, OWASP A01, `UCA06`) |
@@ -244,7 +264,8 @@ Au-delà, `HTTP 429` est retourné.
 - [§ Révocation](Securite.md#Révocation) → [REST /api/admin/sessions](../../docs/code/routes/REST%20api-admin-sessions.md)
 - [§ Cycle de vie d'une identité](Securite.md#Cycle%20de%20vie%20d'une%20identité) → [REST /api/identity/requests](../../docs/code/routes/REST%20api-identity-requests.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
 - [§ Rôles et permissions](Securite.md#Rôles%20et%20permissions) → [CLI myr identity set-role](../../docs/code/commandes/CLI%20myr-identity-set-role.md) · [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md)
-- [§ 8. Rate limiting](Securite.md#8.%20Rate%20limiting) → [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
-- [§ 9. Surfaces d'attaque et mitigations](Securite.md#9.%20Surfaces%20d'attaque%20et%20mitigations) → [REST /api/admin/sessions](../../docs/code/routes/REST%20api-admin-sessions.md) · [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [CLI myr network create](../../docs/code/commandes/CLI%20myr-network-create.md)
+- [§ 8. Rate limiting](Securite.md#8.%20Rate%20limiting) → [REST /api/identity/enroll](../../docs/code/routes/REST%20api-identity-enroll.md) · [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
+- [§ 8.1 Bornes des requêtes](Securite.md#8.1%20Bornes%20des%20requêtes) → [REST /api/status](../../docs/code/routes/REST%20api-status.md)
+- [§ 9. Surfaces d'attaque et mitigations](Securite.md#9.%20Surfaces%20d'attaque%20et%20mitigations) → [REST /api/admin/sessions](../../docs/code/routes/REST%20api-admin-sessions.md) · [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [REST /api/identity/enroll](../../docs/code/routes/REST%20api-identity-enroll.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [CLI myr network create](../../docs/code/commandes/CLI%20myr-network-create.md)
 
 <!-- liens-obsidian:end -->

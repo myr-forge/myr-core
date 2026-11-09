@@ -4,6 +4,7 @@ package model
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -488,7 +489,27 @@ func (s *Service) SaveThumbnail(assetID, dataURL string) error {
 	if s.thumbStore == nil {
 		return fmt.Errorf("thumbnail store non configuré")
 	}
+	if err := checkThumbnailSize(dataURL); err != nil {
+		return err
+	}
 	return s.thumbStore.SaveThumbnail(assetID, dataURL)
+}
+
+// MaxThumbnailBytes borne la taille de l'image d'une miniature.
+const MaxThumbnailBytes = 2 << 20
+
+// checkThumbnailSize refuse une miniature dont l'image dépasserait
+// MaxThumbnailBytes (data URL : en-tête, puis image encodée en base64).
+func checkThumbnailSize(dataURL string) error {
+	payload := dataURL
+	if _, data, ok := strings.Cut(dataURL, ","); ok {
+		payload = data
+	}
+	padding := len(payload) - len(strings.TrimRight(payload, "="))
+	if n := base64.StdEncoding.DecodedLen(len(payload)) - padding; n > MaxThumbnailBytes {
+		return fmt.Errorf("%w : %d octets, %d au plus", ErrThumbnailTooLarge, n, MaxThumbnailBytes)
+	}
+	return nil
 }
 
 func (s *Service) GetThumbnail(assetID string) (string, error) {

@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"myr-core/domain/identity"
 )
@@ -37,6 +38,10 @@ type CAClient struct {
 	tlsPool   *x509.CertPool
 	http      *http.Client
 }
+
+// caTimeout borne chaque appel à la CA : une CA qui ne répond plus ne bloque
+// pas indéfiniment la requête qui l'attend (R-07).
+const caTimeout = 30 * time.Second
 
 // NewCAClient construit un CAClient depuis le Config du réseau actif.
 // Retourne nil (sans erreur) si CAEndpoint n'est pas configuré.
@@ -97,6 +102,7 @@ func NewCAClient(cfg Config) (*CAClient, error) {
 		adminKey:  adminKey,
 		tlsPool:   pool,
 		http: &http.Client{
+			Timeout:   caTimeout,
 			Transport: &http.Transport{TLSClientConfig: tlsCfg},
 		},
 	}, nil
@@ -249,6 +255,7 @@ type caEnrollReq struct {
 	Profile            string `json:"profile"`
 	CAName             string `json:"caname,omitempty"`
 }
+
 // caEnrollResult est le résultat d'un enrôlement ou d'un ré-enrôlement réussi.
 type caEnrollResult struct {
 	Cert       string `json:"Cert"`

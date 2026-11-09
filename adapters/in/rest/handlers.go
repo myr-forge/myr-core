@@ -11,6 +11,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -90,19 +91,6 @@ func (l *ipRateLimiter) cleanup() {
 	}
 }
 
-func clientIP(r *http.Request) string {
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		if idx := strings.IndexByte(xff, ','); idx != -1 {
-			return strings.TrimSpace(xff[:idx])
-		}
-		return strings.TrimSpace(xff)
-	}
-	if host, _, ok := strings.Cut(r.RemoteAddr, ":"); ok {
-		return host
-	}
-	return r.RemoteAddr
-}
-
 // blockchainRouter sélectionne le bon BlockchainPort pour un réseau donné.
 // Implémenté par fabric.NetworkPool — défini ici pour éviter l'import circulaire
 // entre adapters/in et adapters/out.
@@ -127,6 +115,10 @@ type Handler struct {
 	netInfo      NetworkInfo
 	authLimiter  *ipRateLimiter
 
+	trustedProxies []netip.Prefix // proxys dont X-Forwarded-For est cru (limits.go)
+	maxUpload      int64          // taille maximale d'un envoi de fichier (octets)
+	assetCounts    assetCountCache
+
 	// Phase 2 : multi-réseau
 	bcRouter         blockchainRouter      // nil en mode legacy (réseau unique)
 	fileStore        model.FileStoragePort // toujours nil en pratique : myr-core ne persiste aucun fichier (RM42) — port conservé pour interchangeabilité future
@@ -147,6 +139,9 @@ func NewHandler(svc model.ModelService, ts model.ThumbnailStore, is model.Interf
 		ifaceStore:  is,
 		sessions:    newSessionStore(),
 		authLimiter: newIPRateLimiter(10, time.Minute), // 10 tentatives / minute / IP
+
+		trustedProxies: loopbackProxies,
+		maxUpload:      DefaultMaxUpload,
 	}
 }
 
@@ -1836,18 +1831,49 @@ func (h *Handler) handlePing(w http.ResponseWriter, r *http.Request) {
 //	@Router		/status [get]
 func (h *Handler) handleStatus(w http.ResponseWriter, r *http.Request) {
 	channel := h.channelFor(r)
-	var assetCount int
-	if all, err := h.svcFor(r).List(channel); err == nil {
-		assetCount = len(all)
-	}
 	jsonOK(w, statusResponse{
 		Mode:      "blockchain",
 		Connected: h.fabricConnected,
-		Assets:    assetCount,
+		Assets:    h.assetCount(r, channel),
 		Channel:   channel,
 		Peer:      h.netInfo.Peer,
 		Network:   h.netInfo.Network,
 	})
+}
+
+// statusCountTTL est la durée pendant laquelle /api/status réutilise le nombre
+// d'assets d'un canal : la route est publique, chaque calcul parcourt le ledger.
+const statusCountTTL = 30 * time.Second
+
+// assetCountCache retient, par canal, le dernier nombre d'assets calculé.
+type assetCountCache struct {
+	mu     sync.Mutex
+	counts map[string]cachedCount
+}
+
+type cachedCount struct {
+	n  int
+	at time.Time
+}
+
+// assetCount retourne le nombre d'assets du canal, recalculé au plus une fois
+// par statusCountTTL.
+func (h *Handler) assetCount(r *http.Request, channel string) int {
+	c := &h.assetCounts
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if cached, ok := c.counts[channel]; ok && time.Since(cached.at) < statusCountTTL {
+		return cached.n
+	}
+	n := 0
+	if all, err := h.svcFor(r).List(channel); err == nil {
+		n = len(all)
+	}
+	if c.counts == nil {
+		c.counts = make(map[string]cachedCount)
+	}
+	c.counts[channel] = cachedCount{n: n, at: time.Now()}
+	return n
 }
 
 // ── /api/components/:id/interfaces ───────────────────────────────────────────────
@@ -2122,6 +2148,8 @@ func (h *Handler) internalErr(w http.ResponseWriter, err error) {
 		code, msg = http.StatusForbidden, err.Error()+" — reconnectez-vous avec votre identité (POST /api/identity/session)"
 	case errors.Is(err, model.ErrAssetSubmitted):
 		code, msg = http.StatusConflict, err.Error()
+	case errors.Is(err, model.ErrThumbnailTooLarge):
+		code, msg = http.StatusRequestEntityTooLarge, err.Error()
 	case errors.Is(err, model.ErrUnknownLicense), errors.Is(err, model.ErrLicenseIncompatible):
 		code, msg = http.StatusBadRequest, err.Error()
 	case h.debugErrors:
