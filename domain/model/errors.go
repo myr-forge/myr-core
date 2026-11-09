@@ -85,3 +85,11 @@ var (
 	// ErrInterfaceCarrierChange : une interface ne change pas d'asset porteur.
 	ErrInterfaceCarrierChange = errors.New("model: une interface ne change pas d'asset porteur")
 )
+
+// Création d'un asset : ce que le client doit préciser, sans valeur par défaut.
+var (
+	// ErrInvalidCategory : catégorie absente ou inconnue (RM02).
+	ErrInvalidCategory = errors.New("model: catégorie d'asset absente ou inconnue")
+	// ErrChannelRequired : canal cible non précisé.
+	ErrChannelRequired = errors.New("model: canal cible non précisé")
+)

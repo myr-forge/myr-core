@@ -345,7 +345,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "Crée un asset (catégorie par défaut \"base\"). Le fichier CAO 3D est optionnel (champ \"file\", ou \"stl\" pour rétrocompatibilité) ; une miniature base64 peut être fournie, le serveur n'en dérive aucune de lui-même. Le composant est toujours créé en brouillon local (\"status\":\"draft\", aucune transaction blockchain) — voir POST /components/{id}/submit pour l'engager explicitement sur la blockchain.",
+                "description": "Crée un asset. La catégorie (RM02) et le canal sont obligatoires : aucune valeur par défaut, 400 s'ils manquent. Le fichier CAO 3D est optionnel (champ \"file\", ou \"stl\" pour rétrocompatibilité) ; une miniature base64 peut être fournie, le serveur n'en dérive aucune de lui-même. Le composant est toujours créé en brouillon local (\"status\":\"draft\", aucune transaction blockchain) — voir POST /components/{id}/submit pour l'engager explicitement sur la blockchain.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -372,9 +372,10 @@
                     },
                     {
                         "type": "string",
-                        "description": "catégorie (défaut: base)",
+                        "description": "catégorie (RM02) : base, amelioration, variation, adaptation, derivation, extension ou regression",
                         "name": "category",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -390,9 +391,10 @@
                     },
                     {
                         "type": "string",
-                        "description": "canal cible (défaut: canal de la session)",
+                        "description": "canal cible",
                         "name": "channel_id",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "string",

@@ -5,7 +5,6 @@ package model
 // Il est implémenté par Service et consommé par les adapters (GUI, CLI, TUI, API).
 type ModelService interface {
 	// Compatibilité CLI / TUI
-	Add(filePath, name, channelID, ownerID string, tags []string) (*Model3D, error)
 	// Get récupère un modèle par son ID sur le canal indiqué.
 	// channelID="" utilise le canal actif de la session ou le canal par défaut.
 	Get(id, channelID string) (*Model3D, error)

@@ -25,7 +25,6 @@ type mockSvc struct {
 	get                      func(id string) (*model.Model3D, error)
 	list                     func(channelID string) ([]*model.Model3D, error)
 	verify                   func(id string) (bool, string, error)
-	add                      func(filePath, name, channelID, ownerID string, tags []string) (*model.Model3D, error)
 	remove                   func(id string) error
 	updateAsset              func(req model.UpdateRequest) (*model.Model3D, error)
 	addConnection            func(from, to, label string) (*model.Connection, error)
@@ -86,12 +85,6 @@ func (m *mockSvc) List(channelID string) ([]*model.Model3D, error) {
 		return m.list(channelID)
 	}
 	return nil, nil
-}
-func (m *mockSvc) Add(filePath, name, channelID, ownerID string, tags []string) (*model.Model3D, error) {
-	if m.add != nil {
-		return m.add(filePath, name, channelID, ownerID, tags)
-	}
-	return &model.Model3D{ID: "x", Name: name}, nil
 }
 func (m *mockSvc) Remove(id string) error {
 	if m.remove != nil {
@@ -1180,27 +1173,33 @@ func TestComponents_POST_ServiceError(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que POST /api/components sans catégorie applique CategoryBase par défaut
-/// @input  POST /api/components, multipart avec name="Composant" uniquement
-/// @expect HTTP 201, AddFull appelé avec Category=CategoryBase
-func TestComponents_POST_CategoryDefault(t *testing.T) {
+/// @brief  POST /api/components ne choisit ni la catégorie ni le canal à la place du client ; leur absence est refusée en 400 (RM02)
+/// @input  POST /api/components sans catégorie ni canal, puis avec la catégorie seule ; le service refuse
+/// @expect HTTP 400 ; AddFull reçoit la catégorie envoyée (ou vide) et un canal vide
+func TestComponents_POST_RM02_NoDefaultCategoryOrChannel(t *testing.T) {
 	var capturedReq model.AddRequest
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
 		capturedReq = req
-		return &model.Model3D{ID: "c5", Name: req.Name, CreatedAt: time.Now()}, nil
+		if !req.Category.Valid() {
+			return nil, model.ErrInvalidCategory
+		}
+		return nil, model.ErrChannelRequired
 	}}
-	body, ct := buildMultipartForm(t, map[string]string{"name": "Composant"}, "", "", nil)
-	req := httptest.NewRequest(http.MethodPost, "/api/components", body)
-	req.Header.Set("Content-Type", ct)
-	w := httptest.NewRecorder()
 	mux := newTestMux(t, svc)
-	req.Header.Set("X-Myr-Token", loginToken(t, mux))
-	mux.ServeHTTP(w, req)
-	if w.Code != http.StatusCreated {
-		t.Fatalf("got %d, want 201", w.Code)
-	}
-	if capturedReq.Category != model.CategoryBase {
-		t.Errorf("Category: got %q, want %q", capturedReq.Category, model.CategoryBase)
+	token := loginToken(t, mux)
+	for _, fields := range []map[string]string{{"name": "Composant"}, {"name": "Composant", "category": "base"}} {
+		body, ct := buildMultipartForm(t, fields, "", "", nil)
+		req := httptest.NewRequest(http.MethodPost, "/api/components", body)
+		req.Header.Set("Content-Type", ct)
+		req.Header.Set("X-Myr-Token", token)
+		w := httptest.NewRecorder()
+		mux.ServeHTTP(w, req)
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("%v : got %d, want 400 (body: %s)", fields, w.Code, w.Body.String())
+		}
+		if capturedReq.Category != model.Category(fields["category"]) || capturedReq.ChannelID != "" {
+			t.Errorf("%v : aucune valeur par défaut attendue, reçu catégorie %q, canal %q", fields, capturedReq.Category, capturedReq.ChannelID)
+		}
 	}
 }
 

@@ -83,7 +83,7 @@ La particularité de l'extension est que les **interfaces du composant de base s
 10. L'API retourne `201 Created` avec le nouvel asset.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 40 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 47 déduit(s)
 > - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestAddAssemblyToModule_RM51_Component_StaysComponent](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_Component_StaysComponent.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_AllFields](../../../docs/tests/domain-model/TestAddFull_AllFields.md) — déduit : teste `ModelService.AddFull`
@@ -92,14 +92,14 @@ La particularité de l'extension est que les **interfaces du composant de base s
 > - 🟡 [TestAddFull_NilBlockchain_StillWorks](../../../docs/tests/domain-model/TestAddFull_NilBlockchain_StillWorks.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_NilDraftStore_Rejected](../../../docs/tests/domain-model/TestAddFull_NilDraftStore_Rejected.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_NoFile_NoVersionNoHash](../../../docs/tests/domain-model/TestAddFull_NoFile_NoVersionNoHash.md) — déduit : teste `ModelService.AddFull`
+> - 🟡 [TestAddFull_RM02_CategoryRequired_Rejected](../../../docs/tests/domain-model/TestAddFull_RM02_CategoryRequired_Rejected.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_RM19_DerivedFromSubmittedModule_CopiesComposition](../../../docs/tests/domain-model/TestAddFull_RM19_DerivedFromSubmittedModule_CopiesComposition.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_STLAndSTEP_BothAccepted](../../../docs/tests/domain-model/TestAddFull_STLAndSTEP_BothAccepted.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_WithFile_HashAndVersionCreated](../../../docs/tests/domain-model/TestAddFull_WithFile_HashAndVersionCreated.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_WithParent](../../../docs/tests/domain-model/TestAddFull_WithParent.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddInterface_ClientID_NoOverwrite](../../../docs/tests/domain-model/TestAddInterface_ClientID_NoOverwrite.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestAssembly_UnknownAsset_Rejected](../../../docs/tests/domain-model/TestAssembly_UnknownAsset_Rejected.md) — déduit : teste `ModelService.AddInterface`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.AddFull`
-> - … et 25 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 32 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Extension sans fichier 3D (composant virtuel/numérique)

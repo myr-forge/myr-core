@@ -1,3 +1,7 @@
+---
+tags:
+  - rm/RM02
+---
 ﻿---
 categorie: Composant Ecriture
 titre: "Ajout d'un composant Physique"
@@ -68,6 +72,11 @@ Ajout d'une création de l'utilisateur sous forme de composant physique (pièce 
 3. Les métadonnées géométriques (dimensions, volume) sont extraites automatiquement selon le format
 4. Les métadonnées non extractibles automatiquement (description, licence) sont renseignées explicitement
 5. La transaction est soumise normalement
+
+### Flux erreur — Catégorie ou canal non précisés
+
+1. La demande ne précise pas la catégorie de l'asset (RM02), en donne une inconnue, ou ne précise pas le canal cible
+2. La création est refusée (API : 400) : le système ne choisit ni catégorie ni canal à la place du demandeur
 
 ### Flux erreur — Hash déjà existant
 

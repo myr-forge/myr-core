@@ -114,7 +114,7 @@ Voir § 5 pour la table de correspondance complète entre méthode du service do
 ### 3.1 `myr model add`
 
 ```
-myr model add <file> --name <nom> --channel <id> [--category <cat>] [--parent <id>] [--license <id>] [--description <texte>] [--tags <a,b>] [--owner-id <id>] [--draft]
+myr model add <file> --name <nom> --channel <id> --category <cat> [--parent <id>] [--license <id>] [--description <texte>] [--tags <a,b>] [--owner-id <id>] [--draft]
 ```
 
 Appelle `modelSvc.AddFull(AddRequest{...})`, qui expose `Category`, `ParentID`, `LicenseID`, `Description` en plus de `Name`/`Channel`/`Tags` — le strict équivalent CLI de `POST /api/components` (voir UCCE01, UCCE03, UCCE04, UCCE05 en `2-Analyse`).

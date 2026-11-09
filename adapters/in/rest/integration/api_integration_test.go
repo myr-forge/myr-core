@@ -312,11 +312,14 @@ func decodeBody(t *testing.T, resp *http.Response, v any) {
 	}
 }
 
-// multipartBody construit un corps multipart minimal pour les tests de composants.
+// multipartBody construit un corps multipart minimal pour les tests de composants :
+// nom, catégorie et canal, que le serveur ne choisit jamais à la place du client.
 func multipartBody(name string) (string, string) {
 	boundary := "testboundary"
-	body := fmt.Sprintf("--%s\r\nContent-Disposition: form-data; name=\"name\"\r\n\r\n%s\r\n--%s--\r\n",
-		boundary, name, boundary)
+	field := func(k, v string) string {
+		return fmt.Sprintf("--%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n", boundary, k, v)
+	}
+	body := field("name", name) + field("category", "base") + field("channel_id", "ch-integration") + "--" + boundary + "--\r\n"
 	ct := "multipart/form-data; boundary=" + boundary
 	return body, ct
 }
@@ -530,7 +533,7 @@ func createComponent(t *testing.T, srv *httptest.Server, name string) (id, statu
 	return c.ID, c.Status
 }
 
-/// @brief  Cycle complet d'un module (ADR-11) : composant brouillon → instance → assemblage → soumission (RM17)
+/// @brief  Cycle complet d'un module (ADR-11) : composants brouillons → instances → liaison interne → assemblage → soumission (RM17, RM51)
 /// @input  Module et composant réels, connexion réelle, soumission blockchain simulée (memBC)
 /// @expect statut "draft" à la création, "submitted" après soumission
 func TestAPIIntegration_ModuleLifecycle(t *testing.T) {
@@ -544,18 +547,21 @@ func TestAPIIntegration_ModuleLifecycle(t *testing.T) {
 		t.Errorf("status initial: got %q, want draft", status)
 	}
 	partID, _ := createComponent(t, srv, "Moteur")
+	propID, _ := createComponent(t, srv, "Hélice")
 
-	// Instancier le composant dans le module
-	resp1 := apiDo(t, client, http.MethodPost, srv.URL+"/api/components/"+modID+"/instances",
-		`{"asset_id":"`+partID+`"}`)
-	resp1.Body.Close()
-	if resp1.StatusCode != http.StatusOK && resp1.StatusCode != http.StatusCreated {
-		t.Fatalf("POST instances: got %d, want 200/201", resp1.StatusCode)
+	// Instancier les deux composants dans le module
+	for _, id := range []string{partID, propID} {
+		resp1 := apiDo(t, client, http.MethodPost, srv.URL+"/api/components/"+modID+"/instances",
+			`{"asset_id":"`+id+`"}`)
+		resp1.Body.Close()
+		if resp1.StatusCode != http.StatusOK && resp1.StatusCode != http.StatusCreated {
+			t.Fatalf("POST instances: got %d, want 200/201", resp1.StatusCode)
+		}
 	}
 
-	// Créer une connexion
+	// Relier les deux instances : seule une liaison interne au module s'y rattache (RM51)
 	resp2 := apiDo(t, client, http.MethodPost, srv.URL+"/api/connections",
-		`{"from":"a1","to":"a2","label":"lien"}`)
+		`{"from":"`+partID+`","to":"`+propID+`","label":"lien"}`)
 	var conn struct{ ID string `json:"id"` }
 	decodeBody(t, resp2, &conn)
 

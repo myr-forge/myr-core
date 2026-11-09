@@ -4,7 +4,6 @@ package cli
 import "myr-core/domain/model"
 
 type mockModelSvc struct {
-	add                             func(filePath, name, channelID, ownerID string, tags []string) (*model.Model3D, error)
 	get                             func(id, channelID string) (*model.Model3D, error)
 	list                            func(channelID string) ([]*model.Model3D, error)
 	verify                          func(id, channelID string) (bool, string, error)
@@ -48,12 +47,6 @@ type mockModelSvc struct {
 	connectVirtualToPhysical        func(virtualIfaceID, physicalIfaceID string, popupValues model.AssetInterface, fromInstanceID, toInstanceID string) (*model.Connection, error)
 }
 
-func (m *mockModelSvc) Add(filePath, name, channelID, ownerID string, tags []string) (*model.Model3D, error) {
-	if m.add != nil {
-		return m.add(filePath, name, channelID, ownerID, tags)
-	}
-	return &model.Model3D{ID: "m-test", Name: name}, nil
-}
 func (m *mockModelSvc) Get(id, channelID string) (*model.Model3D, error) {
 	if m.get != nil {
 		return m.get(id, channelID)

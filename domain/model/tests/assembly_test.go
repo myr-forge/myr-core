@@ -161,7 +161,7 @@ func TestAddAssemblyLink_RM11_ValueRanges(t *testing.T) {
 // / @expect ErrInterfaceInUse ; le slot reste virtuel ; aucune nouvelle liaison
 func TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized(t *testing.T) {
 	svc := newFullSvc(t, "asset1", "asset2")
-	carrier, err := svc.AddFull(model.AddRequest{Name: "boîtier", ChannelID: "ch1"})
+	carrier, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "boîtier", ChannelID: "ch1"})
 	if err != nil {
 		t.Fatalf("AddFull : %v", err)
 	}
@@ -261,7 +261,7 @@ func TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected(t *testing.T) {
 // / @expect ErrConnectionNotInModule ; le composant reste un composant
 func TestAddAssemblyToModule_RM51_Component_StaysComponent(t *testing.T) {
 	svc := newFullSvc(t)
-	c, err := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	c, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 	if err != nil {
 		t.Fatalf("AddFull : %v", err)
 	}
@@ -350,6 +350,35 @@ func TestAssembly_UnknownAsset_Rejected(t *testing.T) {
 	}
 	if got, _ := svc.GetModule(mod.ID); len(got.WorkspaceInstances) != 0 {
 		t.Errorf("aucune instance attendue : %+v", got.WorkspaceInstances)
+	}
+}
+
+// / @brief  La catégorie d'un asset est obligatoire et doit être reconnue : le serveur n'en choisit pas (RM02)
+// / @input  AddFull sans catégorie, puis avec la catégorie inconnue « gadget »
+// / @expect ErrInvalidCategory dans les deux cas ; aucun brouillon créé
+func TestAddFull_RM02_CategoryRequired_Rejected(t *testing.T) {
+	drafts := newMockDraftStore()
+	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(drafts)
+	for _, c := range []model.Category{"", "gadget"} {
+		if _, err := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1", Category: c}); !errors.Is(err, model.ErrInvalidCategory) {
+			t.Errorf("catégorie %q : ErrInvalidCategory attendu, obtenu %v", c, err)
+		}
+	}
+	if len(drafts.drafts) != 0 {
+		t.Errorf("aucun brouillon attendu : %d", len(drafts.drafts))
+	}
+}
+
+// / @brief  Le canal cible d'une création est obligatoire : le serveur n'en choisit pas
+// / @input  AddFull puis CreateModule sans canal
+// / @expect ErrChannelRequired dans les deux cas
+func TestCreate_ChannelRequired_Rejected(t *testing.T) {
+	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
+	if _, err := svc.AddFull(model.AddRequest{Name: "vis", Category: model.CategoryBase}); !errors.Is(err, model.ErrChannelRequired) {
+		t.Errorf("AddFull : ErrChannelRequired attendu, obtenu %v", err)
+	}
+	if _, err := svc.CreateModule(model.ModuleRequest{Name: "drone"}); !errors.Is(err, model.ErrChannelRequired) {
+		t.Errorf("CreateModule : ErrChannelRequired attendu, obtenu %v", err)
 	}
 }
 

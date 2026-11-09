@@ -681,16 +681,16 @@ func assetMatchesQuery(m *model.Model3D, q string) bool {
 // createAsset crée un composant à partir d'un formulaire multipart.
 //
 //	@Summary		Créer un composant
-//	@Description	Crée un asset (catégorie par défaut "base"). Le fichier CAO 3D est optionnel (champ "file", ou "stl" pour rétrocompatibilité) ; une miniature base64 peut être fournie, le serveur n'en dérive aucune de lui-même. Le composant est toujours créé en brouillon local ("status":"draft", aucune transaction blockchain) — voir POST /components/{id}/submit pour l'engager explicitement sur la blockchain.
+//	@Description	Crée un asset. La catégorie (RM02) et le canal sont obligatoires : aucune valeur par défaut, 400 s'ils manquent. Le fichier CAO 3D est optionnel (champ "file", ou "stl" pour rétrocompatibilité) ; une miniature base64 peut être fournie, le serveur n'en dérive aucune de lui-même. Le composant est toujours créé en brouillon local ("status":"draft", aucune transaction blockchain) — voir POST /components/{id}/submit pour l'engager explicitement sur la blockchain.
 //	@Tags			components
 //	@Accept			multipart/form-data
 //	@Produce		json
 //	@Param			name		formData	string	true	"nom du composant (max 256 caractères)"
 //	@Param			description	formData	string	false	"description (max 10000 caractères)"
-//	@Param			category	formData	string	false	"catégorie (défaut: base)"
+//	@Param			category	formData	string	true	"catégorie (RM02) : base, amelioration, variation, adaptation, derivation, extension ou regression"
 //	@Param			owner_id	formData	string	false	"propriétaire — ignoré quand la session est liée à une identité : le propriétaire est alors cette identité (pseudo@org), qui signera la soumission"
 //	@Param			parent_id	formData	string	false	"asset parent (dérivation)"
-//	@Param			channel_id	formData	string	false	"canal cible (défaut: canal de la session)"
+//	@Param			channel_id	formData	string	true	"canal cible"
 //	@Param			license_id	formData	string	false	"licence"
 //	@Param			tags		formData	string	false	"tags séparés par virgule"
 //	@Param			links		formData	string	false	"liens externes, tableau JSON encodé en chaîne"
@@ -732,9 +732,6 @@ func (h *Handler) createAsset(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "channel_id invalide", http.StatusBadRequest)
 		return
 	}
-	if channelID == "" {
-		channelID = h.channelFor(r)
-	}
 
 	req := model.AddRequest{
 		Name:        name,
@@ -748,9 +745,6 @@ func (h *Handler) createAsset(w http.ResponseWriter, r *http.Request) {
 	}
 	if raw := r.FormValue("links"); raw != "" {
 		_ = json.Unmarshal([]byte(raw), &req.Links)
-	}
-	if req.Category == "" {
-		req.Category = model.CategoryBase
 	}
 
 	// Fichier 3D optionnel — accepte le champ "file" (générique) ou "stl" (rétrocompat)
@@ -2027,7 +2021,8 @@ func (h *Handler) internalErr(w http.ResponseWriter, err error) {
 	case errors.Is(err, model.ErrUnknownLicense), errors.Is(err, model.ErrLicenseIncompatible),
 		errors.Is(err, model.ErrIncompatibleInterfaces), errors.Is(err, model.ErrSelfLink),
 		errors.Is(err, model.ErrConnectionNotInModule), errors.Is(err, model.ErrCyclicComposition),
-		errors.Is(err, model.ErrInterfaceCarrierChange):
+		errors.Is(err, model.ErrInterfaceCarrierChange),
+		errors.Is(err, model.ErrInvalidCategory), errors.Is(err, model.ErrChannelRequired):
 		code, msg = http.StatusBadRequest, err.Error()
 	case h.debugErrors:
 		msg = err.Error()

@@ -42,10 +42,11 @@ var modelAddCmd = &cobra.Command{
 designer-agnostic: .stl, .step, .obj, .3mf and any other format are accepted.
 The file is hashed (SHA-256) and stored, and the model is indexed with the
 provided name and tags — but it only joins the blockchain network at an
-explicit "myr model submit" call.
+explicit "myr model submit" call. --channel and --category are required: no
+default is chosen.
 
 Examples:
-  myr model add wheel.stl  --name "Front wheel"  --channel greenchannel --tags "3dprint"
+  myr model add wheel.stl  --name "Front wheel"  --channel greenchannel --category base --tags "3dprint"
   myr model add pivot.step --name "Left pivot"   --channel greenchannel --tags "mechanical" --category amelioration --parent abc123 --license mit`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -396,8 +397,8 @@ Example:
 func init() {
 	modelAddCmd.Flags().String("name", "", "Nom du modele (requis)")
 	modelAddCmd.Flags().String("description", "", "Description du modèle")
-	modelAddCmd.Flags().String("channel", "", "ID du canal")
-	modelAddCmd.Flags().String("category", "", "Catégorie (base, amelioration, variation, adaptation, derivation, extension, regression)")
+	modelAddCmd.Flags().String("channel", "", "ID du canal (requis)")
+	modelAddCmd.Flags().String("category", "", "Catégorie (requis) : base, amelioration, variation, adaptation, derivation, extension, regression")
 	modelAddCmd.Flags().String("parent", "", "ID du composant parent (lignée)")
 	modelAddCmd.Flags().String("license", "", "ID de licence dans le catalogue")
 	modelAddCmd.Flags().String("owner-id", "", "Identité propriétaire (pseudo@org) — par défaut celle du compte local (myr session), seule autorisée à soumettre l'asset")

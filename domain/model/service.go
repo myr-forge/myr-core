@@ -69,24 +69,18 @@ func (s *Service) WithRemovedStore(rs RemovedAssetStore) *Service {
 	return s
 }
 
-// Add crée un asset minimal (compatibilité CLI / TUI).
-func (s *Service) Add(filePath, name, channelID, ownerID string, tags []string) (*Model3D, error) {
-	return s.AddFull(AddRequest{
-		FilePath:  filePath,
-		Name:      name,
-		ChannelID: channelID,
-		OwnerID:   ownerID,
-		Tags:      tags,
-		Category:  CategoryBase,
-	})
-}
-
 // AddFull crée un asset avec tous ses champs (mode GUI).
 // Toute création est un brouillon (DraftStore, aucune transaction blockchain) —
 // l'asset ne rejoint la blockchain qu'à un appel explicite à Submit.
 func (s *Service) AddFull(req AddRequest) (*Model3D, error) {
 	if s.draftStore == nil {
 		return nil, fmt.Errorf("stockage de brouillons non configuré")
+	}
+	if !req.Category.Valid() {
+		return nil, fmt.Errorf("%w : %q", ErrInvalidCategory, req.Category)
+	}
+	if req.ChannelID == "" {
+		return nil, ErrChannelRequired
 	}
 	// Licence : présente au catalogue, compatible avec celle du parent s'il est
 	// connu de ce nœud (RM03) — le parent peut lui-même être encore un brouillon.
@@ -899,6 +893,9 @@ func (s *Service) updateSubmittedMetadata(m *Model3D, req UpdateRequest) (*Model
 func (s *Service) CreateModule(req ModuleRequest) (*Model3D, error) {
 	if s.draftStore == nil {
 		return nil, fmt.Errorf("stockage de brouillons non configuré")
+	}
+	if req.ChannelID == "" {
+		return nil, ErrChannelRequired
 	}
 
 	var parent *Model3D

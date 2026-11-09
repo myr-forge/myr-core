@@ -2,6 +2,7 @@
 tags:
   - couche/conception
   - type/conception
+  - rm/RM02
   - rm/RM03
   - rm/RM08
   - rm/RM09
@@ -111,7 +112,7 @@ tags:
 | Méthode | Route | Accès | Description |
 |---------|-------|-------|-------------|
 | GET | `/api/components` | Public (DC-D1-06) | Liste de tous les composants, décomposés ou non (filtres: q, categories, owner_id, parent_id, hash, tags, channel, status, limit — `?uses_component={id}` pour les assets qui intègrent un composant donné, `DC_D8_Recherche.md` §4, UCREC04) |
-| POST | `/api/components` | Contributor | Créer un composant (`AddFull`), un fichier CAO par appel ; `parent_id` optionnel pour dériver d'un asset existant (composant ou déjà décomposé), avec copie de sa composition le cas échéant (UCMOD01) |
+| POST | `/api/components` | Contributor | Créer un composant (`AddFull`), un fichier CAO par appel ; catégorie (`category`, RM02) et canal (`channel_id`) obligatoires, sans valeur par défaut (`400` sinon) ; une miniature n'est enregistrée que si le client la fournit (`thumbnail`) ; `parent_id` optionnel pour dériver d'un asset existant (composant ou déjà décomposé), avec copie de sa composition le cas échéant (UCMOD01) |
 | GET | `/api/components/{id}` | Auth | Détail d'un composant, décomposé ou non |
 | PATCH | `/api/components/{id}` | Contributor | Modifier les métadonnées (patch : name, description, tags, locations, license_id — UCCE02/UCMOD03, mêmes champs quel que soit le nombre d'instances). Brouillon : modification locale, licence vérifiée contre le catalogue et le parent (RM03, `400` si refusée). Asset soumis (RM19) : seuls name, description, tags et liens changent, sur le ledger via l'opération chaincode `UpdateMetadata` signée par le propriétaire ; un changement de licence est refusé (`409`) — #incoherence la méthode documentée ici était PUT, mais le handler (`adapters/in/rest/handlers.go`, `patchComponent`) répond uniquement à PATCH ; corrigé pour refléter le comportement réel, à confirmer que PUT n'était pas l'intention initiale |
 | DELETE | `/api/components/{id}` | Contributor | Supprimer (UCCE07/UCMOD08) — brouillon retiré du stockage local ; asset déjà soumis masqué localement (disparaît des listes), son enregistrement blockchain (y compris ses `ModuleVersion` éventuelles) n'est jamais modifié (RM08) |

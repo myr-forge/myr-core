@@ -30,7 +30,7 @@ func newSubmittedFixture(t *testing.T) *submittedFixture {
 		WithIfaceStore(newMockIfaceStore()).
 		WithDraftStore(newMockDraftStore())
 
-	c, err := f.svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1", LicenseID: "cc-by-4"})
+	c, err := f.svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1", LicenseID: "cc-by-4"})
 	if err != nil {
 		t.Fatalf("AddFull: %v", err)
 	}
@@ -89,7 +89,7 @@ func TestSubmit_DraftAlreadyOnLedger_Rejected(t *testing.T) {
 	bc := newMockBC()
 	drafts := newMockDraftStore()
 	svc := model.NewService(bc, &mockFS{}).WithIfaceStore(newMockIfaceStore()).WithDraftStore(drafts)
-	m, err := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	m, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 	if err != nil {
 		t.Fatalf("AddFull: %v", err)
 	}
@@ -220,13 +220,13 @@ func TestCreateModule_RM19_ForkOfSubmitted_Submittable(t *testing.T) {
 // / @expect ErrUnknownLicense dans les trois cas
 func TestLicense_UnknownLicense_Rejected(t *testing.T) {
 	svc := newFullSvc(t)
-	if _, err := svc.AddFull(model.AddRequest{Name: "vis", LicenseID: "apache"}); !errors.Is(err, model.ErrUnknownLicense) {
+	if _, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, ChannelID: "ch1", Name: "vis", LicenseID: "apache"}); !errors.Is(err, model.ErrUnknownLicense) {
 		t.Errorf("AddFull : ErrUnknownLicense attendu, obtenu %v", err)
 	}
-	if _, err := svc.CreateModule(model.ModuleRequest{Name: "drone", LicenseID: "apache"}); !errors.Is(err, model.ErrUnknownLicense) {
+	if _, err := svc.CreateModule(model.ModuleRequest{ChannelID: "ch1", Name: "drone", LicenseID: "apache"}); !errors.Is(err, model.ErrUnknownLicense) {
 		t.Errorf("CreateModule : ErrUnknownLicense attendu, obtenu %v", err)
 	}
-	d, err := svc.AddFull(model.AddRequest{Name: "vis"})
+	d, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, ChannelID: "ch1", Name: "vis"})
 	if err != nil {
 		t.Fatalf("AddFull : %v", err)
 	}
@@ -242,7 +242,7 @@ func TestUpdateAsset_RM03_IncompatibleLicense_Rejected(t *testing.T) {
 	bc := newMockBC()
 	svc := model.NewService(bc, &mockFS{}).WithIfaceStore(newMockIfaceStore()).WithDraftStore(newMockDraftStore())
 	bc.records["parent"] = &model.Model3D{ID: "parent", LicenseID: "cc-by-nd-4", Status: model.ModuleSubmitted}
-	child, err := svc.AddFull(model.AddRequest{Name: "dérivé", ParentID: "parent", Category: model.CategoryAmelioration})
+	child, err := svc.AddFull(model.AddRequest{ChannelID: "ch1", Name: "dérivé", ParentID: "parent", Category: model.CategoryAmelioration})
 	if err != nil {
 		t.Fatalf("AddFull : %v", err)
 	}
@@ -270,7 +270,7 @@ func TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected(t *testing.T) {
 	if slot == nil {
 		t.Fatal("slot virtuel absent")
 	}
-	other, err := f.svc.AddFull(model.AddRequest{Name: "écrou", ChannelID: "ch1", LicenseID: "cc-by-4"})
+	other, err := f.svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "écrou", ChannelID: "ch1", LicenseID: "cc-by-4"})
 	if err != nil {
 		t.Fatalf("AddFull: %v", err)
 	}

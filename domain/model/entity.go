@@ -20,6 +20,15 @@ const (
 	CategoryRegression   Category = "regression"
 )
 
+// categories regroupe les catégories reconnues (RM02).
+var categories = map[Category]bool{
+	CategoryBase: true, CategoryAmelioration: true, CategoryVariation: true, CategoryAdaptation: true,
+	CategoryDerivation: true, CategoryExtension: true, CategoryRegression: true,
+}
+
+// Valid indique si c est une catégorie reconnue (RM02).
+func (c Category) Valid() bool { return categories[c] }
+
 // Model3D est l'entité unifiée représentant un composant ou un module.
 // Un composant contient une ressource (Hash non vide).
 // Un module contient des sous-composants/modules (WorkspaceInstances non vide).

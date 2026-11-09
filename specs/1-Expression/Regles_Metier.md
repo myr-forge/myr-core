@@ -30,12 +30,13 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 
 - **Déclencheur** : Création ou dérivation d'un asset
 - **Condition** : Toujours
-- **Conséquence** : Chaque asset doit appartenir à l'une des 8 catégories : `base`, `amélioration`, `variation`, `adaptation`, `dérivation`, `extension`, `régression`, `découpage`
+- **Conséquence** : Chaque asset doit appartenir à l'une des 8 catégories : `base`, `amélioration`, `variation`, `adaptation`, `dérivation`, `extension`, `régression`, `découpage`. La catégorie est donnée par le demandeur : le système n'en choisit aucune par défaut, et refuse une création sans catégorie ou avec une catégorie inconnue
 - **Use cases** : UCCE01–06, UCAM05
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 2 explicite(s) · 0 déduit(s)
+> - ✅ [TestComponents_POST_RM02_NoDefaultCategoryOrChannel](../../docs/tests/adapters-in-rest/TestComponents_POST_RM02_NoDefaultCategoryOrChannel.md) — explicite (le test cite RM02)
+> - ✅ [TestAddFull_RM02_CategoryRequired_Rejected](../../docs/tests/domain-model/TestAddFull_RM02_CategoryRequired_Rejected.md) — explicite (le test cite RM02)
 <!-- tests-obsidian:end -->
 
 ### RM03 — Compatibilité de licence
@@ -259,7 +260,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 4 explicite(s) · 70 déduit(s)
+> [!check]- Tests — 5 explicite(s) · 69 déduit(s)
+> - ✅ [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — explicite (le test cite RM51)
 > - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM51)
 > - ✅ [TestAddAssemblyToModule_RM51_Component_StaysComponent](../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_Component_StaysComponent.md) — explicite (le test cite RM51)
 > - ✅ [TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected](../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected.md) — explicite (le test cite RM51)
@@ -269,7 +271,6 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
-> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentInterfaces_GET](../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentInterfaces_POST_BadJSON](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_BadJSON.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentInterfaces_POST_Created](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : teste route `/api/components`

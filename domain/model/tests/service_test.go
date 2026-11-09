@@ -337,7 +337,7 @@ func TestModelAdd(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
 
 	path := tempFile(t, "v 0 0 0\n")
-	m, err := svc.Add(path, "cube", "ch1", "owner1", []string{"3d"})
+	m, err := svc.AddFull(model.AddRequest{FilePath: path, Name: "cube", ChannelID: "ch1", OwnerID: "owner1", Category: model.CategoryBase, Tags: []string{"3d"}})
 	if err != nil {
 		t.Fatalf("Add: %v", err)
 	}
@@ -388,7 +388,7 @@ func TestService_NilBlockchain_ErrBlockchainUnavailable(t *testing.T) {
 func TestModelAdd_FileMissing(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
 
-	_, err := svc.Add("/inexistant/fichier.obj", "cube", "ch1", "o1", nil)
+	_, err := svc.AddFull(model.AddRequest{FilePath: "/inexistant/fichier.obj", Name: "cube", ChannelID: "ch1", OwnerID: "o1", Category: model.CategoryBase})
 	if err == nil {
 		t.Error("expected error for missing file")
 	}
@@ -400,7 +400,7 @@ func TestModelAdd_FileMissing(t *testing.T) {
 func TestModelAdd_NoFile(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
 
-	m, err := svc.Add("", "lien-boutique", "ch1", "o1", []string{"achat"})
+	m, err := svc.AddFull(model.AddRequest{Name: "lien-boutique", ChannelID: "ch1", OwnerID: "o1", Category: model.CategoryBase, Tags: []string{"achat"}})
 	if err != nil {
 		t.Fatalf("Add sans fichier: %v", err)
 	}
@@ -447,7 +447,7 @@ func TestAddFull_AllFields(t *testing.T) {
 func TestAddFull_WithParent(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
 
-	base, _ := svc.AddFull(model.AddRequest{Name: "base", ChannelID: "ch1", OwnerID: "o1"})
+	base, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "base", ChannelID: "ch1", OwnerID: "o1"})
 	child, err := svc.AddFull(model.AddRequest{
 		Name:      "variante",
 		Category:  model.CategoryVariation,
@@ -470,7 +470,7 @@ func TestModelGet(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
 
 	path := tempFile(t, "data")
-	created, _ := svc.Add(path, "cube", "ch1", "o1", nil)
+	created, _ := svc.AddFull(model.AddRequest{FilePath: path, Name: "cube", ChannelID: "ch1", OwnerID: "o1", Category: model.CategoryBase})
 
 	got, err := svc.Get(created.ID, "")
 	if err != nil {
@@ -499,8 +499,8 @@ func TestModelGet_NotFound(t *testing.T) {
 func TestModelList(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
 
-	svc.Add(tempFile(t, "a"), "m1", "ch1", "o1", nil)
-	svc.Add(tempFile(t, "b"), "m2", "ch2", "o1", nil)
+	svc.AddFull(model.AddRequest{FilePath: tempFile(t, "a"), Name: "m1", ChannelID: "ch1", OwnerID: "o1", Category: model.CategoryBase})
+	svc.AddFull(model.AddRequest{FilePath: tempFile(t, "b"), Name: "m2", ChannelID: "ch2", OwnerID: "o1", Category: model.CategoryBase})
 
 	all, err := svc.List("")
 	if err != nil {
@@ -568,8 +568,8 @@ func TestModelList_BlockchainUnreachable_NoDrafts_ReturnsError(t *testing.T) {
 func TestModelRemove(t *testing.T) {
 	svc := newFullSvc(t)
 
-	m1, _ := svc.AddFull(model.AddRequest{Name: "a", ChannelID: "ch1", OwnerID: "o1"})
-	m2, _ := svc.AddFull(model.AddRequest{Name: "b", ChannelID: "ch1", OwnerID: "o1"})
+	m1, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "a", ChannelID: "ch1", OwnerID: "o1"})
+	m2, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "b", ChannelID: "ch1", OwnerID: "o1"})
 	conn, _ := svc.AddConnection(m1.ID, m2.ID, "lien")
 
 	// La connexion existe
@@ -605,7 +605,7 @@ func TestModelRemove_NotSupported(t *testing.T) {
 	}
 	// On ne peut pas tester ça sans une vraie struct distincte — on vérifie juste
 	// que Remove sur mockBC (qui l'implémente) fonctionne.
-	m, _ := svc.AddFull(model.AddRequest{Name: "x", ChannelID: "ch1", OwnerID: "o1"})
+	m, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "x", ChannelID: "ch1", OwnerID: "o1"})
 	if err := svc.Remove(m.ID); err != nil {
 		t.Fatalf("Remove: %v", err)
 	}
@@ -1384,6 +1384,7 @@ func TestAddFull_WithFile_HashAndVersionCreated(t *testing.T) {
 		ChannelID: "ch1",
 		OwnerID:   "user1",
 		FilePath:  path,
+		Category:  model.CategoryBase,
 	})
 	if err != nil {
 		t.Fatalf("AddFull: %v", err)
@@ -1411,6 +1412,7 @@ func TestAddFull_MissingFile_ReturnsError(t *testing.T) {
 		Name:      "Fantôme",
 		ChannelID: "ch1",
 		FilePath:  "/tmp/fichier-inexistant-myr-test.stl",
+		Category:  model.CategoryBase,
 	})
 	if err == nil {
 		t.Fatal("attendu une erreur pour un fichier inexistant")
@@ -1426,6 +1428,7 @@ func TestAddFull_NoFile_NoVersionNoHash(t *testing.T) {
 		Name:      "Vis M3 catalogue",
 		ChannelID: "ch1",
 		FilePath:  "",
+		Category:  model.CategoryBase,
 	})
 	if err != nil {
 		t.Fatalf("AddFull: %v", err)
@@ -1456,6 +1459,7 @@ func TestAddFull_STLAndSTEP_BothAccepted(t *testing.T) {
 				Name:      tc.name,
 				ChannelID: "ch1",
 				FilePath:  path,
+				Category:  model.CategoryBase,
 			})
 			if err != nil {
 				t.Fatalf("AddFull %s: %v", tc.name, err)
@@ -1480,7 +1484,7 @@ func TestAddFull_STLAndSTEP_BothAccepted(t *testing.T) {
 func TestGetChildren_Success(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
 
-	parent, _ := svc.AddFull(model.AddRequest{Name: "parent", ChannelID: "ch1", OwnerID: "o1"})
+	parent, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "parent", ChannelID: "ch1", OwnerID: "o1"})
 	child, _ := svc.AddFull(model.AddRequest{
 		Name: "variante", Category: model.CategoryVariation, ParentID: parent.ID,
 		ChannelID: "ch1", OwnerID: "o1",
@@ -1504,7 +1508,7 @@ func TestGetChildren_Success(t *testing.T) {
 func TestGetChildren_Empty(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
 
-	m, _ := svc.AddFull(model.AddRequest{Name: "isolé", ChannelID: "ch1", OwnerID: "o1"})
+	m, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "isolé", ChannelID: "ch1", OwnerID: "o1"})
 
 	children, err := svc.GetChildren(m.ID)
 	if err != nil {
@@ -1525,7 +1529,7 @@ func TestGetChildren_Empty(t *testing.T) {
 func TestGetModuleInterfaces_SimpleComponent(t *testing.T) {
 	svc := newFullSvc(t)
 
-	comp, _ := svc.AddFull(model.AddRequest{Name: "Capteur", ChannelID: "ch1", OwnerID: "o1"})
+	comp, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "Capteur", ChannelID: "ch1", OwnerID: "o1"})
 	iface := &model.AssetInterface{AssetID: comp.ID, Category: "ELEC", Type: "USB-C", Direction: model.IfaceOut}
 	svc.AddInterface(iface)
 
@@ -1558,8 +1562,8 @@ func TestGetModuleInterfaces_NilStore(t *testing.T) {
 func TestGetModuleInterfaces_InternalConnectionsConsumed(t *testing.T) {
 	svc := newFullSvc(t)
 
-	compA, _ := svc.AddFull(model.AddRequest{Name: "A", ChannelID: "ch1", OwnerID: "o1"})
-	compB, _ := svc.AddFull(model.AddRequest{Name: "B", ChannelID: "ch1", OwnerID: "o1"})
+	compA, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "A", ChannelID: "ch1", OwnerID: "o1"})
+	compB, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "B", ChannelID: "ch1", OwnerID: "o1"})
 
 	ifaceOut := &model.AssetInterface{AssetID: compA.ID, Category: "ELEC", Type: "USB-C", Direction: model.IfaceOut}
 	ifaceIn := &model.AssetInterface{AssetID: compB.ID, Category: "ELEC", Type: "USB-C", Direction: model.IfaceIn}
@@ -1602,7 +1606,7 @@ func TestGetModuleInterfaces_InternalConnectionsConsumed(t *testing.T) {
 func TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed(t *testing.T) {
 	svc := newFullSvc(t)
 
-	screw, _ := svc.AddFull(model.AddRequest{Name: "Vis", ChannelID: "ch1", OwnerID: "o1"})
+	screw, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "Vis", ChannelID: "ch1", OwnerID: "o1"})
 	iface := &model.AssetInterface{AssetID: screw.ID, Category: "MECA", Type: "Vis M3", Direction: model.IfaceOut}
 	svc.AddInterface(iface)
 
@@ -1634,11 +1638,11 @@ func TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed(t *testing.T)
 func TestGetModuleInterfaces_InternalConnection_ScopedToInstance(t *testing.T) {
 	svc := newFullSvc(t)
 
-	screw, _ := svc.AddFull(model.AddRequest{Name: "Vis", ChannelID: "ch1", OwnerID: "o1"})
+	screw, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "Vis", ChannelID: "ch1", OwnerID: "o1"})
 	screwIface := &model.AssetInterface{AssetID: screw.ID, Category: "MECA", Type: "Vis M3", Direction: model.IfaceOut}
 	svc.AddInterface(screwIface)
 
-	plate, _ := svc.AddFull(model.AddRequest{Name: "Plaque", ChannelID: "ch1", OwnerID: "o1"})
+	plate, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "Plaque", ChannelID: "ch1", OwnerID: "o1"})
 	plateIface := &model.AssetInterface{AssetID: plate.ID, Category: "MECA", Type: "Vis M3", Direction: model.IfaceIn}
 	svc.AddInterface(plateIface)
 
@@ -2302,7 +2306,7 @@ func TestAddFull_AlwaysDraft_NoBlockchainWrite(t *testing.T) {
 	bc := newMockBC()
 	svc := model.NewService(bc, &mockFS{}).WithDraftStore(newMockDraftStore())
 
-	m, err := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	m, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 	if err != nil {
 		t.Fatalf("AddFull: %v", err)
 	}
@@ -2320,7 +2324,7 @@ func TestAddFull_AlwaysDraft_NoBlockchainWrite(t *testing.T) {
 func TestAddFull_NilBlockchain_StillWorks(t *testing.T) {
 	svc := model.NewService(nil, &mockFS{}).WithDraftStore(newMockDraftStore())
 
-	m, err := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	m, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 	if err != nil {
 		t.Fatalf("AddFull sans blockchain: %v", err)
 	}
@@ -2333,8 +2337,8 @@ func TestAddFull_NilBlockchain_StillWorks(t *testing.T) {
 // / @input  Service sans WithDraftStore
 // / @expect Erreur non nil
 func TestAddFull_NilDraftStore_Rejected(t *testing.T) {
-	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
-	if _, err := svc.AddFull(model.AddRequest{Name: "vis"}); err == nil {
+	svc := model.NewService(newMockBC(), &mockFS{})
+	if _, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, ChannelID: "ch1", Name: "vis"}); err == nil {
 		t.Error("AddFull sans DraftStore doit retourner une erreur")
 	}
 }
@@ -2344,7 +2348,7 @@ func TestAddFull_NilDraftStore_Rejected(t *testing.T) {
 // / @expect Get(id) retourne le brouillon (Status=draft)
 func TestGet_FindsDraftBeforeBlockchain(t *testing.T) {
 	svc := newFullSvc(t)
-	m, _ := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	m, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 
 	got, err := svc.Get(m.ID, "")
 	if err != nil {
@@ -2360,8 +2364,8 @@ func TestGet_FindsDraftBeforeBlockchain(t *testing.T) {
 // / @expect List retourne les deux assets
 func TestList_MergesDraftsAndBlockchain(t *testing.T) {
 	svc := newFullSvc(t)
-	draft, _ := svc.AddFull(model.AddRequest{Name: "brouillon", ChannelID: "ch1"})
-	toSubmit, _ := svc.AddFull(model.AddRequest{Name: "soumis", ChannelID: "ch1"})
+	draft, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "brouillon", ChannelID: "ch1"})
+	toSubmit, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "soumis", ChannelID: "ch1"})
 	submitted, err := svc.Submit(toSubmit.ID, "")
 	if err != nil {
 		t.Fatalf("Submit: %v", err)
@@ -2394,7 +2398,7 @@ func TestSubmit_CommitsDraftWithInterfaces(t *testing.T) {
 		WithIfaceStore(newMockIfaceStore()).
 		WithDraftStore(newMockDraftStore())
 
-	m, err := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	m, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 	if err != nil {
 		t.Fatalf("AddFull draft: %v", err)
 	}
@@ -2455,7 +2459,7 @@ func TestSubmit_NilDraftStore_Rejected(t *testing.T) {
 // / @expect ListModules ne retourne que le module ; le composant draft est absent
 func TestIsModule_DraftComponent_NotMisclassified(t *testing.T) {
 	svc := newFullSvc(t)
-	draftComponent, _ := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	draftComponent, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 	mod, _ := svc.CreateModule(model.ModuleRequest{Name: "module", ChannelID: "ch1"})
 
 	modules, err := svc.ListModules("ch1")
@@ -2479,7 +2483,7 @@ func TestUpdateAsset_Draft_StaysLocal(t *testing.T) {
 	bc := newMockBC()
 	svc := model.NewService(bc, &mockFS{}).WithDraftStore(newMockDraftStore())
 
-	m, _ := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	m, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 	updated, err := svc.UpdateAsset(model.UpdateRequest{ID: m.ID, Name: "vis M4"})
 	if err != nil {
 		t.Fatalf("UpdateAsset: %v", err)
@@ -2497,7 +2501,7 @@ func TestUpdateAsset_Draft_StaysLocal(t *testing.T) {
 // / @expect Remove sans erreur, Get(id) échoue ensuite (brouillon supprimé, rien sur la blockchain)
 func TestRemove_Draft_RemovesLocally(t *testing.T) {
 	svc := newFullSvc(t)
-	m, _ := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	m, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 
 	if err := svc.Remove(m.ID); err != nil {
 		t.Fatalf("Remove: %v", err)
@@ -2516,7 +2520,7 @@ func TestRemove_Submitted_HidesLocally(t *testing.T) {
 		WithDraftStore(newMockDraftStore()).
 		WithRemovedStore(newMockRemovedStore())
 
-	m, _ := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1"})
+	m, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 	submitted, err := svc.Submit(m.ID, "")
 	if err != nil {
 		t.Fatalf("Submit: %v", err)
