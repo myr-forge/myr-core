@@ -39,6 +39,8 @@ UC1 ..> UC2 : <<include>>
 
 À partir d'un composant, lister les différentes versions qu'elles soient parentes ou enfants (améliorations, variations, adaptations, extensions, dérivations...).
 
+Seules les versions soumises au réseau en font partie : un dérivé encore en brouillon reste privé à son auteur tant qu'il n'est pas soumis.
+
 ## Pré-conditions
 
 - Être connecté au réseau

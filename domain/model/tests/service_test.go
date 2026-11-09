@@ -1478,17 +1478,24 @@ func TestAddFull_STLAndSTEP_BothAccepted(t *testing.T) {
 // Tests — GetChildren
 // ══════════════════════════════════════════════════════════════════════════════
 
-// / @brief  GetChildren retourne les variantes directes d'un asset parent
-// / @input  mockBC avec parent et 1 enfant (CategoryVariation, ParentID=parent.ID)
-// / @expect liste de 1 enfant avec l'ID correct
+// / @brief  GetChildren retourne les dérivés directs soumis d'un asset ; un dérivé encore en brouillon n'en fait pas partie
+// / @input  parent soumis ; un dérivé soumis (CategoryVariation) et un dérivé resté en brouillon
+// / @expect une seule entrée : le dérivé soumis
 func TestGetChildren_Success(t *testing.T) {
 	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
 
 	parent, _ := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "parent", ChannelID: "ch1", OwnerID: "o1"})
+	if _, err := svc.Submit(parent.ID, ""); err != nil {
+		t.Fatalf("Submit parent : %v", err)
+	}
 	child, _ := svc.AddFull(model.AddRequest{
 		Name: "variante", Category: model.CategoryVariation, ParentID: parent.ID,
 		ChannelID: "ch1", OwnerID: "o1",
 	})
+	if _, err := svc.Submit(child.ID, ""); err != nil {
+		t.Fatalf("Submit enfant : %v", err)
+	}
+	svc.AddFull(model.AddRequest{Name: "brouillon", Category: model.CategoryVariation, ParentID: parent.ID, ChannelID: "ch1", OwnerID: "o1"})
 
 	children, err := svc.GetChildren(parent.ID)
 	if err != nil {

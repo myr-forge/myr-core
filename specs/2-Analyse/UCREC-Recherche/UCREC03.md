@@ -177,7 +177,7 @@ REST --> Client : 200 {root: {...}, tree: {...}}
 
 **Endpoints manquants :** `GET /api/components/:id/versions` n'existe pas. La route `handleComponent()` gère `/api/components/:id` mais pas le chemin enfant `/versions`.
 
-**`GetChildren()` existant :** `service.GetChildren(parentID)` (service.go:~251) effectue un `ListModelRecords("")` puis filtre par `ParentID`. Réutilisable directement pour construire l'arbre descendant.
+**`GetChildren()` existant :** `service.GetChildren(parentID)` (service.go:~251) effectue un `ListModelRecords("")` puis filtre par `ParentID` : seuls les dérivés soumis sont des enfants, un brouillon n'en fait pas partie. Réutilisable directement pour construire l'arbre descendant.
 
 **Remontée ascendante :** Aucune fonction de remontée n'existe — à implémenter par itération sur `Get(m.ParentID)` jusqu'à `ParentID == ""`. Protéger contre les cycles potentiels (compteur de profondeur max, ex : 50).
 
