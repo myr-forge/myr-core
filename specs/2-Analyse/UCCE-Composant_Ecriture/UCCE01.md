@@ -130,7 +130,7 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 > Ce flux est **optionnel** : le flux nominal (sans `draft: true`) reste inchangé — un composant est créé et soumis en une seule transaction, comme aujourd'hui. `draft` sert uniquement au cas où le Concepteur veut affiner les interfaces après création, sans les connaître entièrement à l'import du fichier.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 79 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 74 déduit(s)
 > - 🟡 [TestResolveOwner](../../../docs/tests/adapters-in-cli/TestResolveOwner.md) — déduit : teste commande `myr model add`
 > - 🟡 [TestRunModelAdd_NominalCase](../../../docs/tests/adapters-in-cli/TestRunModelAdd_NominalCase.md) — déduit : teste commande `myr model add`
 > - 🟡 [TestRunModelAdd_ServiceError_Rejected](../../../docs/tests/adapters-in-cli/TestRunModelAdd_ServiceError_Rejected.md) — déduit : teste commande `myr model add`
@@ -146,7 +146,7 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 > - 🟡 [TestComponentInterfaces_POST_Created](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentTree_GET](../../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentTree_MethodNotAllowed](../../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components`
-> - … et 64 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 59 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Catégorie dérivée (non-`base`)
@@ -331,7 +331,6 @@ end
 ## Liens
 
 **Étape suivante — conception**
-- **API_REST** : [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](../../3-Conception/API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29)
 - **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29)
 - **Chaincode** : [§ 4. Fonctions chaincode — Store/Read (D3/D4/D6)](../../3-Conception/Chaincode.md#4.%20Fonctions%20chaincode%20—%20Store/Read%20%28D3/D4/D6%29)
 - **Conception_intro** : [§ ADR-02 — Interfaces enregistrées sur la blockchain via le cycle brouillon → soumission (généralisé à tout asset)](../../3-Conception/Conception_intro.md#ADR-02%20—%20Interfaces%20enregistrées%20sur%20la%20blockchain%20via%20le%20cycle%20brouillon%20→%20soumission%20%28généralisé%20à%20tout%20asset%29)

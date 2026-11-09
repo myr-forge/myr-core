@@ -115,7 +115,7 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 
 ### Composants — Écriture UCCE01–07
 
-- [ ] UCCE01 — Ajouter un composant physique (import fichier 3D, hash SHA-256, métadonnées, soumission blockchain) ; import par lot (`POST /api/components/batch`, plusieurs fichiers, sans garantie transactionnelle)
+- [ ] UCCE01 — Ajouter un composant physique (import fichier 3D, hash SHA-256, métadonnées, soumission blockchain)
 - [ ] UCCE02 — Configurer un composant (éditer métadonnées)
 - [ ] UCCE03 — Ajouter un composant numérique (firmware, logiciel)
 - [ ] UCCE04 — Améliorer / dériver un composant (`ParentID` requis, vérification licence RM03)

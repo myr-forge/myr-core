@@ -780,8 +780,6 @@ func (h *Handler) createAsset(w http.ResponseWriter, r *http.Request) {
 
 // createOneComponent crée un composant à partir d'un gabarit AddRequest (Name
 // déjà renseigné) et d'un fichier CAO optionnel (nil si aucun fichier).
-// Réutilisée par createAsset (un fichier) et createComponentsBatch (plusieurs
-// fichiers, un composant par fichier — règle 28, ne pas dupliquer cette logique).
 func (h *Handler) createOneComponent(r *http.Request, req model.AddRequest, file multipart.File, header *multipart.FileHeader) (*model.Model3D, error) {
 	if file != nil {
 		defer file.Close()
@@ -826,126 +824,6 @@ func (h *Handler) applyThumbnailFallback(r *http.Request, assetID, thumb string,
 	}
 }
 
-// createComponentsBatch crée plusieurs composants en un seul appel, un
-// fichier CAO par composant (UCCE01). Le nom de chaque composant est dérivé
-// du nom de fichier (sans extension). Les autres champs (owner_id,
-// channel_id, category, parent_id, license_id, tags) sont partagés par tous
-// les fichiers du lot. Aucune garantie transactionnelle : pas de BDD SQL, pas
-// de transaction inter-blockchain (règle 16) — chaque fichier réussit ou
-// échoue indépendamment.
-//
-//	@Summary		Créer plusieurs composants en un seul appel
-//	@Description	Multipart, champ répété "files" (un ou plusieurs fichiers CAO). Champs partagés par tous les fichiers du lot : owner_id, channel_id, category, parent_id, license_id, tags. Champ répété optionnel "thumbnails" (une valeur par fichier, même ordre que "files", chaîne vide acceptée) — myr-core ne rend jamais lui-même un fichier 3D (voir § Séparation des dépôts), la miniature doit être rendue côté client et fournie ici. Le nom de chaque composant créé est dérivé du nom de fichier (sans extension) — pas de nom distinct par fichier. Aucune atomicité entre les fichiers d'un même lot : la réponse détaille un résultat par fichier.
-//	@Tags			components
-//	@Accept			multipart/form-data
-//	@Produce		json
-//	@Param			files		formData	file	true	"un ou plusieurs fichiers CAO 3D"
-//	@Param			owner_id	formData	string	false	"propriétaire, partagé par tous les fichiers — ignoré quand la session est liée à une identité (pseudo@org), qui devient le propriétaire"
-//	@Param			channel_id	formData	string	false	"canal cible (défaut: canal de la session)"
-//	@Param			category	formData	string	false	"catégorie, partagée par tous les fichiers (défaut: base)"
-//	@Param			parent_id	formData	string	false	"asset parent, partagé par tous les fichiers"
-//	@Param			license_id	formData	string	false	"licence, partagée par tous les fichiers"
-//	@Param			tags		formData	string	false	"tags séparés par virgule, partagés par tous les fichiers"
-//	@Param			thumbnails	formData	[]string	false	"miniatures (data URL base64), une valeur répétée par fichier, même ordre que 'files' — chaîne vide acceptée pour un fichier sans miniature rendue côté client"	collectionFormat(multi)
-//	@Success		200	{object}	map[string]interface{}	"{results: [{filename, component} ou {filename, error}], succeeded, failed}"
-//	@Failure		400	{object}	map[string]string
-//	@Security		MyrToken
-//	@Router			/components/batch [post]
-func (h *Handler) createComponentsBatch(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		jsonError(w, "parsing form: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-	var files []*multipart.FileHeader
-	if r.MultipartForm != nil {
-		files = r.MultipartForm.File["files"]
-	}
-	if len(files) == 0 {
-		jsonError(w, "au moins un fichier est requis dans le champ 'files'", http.StatusBadRequest)
-		return
-	}
-
-	ownerID := strings.TrimSpace(r.FormValue("owner_id"))
-	channelID := strings.TrimSpace(r.FormValue("channel_id"))
-	if ownerID != "" && !validFieldID.MatchString(ownerID) {
-		jsonError(w, "owner_id invalide", http.StatusBadRequest)
-		return
-	}
-	ownerID = ownerFor(r, ownerID)
-	if channelID != "" && !validFieldID.MatchString(channelID) {
-		jsonError(w, "channel_id invalide", http.StatusBadRequest)
-		return
-	}
-	if channelID == "" {
-		channelID = h.channelFor(r)
-	}
-
-	shared := model.AddRequest{
-		Category:  model.Category(r.FormValue("category")),
-		OwnerID:   ownerID,
-		ParentID:  strings.TrimSpace(r.FormValue("parent_id")),
-		ChannelID: channelID,
-		LicenseID: strings.TrimSpace(r.FormValue("license_id")),
-		Tags:      parseTags(r.FormValue("tags")),
-	}
-	if shared.Category == "" {
-		shared.Category = model.CategoryBase
-	}
-
-	type batchItemResult struct {
-		Filename  string        `json:"filename"`
-		Component *componentDTO `json:"component,omitempty"`
-		Error     string        `json:"error,omitempty"`
-	}
-	results := make([]batchItemResult, 0, len(files))
-	succeeded, failed := 0, 0
-
-	// "thumbnails" : valeurs répétées, une par fichier, même ordre que "files"
-	// (rendu côté client — myr-core ne sait pas rendre un fichier 3D). Une
-	// entrée manquante ou vide ("") est acceptée pour un fichier sans
-	// miniature rendue et ne décale pas les index suivants.
-	var thumbnails []string
-	if r.MultipartForm != nil {
-		thumbnails = r.MultipartForm.Value["thumbnails"]
-	}
-
-	for i, header := range files {
-		name := strings.TrimSuffix(header.Filename, filepath.Ext(header.Filename))
-		if name == "" {
-			name = header.Filename
-		}
-		file, err := header.Open()
-		if err != nil {
-			results = append(results, batchItemResult{Filename: header.Filename, Error: err.Error()})
-			failed++
-			continue
-		}
-		req := shared
-		req.Name = name
-		m, err := h.createOneComponent(r, req, file, header)
-		if err != nil {
-			results = append(results, batchItemResult{Filename: header.Filename, Error: err.Error()})
-			failed++
-			continue
-		}
-		var thumb string
-		if i < len(thumbnails) {
-			thumb = thumbnails[i]
-		}
-		h.applyThumbnailFallback(r, m.ID, thumb, req.Links)
-		savedThumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-		dto := toComponentDTO(m, savedThumb)
-		results = append(results, batchItemResult{Filename: header.Filename, Component: &dto})
-		succeeded++
-	}
-
-	jsonOK(w, map[string]any{
-		"results":   results,
-		"succeeded": succeeded,
-		"failed":    failed,
-	})
-}
-
 // ── /api/components/:id ──────────────────────────────────────────────────────────
 
 func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
@@ -962,17 +840,6 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 			jsonError(w, "asset introuvable", http.StatusNotFound)
 			return
 		}
-	}
-	// /api/components/batch — création de plusieurs composants en un seul appel.
-	// Traité ici (et non via un mux.HandleFunc séparé) pour ne jamais être
-	// confondu avec un identifiant d'asset par le routage /:id ci-dessous.
-	if rest == "batch" {
-		if r.Method != http.MethodPost {
-			http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-			return
-		}
-		h.createComponentsBatch(w, r)
-		return
 	}
 	// Sous-route /:id/interfaces
 	if strings.HasSuffix(rest, "/interfaces") {

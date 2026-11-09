@@ -103,7 +103,7 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 5. Le Concepteur retrouve immédiatement l'assemblage complet du Module parent, prêt à être modifié, sans avoir ajouté une seule instance ni recréé une seule Liaison manuellement
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 76 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 71 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -119,7 +119,7 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 61 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 56 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Dérivation avec licence incompatible
