@@ -447,6 +447,15 @@ type connectionDTO struct {
 	Incompatible    bool   `json:"incompatible,omitempty"`
 }
 
+func toConnectionDTO(c *model.Connection) connectionDTO {
+	return connectionDTO{
+		ID: c.ID, From: c.From, To: c.To, Label: c.Label,
+		FromIfaceID: c.FromIfaceID, ToIfaceID: c.ToIfaceID,
+		FromInstanceID: c.FromInstanceID, ToInstanceID: c.ToInstanceID,
+		FastenerAssetID: c.FastenerAssetID, Incompatible: c.Incompatible,
+	}
+}
+
 type graphResponse struct {
 	Components  []componentDTO  `json:"components"`
 	Connections []connectionDTO `json:"connections"`
@@ -629,12 +638,7 @@ func (h *Handler) listGraph(w http.ResponseWriter, r *http.Request) {
 	connDTOs := make([]connectionDTO, 0)
 	for _, c := range conns {
 		if loadedIDs[c.From] && loadedIDs[c.To] {
-			connDTOs = append(connDTOs, connectionDTO{
-				ID: c.ID, From: c.From, To: c.To, Label: c.Label,
-				FromIfaceID: c.FromIfaceID, ToIfaceID: c.ToIfaceID,
-				FromInstanceID: c.FromInstanceID, ToInstanceID: c.ToInstanceID,
-				FastenerAssetID: c.FastenerAssetID, Incompatible: c.Incompatible,
-			})
+			connDTOs = append(connDTOs, toConnectionDTO(c))
 		}
 	}
 
@@ -1233,12 +1237,7 @@ func (h *Handler) handleComponentAssemblies(w http.ResponseWriter, r *http.Reque
 		dtos := make([]connectionDTO, 0)
 		for _, c := range all {
 			if asmSet[c.ID] {
-				dtos = append(dtos, connectionDTO{
-					ID: c.ID, From: c.From, To: c.To, Label: c.Label,
-					FromIfaceID: c.FromIfaceID, ToIfaceID: c.ToIfaceID,
-					FromInstanceID: c.FromInstanceID, ToInstanceID: c.ToInstanceID,
-					FastenerAssetID: c.FastenerAssetID, Incompatible: c.Incompatible,
-				})
+				dtos = append(dtos, toConnectionDTO(c))
 			}
 		}
 		jsonOK(w, dtos)
@@ -1560,12 +1559,7 @@ func (h *Handler) handleComponentTree(w http.ResponseWriter, r *http.Request, id
 	connDTOs := make([]connectionDTO, 0)
 	for _, c := range conns {
 		if treeIDs[c.From] && treeIDs[c.To] {
-			connDTOs = append(connDTOs, connectionDTO{
-				ID: c.ID, From: c.From, To: c.To, Label: c.Label,
-				FromIfaceID: c.FromIfaceID, ToIfaceID: c.ToIfaceID,
-				FromInstanceID: c.FromInstanceID, ToInstanceID: c.ToInstanceID,
-				FastenerAssetID: c.FastenerAssetID, Incompatible: c.Incompatible,
-			})
+			connDTOs = append(connDTOs, toConnectionDTO(c))
 		}
 	}
 
@@ -1576,11 +1570,35 @@ func (h *Handler) handleComponentTree(w http.ResponseWriter, r *http.Request, id
 
 func (h *Handler) handleConnections(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+	case http.MethodGet:
+		h.listConnections(w, r)
 	case http.MethodPost:
 		h.createConnection(w, r)
 	default:
 		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
 	}
+}
+
+// listConnections liste toutes les connexions — directes ou entre interfaces —,
+// celles d'une composition comprises.
+//
+//	@Summary	Lister les connexions
+//	@Tags		connections
+//	@Produce	json
+//	@Success	200	{array}	connectionDTO
+//	@Security	MyrToken
+//	@Router		/connections [get]
+func (h *Handler) listConnections(w http.ResponseWriter, r *http.Request) {
+	conns, err := h.svcFor(r).ListConnections()
+	if err != nil {
+		h.internalErr(w, err)
+		return
+	}
+	dtos := make([]connectionDTO, 0, len(conns))
+	for _, c := range conns {
+		dtos = append(dtos, toConnectionDTO(c))
+	}
+	jsonOK(w, dtos)
 }
 
 // createConnection crée une connexion simple entre deux assets.
@@ -1612,7 +1630,7 @@ func (h *Handler) createConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	jsonOK(w, connectionDTO{ID: conn.ID, From: conn.From, To: conn.To, Label: conn.Label})
+	jsonOK(w, toConnectionDTO(conn))
 }
 
 // ── /api/connections/:id ─────────────────────────────────────────────────────
@@ -1687,12 +1705,7 @@ func (h *Handler) handleAssemblyLinks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	jsonOK(w, connectionDTO{
-		ID: conn.ID, From: conn.From, To: conn.To, Label: conn.Label,
-		FromIfaceID: conn.FromIfaceID, ToIfaceID: conn.ToIfaceID,
-		FromInstanceID: conn.FromInstanceID, ToInstanceID: conn.ToInstanceID,
-		FastenerAssetID: conn.FastenerAssetID,
-	})
+	jsonOK(w, toConnectionDTO(conn))
 }
 
 // ── /api/virtual-connect ─────────────────────────────────────────────────────
@@ -1748,11 +1761,7 @@ func (h *Handler) handleVirtualConnect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	jsonOK(w, connectionDTO{
-		ID: conn.ID, From: conn.From, To: conn.To, Label: conn.Label,
-		FromIfaceID: conn.FromIfaceID, ToIfaceID: conn.ToIfaceID,
-		FromInstanceID: conn.FromInstanceID, ToInstanceID: conn.ToInstanceID,
-	})
+	jsonOK(w, toConnectionDTO(conn))
 }
 
 // ── /api/channels ────────────────────────────────────────────────────────────

@@ -217,7 +217,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 2 explicite(s) · 0 déduit(s)
+> [!check]- Tests — 3 explicite(s) · 0 déduit(s)
+> - ✅ [TestConnections_GET_RM50_ListsAll](../../docs/tests/adapters-in-rest/TestConnections_GET_RM50_ListsAll.md) — explicite (le test cite RM50)
 > - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM50)
 > - ✅ [TestAddConnection_RM50_Duplicate_Rejected](../../docs/tests/domain-model/TestAddConnection_RM50_Duplicate_Rejected.md) — explicite (le test cite RM50)
 <!-- tests-obsidian:end -->

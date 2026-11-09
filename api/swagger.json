@@ -1518,6 +1518,31 @@
             }
         },
         "/connections": {
+            "get": {
+                "security": [
+                    {
+                        "MyrToken": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "connections"
+                ],
+                "summary": "Lister les connexions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/adapters_in_rest.connectionDTO"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {

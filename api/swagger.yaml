@@ -1448,6 +1448,21 @@ paths:
       tags:
       - components
   /connections:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/adapters_in_rest.connectionDTO'
+            type: array
+      security:
+      - MyrToken: []
+      summary: Lister les connexions
+      tags:
+      - connections
     post:
       consumes:
       - application/json

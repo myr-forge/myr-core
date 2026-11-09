@@ -1684,9 +1684,32 @@ func TestConnections_POST_MissingTo(t *testing.T) {
 }
 
 func TestConnections_MethodNotAllowed(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/connections", "")
+	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPut, "/api/connections", "")
 	if w.Code != http.StatusMethodNotAllowed {
 		t.Errorf("got %d, want 405", w.Code)
+	}
+}
+
+/// @brief  GET /api/connections liste toutes les connexions : le client y retrouve une liaison existante au lieu de la recréer (RM50)
+/// @input  mockSvc.listConnections retourne une liaison directe et une liaison d'interfaces
+/// @expect 200, les deux connexions avec leurs champs
+func TestConnections_GET_RM50_ListsAll(t *testing.T) {
+	svc := &mockSvc{listConnections: func() ([]*model.Connection, error) {
+		return []*model.Connection{
+			{ID: "c1", From: "a", To: "b"},
+			{ID: "c2", From: "a", To: "b", FromIfaceID: "i1", ToIfaceID: "i2", FromInstanceID: "n1", ToInstanceID: "n2"},
+		}, nil
+	}}
+	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/connections", "")
+	if w.Code != http.StatusOK {
+		t.Fatalf("got %d, want 200 — %s", w.Code, w.Body.String())
+	}
+	var got []map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil {
+		t.Fatalf("réponse illisible : %v", err)
+	}
+	if len(got) != 2 || got[0]["id"] != "c1" || got[1]["from_instance_id"] != "n1" {
+		t.Errorf("connexions inattendues : %v", got)
 	}
 }
 
