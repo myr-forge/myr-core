@@ -22,6 +22,7 @@ tags:
   - rm/RM42
   - rm/RM47
   - rm/RM48
+  - rm/RM49
   - enf/ENF10
   - enf/ENF18
   - enf/ENF25
@@ -279,7 +280,7 @@ end note
 
 **Décision :** Il n'existe qu'une seule source d'identité (`domain/identity`, adossée à la Fabric CA) — pas de second système d'authentification web (email/mot de passe/JWT). L'autorisation (RBAC) est un domaine séparé (`domain/role`), découplé du rôle porté par le certificat CA.
 
-**Justification :** Un accès invité (`POST /api/identity/guest`) peut être délivré sans aucune identité CA (cas : rôle Lecteur automatique sur réseau public). Séparer le RBAC de l'identité CA permet de faire évoluer les permissions (`myr role create/update`) sans dépendre du cycle de vie des certificats.
+**Justification :** Un visiteur peut lire le catalogue publié sans aucune identité CA quand la lecture publique est ouverte (RM49). Séparer le RBAC de l'identité CA permet de faire évoluer les permissions (`myr role create/update`) sans dépendre du cycle de vie des certificats.
 
 **Conséquence :** Le rôle appliqué à une session REST est déterminé **à la connexion**, à partir du rôle CA de l'identité — un changement de rôle administratif (`myr identity set-role`) ne se répercute que sur les sessions créées après le changement, pas sur les sessions déjà ouvertes (voir `DC_D1_Auth_Identity.md`, et `specs/roadmap_dev.md` § Écarts Identité & Session pour l'état de cette dépendance).
 

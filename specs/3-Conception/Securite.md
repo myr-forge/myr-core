@@ -212,7 +212,6 @@ Appliqués à toutes les réponses par le middleware `secureHeaders` :
 
 - `POST /api/identity/request`
 - `POST /api/identity/session`
-- `POST /api/identity/guest`
 - `POST /api/identity/enroll` (essais de secrets d'enrôlement par force brute)
 
 Au-delà, `HTTP 429` est retourné.
@@ -264,7 +263,7 @@ Au-delà, `HTTP 429` est retourné.
 - [§ Révocation](Securite.md#Révocation) → [REST /api/admin/sessions](../../docs/code/routes/REST%20api-admin-sessions.md)
 - [§ Cycle de vie d'une identité](Securite.md#Cycle%20de%20vie%20d'une%20identité) → [REST /api/identity/requests](../../docs/code/routes/REST%20api-identity-requests.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
 - [§ Rôles et permissions](Securite.md#Rôles%20et%20permissions) → [CLI myr identity set-role](../../docs/code/commandes/CLI%20myr-identity-set-role.md) · [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md)
-- [§ 8. Rate limiting](Securite.md#8.%20Rate%20limiting) → [REST /api/identity/enroll](../../docs/code/routes/REST%20api-identity-enroll.md) · [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
+- [§ 8. Rate limiting](Securite.md#8.%20Rate%20limiting) → [REST /api/identity/enroll](../../docs/code/routes/REST%20api-identity-enroll.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
 - [§ 8.1 Bornes des requêtes](Securite.md#8.1%20Bornes%20des%20requêtes) → [REST /api/status](../../docs/code/routes/REST%20api-status.md)
 - [§ 9. Surfaces d'attaque et mitigations](Securite.md#9.%20Surfaces%20d'attaque%20et%20mitigations) → [REST /api/admin/sessions](../../docs/code/routes/REST%20api-admin-sessions.md) · [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [REST /api/identity/enroll](../../docs/code/routes/REST%20api-identity-enroll.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [CLI myr network create](../../docs/code/commandes/CLI%20myr-network-create.md)
 

@@ -12,6 +12,7 @@ tags:
   - domaine/identity
   - domaine/role
   - uc/UCA02
+  - rm/RM49
 ---
 
 # Se Connecter
@@ -28,7 +29,7 @@ actor "Serveur MYR" as SRV
 
 rectangle "Application MYR" {
     usecase "Se connecter avec un secret" as UC1
-    usecase "Obtenir un accès invité" as UC2
+    usecase "Lire le catalogue sans compte" as UC2
     usecase "Afficher erreur identifiants" as UC3
     usecase "Afficher erreur réseau" as UC4
 }
@@ -51,16 +52,16 @@ Il n'y a pas d'étape de « provisionnement de l'identité blockchain » distinc
 
 Le certificat émis à la connexion est la seule source de vérité de l'accès : il porte le **statut** de l'identité (active, en attente d'approbation, suspendue) et son **rôle**. Seule une identité active dotée d'un rôle ouvre une session, et la session porte exactement ce rôle. Une approbation, un refus ou un changement de rôle décidés par l'administrateur (UCA01, UCA08) prennent donc effet à la connexion suivante.
 
-Un second mode existe pour un réseau public : l'**accès invité**, qui ne requiert aucun secret ni identité préalable (si le réseau l'autorise) et attribue directement un rôle Lecteur.
+Un visiteur sans compte n'ouvre aucune session : si l'administrateur a ouvert la lecture publique du réseau, il lit le catalogue publié sans jeton (RM49). Toute écriture exige une connexion avec secret.
 
 ## Pré-conditions
 
 - Pour une connexion avec secret : une identité a été enregistrée auprès de la CA (UCA01), et son secret d'enrôlement est connu
-- Pour un accès invité : le réseau MYR visé existe et est accessible
+- Pour une lecture sans compte : le réseau MYR visé existe et est accessible
 
 ## Scénario
 
-**Étape initiale :** Un client transmet le secret reçu de l'administrateur via `POST /api/identity/session` (ou demande un accès invité via `POST /api/identity/guest`)
+**Étape initiale :** Un client transmet le secret reçu de l'administrateur via `POST /api/identity/session`
 
 ### Flux nominal — Connexion avec secret
 
@@ -70,16 +71,16 @@ Un second mode existe pour un réseau public : l'**accès invité**, qui ne requ
 4. Un token de session est retourné dans la réponse, associé au rôle inscrit dans le certificat
 5. Le client inclut ce token dans l'en-tête `X-Myr-Token` pour les requêtes suivantes
 
-### Flux nominal — Accès invité (réseau public)
+### Flux alternatif — Lecture sans compte (lecture publique ouverte)
 
-1. Un accès invité est demandé (`POST /api/identity/guest`), sans secret ni identité
-2. Le réseau autorise l'accès automatique
-3. Un token de session avec rôle Lecteur est délivré immédiatement — aucun enrôlement CA n'a lieu
+1. Le client lit la politique du réseau (`GET /api/identity/policy`, champ `allow_auto_guest`)
+2. L'administrateur a ouvert la lecture publique
+3. Le client lit le catalogue publié sans jeton ni session (RM49) — aucun enrôlement CA n'a lieu
 
-### Flux alternatif — Accès invité refusé (réseau privé)
+### Flux alternatif — Lecture publique fermée (réseau privé)
 
-1. Le réseau n'autorise pas l'accès automatique (`403 Forbidden`)
-2. Une demande d'accès peut être soumise (voir UCA01), mais la connexion directe est refusée
+1. L'administrateur n'a pas ouvert la lecture publique : une lecture sans jeton est refusée (`401`)
+2. Une demande d'accès peut être soumise (voir UCA01)
 
 ### Flux erreur — Secret invalide
 

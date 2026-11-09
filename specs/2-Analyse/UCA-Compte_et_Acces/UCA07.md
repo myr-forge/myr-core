@@ -36,7 +36,7 @@ U --> UC1
 
 ## Contexte
 
-Comme pour UCA04, **il n'existe aucun endpoint permettant à un client de (re)demander son rôle courant au serveur.** Le rôle n'est communiqué qu'une seule fois : dans la réponse de `POST /api/identity/session` ou `POST /api/identity/guest` (UCA02), sous la forme `{role, pseudo, channel, ...}`. Le client doit le mettre en cache lui-même pour toute la durée de vie de sa session (jusqu'à 7 jours).
+Comme pour UCA04, **il n'existe aucun endpoint permettant à un client de (re)demander son rôle courant au serveur.** Le rôle n'est communiqué qu'une seule fois : dans la réponse de `POST /api/identity/session` (UCA02), sous la forme `{role, pseudo, channel, ...}`. Le client doit le mettre en cache lui-même pour toute la durée de vie de sa session (jusqu'à 7 jours).
 
 > La restitution de cette information à l'utilisateur (infobulle, libellé traduit, etc.) est un choix d'interface qui relève du dépôt GUI externe — hors périmètre de ce document. Seul le fait que le rôle soit une donnée serveur, non falsifiable côté client, fait partie de `myr`.
 
@@ -48,14 +48,12 @@ Comme pour UCA04, **il n'existe aucun endpoint permettant à un client de (re)de
 
 ### Flux nominal — Rôle connu depuis la connexion
 
-1. Le client lit le champ `role` reçu lors de `POST /api/identity/session` ou `POST /api/identity/guest`
+1. Le client lit le champ `role` reçu lors de `POST /api/identity/session`
 2. Il n'y a rien d'autre à faire — cette valeur reste valable tant que le token n'est pas expiré ou révoqué
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 12 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 10 déduit(s)
 > - 🟡 [TestChannels_PUT_SwitchesChannel](../../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : teste route `/api/identity/session`
-> - 🟡 [TestHandleIdentityGuest_DisallowedReturnsForbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_DisallowedReturnsForbidden.md) — déduit : teste route `/api/identity/guest`
-> - 🟡 [TestHandleIdentityGuest_RM49_PublicRead_NoSession](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_RM49_PublicRead_NoSession.md) — déduit : teste route `/api/identity/guest`
 > - 🟡 [TestHandleIdentitySession_CannotSignIn_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_CannotSignIn_Forbidden.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_EnrollError](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_EnrollError.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_InvalidJSON](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_InvalidJSON.md) — déduit : teste route `/api/identity/session`
@@ -107,7 +105,7 @@ note over Client : Aucun endpoint ultérieur ne permet\nde revérifier ce rôle 
 **Rôle figé, potentiellement obsolète :** le rôle mis en cache par le client ne reflète que l'état au moment de la connexion. Si un administrateur modifie le rôle de l'identité entre-temps (`myr identity set-role`, UCA08), le client n'en sera informé qu'à sa prochaine connexion — voir aussi l'écart documenté dans UCA02 sur le rôle de session actuellement figé à `"contributor"`.
 
 **Statut d'implémentation :**
-- Transmission du rôle à la connexion : **opérationnelle** (`POST /api/identity/session`, `POST /api/identity/guest`)
+- Transmission du rôle à la connexion : **opérationnelle** (`POST /api/identity/session`)
 - Endpoint de re-consultation du rôle courant : **inexistant** — écart réel, pas une simplification de cette spec
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->

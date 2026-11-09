@@ -23,7 +23,7 @@
 //	@securityDefinitions.apikey	MyrToken
 //	@in							header
 //	@name						X-Myr-Token
-//	@description				Token opaque de session (32 octets hex), obtenu via POST /identity/session, /identity/guest ou /identity/enroll — pas de JWT (voir la règle d'authentification du domaine identité).
+//	@description				Token opaque de session (32 octets hex), obtenu via POST /identity/session ou /identity/enroll — pas de JWT (voir la règle d'authentification du domaine identité).
 package main
 
 import (

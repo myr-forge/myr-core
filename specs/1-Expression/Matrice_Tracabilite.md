@@ -45,23 +45,23 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCA02
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 30 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 28 déduit(s)
 > - 🟡 [TestChannels_PUT_SwitchesChannel](../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : via UCA02 · Flux nominal — Connexion avec secret CA
-> - 🟡 [TestHandleIdentityGuest_DisallowedReturnsForbidden](../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_DisallowedReturnsForbidden.md) — déduit : via UCA02 · Flux nominal — Accès invité (réseau ouvert à la lecture publique)
-> - 🟡 [TestHandleIdentityGuest_RM49_PublicRead_NoSession](../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_RM49_PublicRead_NoSession.md) — déduit : via UCA02 · Flux nominal — Accès invité (réseau ouvert à la lecture publique)
-> - 🟡 [TestHandleIdentityPolicy_BlockchainPrivate](../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_BlockchainPrivate.md) — déduit : via UCA02 · Flux nominal — Accès invité (réseau ouvert à la lecture publique)
-> - 🟡 [TestHandleIdentityPolicy_BlockchainPublic](../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_BlockchainPublic.md) — déduit : via UCA02 · Flux nominal — Accès invité (réseau ouvert à la lecture publique)
-> - 🟡 [TestHandleIdentityPolicy_RequireApproval](../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_RequireApproval.md) — déduit : via UCA02 · Flux nominal — Accès invité (réseau ouvert à la lecture publique)
-> - 🟡 [TestHandleIdentityRequest_InvalidJSON](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidJSON.md) — déduit : via UCA02 · Flux alternatif — Accès invité refusé (réseau privé)
-> - 🟡 [TestHandleIdentityRequest_InvalidName_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidName_Rejected.md) — déduit : via UCA02 · Flux alternatif — Accès invité refusé (réseau privé)
-> - 🟡 [TestHandleIdentityRequest_MissingFields](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_MissingFields.md) — déduit : via UCA02 · Flux alternatif — Accès invité refusé (réseau privé)
-> - 🟡 [TestHandleIdentityRequest_RegistrationClosed_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_RegistrationClosed_Rejected.md) — déduit : via UCA02 · Flux alternatif — Accès invité refusé (réseau privé)
-> - 🟡 [TestHandleIdentityRequest_ServiceError](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_ServiceError.md) — déduit : via UCA02 · Flux alternatif — Accès invité refusé (réseau privé)
-> - 🟡 [TestHandleIdentityRequest_Success](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_Success.md) — déduit : via UCA02 · Flux alternatif — Accès invité refusé (réseau privé)
+> - 🟡 [TestHandleIdentityPolicy_BlockchainPrivate](../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_BlockchainPrivate.md) — déduit : via UCA02 · Flux alternatif — Lecture sans compte (lecture publique ouverte)
+> - 🟡 [TestHandleIdentityPolicy_BlockchainPublic](../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_BlockchainPublic.md) — déduit : via UCA02 · Flux alternatif — Lecture sans compte (lecture publique ouverte)
+> - 🟡 [TestHandleIdentityPolicy_RequireApproval](../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_RequireApproval.md) — déduit : via UCA02 · Flux alternatif — Lecture sans compte (lecture publique ouverte)
+> - 🟡 [TestHandleIdentityRequest_InvalidJSON](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidJSON.md) — déduit : via UCA02 · Flux alternatif — Lecture publique fermée (réseau privé)
+> - 🟡 [TestHandleIdentityRequest_InvalidName_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_InvalidName_Rejected.md) — déduit : via UCA02 · Flux alternatif — Lecture publique fermée (réseau privé)
+> - 🟡 [TestHandleIdentityRequest_MissingFields](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_MissingFields.md) — déduit : via UCA02 · Flux alternatif — Lecture publique fermée (réseau privé)
+> - 🟡 [TestHandleIdentityRequest_RegistrationClosed_Rejected](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_RegistrationClosed_Rejected.md) — déduit : via UCA02 · Flux alternatif — Lecture publique fermée (réseau privé)
+> - 🟡 [TestHandleIdentityRequest_ServiceError](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_ServiceError.md) — déduit : via UCA02 · Flux alternatif — Lecture publique fermée (réseau privé)
+> - 🟡 [TestHandleIdentityRequest_Success](../../docs/tests/adapters-in-rest/TestHandleIdentityRequest_Success.md) — déduit : via UCA02 · Flux alternatif — Lecture publique fermée (réseau privé)
 > - 🟡 [TestHandleIdentitySession_CannotSignIn_Forbidden](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_CannotSignIn_Forbidden.md) — déduit : via UCA02 · Flux nominal — Connexion avec secret CA
 > - 🟡 [TestHandleIdentitySession_EnrollError](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_EnrollError.md) — déduit : via UCA02 · Flux nominal — Connexion avec secret CA
 > - 🟡 [TestHandleIdentitySession_InvalidJSON](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_InvalidJSON.md) — déduit : via UCA02 · Flux nominal — Connexion avec secret CA
-> - … et 15 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestHandleIdentitySession_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MethodNotAllowed.md) — déduit : via UCA02 · Flux nominal — Connexion avec secret CA
+> - 🟡 [TestHandleIdentitySession_MissingFields](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_MissingFields.md) — déduit : via UCA02 · Flux nominal — Connexion avec secret CA
+> - … et 13 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF03 — Déconnecter un utilisateur et invalider sa session
@@ -87,10 +87,8 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCA05, UCA07
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 22 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 20 déduit(s)
 > - 🟡 [TestChannels_PUT_SwitchesChannel](../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
-> - 🟡 [TestHandleIdentityGuest_DisallowedReturnsForbidden](../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_DisallowedReturnsForbidden.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
-> - 🟡 [TestHandleIdentityGuest_RM49_PublicRead_NoSession](../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_RM49_PublicRead_NoSession.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
 > - 🟡 [TestHandleIdentitySession_CannotSignIn_Forbidden](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_CannotSignIn_Forbidden.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
 > - 🟡 [TestHandleIdentitySession_EnrollError](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_EnrollError.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
 > - 🟡 [TestHandleIdentitySession_InvalidJSON](../../docs/tests/adapters-in-rest/TestHandleIdentitySession_InvalidJSON.md) — déduit : via UCA07 · Flux nominal — Rôle connu depuis la connexion
@@ -103,7 +101,9 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestCreate_NoTable_Rejected](../../docs/tests/domain-role/TestCreate_NoTable_Rejected.md) — déduit : via UCA05 · Flux nominal — Action autorisée
 > - 🟡 [TestDelete_Success](../../docs/tests/domain-role/TestDelete_Success.md) — déduit : via UCA05 · Flux nominal — Action autorisée
 > - 🟡 [TestHasPermission_DefaultTable](../../docs/tests/domain-role/TestHasPermission_DefaultTable.md) — déduit : via UCA05 · Flux nominal — Action autorisée
-> - … et 7 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestHasPermission_UnknownRole](../../docs/tests/domain-role/TestHasPermission_UnknownRole.md) — déduit : via UCA05 · Flux nominal — Action autorisée
+> - 🟡 [TestTable_RM48_AdminAlwaysImmutable](../../docs/tests/domain-role/TestTable_RM48_AdminAlwaysImmutable.md) — déduit : via UCA05 · Flux nominal — Action autorisée
+> - … et 5 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF06 — Consulter les assets possédés par l'utilisateur
@@ -998,7 +998,7 @@ EF48–EF54 : retirés — use cases 100 % frontend (UCIG, UCPAR, UCDOC), sans c
 - **Use cases couvrants** : UCDEV01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 81 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 79 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : via UCDEV01 · Flux nominal — Lecture de données (query)
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : via UCDEV01 · Flux nominal — Lecture de données (query)
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : via UCDEV01 · Flux nominal — Lecture de données (query)
@@ -1014,7 +1014,7 @@ EF48–EF54 : retirés — use cases 100 % frontend (UCIG, UCPAR, UCDOC), sans c
 > - 🟡 [TestComponent_AddInstance](../../docs/tests/adapters-in-rest/TestComponent_AddInstance.md) — déduit : via UCDEV01 · Flux nominal — Lecture de données (query)
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : via UCDEV01 · Flux nominal — Lecture de données (query)
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : via UCDEV01 · Flux nominal — Lecture de données (query)
-> - … et 66 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 64 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF56 — Proposer un CLI d'administration serveur

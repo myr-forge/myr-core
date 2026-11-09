@@ -22,6 +22,7 @@ tags:
   - rm/RM43
   - rm/RM44
   - rm/RM46
+  - rm/RM49
   - enf/ENF18
 ---
 # DC — D2 : Administration réseau
@@ -219,7 +220,7 @@ NetworkProfile "1" --> "0..*" Channel : FabricChannel\n(default channel)
 
 | Paramètre | Valeur par défaut | Comportement |
 |-----------|-------------------|-------------|
-| `AllowAutoGuest` | `false` | `false` : tout accès requiert une identité validée. `true` : `POST /api/identity/guest` délivre immédiatement un token `reader`. |
+| `AllowAutoGuest` | `false` | `false` : tout accès requiert une identité validée. `true` : le catalogue publié se lit sans compte ni jeton (RM49) ; les brouillons restent invisibles d'un visiteur. |
 | `AllowAutoRegister` | `false` | `false` : aucune demande d'inscription n'est acceptée (`POST /api/identity/request` → 403), seul l'administrateur crée des comptes (`myr identity register`). `true` : la demande crée directement l'identité dans la CA Fabric (RM43). |
 | `RequireApproval` | `false` | Avec `AllowAutoRegister=true` : `true` crée l'identité en attente, activée ou suspendue par la décision de l'administrateur (`myr identity approve|reject`, RM44) ; `false` la crée active. |
 | `AutoRegisterRole` | `""` → `reader` | Rôle attribué lors d'un auto-register : rôle existant, sans droit d'administration (RM46). `""` = `reader`. |
@@ -400,7 +401,7 @@ Annuaire des peers : déclaré dans `configtx.yaml`, distribué sur le ledger. C
 - [§ NetworkProfile (domain/network)](DC_D2_Administration.md#NetworkProfile%20%28domain/network%29) → [REST /api/networks/active](../../docs/code/routes/REST%20api-networks-active.md) · [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md)
 - [§ Champ à ajouter à NetworkProfile](DC_D2_Administration.md#Champ%20à%20ajouter%20à%20NetworkProfile) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md)
 - [§ Role (domain/channel)](DC_D2_Administration.md#Role%20%28domain/channel%29) → [CLI myr role create](../../docs/code/commandes/CLI%20myr-role-create.md) · [CLI myr role delete](../../docs/code/commandes/CLI%20myr-role-delete.md)
-- [§ 4. Politique d'accès réseau](DC_D2_Administration.md#4.%20Politique%20d'accès%20réseau) → [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [CLI myr identity approve](../../docs/code/commandes/CLI%20myr-identity-approve.md) · [CLI myr identity register](../../docs/code/commandes/CLI%20myr-identity-register.md)
+- [§ 4. Politique d'accès réseau](DC_D2_Administration.md#4.%20Politique%20d'accès%20réseau) → [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [CLI myr identity approve](../../docs/code/commandes/CLI%20myr-identity-approve.md) · [CLI myr identity register](../../docs/code/commandes/CLI%20myr-identity-register.md)
 - [§ Port entrant — NetworkService](DC_D2_Administration.md#Port%20entrant%20—%20NetworkService) → [NetworkService.AddPeer](../../docs/code/fonctions/network.NetworkService.AddPeer.md) · [NetworkService.GetActive](../../docs/code/fonctions/network.NetworkService.GetActive.md) · [NetworkService.TestConnection](../../docs/code/fonctions/network.NetworkService.TestConnection.md)
 - [§ 7. Décisions de conception](DC_D2_Administration.md#7.%20Décisions%20de%20conception) → [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [NetworkService.Delete](../../docs/code/fonctions/network.NetworkService.Delete.md)
 - [§ 8. Écarts code → specs](DC_D2_Administration.md#8.%20Écarts%20code%20→%20specs) → [CLI myr network](../../docs/code/commandes/CLI%20myr-network.md) · [CLI myr network destroy](../../docs/code/commandes/CLI%20myr-network-destroy.md) · [CLI myr node](../../docs/code/commandes/CLI%20myr-node.md) · [CLI myr org](../../docs/code/commandes/CLI%20myr-org.md)

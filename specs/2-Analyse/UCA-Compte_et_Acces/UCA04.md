@@ -41,7 +41,7 @@ U --> UC2
 
 **Il n'existe aucun endpoint qui répond « suis-je connecté ? / quel est mon rôle actuel ? ».** Il n'y a pas d'équivalent de `GET /api/auth/me` dans le code réel.
 
-Le seul moment où le client apprend son rôle, son pseudo et son canal est la réponse de `POST /api/identity/session` ou `POST /api/identity/guest` (UCA02) — il doit les mettre en cache lui-même. Ensuite, la seule façon de savoir si la session est toujours valide est de tenter un appel protégé et d'observer la réponse :
+Le seul moment où le client apprend son rôle, son pseudo et son canal est la réponse de `POST /api/identity/session` (UCA02) — il doit les mettre en cache lui-même. Ensuite, la seule façon de savoir si la session est toujours valide est de tenter un appel protégé et d'observer la réponse :
 
 - `HTTP 200` (ou tout code de succès métier) → le token est toujours valide
 - `HTTP 401` → le token est absent, invalide ou expiré — il faut se reconnecter (UCA02)

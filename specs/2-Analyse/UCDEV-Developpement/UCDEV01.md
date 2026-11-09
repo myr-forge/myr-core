@@ -13,6 +13,7 @@ tags:
   - rm/RM01
   - rm/RM07
   - rm/RM08
+  - rm/RM49
   - enf/ENF12
 ---
 
@@ -53,7 +54,7 @@ L'acteur "Développeur" est distinct de l'Administrateur : il accède à MYR exc
 
 - `myr-api` est en cours d'exécution et accessible
 - Le développeur dispose d'un compte MYR avec les droits nécessaires (rôle Lecteur minimum)
-- Le développeur dispose d'un token de session opaque valide (obtenu via `POST /api/identity/session` ou `POST /api/identity/guest`)
+- Le développeur dispose d'un token de session opaque valide (obtenu via `POST /api/identity/session`)
 - La documentation de l'API REST (spec OpenAPI dans `api/`) est disponible
 
 ## Scénario
@@ -62,7 +63,7 @@ L'acteur "Développeur" est distinct de l'Administrateur : il accède à MYR exc
 
 ### Flux nominal — Lecture de données (query)
 
-1. Le développeur obtient un token de session via `POST /api/identity/session` (secret CA) ou `POST /api/identity/guest` (accès invité)
+1. Le développeur obtient un token de session via `POST /api/identity/session` (secret CA) ; sans compte, il ne lit que le catalogue publié, sans jeton, si la lecture publique est ouverte (RM49)
 2. Il effectue un appel GET avec l'en-tête `X-Myr-Token: <token>`
 3. Exemple : `GET /api/components?channel=greenchannel`
 4. Le serveur vérifie le token (`requireAuth`)
@@ -70,7 +71,7 @@ L'acteur "Développeur" est distinct de l'Administrateur : il accède à MYR exc
 6. Le développeur intègre les données dans son application tierce
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 81 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 79 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -86,7 +87,7 @@ L'acteur "Développeur" est distinct de l'Administrateur : il accède à MYR exc
 > - 🟡 [TestComponent_AddInstance](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
-> - … et 66 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 64 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Écriture de données (invoke)
@@ -122,14 +123,12 @@ L'acteur "Développeur" est distinct de l'Administrateur : il accède à MYR exc
 
 1. Le développeur effectue un appel avec un token expiré ou révoqué
 2. Le serveur retourne `401 Unauthorized`
-3. **Il n'existe pas de mécanisme de rafraîchissement** — le développeur doit ré-obtenir un nouveau token via `POST /api/identity/session` (nouvel enrôlement CA) ou `POST /api/identity/guest`
+3. **Il n'existe pas de mécanisme de rafraîchissement** — le développeur doit ré-obtenir un nouveau token via `POST /api/identity/session` (nouvel enrôlement CA)
 4. Le développeur réessaie l'appel avec le nouveau token
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 12 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 10 déduit(s)
 > - 🟡 [TestChannels_PUT_SwitchesChannel](../../../docs/tests/adapters-in-rest/TestChannels_PUT_SwitchesChannel.md) — déduit : teste route `/api/identity/session`
-> - 🟡 [TestHandleIdentityGuest_DisallowedReturnsForbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_DisallowedReturnsForbidden.md) — déduit : teste route `/api/identity/guest`
-> - 🟡 [TestHandleIdentityGuest_RM49_PublicRead_NoSession](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_RM49_PublicRead_NoSession.md) — déduit : teste route `/api/identity/guest`
 > - 🟡 [TestHandleIdentitySession_CannotSignIn_Forbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_CannotSignIn_Forbidden.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_EnrollError](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_EnrollError.md) — déduit : teste route `/api/identity/session`
 > - 🟡 [TestHandleIdentitySession_InvalidJSON](../../../docs/tests/adapters-in-rest/TestHandleIdentitySession_InvalidJSON.md) — déduit : teste route `/api/identity/session`
@@ -239,7 +238,7 @@ end
 ## Notes d'implémentation
 
 **Routes exposées** dans `adapters/in/rest/server.go` :
-- Identité : `/api/identity/policy`, `/api/identity/enroll`, `/api/identity/session`, `/api/identity/guest`, `/api/identity/request`, `/api/identity/requests`, `/api/identity/wallets`, `/api/identity/status`
+- Identité : `/api/identity/policy`, `/api/identity/enroll`, `/api/identity/session`, `/api/identity/request`, `/api/identity/requests`, `/api/identity/wallets`, `/api/identity/status`
 - Données : `/api/components`, `/api/components/`, `/api/connections`, `/api/connections/`, `/api/assembly-links`, `/api/virtual-connect`, `/api/modules`, `/api/modules/`, `/api/interfaces/`
 - Référentiel : `/api/refs`, `/api/refs/categories`, `/api/refs/types`, `/api/refs/units`
 - Réseau : `/api/channels`, `/api/networks`, `/api/networks/active`
@@ -265,7 +264,6 @@ end
 - REST `/api/connections`
 - REST `/api/health`
 - REST `/api/identity/enroll`
-- REST `/api/identity/guest`
 - REST `/api/identity/policy`
 - REST `/api/identity/request`
 - REST `/api/identity/requests`

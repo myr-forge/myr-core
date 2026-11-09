@@ -120,7 +120,6 @@ func (s *Server) buildMux() (http.Handler, error) {
 	mux.HandleFunc("/api/identity/policy", s.handler.handleIdentityPolicy)
 	mux.HandleFunc("/api/identity/enroll", s.handler.handleIdentityEnroll)
 	mux.HandleFunc("/api/identity/session", s.handler.handleIdentitySession)
-	mux.HandleFunc("/api/identity/guest", s.handler.handleIdentityGuest)
 	mux.HandleFunc("/api/identity/request", s.handler.handleIdentityRequest)
 
 	// Routes d'identité — protégées

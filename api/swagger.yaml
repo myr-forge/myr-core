@@ -1561,40 +1561,6 @@ paths:
       summary: Enrôlement CA (sans session)
       tags:
       - identity
-  /identity/guest:
-    post:
-      consumes:
-      - application/json
-      description: 'Déprécié : la lecture publique du catalogue ne demande aucun jeton.
-        Répond 200 {guest: true, token: ""} si le réseau l''autorise, 403 sinon.'
-      parameters:
-      - description: pseudo, display_name, email, org_id, message — tous optionnels
-        in: body
-        name: body
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.sessionDTO'
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "429":
-          description: Too Many Requests
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Accès invité (lecture publique, sans session)
-      tags:
-      - identity
   /identity/policy:
     get:
       produces:
@@ -2381,9 +2347,9 @@ schemes:
 - https
 securityDefinitions:
   MyrToken:
-    description: Token opaque de session (32 octets hex), obtenu via POST /identity/session,
-      /identity/guest ou /identity/enroll — pas de JWT (voir la règle d'authentification
-      du domaine identité).
+    description: Token opaque de session (32 octets hex), obtenu via POST /identity/session
+      ou /identity/enroll — pas de JWT (voir la règle d'authentification du domaine
+      identité).
     in: header
     name: X-Myr-Token
     type: apiKey

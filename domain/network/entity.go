@@ -54,7 +54,7 @@ type NetworkProfile struct {
 	CAAdminKeyPath  string `json:"ca_admin_key_path,omitempty"`
 	// ServerURL est l'URL du MYR Server central de l'organisation.
 	// Quand ce champ est renseigné, le GUI client y redirige les demandes d'identité
-	// (POST /api/identity/request, POST /api/identity/guest) au lieu de les traiter
+	// (POST /api/identity/request) au lieu de les traiter
 	// localement. Le MYR Server détient les credentials admin CA et gère les comptes.
 	// Exemple : "https://myr.monorg.com:8080"
 	// Vide = le GUI gère lui-même (mode standalone, dev uniquement).

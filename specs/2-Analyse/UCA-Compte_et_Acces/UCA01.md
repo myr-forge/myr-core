@@ -17,6 +17,7 @@ tags:
   - rm/RM43
   - rm/RM44
   - rm/RM46
+  - rm/RM49
   - enf/ENF12
   - relecture/incoherence
 ---
@@ -63,7 +64,7 @@ Les règles d'inscription sont un réglage du profil réseau, fixé par l'admini
 
 Le rôle attribué à l'inscription est `AutoRegisterRole` du profil réseau, ou `reader` par défaut (RM21) ; il doit exister dans la table des rôles et ne porter aucun droit d'administration, ce que vérifient la configuration du réseau (`myr network add|update --auto-role`) puis chaque demande (RM46). L'identité est créée dans la CA **dès la demande**, y compris lorsqu'une approbation est exigée : l'approbation ne fait que changer son statut (`CAPort.UpdateAttributes`), elle ne la crée pas. Le changement s'applique au prochain enrôlement, c'est-à-dire à la prochaine connexion (UCA02), qui ré-enrôle systématiquement.
 
-Il existe aussi un accès **invité** sans aucune identité CA (voir UCA02, `POST /api/identity/guest`), qui n'entre pas dans ce use case.
+Un visiteur sans compte lit le catalogue publié sans jeton quand l'administrateur l'a ouvert (UCA02, RM49) ; ce cas n'entre pas dans ce use case.
 
 **Sur la portée réelle de l'auto-enregistrement (`AllowAutoRegister=true`) :** ce réglage supprime la validation humaine *au moment de la demande* — aucun administrateur n'intervient avant la création de l'identité, même lorsque son activation reste soumise à approbation. Il ne supprime pas pour autant toute autorité d'enregistrement : la Fabric CA exige qu'une identité **registrar** (privilèges `hf.Registrar.*`) signe chaque enregistrement (`CAClient.Register`, `adapters/out/fabric/ca_client.go`). Cette identité registrar est provisionnée une seule fois, à la création du réseau, puis le serveur `myr` l'utilise de façon automatisée pour chaque demande — voir ADR-07 (`specs/3-Conception/Conception_intro.md` §6) pour la décision d'architecture et ses conséquences (notamment le fait que ce registrar est scopé par organisation, pas partagé pour tout le réseau décentralisé).
 

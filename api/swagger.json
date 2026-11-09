@@ -1709,57 +1709,6 @@
                 }
             }
         },
-        "/identity/guest": {
-            "post": {
-                "description": "Déprécié : la lecture publique du catalogue ne demande aucun jeton. Répond 200 {guest: true, token: \"\"} si le réseau l'autorise, 403 sinon.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "identity"
-                ],
-                "summary": "Accès invité (lecture publique, sans session)",
-                "parameters": [
-                    {
-                        "description": "pseudo, display_name, email, org_id, message — tous optionnels",
-                        "name": "body",
-                        "in": "body",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.sessionDTO"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "429": {
-                        "description": "Too Many Requests",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/identity/policy": {
             "get": {
                 "produces": [
@@ -3533,7 +3482,7 @@
     },
     "securityDefinitions": {
         "MyrToken": {
-            "description": "Token opaque de session (32 octets hex), obtenu via POST /identity/session, /identity/guest ou /identity/enroll — pas de JWT (voir la règle d'authentification du domaine identité).",
+            "description": "Token opaque de session (32 octets hex), obtenu via POST /identity/session ou /identity/enroll — pas de JWT (voir la règle d'authentification du domaine identité).",
             "type": "apiKey",
             "name": "X-Myr-Token",
             "in": "header"

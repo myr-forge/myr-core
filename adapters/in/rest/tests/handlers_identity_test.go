@@ -584,60 +584,7 @@ func TestHandleIdentityPolicy_RequireApproval(t *testing.T) {
 	}
 }
 
-// ── POST /api/identity/guest ──────────────────────────────────────────────────
-
-// / @brief  POST /api/identity/guest sur un réseau ouvert à la lecture publique : aucune session créée (RM49)
-// / @input  réseau AllowAutoGuest=true, corps {pseudo: visiteur}
-// / @expect 200, guest=true, role reader, jeton vide — la lecture se fait sans jeton
-func TestHandleIdentityGuest_RM49_PublicRead_NoSession(t *testing.T) {
-	netSvc := &mockNetworkSvc{
-		getActive: func() (*network.NetworkProfile, error) {
-			return &network.NetworkProfile{AllowAutoGuest: true, MSPID: "Org1MSP"}, nil
-		},
-	}
-
-	body, _ := json.Marshal(map[string]string{"pseudo": "visiteur"})
-	req := httptest.NewRequest(http.MethodPost, "/api/identity/guest", bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	newBothMux(t, &mockIdentitySvc{}, netSvc).ServeHTTP(w, req)
-
-	if w.Code != http.StatusOK {
-		t.Fatalf("code 200 attendu, obtenu %d — body: %s", w.Code, w.Body.String())
-	}
-	var sess struct {
-		Token string `json:"token"`
-		Role  string `json:"role"`
-		Guest bool   `json:"guest"`
-	}
-	json.NewDecoder(w.Body).Decode(&sess)
-	if sess.Token != "" {
-		t.Errorf("aucun jeton attendu (lecture publique sans session), obtenu %q", sess.Token)
-	}
-	if sess.Role != "reader" {
-		t.Errorf("role reader attendu, obtenu %q", sess.Role)
-	}
-	if !sess.Guest {
-		t.Error("guest=true attendu")
-	}
-}
-
-func TestHandleIdentityGuest_DisallowedReturnsForbidden(t *testing.T) {
-	netSvc := &mockNetworkSvc{
-		getActive: func() (*network.NetworkProfile, error) {
-			return &network.NetworkProfile{AllowAutoGuest: false}, nil
-		},
-	}
-
-	req := httptest.NewRequest(http.MethodPost, "/api/identity/guest", bytes.NewBufferString("{}"))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	newBothMux(t, &mockIdentitySvc{}, netSvc).ServeHTTP(w, req)
-
-	if w.Code != http.StatusForbidden {
-		t.Errorf("code 403 attendu, obtenu %d", w.Code)
-	}
-}
+// ── (retiré) POST /api/identity/guest ──────────────────────────────────────────────────
 
 // ── requireAuth middleware ────────────────────────────────────────────────────
 

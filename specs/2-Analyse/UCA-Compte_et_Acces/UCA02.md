@@ -33,8 +33,8 @@ actor "Visiteur\n(sans identité)" as V
 
 rectangle "API myr" {
     usecase "Se connecter (secret CA)" as UC1
-    usecase "Obtenir un accès invité" as UC2
-    usecase "Refuser l'accès invité\n(réseau privé)" as UC3
+    usecase "Lire le catalogue sans compte" as UC2
+    usecase "Lecture publique fermée\n(réseau privé)" as UC3
 }
 
 U --> UC1
@@ -52,12 +52,12 @@ Il n'y a pas de distinction « connexion standard / première connexion avec pro
 
 Le certificat tout juste émis est la seule source de vérité de l'autorisation (ADR-12) : `Enroll` lit ses attributs `Myr.status` et `Myr.role` (`CAPort.CertAttributes`) dans le `WalletEntry` retourné, et `WalletEntry.CanSignIn` n'autorise l'ouverture de session qu'à une identité `active` dotée d'un rôle. La session porte ce rôle et l'identifiant `pseudo@org` de l'identité, dont le wallet signe ensuite ses écritures sur le ledger. Comme chaque connexion ré-enrôle, une approbation, un refus (UCA01) ou un changement de rôle (UCA08) s'appliquent dès la connexion suivante.
 
-Un visiteur sans compte n'ouvre aucune session : quand l'administrateur a ouvert la lecture publique du réseau (`AllowAutoGuest=true`), il lit le catalogue publié sans jeton (RM49, UCCL01). `POST /api/identity/guest` ne fait que l'indiquer au client, sans créer de session ni délivrer de jeton.
+Un visiteur sans compte n'ouvre aucune session : quand l'administrateur a ouvert la lecture publique du réseau (`AllowAutoGuest=true`), il lit le catalogue publié sans jeton (RM49, UCCL01). Le client l'apprend par `GET /api/identity/policy` (`allow_auto_guest`).
 
 ## Pré-conditions
 
 - **Connexion avec secret** : une identité a été enregistrée auprès de la CA (UCA01) et son secret est connu du client
-- **Accès invité** : le réseau actif existe (aucune identité requise)
+- **Lecture sans compte** : le réseau actif existe (aucune identité requise)
 
 ## Scénario
 
@@ -91,27 +91,24 @@ Un visiteur sans compte n'ouvre aucune session : quand l'administrateur a ouvert
 > - … et 4 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
-### Flux nominal — Accès invité (réseau ouvert à la lecture publique)
+### Flux alternatif — Lecture sans compte (lecture publique ouverte)
 
-1. Le client soumet `POST /api/identity/guest` (corps optionnel : `{pseudo, display_name, email, org_id, message}`) — ou lit directement `allow_auto_guest` dans `GET /api/identity/policy`
+1. Le client lit `allow_auto_guest` dans `GET /api/identity/policy`
 2. Le réseau actif a `AllowAutoGuest=true`
-3. Réponse `HTTP 200` avec `{token:"", role:"reader", pseudo, channel, guest:true}` : aucune session n'est créée, aucun enrôlement CA n'a lieu
-4. Le client lit ensuite le catalogue publié sans jeton (RM49, UCCL01) ; toute écriture exige une connexion avec secret
+3. Le client lit le catalogue publié sans jeton (RM49, UCCL01) : aucune session n'est créée, aucun enrôlement CA n'a lieu ; toute écriture exige une connexion avec secret
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
-> - 🟡 [TestHandleIdentityGuest_DisallowedReturnsForbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_DisallowedReturnsForbidden.md) — déduit : teste route `/api/identity/guest`
-> - 🟡 [TestHandleIdentityGuest_RM49_PublicRead_NoSession](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_RM49_PublicRead_NoSession.md) — déduit : teste route `/api/identity/guest`
+> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
 > - 🟡 [TestHandleIdentityPolicy_BlockchainPrivate](../../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_BlockchainPrivate.md) — déduit : teste route `/api/identity/policy`
 > - 🟡 [TestHandleIdentityPolicy_BlockchainPublic](../../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_BlockchainPublic.md) — déduit : teste route `/api/identity/policy`
 > - 🟡 [TestHandleIdentityPolicy_RequireApproval](../../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_RequireApproval.md) — déduit : teste route `/api/identity/policy`
 <!-- tests-obsidian:end -->
 
-### Flux alternatif — Accès invité refusé (réseau privé)
+### Flux alternatif — Lecture publique fermée (réseau privé)
 
 1. `AllowAutoGuest=false`
-2. Réponse `HTTP 403` avec `{"error": "ce réseau ne permet pas l'accès automatique — contactez l'administrateur"}`
-3. Aucune demande d'accès n'est enregistrée par cet appel : une inscription passe par `POST /api/identity/request`, selon les règles d'inscription du réseau (UCA01)
+2. Une lecture du catalogue sans jeton reçoit `HTTP 401`
+3. Une inscription passe par `POST /api/identity/request`, selon les règles d'inscription du réseau (UCA01)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 0 explicite(s) · 6 déduit(s)
@@ -228,7 +225,7 @@ end
 
 **Endpoints :**
 - `POST /api/identity/session` → `handleIdentitySession`
-- `POST /api/identity/guest` → `handleIdentityGuest`
+- `GET /api/identity/policy` → `handleIdentityPolicy`
 - `POST /api/identity/enroll` → `handleIdentityEnroll` (variante sans création de session REST — récupère juste le wallet local, utile hors contexte HTTP)
 
 **Pas de JWT :** malgré des commentaires de code encore présents ailleurs (`handlers.go`, `handlers_network.go`) mentionnant « JWT Bearer », il n'y a aucune bibliothèque JWT, aucun claim signé. Le seul mécanisme réel est le token opaque + en-tête `X-Myr-Token`.
