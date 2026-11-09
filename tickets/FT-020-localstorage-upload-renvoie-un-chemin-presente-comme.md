@@ -2,10 +2,10 @@
 id: FT-020
 titre: "LocalStorage.Upload renvoie un chemin présenté comme un hash"
 type: dette
-statut: ouvert
+statut: ferme
 severite: mineure
 detecte: 2026-10-02
-maj: 2026-10-02
+maj: 2026-11-09
 composants: [adapters/out/localstorage]
 uc: [UCCL03]
 rm: [RM42]
@@ -13,7 +13,7 @@ enf: []
 tags:
   - ticket
   - ticket/dette
-  - statut/ouvert
+  - statut/ferme
   - severite/mineure
   - domaine/model
   - uc/UCCL03
@@ -21,7 +21,7 @@ tags:
 ---
 # FT-020 — LocalStorage.Upload renvoie un chemin présenté comme un hash
 
-> **Dette technique** · sévérité **mineure** · statut **Ouvert** · détecté le 2026-10-02
+> **Dette technique** · sévérité **mineure** · statut **Fermé** · détecté le 2026-10-02
 > Source : todo.md (travaux traçabilité du fichier source)
 
 ## Constat
@@ -58,3 +58,4 @@ Renommer la valeur de retour (« référence de stockage ») dans le port et sa 
 ## Historique
 
 - 2026-10-02 — Ticket créé
+- 2026-11-09 — Fermé, sans objet : décision du PO, `FileStoragePort` et ses implémentations `LocalStorage` et `ContentAddressedStorage` sont retirés (commit `e5e6b10`) ; myr-core ne conserve aucun fichier (RM42)

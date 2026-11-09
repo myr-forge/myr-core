@@ -5,7 +5,7 @@ type: anomalie
 statut: en-cours
 severite: majeure
 detecte: 2026-11-08
-maj: 2026-11-08
+maj: 2026-11-09
 composants: [adapters/in/rest]
 uc: [UCDEV01, UCMOD06, UCCE06]
 rm: [RM13, RM17]
@@ -67,3 +67,4 @@ Ouvrir une vraie session dans chaque test : identité réelle (`domain/identity`
 
 - 2026-11-08 — Ticket créé ; échecs constatés à l'identique au commit `dfa6ebb` (antérieurs à R-03)
 - 2026-11-08 — Corrigé — commit `353fece` : session réelle sur une CA en mémoire, câblage aligné sur `cmd/api`, attentes alignées sur l'ADR-11 et RM13 ; les 10 tests passent. Branche `feature/ledger-invariants`, pas encore fusionnée
+- 2026-11-09 — `go test -tags integration ./adapters/in/rest/integration/` passe en entier sur `feature/ledger-invariants` (scénario de module aligné sur RM51, corps de création avec catégorie et canal — commit `51f12f3`)

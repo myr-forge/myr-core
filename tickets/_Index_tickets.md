@@ -15,13 +15,13 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 
 | Statut | Nombre |
 |--------|--------|
-| Ouvert | 16 |
+| Ouvert | 14 |
 | À vérifier | 2 |
 | À trancher (PO) | 14 |
 | Différé | 1 |
-| En cours | 7 |
+| En cours | 8 |
 | Résolu | 1 |
-| Fermé | 1 |
+| Fermé | 2 |
 
 ## Critiques à traiter en premier
 
@@ -39,7 +39,6 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-001 — Propriété des assets non contrôlée côté serveur](FT-001-propriete-des-assets-non-controlee-cote-serveur.md) | Sécurité | critique | Ouvert | UCCE01, UCCE02, UCCE07, UCMOD03, UCMOD04, UCMOD08, UCPI07 |
 | [FT-014 — Catégorie d'asset decoupage absente](FT-014-categorie-d-asset-decoupage-absente.md) | Écart spec ↔ code | majeure | Ouvert | UCAM05, UCAM09 |
 | [FT-018 — Identifiant de bloc des versions de module simulé](FT-018-identifiant-de-bloc-des-versions-de-module.md) | Anomalie | majeure | Ouvert | UCMOD06 |
-| [FT-019 — Deux tests rouges dans domain/model](FT-019-deux-tests-rouges-dans-domain-model.md) | Anomalie | majeure | Ouvert | UCREC03, UCCE01 |
 | [FT-027 — Intégration continue absente du dépôt](FT-027-integration-continue-absente-du-depot.md) | Incohérence documentaire | majeure | Ouvert | — |
 | [FT-028 — Mot de passe serveur en clair dans le script de déploiement](FT-028-mot-de-passe-serveur-en-clair-dans.md) | Sécurité | majeure | Ouvert | — |
 | [FT-030 — Parité CLI et REST incomplète](FT-030-parite-cli-et-rest-incomplete.md) | Écart spec ↔ code | majeure | Ouvert | UCADM01, UCADM03, UCADM04, UCPI01, UCPI02, UCADM07 |
@@ -47,7 +46,6 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-009 — Registrar CA unique par organisation](FT-009-registrar-ca-unique-par-organisation.md) | Risque | mineure | Ouvert | UCA01 |
 | [FT-041 — Rôles attribués aux organisations non implémentés](FT-041-roles-attribues-aux-organisations-non-implementes.md) | Écart spec ↔ code | mineure | Ouvert | UCADM06, UCADM07 |
 | [FT-011 — Commentaires JWT obsolètes dans les handlers REST](FT-011-commentaires-jwt-obsoletes-dans-les-handlers-rest.md) | Dette technique | mineure | Ouvert | — |
-| [FT-020 — LocalStorage.Upload renvoie un chemin présenté comme un hash](FT-020-localstorage-upload-renvoie-un-chemin-presente-comme.md) | Dette technique | mineure | Ouvert | UCCL03 |
 | [FT-026 — Erreur Fabric indisponible renvoyée en 500 au lieu de 503](FT-026-erreur-fabric-indisponible-renvoyee-en-500-au.md) | Anomalie | mineure | Ouvert | UCCL01 |
 | [FT-029 — make deploy suppose un fabric.env présent sur le serveur](FT-029-make-deploy-suppose-un-fabric-env-present.md) | Anomalie | mineure | Ouvert | — |
 | [FT-032 — API_REST.md diverge des routes réellement servies](FT-032-api-rest-md-diverge-des-routes-reellement.md) | Incohérence documentaire | mineure | Ouvert | UCCE02, UCMOD03 |
@@ -96,6 +94,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-034 — Modèle de domaine : ligne RM22 décrivant un écart](FT-034-modele-de-domaine-ligne-rm22-decrivant-un.md) | Incohérence documentaire | mineure | En cours | UCA02 |
 | [FT-039 — Tests d'intégration REST en échec depuis l'authentification obligatoire](FT-039-tests-d-integration-rest-en-echec.md) | Anomalie | majeure | En cours | UCDEV01, UCMOD06, UCCE06 |
 | [FT-007 — Lecture du catalogue sans compte](FT-007-lecture-du-catalogue-sans-compte.md) | Décision à prendre | mineure | En cours | UCA01, UCCL01 |
+| [FT-019 — Deux tests rouges dans domain/model](FT-019-deux-tests-rouges-dans-domain-model.md) | Anomalie | majeure | En cours | UCREC03, UCCE01 |
 
 ## Résolu
 
@@ -108,6 +107,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | Ticket | Type | Sévérité | Statut | Use cases |
 |--------|------|----------|--------|-----------|
 | [FT-015 — Critère tag absent des interfaces](FT-015-critere-tag-absent-des-interfaces.md) | Écart spec ↔ code | mineure | Fermé | UCAM01, UCREC02 |
+| [FT-020 — LocalStorage.Upload renvoie un chemin présenté comme un hash](FT-020-localstorage-upload-renvoie-un-chemin-presente-comme.md) | Dette technique | mineure | Fermé | UCCL03 |
 
 ## Fonctionnement
 

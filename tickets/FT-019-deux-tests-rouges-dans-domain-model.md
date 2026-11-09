@@ -2,7 +2,7 @@
 id: FT-019
 titre: "Deux tests rouges dans domain/model"
 type: anomalie
-statut: ouvert
+statut: en-cours
 severite: majeure
 detecte: 2026-10-02
 maj: 2026-11-09
@@ -13,7 +13,7 @@ enf: [ENF19]
 tags:
   - ticket
   - ticket/anomalie
-  - statut/ouvert
+  - statut/en-cours
   - severite/majeure
   - domaine/model
   - uc/UCREC03
@@ -22,7 +22,7 @@ tags:
 ---
 # FT-019 — Deux tests rouges dans domain/model
 
-> **Anomalie** · sévérité **majeure** · statut **Ouvert** · détecté le 2026-10-02
+> **Anomalie** · sévérité **majeure** · statut **En cours** · détecté le 2026-10-02
 > Source : `go test ./...` au commit 2aa69c1
 
 ## Constat
@@ -65,3 +65,4 @@ Pour chaque test : décider si le comportement attendu (specs UCREC03, UCCE01) o
 
 - 2026-10-02 — Ticket créé ; échecs reproduits au commit `2aa69c1`
 - 2026-11-09 — `TestAddFull_NilDraftStore_Rejected` corrigé (commit `51f12f3`) : depuis que toute création passe par un brouillon (`9cdfb54`), le test injectait par erreur un stockage de brouillons et ne testait plus son absence ; il le fait de nouveau. Reste `TestGetChildren_Success` : `GetChildren` ne lit que le ledger, alors que l'enfant créé par `AddFull` est un brouillon — comportement attendu à trancher (brouillons inclus ou non)
+- 2026-11-09 — Corrigé sur `feature/ledger-invariants` (commit `03c9ad8`) : décision du PO, `GetChildren` ne liste que les dérivés soumis (UCREC03) ; le test soumet le parent et l'enfant. `go test ./...` passe en entier
