@@ -312,6 +312,27 @@ func TestAddAssetToWorkspace_RM52_Cycle_Rejected(t *testing.T) {
 	}
 }
 
+// / @brief  Une composition cyclique enregistrée avant RM52 ne fait pas récurser sans fin le calcul des interfaces exposées (RM52)
+// / @input  brouillons A et B écrits directement dans le stockage, A contenant B et B contenant A, chacun avec une interface
+// / @expect GetModuleInterfaces(A) se termine sans erreur
+func TestGetModuleInterfaces_RM52_LegacyCycle_Terminates(t *testing.T) {
+	drafts := newMockDraftStore()
+	svc := model.NewService(newMockBC(), &mockFS{}).
+		WithDraftStore(drafts).
+		WithIfaceStore(newMockIfaceStore()).
+		WithConnStore(newMockConnStore())
+	drafts.drafts["A"] = &model.Model3D{ID: "A", Status: model.ModuleDraft, Assemblies: []string{},
+		WorkspaceInstances: []model.WorkspaceInstance{{ID: "ia", AssetID: "B"}}}
+	drafts.drafts["B"] = &model.Model3D{ID: "B", Status: model.ModuleDraft, Assemblies: []string{},
+		WorkspaceInstances: []model.WorkspaceInstance{{ID: "ib", AssetID: "A"}}}
+	addTestIface(t, svc, &model.AssetInterface{AssetID: "A", Category: "ELEC", Type: "USB-C", Direction: model.IfaceOut})
+	addTestIface(t, svc, &model.AssetInterface{AssetID: "B", Category: "ELEC", Type: "USB-C", Direction: model.IfaceIn})
+
+	if _, err := svc.GetModuleInterfaces("A"); err != nil {
+		t.Errorf("GetModuleInterfaces : %v", err)
+	}
+}
+
 // syncDraftStore est un DraftStore sûr en concurrence qui, comme un stockage
 // fichier, rend une copie à chaque lecture.
 type syncDraftStore struct {

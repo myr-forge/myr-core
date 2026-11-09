@@ -1312,9 +1312,10 @@ func (s *Service) GetModuleInterfaces(moduleID string) ([]*AssetInterface, error
 	return s.getModuleInterfacesInto(moduleID, cache)
 }
 
-// #incoherence — cache[moduleID] n'est écrit qu'à la fin du calcul, pas avant
-// de récurser dans les WorkspaceInstances : un cycle encore en cours de calcul
-// n'est jamais détecté — voir specs/roadmap_dev.md § Écarts — revue de code, E1.
+// getModuleInterfacesInto calcule les interfaces de moduleID dans cache. Un
+// module en cours de calcul y figure déjà, vide : une composition cyclique
+// enregistrée avant RM52 ne fait donc pas récurser sans fin, le cycle
+// n'expose simplement aucune interface.
 func (s *Service) getModuleInterfacesInto(moduleID string, cache map[string][]*AssetInterface) ([]*AssetInterface, error) {
 	if ifaces, ok := cache[moduleID]; ok {
 		return ifaces, nil
@@ -1358,6 +1359,7 @@ func (s *Service) getModuleInterfacesInto(moduleID string, cache map[string][]*A
 	if len(ownIfacesCheck) == 0 {
 		s.ensureVirtualSlot(moduleID)
 	}
+	cache[moduleID] = nil // en cours de calcul
 	// Calculer les interfaces exposées (non connectées en interne).
 	// Une connexion porte l'instance de chaque extrémité (FromInstanceID/ToInstanceID) :
 	// quand elle est renseignée, seule cette instance précise est marquée interne, ce qui
