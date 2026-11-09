@@ -19,6 +19,8 @@ Ce guide s'adresse aux développeurs de myr-web, et de tout autre client de l'AP
 | Nouvelle version | — | Asset dérivé (`parent_id`) ; un module dérivé reprend la composition du parent | Bouton « nouvelle version » → `POST /api/components` avec `parent_id` |
 | Licence | Libre | Doit exister au catalogue et être compatible avec celle du parent | Proposer la liste de `/api/licenses` ; gérer `400` |
 | Slots virtuels | Matérialisables partout | Refusé sur un asset soumis (`409`) | Relier un asset soumis par ses interfaces physiques |
+| Liaisons | Toujours acceptées ; un doublon recevait un identifiant fantôme | Refusées si incompatibles (`400`), si l'interface est déjà engagée sur son instance ou si la liaison existe déjà (`409`) | Désigner les instances ; relire `/api/connections` avant d'en créer ; ne plus réessayer « pour voir » |
+| Composition d'un module | Toute liaison, même inconnue, se rattachait | Seule une liaison existante entre deux instances du module se rattache ; un module ne se contient pas lui-même (`400`) | Créer les instances, puis la liaison entre elles, puis la rattacher |
 | Rôles | Changement par l'administrateur seulement | Demande de rôle en libre-service, automatique ou sur approbation | Écran « demander un rôle » ; écran d'approbation pour l'administrateur |
 | Bornes | Aucune | Taille des corps, débit, délais | Gérer `413` et `429` |
 
@@ -188,7 +190,35 @@ name=Drone v2, parent_id=<id de l'asset soumis>, category=amelioration, license_
 - `POST /api/virtual-connect` matérialise le slot virtuel d'un asset en interface physique : c'est refusé (`409`) si cet asset est soumis, car ce serait ajouter une interface à un asset figé (RM19). Pour relier un composant soumis :
   - créer la liaison entre ses **interfaces physiques existantes** : `POST /api/assembly-links {"from_iface_id","to_iface_id","from_instance_id","to_instance_id","label","fastener_asset_id"}` ;
   - ou créer un **dérivé** du composant (§ 3.4) et lui ajouter l'interface.
+- **Si `virtual-connect` est refusé** (`400` ou `409`), le slot reste virtuel : rien n'a été modifié, il n'y a rien à annuler côté client.
 - **À anticiper** : slots virtuels, positions x/y des instances, miniatures, voire brouillons, sont des facilités d'interface appelées à relever de myr-web plutôt que du cœur (ticket FT-040, à trancher). Mieux vaut les traiter dès maintenant comme des concepts d'affichage côté client, sans construire de logique métier dessus.
+
+### 4.1 Créer une liaison
+
+Toujours dans cet ordre, sur un module en brouillon :
+
+1. Ajouter les instances : `POST /api/components/{id}/instances {"asset_id"}` — la réponse contient `instances`, dont l'identifiant de la nouvelle instance (la dernière).
+2. Créer la liaison entre deux de ces instances : `POST /api/assembly-links` avec `from_instance_id` et `to_instance_id` renseignés.
+3. La rattacher au module : `POST /api/components/{id}/assemblies {"connection_id"}`.
+
+| Refus | Code | Cause | Que faire |
+|-------|------|-------|-----------|
+| interfaces incompatibles | `400` | Catégorie, type, sens ou valeurs ne correspondent pas (RM10/RM11) | Montrer la cause ; proposer un asset d'accroche (`fastener_asset_id`) compatible avec les deux |
+| interface reliée à elle-même | `400` | Même interface sur la même instance | — |
+| interface déjà engagée | `409` | Cette interface, **sur cette instance**, sert déjà dans une liaison (RM09) ; le message donne l'identifiant de la liaison existante | Proposer une autre instance ou une autre interface, ou supprimer l'ancienne liaison |
+| liaison déjà existante | `409` | `POST /api/connections` : une connexion directe relie déjà le même `from` au même `to` (RM50) | La retrouver dans `GET /api/connections` — myr-core ne la renvoie pas à votre place et n'en crée pas de copie |
+| liaison étrangère au module | `400` | `POST …/assemblies` : la connexion n'existe pas ou ne relie pas deux instances du module (RM51) | Créer d'abord les instances et la liaison entre elles |
+| composition cyclique | `400` | `POST …/instances` : l'asset ajouté est le module ou le contient (RM52) | — |
+
+La même interface d'un composant reste libre dans ses **autres** instances : deux vis identiques se relient chacune à leur propre écrou. Une liaison créée sans `from_instance_id`/`to_instance_id` engage l'interface elle-même, quelle que soit l'instance : à éviter dans un module.
+
+### 4.2 Valeurs des interfaces
+
+La compatibilité compare les valeurs (`value_min`, `value_max`, `is_range`, `unit`) ainsi :
+
+- une interface **sans unité** n'impose aucune contrainte de valeur ;
+- avec une unité, une **valeur simple** (`is_range: false`) vaut l'intervalle [v ; v] : une sortie 5 V est compatible avec une entrée [3 ; 6] V ;
+- **0 est une vraie valeur** : une sortie 0 V n'est pas compatible avec une entrée [3 ; 6] V. Pour « pas de valeur », envoyer une interface sans unité.
 
 ---
 
@@ -204,11 +234,11 @@ Une erreur interne (`500`) porte une référence : `{"error": "erreur interne (r
 
 | Code | Sens |
 |------|------|
-| `400` | Requête invalide, licence refusée, rôle inconnu |
+| `400` | Requête invalide, licence refusée, rôle inconnu, liaison ou composition refusée (§ 4.1) |
 | `401` | Pas de session, ou jeton invalide ou expiré |
 | `403` | Droits insuffisants, identité inactive, écriture sans identité signataire |
 | `404` | Introuvable — y compris un brouillon demandé par un visiteur |
-| `409` | Asset soumis (figé), demande déjà décidée ou déjà en attente |
+| `409` | Asset soumis (figé), demande déjà décidée ou déjà en attente, interface déjà engagée, liaison déjà existante (§ 4.1) |
 | `413` | Corps trop volumineux (§ 5.2) |
 | `429` | Trop de tentatives (§ 5.2) — « réessayez dans une minute » |
 | `503` | Blockchain injoignable |
@@ -265,6 +295,9 @@ location /api/ {
 - [ ] Action « nouvelle version » → `POST /api/components` avec `parent_id`
 - [ ] Choix de licence depuis `/api/licenses`, avec vérification de compatibilité pour un dérivé
 - [ ] Slots virtuels : ne plus les proposer sur un asset soumis ; relier par les interfaces physiques
+- [ ] Liaisons : toujours renseigner `from_instance_id`/`to_instance_id` ; gérer `400` (incompatible, réflexive) et `409` (interface engagée, liaison existante) sans réessai automatique
+- [ ] Composition : instances, puis liaison entre elles, puis rattachement ; gérer `400` (liaison étrangère, composition cyclique)
+- [ ] Valeurs d'interface : envoyer une unité dès qu'une valeur compte ; ne plus utiliser 0 pour « pas de valeur »
 - [ ] Écran « demander un rôle » (`/api/identity/roles/request`) et, pour l'administrateur, l'écran des demandes (`kind`, `role`)
 - [ ] Afficher la référence des erreurs `500`
 - [ ] Remplacer les appels `/api/modules…` par `/api/components…`

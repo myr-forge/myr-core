@@ -5,7 +5,7 @@ type: dette
 statut: a-trancher
 severite: majeure
 detecte: 2026-11-08
-maj: 2026-11-08
+maj: 2026-11-09
 composants: [domain/model, adapters/in/rest, adapters/in/cli, adapters/out/localstorage, adapters/out/webimage]
 uc: [UCAM01, UCAM02, UCAM03, UCCE01, UCCE06, UCMOD01, UCMOD03, UCMOD06]
 rm: [RM13, RM16, RM17]
@@ -87,3 +87,4 @@ Retrait côté cœur, une fois tranché : ports `DraftStore`, `ThumbnailStore`, 
 ## Historique
 
 - 2026-11-08 — Ticket créé ; décision du PO : slots virtuels, disposition à l'écran, brouillons et miniatures relèvent des outils extérieurs ; vocabulaire de référence et connexions libres restent dans le cœur. Stockage et ordre du retrait à trancher
+- 2026-11-09 — Décision du PO (R-15) : `myr-core` ne devine pas. Une connexion en double, auparavant dédoublonnée en silence (un identifiant jamais enregistré était renvoyé), est désormais refusée (`409`, RM50) ; créer une nouvelle interface reste une demande explicite de l'outil. Le PO estime que d'autres fonctions de l'API ne devraient pas exister dans le cœur : dresser l'inventaire des fonctions qui devinent ou facilitent à la place du client, et le trancher avec lui

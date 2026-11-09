@@ -19,17 +19,24 @@ func runModelInstanceAdd(w io.Writer, svc model.ModelService, moduleID, assetID 
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Instance ajoutée au module %s (total : %d instances).\n", m.ID, len(m.WorkspaceInstances))
+	// L'instance ajoutée est la dernière : son identifiant désigne ses interfaces
+	// dans une liaison (myr model link add --from-instance/--to-instance).
+	instanceID := ""
+	if n := len(m.WorkspaceInstances); n > 0 {
+		instanceID = m.WorkspaceInstances[n-1].ID
+	}
+	fmt.Fprintf(w, "Instance %s ajoutée au module %s (total : %d instances).\n", instanceID, m.ID, len(m.WorkspaceInstances))
 	return nil
 }
 
 var modelInstanceAddCmd = &cobra.Command{
 	Use:   "add <assetID> <subAssetID>",
 	Short: "Add an existing asset as an instance of another asset (local draft, no blockchain effect)",
-	Long: `Add an existing asset as an instance of another asset — applies to any assetID,
-including one with no instance yet (ADR-11). This only updates the local
-draft — even if the asset was already submitted before, this reopens it as a
-draft; the change reaches the blockchain only at the next "myr model submit".`,
+	Long: `Add an existing asset as an instance of a draft asset — applies to any
+assetID, including one with no instance yet (ADR-11). An asset that is, or
+contains (even indirectly), the target asset is refused. This only updates the
+local draft; the change reaches the blockchain at "myr model submit". A
+submitted asset no longer changes: derive a new asset from it instead.`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runModelInstanceAdd(cmd.OutOrStdout(), modelSvc, args[0], args[1])

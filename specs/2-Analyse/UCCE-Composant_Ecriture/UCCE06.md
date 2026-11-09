@@ -137,7 +137,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 3. Lors d'une liaison (UCAM01/UCAM03), le slot virtuel sera matérialisé en interface physique via `ConnectVirtualToPhysical()`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
 > - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
@@ -147,12 +147,13 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 > - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestWorkspace_VirtualIsClickable](../../../docs/tests/domain-model/TestWorkspace_VirtualIsClickable.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_VirtualSlot_ChainedConnections](../../../docs/tests/domain-model/TestWorkspace_VirtualSlot_ChainedConnections.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Mise à jour d'une interface existante (UpdateInterface)
@@ -164,7 +165,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 5. L'API retourne `200 OK` avec l'interface mise à jour.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 78 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 79 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -180,7 +181,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 63 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 64 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Champ obligatoire absent

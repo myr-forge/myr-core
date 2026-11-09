@@ -2,6 +2,7 @@
 tags:
   - couche/expression
   - type/regles-metier
+  - relecture/incoherence
   - relecture/question
 ---
 # Règles métier — Myr System
@@ -136,39 +137,53 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 
 ### RM09 — Interface à usage unique
 
-- **Déclencheur** : Tentative de liaison d'une interface déjà engagée
-- **Condition** : Interface source ou cible déjà utilisée dans une liaison
-- **Conséquence** : La liaison est refusée
+- **Déclencheur** : Création d'une liaison entre deux interfaces
+- **Condition** : L'interface source ou cible est déjà engagée dans une liaison sur l'instance désignée, ou la liaison relierait une interface à elle-même sur la même instance
+- **Conséquence** : La liaison est refusée. L'usage unique porte sur l'interface d'une instance donnée : la même interface d'un composant reste disponible dans ses autres instances (RM15), et deux instances d'un même composant peuvent se relier par cette interface. Une liaison qui ne désigne pas d'instance engage l'interface elle-même
 - **Use cases** : UCAM01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 1 explicite(s) · 0 déduit(s)
-> - ✅ [TestRunModelLinkAdd_MissingFrom_Rejected](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_MissingFrom_Rejected.md) — explicite (le test cite RM09)
+> [!check]- Tests — 8 explicite(s) · 0 déduit(s)
+> - ✅ [TestRunModelLinkAdd_RM10_Refused_ErrorReturned](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_RM10_Refused_ErrorReturned.md) — explicite (le test cite RM09)
+> - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM09)
+> - ✅ [TestAddAssemblyLink_RM09_InterfaceUsedOnce](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_InterfaceUsedOnce.md) — explicite (le test cite RM09)
+> - ✅ [TestAddAssemblyLink_RM09_NoInstance_InterfaceUsedOnce](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_NoInstance_InterfaceUsedOnce.md) — explicite (le test cite RM09)
+> - ✅ [TestAddAssemblyLink_RM09_SameInterfaceOtherInstance_OK](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SameInterfaceOtherInstance_OK.md) — explicite (le test cite RM09)
+> - ✅ [TestAddAssemblyLink_RM09_SameInterfaceTwoInstances_OK](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SameInterfaceTwoInstances_OK.md) — explicite (le test cite RM09)
+> - ✅ [TestAddAssemblyLink_RM09_SelfLink_Rejected](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SelfLink_Rejected.md) — explicite (le test cite RM09)
+> - ✅ [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — explicite (le test cite RM09)
 <!-- tests-obsidian:end -->
 
 ### RM10 — Vérification de compatibilité automatique
 
 - **Déclencheur** : Création de toute liaison
 - **Condition** : Toujours
-- **Conséquence** : Le système appelle `ifacesCompatible` pour vérifier la cohérence de la paire avant d'enregistrer la liaison. Une liaison incompatible est refusée par le service. L'incompatibilité post-création est couverte par RM12
+- **Conséquence** : Le système appelle `ifacesCompatible` pour vérifier la cohérence de la paire avant d'enregistrer la liaison. Une liaison incompatible est refusée par le service. Avec un asset d'accroche, c'est l'accroche qui doit être compatible avec chacune des deux interfaces (UCAM07). L'incompatibilité post-création est couverte par RM12
 - **Use cases** : UCAM01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 2 explicite(s) · 0 déduit(s)
-> - ✅ [TestRunModelLinkAdd_Incompatible](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_Incompatible.md) — explicite (le test cite RM10)
-> - ✅ [TestRunModelLinkAdd_MissingFrom_Rejected](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_MissingFrom_Rejected.md) — explicite (le test cite RM10)
+> [!check]- Tests — 4 explicite(s) · 0 déduit(s)
+> - ✅ [TestRunModelLinkAdd_RM10_Refused_ErrorReturned](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_RM10_Refused_ErrorReturned.md) — explicite (le test cite RM10)
+> - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM10)
+> - ✅ [TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected](../../docs/tests/domain-model/TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected.md) — explicite (le test cite RM10)
+> - ✅ [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — explicite (le test cite RM10)
 <!-- tests-obsidian:end -->
 
 ### RM11 — Critères de compatibilité d'interfaces
 
 - **Déclencheur** : Appel de `ifacesCompatible`
 - **Condition** : Toujours
-- **Conséquence** : Deux interfaces sont compatibles si : (1) même catégorie (Électrique, Mécanique, Numérique…), (2) même tag (Câble, vis…) si renseigné, (3) même type (USB-C, UART…) si renseigné, (4) sens complémentaires (♂/♀ ou bidirectionnel), (5) plages de valeurs se chevauchant (`ValueMin`/`ValueMax`)
+- **Conséquence** : Deux interfaces sont compatibles si : (1) même catégorie (Électrique, Mécanique, Numérique…), (2) même tag (Câble, vis…) si renseigné, (3) même type (USB-C, UART…) si renseigné, (4) sens complémentaires (♂/♀ ou bidirectionnel), (5) valeurs se chevauchant (`ValueMin`/`ValueMax`) : une valeur simple vaut l'intervalle [v ; v] et 0 est une vraie valeur (0 V, 0 bar) ; une interface sans unité n'impose aucune contrainte de valeur
 - **Use cases** : UCAM01, UCAM03
 
+#incoherence — critères (2) et (3) : une interface (`AssetInterface`) ne porte aucun tag, donc (2) n'est jamais vérifié ; et `ifacesCompatible` exige un type identique même quand il n'est renseigné que d'un côté, alors que (3) ne l'impose que « si renseigné ».
+
+#question — critère (5) : deux interfaces dotées d'unités différentes (ex. V et mA) ont leurs valeurs comparées comme si l'unité était la même. Faut-il refuser la paire, ou ignorer les valeurs ?
+
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 1 explicite(s) · 0 déduit(s)
-> - ✅ [TestRunModelLinkAdd_Incompatible](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_Incompatible.md) — explicite (le test cite RM11)
+> [!check]- Tests — 2 explicite(s) · 0 déduit(s)
+> - ✅ [TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected](../../docs/tests/domain-model/TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected.md) — explicite (le test cite RM11)
+> - ✅ [TestAddAssemblyLink_RM11_ValueRanges](../../docs/tests/domain-model/TestAddAssemblyLink_RM11_ValueRanges.md) — explicite (le test cite RM11)
 <!-- tests-obsidian:end -->
 
 ### RM12 — Persistance des liaisons incompatibles
@@ -187,14 +202,27 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 
 - **Déclencheur** : Ajout d'un asset à un module
 - **Condition** : Toujours
-- **Conséquence** : Chaque asset dispose en permanence d'au moins un slot virtuel (`Virtual: true`). Dès qu'un slot virtuel est matérialisé en interface, un nouveau slot virtuel est recréé automatiquement
+- **Conséquence** : Chaque asset dispose en permanence d'au moins un slot virtuel (`Virtual: true`). Dès qu'un slot virtuel est matérialisé en interface, un nouveau slot virtuel est recréé automatiquement. Le slot n'est matérialisé que si la liaison demandée est permise (RM09, RM10) : un refus le laisse virtuel
 - **Use cases** : UCAM02, UCAM03
-
----
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 1 explicite(s) · 0 déduit(s)
 > - ✅ [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — explicite (le test cite RM13)
+<!-- tests-obsidian:end -->
+
+### RM50 — Liaison directe unique
+
+- **Déclencheur** : Création d'une liaison directe entre deux assets, sans interface
+- **Condition** : Une liaison directe relie déjà le même asset source au même asset cible
+- **Conséquence** : La création est refusée. La liaison existante reste consultable dans la liste des liaisons : le système ne la renvoie pas à la place d'une nouvelle et n'en crée pas de doublon. Une liaison de sens inverse (cible vers source) est une autre liaison
+- **Use cases** : UCAM01
+
+---
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 2 explicite(s) · 0 déduit(s)
+> - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM50)
+> - ✅ [TestAddConnection_RM50_Duplicate_Rejected](../../docs/tests/domain-model/TestAddConnection_RM50_Duplicate_Rejected.md) — explicite (le test cite RM50)
 <!-- tests-obsidian:end -->
 
 ## 4. Composition d'un Module (instances)
@@ -220,11 +248,65 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Conséquence** : Une seconde instance est créée avec ses propres connexions, indépendantes de la première
 - **Use cases** : UCMOD02
 
----
-
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 1 explicite(s) · 0 déduit(s)
 > - ✅ [TestRunModelInstanceRemove_NominalCase](../../docs/tests/adapters-in-cli/TestRunModelInstanceRemove_NominalCase.md) — explicite (le test cite RM15)
+<!-- tests-obsidian:end -->
+
+### RM51 — Assemblage interne au module
+
+- **Déclencheur** : Rattachement d'une liaison à un asset (`myr model assembly add`, `POST /api/components/{id}/assemblies`)
+- **Condition** : Toujours
+- **Conséquence** : La liaison doit exister et relier deux instances de cet asset : par leurs identifiants d'instance, ou, pour une liaison directe qui n'en désigne pas, par les assets de ses instances. Sinon le rattachement est refusé et l'asset reste inchangé — un composant ne devient jamais module par un rattachement refusé
+- **Use cases** : UCMOD01
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 4 explicite(s) · 79 déduit(s)
+> - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM51)
+> - ✅ [TestAddAssemblyToModule_RM51_Component_StaysComponent](../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_Component_StaysComponent.md) — explicite (le test cite RM51)
+> - ✅ [TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected](../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected.md) — explicite (le test cite RM51)
+> - ✅ [TestAddAssemblyToModule_RM51_InstanceLink_OK](../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_InstanceLink_OK.md) — explicite (le test cite RM51)
+> - 🟡 [TestRunModelAssemblyAdd_NominalCase](../../docs/tests/adapters-in-cli/TestRunModelAssemblyAdd_NominalCase.md) — déduit : teste commande `myr model assembly add`
+> - 🟡 [TestRunModelAssemblyAdd_ServiceError_Rejected](../../docs/tests/adapters-in-cli/TestRunModelAssemblyAdd_ServiceError_Rejected.md) — déduit : teste commande `myr model assembly add`
+> - 🟡 [TestAPIIntegration_AssetLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_GET](../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_POST_BadJSON](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_BadJSON.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_POST_Created](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentTree_GET](../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components`
+> - … et 68 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+<!-- tests-obsidian:end -->
+
+### RM52 — Composition sans cycle
+
+- **Déclencheur** : Ajout d'une instance à un module (`myr model instance add`, `POST /api/components/{id}/instances`)
+- **Condition** : L'asset ajouté est le module lui-même, ou le contient, même indirectement
+- **Conséquence** : L'ajout est refusé. La composition d'un module reste un arbre fini, que le système parcourt sans fin de récursion (interfaces exposées, arborescence)
+- **Use cases** : UCMOD02
+
+---
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 2 explicite(s) · 79 déduit(s)
+> - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM52)
+> - ✅ [TestAddAssetToWorkspace_RM52_Cycle_Rejected](../../docs/tests/domain-model/TestAddAssetToWorkspace_RM52_Cycle_Rejected.md) — explicite (le test cite RM52)
+> - 🟡 [TestRunModelInstanceAdd_NominalCase](../../docs/tests/adapters-in-cli/TestRunModelInstanceAdd_NominalCase.md) — déduit : teste commande `myr model instance add`
+> - 🟡 [TestRunModelInstanceAdd_ServiceError_Rejected](../../docs/tests/adapters-in-cli/TestRunModelInstanceAdd_ServiceError_Rejected.md) — déduit : teste commande `myr model instance add`
+> - 🟡 [TestAPIIntegration_AssetLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_GET](../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_POST_BadJSON](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_BadJSON.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_POST_Created](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentTree_GET](../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponent_AddAssembly](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponent_AddAssembly_MissingConnectionID](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly_MissingConnectionID.md) — déduit : teste route `/api/components`
+> - … et 66 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## 5. Modules et cycle de vie des assets
@@ -557,7 +639,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 4 explicite(s) · 91 déduit(s)
+> [!check]- Tests — 4 explicite(s) · 92 déduit(s)
 > - ✅ [TestHandleIdentityGuest_RM49_PublicRead_NoSession](../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_RM49_PublicRead_NoSession.md) — explicite (le test cite RM49)
 > - ✅ [TestPublicRead_RM49_Closed_SessionRequired](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_Closed_SessionRequired.md) — explicite (le test cite RM49)
 > - ✅ [TestPublicRead_RM49_Open_PublishedOnly](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_Open_PublishedOnly.md) — explicite (le test cite RM49)
@@ -573,7 +655,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - 🟡 [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_RefsCategoryPersists](../../docs/tests/adapters-in-rest/TestAPIIntegration_RefsCategoryPersists.md) — déduit : teste route `/api/refs`
 > - 🟡 [TestComponentInterfaces_GET](../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : teste route `/api/components`
-> - … et 80 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 81 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## 7. Propriété intellectuelle et commissions
@@ -784,13 +866,16 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | [RM06](#RM06%20—%20Immuabilité%20des%20transactions) | Transactions blockchain immuables, pas de suppression | Blockchain |
 | [RM07](#RM07%20—%20Validation%20préalable%20obligatoire) | Validation complète avant toute soumission blockchain | Blockchain |
 | [RM08](#RM08%20—%20Masquage%20local,%20ledger%20jamais%20modifié) | ErrNotSupported retourné sur tentative de suppression | Blockchain |
-| [RM09](#RM09%20—%20Interface%20à%20usage%20unique) | Interface à usage unique dans une liaison | Interfaces |
+| [RM09](#RM09%20—%20Interface%20à%20usage%20unique) | Interface à usage unique dans une liaison, par instance ; jamais reliée à elle-même | Interfaces |
 | [RM10](#RM10%20—%20Vérification%20de%20compatibilité%20automatique) | Vérification de compatibilité automatique à la création | Interfaces |
 | [RM11](#RM11%20—%20Critères%20de%20compatibilité%20d'interfaces) | Critères de compatibilité : catégorie + tag + type + sens + plage de valeurs | Interfaces |
 | [RM12](#RM12%20—%20Persistance%20des%20liaisons%20incompatibles) | Liaison incompatible persistante (`Incompatible:true`, non supprimée automatiquement) | Interfaces |
 | [RM13](#RM13%20—%20Slot%20virtuel%20garanti) | Slot virtuel garanti et recréé automatiquement à chaque matérialisation | Interfaces |
+| [RM50](#RM50%20—%20Liaison%20directe%20unique) | Liaison directe en double refusée, jamais renvoyée ni dupliquée | Interfaces |
 | [RM14](#RM14%20—%20Suppression%20en%20cascade%20des%20connexions) | Suppression en cascade des connexions au retrait d'une instance | Composition (instances) |
 | [RM15](#RM15%20—%20Instance%20indépendante) | Seconde instance indépendante si module déjà instancié dans le module hôte | Composition (instances) |
+| [RM51](#RM51%20—%20Assemblage%20interne%20au%20module) | Seule une liaison existante entre deux instances de l'asset s'y rattache | Composition (instances) |
+| [RM52](#RM52%20—%20Composition%20sans%20cycle) | Un module ne se contient pas lui-même, même indirectement | Composition (instances) |
 | [RM16](#RM16%20—%20État%20draft) | État draft générique (module : toujours ; composant : optionnel via `--draft`) | Modules |
 | [RM17](#RM17%20—%20Assemblage%20requis%20pour%20soumission%20%28module%20uniquement%29) | Au moins un assemblage requis pour soumettre (module uniquement) | Modules |
 | [RM18](#RM18%20—%20ModuleVersion%20immuable%20%28module%20uniquement%29) | ModuleVersion immuable horodatée à la soumission (module uniquement) | Modules |

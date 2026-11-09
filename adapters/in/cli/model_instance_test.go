@@ -10,9 +10,9 @@ import (
 	"myr-core/domain/model"
 )
 
-/// @brief  runModelInstanceAdd ajoute un asset comme instance et affiche le total
+/// @brief  runModelInstanceAdd ajoute un asset comme instance, affiche l'identifiant de l'instance créée et le total
 /// @input  moduleID="mod-1", assetID="asset-1"
-/// @expect AddAssetToWorkspace reçoit les deux ids, sortie contient l'id du module
+/// @expect AddAssetToWorkspace reçoit les deux ids, sortie contient l'id du module et celui de l'instance
 func TestRunModelInstanceAdd_NominalCase(t *testing.T) {
 	var gotModule, gotAsset string
 	svc := &mockModelSvc{addAssetToWorkspace: func(moduleID, assetID string) (*model.Model3D, error) {
@@ -26,7 +26,7 @@ func TestRunModelInstanceAdd_NominalCase(t *testing.T) {
 	if gotModule != "mod-1" || gotAsset != "asset-1" {
 		t.Fatalf("unexpected forwarded args: module=%q asset=%q", gotModule, gotAsset)
 	}
-	if !strings.Contains(buf.String(), "mod-1") {
+	if !strings.Contains(buf.String(), "mod-1") || !strings.Contains(buf.String(), "inst-1") {
 		t.Fatalf("unexpected output: %q", buf.String())
 	}
 }

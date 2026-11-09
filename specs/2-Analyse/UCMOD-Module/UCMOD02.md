@@ -69,11 +69,15 @@ La clé de cette opération est la gestion des **instances indépendantes** (RM1
 5. Le Module source est instancié dans le module hôte, avec ses interfaces exposées
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 19 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 23 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_Verify_OK](../../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`
+> - 🟡 [TestAddAssemblyToModule_RM51_InstanceLink_OK](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_InstanceLink_OK.md) — déduit : teste `ModelService.AddAssetToWorkspace`
+> - 🟡 [TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate](../../../docs/tests/domain-model/TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate.md) — déduit : teste `ModelService.AddAssetToWorkspace`
+> - 🟡 [TestAddAssetToWorkspace_RM52_Cycle_Rejected](../../../docs/tests/domain-model/TestAddAssetToWorkspace_RM52_Cycle_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddAssetToWorkspace`
@@ -81,11 +85,7 @@ La clé de cette opération est la gestion des **instances indépendantes** (RM1
 > - 🟡 [TestModuleComposition_RM19_Submitted_Rejected](../../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_AddRemoveInstance](../../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterAdd](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterAdd.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - 🟡 [TestWorkspace_NilStore_ReturnsError](../../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - 🟡 [TestWorkspace_ThreeAssets_AllPresent](../../../docs/tests/domain-model/TestWorkspace_ThreeAssets_AllPresent.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - 🟡 [TestWorkspace_TwoDifferentAssets_BothPresent](../../../docs/tests/domain-model/TestWorkspace_TwoDifferentAssets_BothPresent.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - … et 4 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 8 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Module déjà instancié dans le module hôte (RM15)
@@ -199,6 +199,7 @@ REST --> Client : 200 moduleDTO
 ## Liens
 
 **Étape suivante — conception**
+- **API_REST** : [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](../../3-Conception/API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29)
 - **Architecture_Composition** : [§ Architecture — Composition (D3/D5/D6 : composant, assemblage, module)](../../3-Conception/Architecture_Composition.md#Architecture%20—%20Composition%20%28D3/D5/D6%20:%20composant,%20assemblage,%20module%29)
 - **DC_CLI_Model** : [§ DC — CLI Modèle : Référence des commandes composant / interfaces / module](../../3-Conception/DC_CLI_Model.md#DC%20—%20CLI%20Modèle%20:%20Référence%20des%20commandes%20composant%20/%20interfaces%20/%20module) · [§ 2. Arbre de commandes](../../3-Conception/DC_CLI_Model.md#2.%20Arbre%20de%20commandes) · [§ 3.6 `myr model assembly add` / `remove` (ex-`myr module add-assembly`/`remove-assembly`, ADR-11)](../../3-Conception/DC_CLI_Model.md#3.6%20`myr%20model%20assembly%20add`%20/%20`remove`%20%28ex-`myr%20module%20add-assembly`/`remove-assembly`,%20ADR-11%29) · [§ 5. Table de correspondance méthode domaine → commande CLI → use case](../../3-Conception/DC_CLI_Model.md#5.%20Table%20de%20correspondance%20méthode%20domaine%20→%20commande%20CLI%20→%20use%20case)
 - **Sequence_soumission_module** : [§ Séquence — Composition et soumission d'un module (D5/D6)](../../3-Conception/Sequence_soumission_module.md#Séquence%20—%20Composition%20et%20soumission%20d'un%20module%20%28D5/D6%29)

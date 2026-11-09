@@ -45,19 +45,11 @@ func newSubmittedFixture(t *testing.T) *submittedFixture {
 	if err != nil {
 		t.Fatalf("CreateModule: %v", err)
 	}
-	mod, err = f.svc.AddAssetToWorkspace(mod.ID, f.component.ID)
-	if err != nil {
-		t.Fatalf("AddAssetToWorkspace: %v", err)
+	f.assembly = assembleInModule(t, f.svc, mod.ID, f.component.ID, f.component.ID)
+	if mod, err = f.svc.GetModule(mod.ID); err != nil {
+		t.Fatalf("GetModule: %v", err)
 	}
 	f.instance = mod.WorkspaceInstances[0].ID
-	conn, err := f.svc.AddConnection("a1", "a2", "lien")
-	if err != nil {
-		t.Fatalf("AddConnection: %v", err)
-	}
-	f.assembly = conn.ID
-	if err := f.svc.AddAssemblyToModule(mod.ID, conn.ID); err != nil {
-		t.Fatalf("AddAssemblyToModule: %v", err)
-	}
 	if f.module, err = f.svc.SubmitModule(mod.ID, "v1"); err != nil {
 		t.Fatalf("SubmitModule: %v", err)
 	}
@@ -212,7 +204,7 @@ func TestCreateModule_RM19_ForkOfSubmitted_Submittable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateModule (fork) : %v", err)
 	}
-	if fork.ID == f.module.ID || len(fork.WorkspaceInstances) != 1 || len(fork.Assemblies) != 1 {
+	if fork.ID == f.module.ID || len(fork.WorkspaceInstances) != 2 || len(fork.Assemblies) != 1 {
 		t.Fatalf("fork inattendu : %+v", fork)
 	}
 	if _, err := f.svc.SubmitModule(fork.ID, "v2"); err != nil {
@@ -300,21 +292,21 @@ func TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected(t *testing.T) {
 }
 
 // / @brief  Un asset créé avec parent_id d'un module soumis reprend une copie indépendante de sa composition, puis se soumet (UCMOD01, RM19)
-// / @input  module soumis (1 instance, 1 liaison) ; AddFull(ParentID = module, licence compatible) ; Submit du dérivé
-// / @expect le dérivé est un brouillon avec 1 instance et 1 liaison de nouveaux identifiants ; le module d'origine est inchangé ; Submit réussit
+// / @input  module soumis (2 instances, 1 liaison) ; AddFull(ParentID = module, licence compatible) ; Submit du dérivé
+// / @expect le dérivé est un brouillon avec 2 instances et 1 liaison de nouveaux identifiants ; le module d'origine est inchangé ; Submit réussit
 func TestAddFull_RM19_DerivedFromSubmittedModule_CopiesComposition(t *testing.T) {
 	f := newSubmittedFixture(t)
 	d, err := f.svc.AddFull(model.AddRequest{Name: "drone v2", ChannelID: "ch1", ParentID: f.module.ID, Category: model.CategoryAmelioration})
 	if err != nil {
 		t.Fatalf("AddFull : %v", err)
 	}
-	if d.Status != model.ModuleDraft || len(d.WorkspaceInstances) != 1 || len(d.Assemblies) != 1 {
+	if d.Status != model.ModuleDraft || len(d.WorkspaceInstances) != 2 || len(d.Assemblies) != 1 {
 		t.Fatalf("dérivé inattendu : status %s, %d instance(s), %d liaison(s)", d.Status, len(d.WorkspaceInstances), len(d.Assemblies))
 	}
 	if d.WorkspaceInstances[0].ID == f.instance || d.Assemblies[0] == f.assembly {
 		t.Error("la composition copiée doit avoir de nouveaux identifiants")
 	}
-	if got := f.bc.records[f.module.ID]; len(got.WorkspaceInstances) != 1 || len(got.Assemblies) != 1 {
+	if got := f.bc.records[f.module.ID]; len(got.WorkspaceInstances) != 2 || len(got.Assemblies) != 1 {
 		t.Errorf("le module d'origine ne doit pas changer : %+v", got)
 	}
 	if _, err := f.svc.Submit(d.ID, "v2"); err != nil {

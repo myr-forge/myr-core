@@ -25,9 +25,10 @@ func runModelAssemblyAdd(w io.Writer, svc model.ModelService, assetID, connID st
 var modelAssemblyAddCmd = &cobra.Command{
 	Use:   "add <assetID> <connID>",
 	Short: "Attach an assembly link to an asset (local draft, no blockchain effect)",
-	Long: `Attach an assembly link to an asset. This only updates the local draft — even
-if the asset was already submitted before, this reopens it as a draft; the
-change reaches the blockchain only at the next "myr model submit".`,
+	Long: `Attach an existing assembly link to a draft asset. The link must join two
+instances of that asset (see "myr model instance add"). This only updates the
+local draft; the change reaches the blockchain at "myr model submit". A
+submitted asset no longer changes: derive a new asset from it instead.`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runModelAssemblyAdd(cmd.OutOrStdout(), modelSvc, args[0], args[1])
@@ -45,9 +46,9 @@ func runModelAssemblyRemove(w io.Writer, svc model.ModelService, assetID, connID
 var modelAssemblyRemoveCmd = &cobra.Command{
 	Use:   "remove <assetID> <connID>",
 	Short: "Detach an assembly link from an asset (local draft, no blockchain effect)",
-	Long: `Detach an assembly link from an asset. This only updates the local draft —
-even if the asset was already submitted before, this reopens it as a draft;
-the change reaches the blockchain only at the next "myr model submit".`,
+	Long: `Detach an assembly link from a draft asset. This only updates the local
+draft; the change reaches the blockchain at "myr model submit". A submitted
+asset no longer changes: derive a new asset from it instead.`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runModelAssemblyRemove(cmd.OutOrStdout(), modelSvc, args[0], args[1])

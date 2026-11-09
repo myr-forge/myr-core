@@ -5,6 +5,10 @@ tags:
   - rm/RM01
   - rm/RM03
   - rm/RM08
+  - rm/RM09
+  - rm/RM10
+  - rm/RM11
+  - rm/RM13
   - rm/RM14
   - rm/RM17
   - rm/RM19
@@ -18,6 +22,9 @@ tags:
   - rm/RM42
   - rm/RM47
   - rm/RM49
+  - rm/RM50
+  - rm/RM51
+  - rm/RM52
   - enf/ENF18
   - enf/ENF25
   - relecture/incoherence
@@ -114,9 +121,10 @@ tags:
 | GET | `/api/components/{id}/compatible` | Auth | Composants compatibles (type d'interface, catégorie, tag, sens — `DC_D8_Recherche.md` §2, UCREC02) |
 | GET | `/api/components/{id}/versions` | Auth | Arbre de versions / historique de dérivation (`DC_D8_Recherche.md` §3, UCREC03) |
 | GET | `/api/components/{id}/instances` | Auth | Instances de l'asset (UCMOD04) — liste vide si l'asset n'a jamais été décomposé |
-| POST | `/api/components/{id}/instances` | Contributor | Ajouter un composant existant comme instance (`AddAssetToWorkspace`) — applicable à n'importe quel `id`, y compris un asset qui n'a encore aucune instance ; brouillon local, sans effet blockchain avant soumission (UCMOD01, UCAM05) |
+| POST | `/api/components/{id}/instances` | Contributor | Ajouter un composant existant comme instance (`AddAssetToWorkspace`) — applicable à n'importe quel `id`, y compris un asset qui n'a encore aucune instance ; brouillon local, sans effet blockchain avant soumission (UCMOD01, UCAM05). Un asset qui est l'asset hôte ou le contient, même indirectement, est refusé (RM52, `400`) ; asset hôte soumis : `409` (RM19) |
 | DELETE | `/api/components/{id}/instances/{instanceId}` | Contributor | Retirer une instance (cascade sur ses connexions, RM14 — UCAM08) |
 | GET | `/api/components/{id}/assemblies` | Auth | Connexions internes de l'asset (UCMOD04) — liste vide si l'asset n'a aucune instance |
+| POST | `/api/components/{id}/assemblies` | Contributor | Rattacher une connexion existante (`connection_id`) à l'asset — brouillon local, sans effet blockchain avant soumission (UCMOD02). La connexion doit relier deux instances de l'asset, sinon `400` (RM51) ; asset soumis : `409` (RM19) |
 | GET | `/api/components/{id}/bom` | Auth | Export BOM (Bill of Materials, `DC_D8_Recherche.md` §5, UCREC05) |
 | POST | `/api/components/{id}/submit` | Contributor | Soumettre à la blockchain — route unique dispatchant en interne vers `SubmitModule` (applique RM17, crée une `ModuleVersion`) si l'asset a des `Assemblies`, vers `Submit` sinon (voir ADR-11, Conséquence — le point de soumission doit dispatcher en interne). Un asset déjà soumis n'est jamais re-soumis (RM19, `409`) — une nouvelle version est un asset dérivé (`parent_id`) |
 | POST | `/api/components/{id}/decompose/preview` | Contributor | Analyser le fichier STEP du composant, retourner une proposition de découpage (sous-pièces, connexions candidates) sous un `decomposition_id` temporaire — aucune entité créée (UCAM09, RM40) |
@@ -135,10 +143,10 @@ tags:
 | Méthode | Route | Accès | Description |
 |---------|-------|-------|-------------|
 | GET | `/api/connections` | Auth | Liste des connexions |
-| POST | `/api/connections` | Contributor | Créer une connexion simple |
+| POST | `/api/connections` | Contributor | Créer une connexion simple entre deux assets — une connexion identique (même `from`, même `to`) existe déjà : `409`, la connexion existante se retrouve dans `GET /api/connections` (RM50) |
 | DELETE | `/api/connections/{id}` | Contributor | Supprimer une connexion |
-| POST | `/api/assembly-links` | Contributor | Créer une liaison interface→interface |
-| POST | `/api/virtual-connect` | Contributor | Relier interface virtuelle → physique |
+| POST | `/api/assembly-links` | Contributor | Créer une liaison interface→interface (UCAM01) — interface déjà engagée sur son instance : `409` (RM09) ; interfaces incompatibles (RM10/RM11) ou interface reliée à elle-même : `400` |
+| POST | `/api/virtual-connect` | Contributor | Relier interface virtuelle → physique — mêmes refus que `/api/assembly-links`, le slot restant alors virtuel (RM13) ; porteur du slot soumis : `409` (RM19) |
 | GET | `/api/interfaces/{id}` | Auth | Détail d'une interface |
 | PUT | `/api/interfaces/{id}` | Contributor | Modifier une interface |
 | DELETE | `/api/interfaces/{id}` | Contributor | Supprimer une interface |

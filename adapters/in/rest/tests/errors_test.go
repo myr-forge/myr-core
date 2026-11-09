@@ -124,3 +124,42 @@ func TestDomainErrors_SubmittedAndLicense_MappedToHTTP(t *testing.T) {
 		}
 	}
 }
+
+// / @brief  Une liaison ou une composition refusée par les règles d'assemblage renvoie 409 ou 400, au lieu d'une erreur interne (RM09, RM10, RM50, RM51, RM52)
+// / @input  POST /connections, /assembly-links, /virtual-connect, /components/{id}/assemblies et /components/{id}/instances dont le service refuse la demande
+// / @expect 409 pour une interface déjà engagée ou une liaison existante, 400 pour une liaison incompatible, réflexive, étrangère au module ou une composition cyclique
+func TestDomainErrors_AssemblyRules_MappedToHTTP(t *testing.T) {
+	var next error
+	svc := &mockSvc{
+		addConnection: func(string, string, string) (*model.Connection, error) { return nil, next },
+		addAssemblyLink: func(string, string, string, string, string, string) (*model.Connection, error) {
+			return nil, next
+		},
+		connectVirtualToPhysical: func(string, string, model.AssetInterface, string, string) (*model.Connection, error) {
+			return nil, next
+		},
+		addAssemblyToModule: func(string, string) error { return next },
+		addAssetToWorkspace: func(string, string) (*model.Model3D, error) { return nil, next },
+	}
+	mux := newTestMux(t, svc)
+	cases := []struct {
+		err        error
+		path, body string
+		want       int
+	}{
+		{model.ErrConnectionExists, "/api/connections", `{"from":"a","to":"b"}`, http.StatusConflict},
+		{model.ErrInterfaceInUse, "/api/assembly-links", `{"from_iface_id":"i1","to_iface_id":"i2"}`, http.StatusConflict},
+		{model.ErrIncompatibleInterfaces, "/api/assembly-links", `{"from_iface_id":"i1","to_iface_id":"i2"}`, http.StatusBadRequest},
+		{model.ErrSelfLink, "/api/assembly-links", `{"from_iface_id":"i1","to_iface_id":"i1"}`, http.StatusBadRequest},
+		{model.ErrInterfaceInUse, "/api/virtual-connect", `{"virtual_iface_id":"v","physical_iface_id":"p"}`, http.StatusConflict},
+		{model.ErrConnectionNotInModule, "/api/components/m1/assemblies", `{"connection_id":"c1"}`, http.StatusBadRequest},
+		{model.ErrCyclicComposition, "/api/components/m1/instances", `{"asset_id":"m1"}`, http.StatusBadRequest},
+	}
+	for _, c := range cases {
+		next = c.err
+		w := do(t, mux, http.MethodPost, c.path, c.body)
+		if w.Code != c.want || !strings.Contains(w.Body.String(), strings.TrimPrefix(c.err.Error(), "model: ")) {
+			t.Errorf("POST %s (%v) : code %d attendu, obtenu %d — %s", c.path, c.err, c.want, w.Code, w.Body.String())
+		}
+	}
+}

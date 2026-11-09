@@ -1,3 +1,8 @@
+---
+tags:
+  - rm/RM51
+  - rm/RM52
+---
 ﻿---
 categorie: Module
 titre: "Ajouter un Module existant"
@@ -52,12 +57,22 @@ Un Module déjà existant (Contrôleurs, Caméra, Visserie...) peut être ajout�
 ### Flux nominal — Module ajouté
 
 1. `myr model instance add <moduleID> <assetID>` (ou l'appel API équivalent) est exécutée avec le module trouvé — une nouvelle instance est créée dans le module hôte
-2. Une fois les liaisons créées (`myr model link add`, voir UCAM01), elles sont rattachées au module hôte avec `myr module add-assembly <moduleID> <connID>`
+2. Une fois les liaisons créées entre ses instances (`myr model link add`, voir UCAM01), elles sont rattachées au module hôte avec `myr model assembly add <moduleID> <connID>` (`POST /api/components/{id}/assemblies`)
 
 ### Flux alternatif — Module déjà instancié dans le module hôte
 
 1. Le module ciblé possède déjà une instance dans le module hôte
 2. `myr model instance add` crée une nouvelle instance indépendante à chaque appel, y compris si le module est déjà présent — chaque instance a ses propres connexions indépendantes
+
+### Flux erreur — Composition cyclique
+
+1. L'asset ajouté est le module hôte lui-même, ou le contient, même indirectement
+2. Le service refuse l'ajout (RM52, API : 400) ; la composition du module hôte est inchangée
+
+### Flux erreur — Liaison étrangère au module
+
+1. La liaison à rattacher n'existe pas, ou ne relie pas deux instances du module hôte
+2. Le service refuse le rattachement (RM51, API : 400) ; le module hôte est inchangé
 
 ## Post-conditions
 

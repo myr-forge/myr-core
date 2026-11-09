@@ -75,11 +75,15 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 5. Le module est enregistré localement en état **draft**
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 29 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 33 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_Verify_OK](../../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected.md) — déduit : teste `ModelService.CreateModule`
+> - 🟡 [TestAddAssemblyToModule_RM51_InstanceLink_OK](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_InstanceLink_OK.md) — déduit : teste `ModelService.CreateModule`
+> - 🟡 [TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate](../../../docs/tests/domain-model/TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate.md) — déduit : teste `ModelService.CreateModule`
+> - 🟡 [TestAddAssetToWorkspace_RM52_Cycle_Rejected](../../../docs/tests/domain-model/TestAddAssetToWorkspace_RM52_Cycle_Rejected.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestCreateModule_ParentID_NotFound_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_NotFound_Rejected.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.CreateModule`
@@ -87,11 +91,7 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed](../../../docs/tests/domain-model/TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestIsModule_DraftComponent_NotMisclassified](../../../docs/tests/domain-model/TestIsModule_DraftComponent_NotMisclassified.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestModule_AddRemoveAssembly](../../../docs/tests/domain-model/TestModule_AddRemoveAssembly.md) — déduit : teste `ModelService.CreateModule`
-> - 🟡 [TestModule_CreateGetList](../../../docs/tests/domain-model/TestModule_CreateGetList.md) — déduit : teste `ModelService.CreateModule`
-> - … et 14 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 18 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
@@ -103,7 +103,7 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 5. Le Concepteur retrouve immédiatement l'assemblage complet du Module parent, prêt à être modifié, sans avoir ajouté une seule instance ni recréé une seule Liaison manuellement
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 81 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 82 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -119,7 +119,7 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 66 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 67 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Dérivation avec licence incompatible
@@ -142,7 +142,8 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 4. La Liaison est créée et le module reste en état `draft`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 17 déduit(s)
+> - 🟡 [TestDomainErrors_AssemblyRules_MappedToHTTP](../../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — déduit : teste route `/api/virtual-connect`
 > - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
@@ -152,12 +153,12 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 > - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_VirtualIsClickable](../../../docs/tests/domain-model/TestWorkspace_VirtualIsClickable.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_VirtualSlot_ChainedConnections](../../../docs/tests/domain-model/TestWorkspace_VirtualSlot_ChainedConnections.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - … et 2 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Aucune liaison créée (sauvegarde bloquée)

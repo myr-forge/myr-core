@@ -99,7 +99,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "Déclenche automatiquement la vérification de compatibilité (règle 11) ; les liaisons incompatibles portent incompatible:true et ne se suppriment pas automatiquement (règle 12). Une interface est à usage unique dans une liaison (règle 10).",
+                "description": "Sans asset d'accroche, les deux interfaces doivent être compatibles (RM10, critères RM11) ; avec une accroche, c'est elle qui doit l'être avec chacune. Une interface d'une instance donnée ne sert qu'à une liaison (RM09) et n'est jamais reliée à elle-même. Une liaison qui devient incompatible plus tard porte incompatible:true et n'est pas supprimée automatiquement (RM12).",
                 "consumes": [
                     "application/json"
                 ],
@@ -129,7 +129,16 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "interfaces incompatibles, ou interface reliée à elle-même",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "interface déjà engagée dans une liaison (RM09)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -683,7 +692,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET renvoie les connexions référencées par Assemblies (liste vide si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr model link add) à cette liste — brouillon local, sans effet blockchain avant soumission.",
+                "description": "GET renvoie les connexions référencées par Assemblies (liste vide si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr model link add) à cette liste — brouillon local, sans effet blockchain avant soumission. La connexion doit exister et relier deux instances de l'asset (400 sinon).",
                 "consumes": [
                     "application/json"
                 ],
@@ -719,7 +728,16 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "connexion inexistante ou qui ne relie pas deux instances de l'asset",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "asset déjà soumis (RM19)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -735,7 +753,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET renvoie les connexions référencées par Assemblies (liste vide si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr model link add) à cette liste — brouillon local, sans effet blockchain avant soumission.",
+                "description": "GET renvoie les connexions référencées par Assemblies (liste vide si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr model link add) à cette liste — brouillon local, sans effet blockchain avant soumission. La connexion doit exister et relier deux instances de l'asset (400 sinon).",
                 "consumes": [
                     "application/json"
                 ],
@@ -771,7 +789,16 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "connexion inexistante ou qui ne relie pas deux instances de l'asset",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "asset déjà soumis (RM19)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -839,7 +866,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET renvoie la liste des instances (vide si l'asset n'a jamais été décomposé). POST ajoute un composant existant comme instance — brouillon local, sans effet blockchain avant soumission.",
+                "description": "GET renvoie la liste des instances (vide si l'asset n'a jamais été décomposé). POST ajoute un composant existant comme instance — brouillon local, sans effet blockchain avant soumission. Un asset qui est l'asset lui-même ou le contient, même indirectement, est refusé (400).",
                 "consumes": [
                     "application/json"
                 ],
@@ -875,7 +902,16 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "composition cyclique",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "asset déjà soumis (RM19)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -891,7 +927,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "GET renvoie la liste des instances (vide si l'asset n'a jamais été décomposé). POST ajoute un composant existant comme instance — brouillon local, sans effet blockchain avant soumission.",
+                "description": "GET renvoie la liste des instances (vide si l'asset n'a jamais été décomposé). POST ajoute un composant existant comme instance — brouillon local, sans effet blockchain avant soumission. Un asset qui est l'asset lui-même ou le contient, même indirectement, est refusé (400).",
                 "consumes": [
                     "application/json"
                 ],
@@ -927,7 +963,16 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "composition cyclique",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "asset déjà soumis (RM19)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1479,6 +1524,7 @@
                         "MyrToken": []
                     }
                 ],
+                "description": "Une connexion identique (même from et même to, sans interface) est refusée : le client la retrouve dans GET /connections.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1509,6 +1555,15 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "connexion déjà existante",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2942,7 +2997,7 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "interfaces incompatibles (RM10)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2951,7 +3006,7 @@
                         }
                     },
                     "409": {
-                        "description": "porteur du slot virtuel déjà soumis (RM19)",
+                        "description": "porteur du slot virtuel déjà soumis (RM19), ou interface déjà engagée (RM09)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

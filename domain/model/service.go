@@ -166,6 +166,11 @@ func (s *Service) Submit(assetID, note string) (*Model3D, error) {
 	if m.IsModule() {
 		return s.SubmitModule(assetID, note)
 	}
+	unlock := lockDraft(assetID)
+	defer unlock()
+	if m, err = s.submittableDraft(assetID); err != nil { // relu sous verrou
+		return nil, err
+	}
 	if s.ifaceStore != nil {
 		ifaces, err := s.ifaceStore.ListInterfacesForAsset(assetID)
 		if err != nil {
@@ -243,6 +248,25 @@ func (s *Service) saveDraft(m *Model3D) error {
 	return s.draftStore.SaveDraft(m)
 }
 
+// editDraft applique change au brouillon id puis l'enregistre, sous le verrou
+// de ce brouillon (R-21) ; ErrAssetSubmitted pour un asset soumis (RM19). Rien
+// n'est enregistré si change échoue.
+func (s *Service) editDraft(id string, change func(m *Model3D) error) (*Model3D, error) {
+	unlock := lockDraft(id)
+	defer unlock()
+	m, err := s.draftAsset(id)
+	if err != nil {
+		return nil, err
+	}
+	if err := change(m); err != nil {
+		return nil, err
+	}
+	if err := s.saveDraft(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // checkLicense vérifie la licence proposée pour un asset : présente au
 // catalogue et, pour un asset dérivé dont le parent est connu, compatible
 // avec la licence de ce parent (RM03). Une licence vide n'est pas contrôlée.
@@ -291,7 +315,25 @@ func (s *Service) List(channelID string) ([]*Model3D, error) {
 	if err != nil {
 		return s.filterHidden(drafts), err
 	}
-	return s.filterHidden(append(drafts, onChain...)), nil
+	return s.filterHidden(mergeDraftsAndLedger(drafts, onChain)), nil
+}
+
+// mergeDraftsAndLedger réunit brouillons et assets du ledger sans doublon
+// (R-14) : un brouillon resté sous l'identifiant d'un asset déjà enregistré
+// (retrait du brouillon échoué après une soumission) est périmé — le ledger
+// fait foi.
+func mergeDraftsAndLedger(drafts, onChain []*Model3D) []*Model3D {
+	onLedger := make(map[string]bool, len(onChain))
+	for _, m := range onChain {
+		onLedger[m.ID] = true
+	}
+	merged := make([]*Model3D, 0, len(drafts)+len(onChain))
+	for _, d := range drafts {
+		if !onLedger[d.ID] {
+			merged = append(merged, d)
+		}
+	}
+	return append(merged, onChain...)
 }
 
 // filterHidden retire de assets tout ID masqué localement (RM08) — un asset
@@ -355,9 +397,27 @@ func (s *Service) Verify(id, channelID string) (bool, string, error) {
 
 // ── Connexions d'assemblage (requiert connStore) ────────────────────────────
 
+// connectionsLock sérialise la vérification et l'enregistrement des liaisons :
+// deux demandes simultanées ne peuvent pas engager la même interface.
+const connectionsLock = "\x00connections"
+
+// AddConnection crée une liaison directe entre deux assets. Une liaison
+// identique existante est refusée (ErrConnectionExists) : le client la
+// retrouve dans la liste des liaisons, le serveur ne la devine pas (RM50).
 func (s *Service) AddConnection(from, to, label string) (*Connection, error) {
 	if s.connStore == nil {
 		return nil, fmt.Errorf("connection store non configuré")
+	}
+	unlock := lockDraft(connectionsLock)
+	defer unlock()
+	conns, err := s.connStore.ListConnections()
+	if err != nil {
+		return nil, err
+	}
+	for _, c := range conns {
+		if c.FromIfaceID == "" && c.ToIfaceID == "" && c.From == from && c.To == to {
+			return nil, fmt.Errorf("%w : %s (%s → %s)", ErrConnectionExists, c.ID, from, to)
+		}
 	}
 	conn := &Connection{ID: generateID(), From: from, To: to, Label: label}
 	return conn, s.connStore.SaveConnection(conn)
@@ -390,6 +450,12 @@ func (s *Service) AddAssemblyLink(fromIfaceID, toIfaceID, label, fromInstanceID,
 		}
 	}
 
+	unlock := lockDraft(connectionsLock)
+	defer unlock()
+	if err := s.checkLinkable(fromIface, toIface, fromInstanceID, toInstanceID, fastenerAssetID != ""); err != nil {
+		return nil, err
+	}
+
 	conn := &Connection{
 		ID:              generateID(),
 		From:            fromIface.AssetID,
@@ -402,6 +468,47 @@ func (s *Service) AddAssemblyLink(fromIfaceID, toIfaceID, label, fromInstanceID,
 		FastenerAssetID: fastenerAssetID,
 	}
 	return conn, s.connStore.SaveConnection(conn)
+}
+
+// linkEnd est une extrémité de liaison : une interface d'une instance donnée
+// (instance vide pour une liaison entre assets).
+type linkEnd struct{ iface, instance string }
+
+// checkLinkable vérifie qu'une liaison entre deux interfaces est permise :
+//   - une interface n'est pas reliée à elle-même (ErrSelfLink) ;
+//   - sans asset d'accroche, les deux interfaces sont compatibles (RM10,
+//     critères RM11) — avec une accroche, c'est elle qui doit l'être avec
+//     chacune (validateFastener) ;
+//   - aucune des deux extrémités n'est déjà engagée dans une liaison (RM09) :
+//     l'usage unique porte sur l'interface d'une instance donnée, la même
+//     interface d'un composant restant disponible dans ses autres instances.
+func (s *Service) checkLinkable(from, to *AssetInterface, fromInstance, toInstance string, viaFastener bool) error {
+	if from.ID == to.ID && fromInstance == toInstance {
+		return fmt.Errorf("%w : %s", ErrSelfLink, from.ID)
+	}
+	if !viaFastener && !ifacesCompatible(from, to) {
+		return fmt.Errorf("%w : %s/%s (%s) ↔ %s/%s (%s)", ErrIncompatibleInterfaces,
+			from.Category, from.Type, from.Direction, to.Category, to.Type, to.Direction)
+	}
+	conns, err := s.connStore.ListConnections()
+	if err != nil {
+		return err
+	}
+	busy := make(map[linkEnd]string, 2*len(conns))
+	for _, c := range conns {
+		if c.FromIfaceID != "" {
+			busy[linkEnd{c.FromIfaceID, c.FromInstanceID}] = c.ID
+		}
+		if c.ToIfaceID != "" {
+			busy[linkEnd{c.ToIfaceID, c.ToInstanceID}] = c.ID
+		}
+	}
+	for _, e := range []linkEnd{{from.ID, fromInstance}, {to.ID, toInstance}} {
+		if id, ok := busy[e]; ok {
+			return fmt.Errorf("%w : interface %s (liaison %s)", ErrInterfaceInUse, e.iface, id)
+		}
+	}
+	return nil
 }
 
 // validateFastener vérifie qu'un asset d'accroche est physiquement compatible
@@ -454,13 +561,26 @@ func ifacesCompatible(a, b *AssetInterface) bool {
 	return ifaceValuesOverlap(b, a)
 }
 
-// ifaceValuesOverlap vérifie que les plages de valeurs de deux interfaces se chevauchent.
-// out → fournisseur, in → consommateur.
+// ifaceValuesOverlap vérifie que les valeurs de deux interfaces se chevauchent
+// (RM11) — out → fournisseur, in → consommateur. Une interface sans unité
+// n'impose aucune contrainte de valeur ; avec une unité, une valeur simple vaut
+// l'intervalle [v ; v] et 0 est une vraie valeur.
 func ifaceValuesOverlap(out, in *AssetInterface) bool {
-	if (out.ValueMin == 0 && out.ValueMax == 0) || (in.ValueMin == 0 && in.ValueMax == 0) {
-		return true // pas de valeur définie = pas de contrainte
+	if out.Unit == "" || in.Unit == "" {
+		return true
 	}
-	return out.ValueMin <= in.ValueMax && in.ValueMin <= out.ValueMax
+	outMin, outMax := valueRange(out)
+	inMin, inMax := valueRange(in)
+	return outMin <= inMax && inMin <= outMax
+}
+
+// valueRange retourne l'intervalle de valeurs d'une interface : sa plage, ou
+// [v ; v] pour une valeur simple.
+func valueRange(i *AssetInterface) (float64, float64) {
+	if i.IsRange {
+		return i.ValueMin, i.ValueMax
+	}
+	return i.ValueMin, i.ValueMin
 }
 
 func (s *Service) RemoveConnection(id string) error {
@@ -762,17 +882,19 @@ func (s *Service) UpdateAsset(req UpdateRequest) (*Model3D, error) {
 	if !isDraft {
 		return s.updateSubmittedMetadata(m, req)
 	}
-	if req.LicenseID != "" {
-		var parent *Model3D
-		if m.ParentID != "" {
-			parent, _, _ = s.getAsset(m.ParentID, m.ChannelID)
+	return s.editDraft(req.ID, func(m *Model3D) error {
+		if req.LicenseID != "" {
+			var parent *Model3D
+			if m.ParentID != "" {
+				parent, _, _ = s.getAsset(m.ParentID, m.ChannelID)
+			}
+			if err := checkLicense(req.LicenseID, parent); err != nil {
+				return err
+			}
 		}
-		if err := checkLicense(req.LicenseID, parent); err != nil {
-			return nil, err
-		}
-	}
-	applyAssetPatch(m, req)
-	return m, s.saveDraft(m)
+		applyAssetPatch(m, req)
+		return nil
+	})
 }
 
 // updateSubmittedMetadata remplace sur le ledger les métadonnées descriptives
@@ -925,43 +1047,88 @@ func (s *Service) ListModules(channelID string) ([]*Model3D, error) {
 	return modules, err
 }
 
+// AddAssemblyToModule rattache au module brouillon une liaison existante qui
+// relie deux de ses instances (RM51). Une liaison inconnue ou étrangère au
+// module est refusée (ErrConnectionNotInModule) : un composant sans instance ne
+// devient donc jamais module par erreur.
 func (s *Service) AddAssemblyToModule(moduleID, connID string) error {
-	m, err := s.draftAsset(moduleID)
-	if err != nil {
-		return err
+	_, err := s.editDraft(moduleID, func(m *Model3D) error {
+		for _, id := range m.Assemblies {
+			if id == connID {
+				return nil // déjà présent
+			}
+		}
+		conn, err := s.findConnection(connID)
+		if err != nil {
+			return err
+		}
+		if !connectsInstancesOf(m, conn) {
+			return fmt.Errorf("%w : %s ne relie pas deux instances de %s", ErrConnectionNotInModule, connID, moduleID)
+		}
+		m.Assemblies = append(m.Assemblies, connID)
+		return nil
+	})
+	return err
+}
+
+// findConnection retourne la liaison connID, ErrConnectionNotInModule si elle
+// n'existe pas.
+func (s *Service) findConnection(connID string) (*Connection, error) {
+	if s.connStore == nil {
+		return nil, fmt.Errorf("connection store non configuré")
 	}
-	for _, id := range m.Assemblies {
-		if id == connID {
-			return nil // déjà présent
+	conns, err := s.connStore.ListConnections()
+	if err != nil {
+		return nil, err
+	}
+	for _, c := range conns {
+		if c.ID == connID {
+			return c, nil
 		}
 	}
-	m.Assemblies = append(m.Assemblies, connID)
-	return s.saveDraft(m)
+	return nil, fmt.Errorf("%w : liaison %s introuvable", ErrConnectionNotInModule, connID)
+}
+
+// connectsInstancesOf indique si la liaison c relie deux instances du module
+// m : par leurs identifiants d'instance, ou, pour une liaison entre assets sans
+// instance, par les assets de ses instances.
+func connectsInstancesOf(m *Model3D, c *Connection) bool {
+	instances := make(map[string]bool, len(m.WorkspaceInstances))
+	assets := make(map[string]bool, len(m.WorkspaceInstances))
+	for _, inst := range m.WorkspaceInstances {
+		instances[inst.ID] = true
+		assets[inst.AssetID] = true
+	}
+	if c.FromInstanceID != "" || c.ToInstanceID != "" {
+		return instances[c.FromInstanceID] && instances[c.ToInstanceID]
+	}
+	return assets[c.From] && assets[c.To]
 }
 
 func (s *Service) RemoveAssemblyFromModule(moduleID, connID string) error {
-	m, err := s.draftAsset(moduleID)
-	if err != nil {
-		return err
-	}
-	filtered := m.Assemblies[:0]
-	for _, id := range m.Assemblies {
-		if id != connID {
-			filtered = append(filtered, id)
+	_, err := s.editDraft(moduleID, func(m *Model3D) error {
+		filtered := m.Assemblies[:0]
+		for _, id := range m.Assemblies {
+			if id != connID {
+				filtered = append(filtered, id)
+			}
 		}
-	}
-	m.Assemblies = filtered
-	return s.saveDraft(m)
+		m.Assemblies = filtered
+		return nil
+	})
+	return err
 }
 
 // SubmitModule soumet un module brouillon à la blockchain et crée sa version
 // immuable (RM18). Un module déjà soumis n'est jamais re-soumis
 // (ErrAssetSubmitted) : une nouvelle version est un nouveau module dérivé
-// (CreateModule avec ParentID, qui reprend sa composition — RM19, ADR-12).
+// (AddFull avec ParentID, qui reprend sa composition — RM19, ADR-12).
 func (s *Service) SubmitModule(moduleID, note string) (*Model3D, error) {
 	if s.blockchain == nil {
 		return nil, ErrBlockchainUnavailable
 	}
+	unlock := lockDraft(moduleID)
+	defer unlock()
 	m, err := s.submittableDraft(moduleID)
 	if err != nil {
 		return nil, err
@@ -994,22 +1161,52 @@ func (s *Service) SubmitModule(moduleID, note string) (*Model3D, error) {
 // Invariant : chaque asset dispose toujours d'au moins une interface virtuelle
 // (slot utilisable pour créer une liaison). Un slot est créé automatiquement
 // si aucune interface virtuelle n'existe encore pour cet asset.
-// #incoherence — aucune garde contre assetID == moduleID ni contre un cycle
-// A→B→A ; combiné à getModuleInterfacesInto ci-dessous, une composition
-// cyclique fait récurser indéfiniment GetModuleInterfaces (stack overflow) —
-// voir specs/roadmap_dev.md § Écarts — revue de code, E1.
+// Un asset qui est le module ou le contient, même indirectement, est refusé
+// (ErrCyclicComposition, RM52).
 func (s *Service) AddAssetToWorkspace(moduleID, assetID string) (*Model3D, error) {
-	m, err := s.draftAsset(moduleID)
+	m, err := s.editDraft(moduleID, func(m *Model3D) error {
+		if err := s.checkNotContaining(assetID, moduleID); err != nil {
+			return err
+		}
+		m.WorkspaceInstances = append(m.WorkspaceInstances, WorkspaceInstance{ID: generateID(), AssetID: assetID})
+		return nil
+	})
 	if err != nil {
-		return nil, err
-	}
-	inst := WorkspaceInstance{ID: generateID(), AssetID: assetID}
-	m.WorkspaceInstances = append(m.WorkspaceInstances, inst)
-	if err := s.saveDraft(m); err != nil {
 		return nil, err
 	}
 	s.ensureVirtualSlot(assetID)
 	return m, nil
+}
+
+// checkNotContaining refuse d'ajouter assetID au module moduleID si assetID
+// est ce module ou le contient, même indirectement : une composition cyclique
+// n'aurait pas de fin (GetModuleInterfaces la parcourt récursivement).
+func (s *Service) checkNotContaining(assetID, moduleID string) error {
+	seen := map[string]bool{}
+	var contains func(id string) bool
+	contains = func(id string) bool {
+		if id == moduleID {
+			return true
+		}
+		if seen[id] {
+			return false
+		}
+		seen[id] = true
+		a, _, err := s.getAsset(id, "")
+		if err != nil {
+			return false
+		}
+		for _, inst := range a.WorkspaceInstances {
+			if contains(inst.AssetID) {
+				return true
+			}
+		}
+		return false
+	}
+	if contains(assetID) {
+		return fmt.Errorf("%w : %s contient %s", ErrCyclicComposition, assetID, moduleID)
+	}
+	return nil
 }
 
 // EnsureVirtualSlot garantit qu'au moins une interface virtuelle existe pour cet asset.
@@ -1040,11 +1237,15 @@ func (s *Service) ensureVirtualSlot(assetID string) { s.EnsureVirtualSlot(assetI
 // RemoveAssetFromWorkspace retire une instance spécifique (par instanceID) du module.
 // Supprime en cascade les connexions de cette instance dans le module.
 func (s *Service) RemoveAssetFromWorkspace(moduleID, instanceID string) (*Model3D, error) {
-	m, err := s.draftAsset(moduleID)
-	if err != nil {
-		return nil, err
-	}
+	return s.editDraft(moduleID, func(m *Model3D) error {
+		s.removeInstance(m, instanceID)
+		return nil
+	})
+}
 
+// removeInstance retire l'instance instanceID du module m et supprime en
+// cascade ses liaisons internes (règle 15).
+func (s *Service) removeInstance(m *Model3D, instanceID string) {
 	if s.connStore != nil {
 		asmSet := make(map[string]bool, len(m.Assemblies))
 		for _, id := range m.Assemblies {
@@ -1077,29 +1278,20 @@ func (s *Service) RemoveAssetFromWorkspace(moduleID, instanceID string) (*Model3
 		}
 	}
 	m.WorkspaceInstances = filtered
-	if err := s.saveDraft(m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 // UpdateInstancePosition met à jour la position persistée d'une instance d'un module.
 func (s *Service) UpdateInstancePosition(moduleID, instanceID string, x, y float64) (*Model3D, error) {
-	m, err := s.draftAsset(moduleID)
-	if err != nil {
-		return nil, err
-	}
-	for i, inst := range m.WorkspaceInstances {
-		if inst.ID == instanceID {
-			m.WorkspaceInstances[i].X = x
-			m.WorkspaceInstances[i].Y = y
-			if err := s.saveDraft(m); err != nil {
-				return nil, err
+	return s.editDraft(moduleID, func(m *Model3D) error {
+		for i, inst := range m.WorkspaceInstances {
+			if inst.ID == instanceID {
+				m.WorkspaceInstances[i].X = x
+				m.WorkspaceInstances[i].Y = y
+				return nil
 			}
-			return m, nil
 		}
-	}
-	return nil, fmt.Errorf("instance %s introuvable dans le module %s", instanceID, moduleID)
+		return fmt.Errorf("instance %s introuvable dans le module %s", instanceID, moduleID)
+	})
 }
 
 // RemoveModule supprime un module — délègue à Remove, qui gère brouillon local,
@@ -1284,10 +1476,11 @@ func (s *Service) ConnectVirtualToPhysical(
 	if err != nil {
 		return nil, fmt.Errorf("interface physique introuvable : %w", err)
 	}
-	virtual, err := s.ifaceStore.GetInterface(virtualIfaceID)
+	stored, err := s.ifaceStore.GetInterface(virtualIfaceID)
 	if err != nil {
 		return nil, fmt.Errorf("interface virtuelle introuvable : %w", err)
 	}
+	virtual := *stored // matérialisé sur une copie : rien ne change si la liaison est refusée
 	if !virtual.Virtual {
 		return nil, fmt.Errorf("l'interface %s n'est pas virtuelle", virtualIfaceID)
 	}
@@ -1335,7 +1528,12 @@ func (s *Service) ConnectVirtualToPhysical(
 		virtual.Unit = physical.Unit
 	}
 
-	if err := s.ifaceStore.SaveInterface(virtual); err != nil {
+	// La liaison doit être permise avant de matérialiser le slot (RM09, RM10) :
+	// un refus ne doit pas laisser une interface matérialisée sans liaison.
+	if err := s.checkLinkable(physical, &virtual, toInstanceID, fromInstanceID, false); err != nil {
+		return nil, err
+	}
+	if err := s.ifaceStore.SaveInterface(&virtual); err != nil {
 		return nil, fmt.Errorf("sauvegarde interface matérialisée : %w", err)
 	}
 

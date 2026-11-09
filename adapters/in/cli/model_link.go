@@ -25,7 +25,7 @@ func runModelLinkAdd(w io.Writer, svc model.ModelService, from, to, label, fromI
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Liaison créée : id=%s incompatible=%v\n", conn.ID, conn.Incompatible)
+	fmt.Fprintf(w, "Liaison créée : id=%s\n", conn.ID)
 	return nil
 }
 
@@ -33,8 +33,10 @@ var modelLinkAddCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Create an assembly link between two interfaces",
 	Long: `Create a link between two physical interfaces, directly or through a
-fastener asset (screw, cable, clip...). Compatibility is checked
-automatically by the domain service.
+fastener asset (screw, cable, clip...). The link is refused when the two
+interfaces are incompatible (or, with a fastener, when the fastener does not
+fit both), when an interface of the given instance is already linked, or when
+an interface would be linked to itself.
 
 Examples:
   myr model link add --from iface-1 --to iface-2

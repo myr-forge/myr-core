@@ -1205,14 +1205,15 @@ func (h *Handler) submitComponent(w http.ResponseWriter, r *http.Request, id str
 // /api/modules/{id}/assemblies (POST), fusionnés sous une seule route (ADR-11).
 //
 //	@Summary		Connexions internes d'un asset décomposé
-//	@Description	GET renvoie les connexions référencées par Assemblies (liste vide si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr model link add) à cette liste — brouillon local, sans effet blockchain avant soumission.
+//	@Description	GET renvoie les connexions référencées par Assemblies (liste vide si l'asset n'a aucune instance). POST rattache une connexion déjà créée (myr model link add) à cette liste — brouillon local, sans effet blockchain avant soumission. La connexion doit exister et relier deux instances de l'asset (400 sinon).
 //	@Tags			components
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		string	true	"identifiant de l'asset"
 //	@Param			body	body		object	false	"connection_id requis — POST uniquement"
 //	@Success		200	{object}	componentDTO
-//	@Failure		400	{object}	map[string]string
+//	@Failure		400	{object}	map[string]string	"connexion inexistante ou qui ne relie pas deux instances de l'asset"
+//	@Failure		409	{object}	map[string]string	"asset déjà soumis (RM19)"
 //	@Security		MyrToken
 //	@Router			/components/{id}/assemblies [get]
 //	@Router			/components/{id}/assemblies [post]
@@ -1301,7 +1302,7 @@ func (h *Handler) removeComponentAssembly(w http.ResponseWriter, r *http.Request
 // existant (ADR-11), y compris un composant qui n'a encore aucune instance.
 //
 //	@Summary		Instances d'un asset
-//	@Description	GET renvoie la liste des instances (vide si l'asset n'a jamais été décomposé). POST ajoute un composant existant comme instance — brouillon local, sans effet blockchain avant soumission.
+//	@Description	GET renvoie la liste des instances (vide si l'asset n'a jamais été décomposé). POST ajoute un composant existant comme instance — brouillon local, sans effet blockchain avant soumission. Un asset qui est l'asset lui-même ou le contient, même indirectement, est refusé (400).
 //	@Tags			components
 //	@Accept			json
 //	@Produce		json
@@ -1309,7 +1310,8 @@ func (h *Handler) removeComponentAssembly(w http.ResponseWriter, r *http.Request
 //	@Param			body	body		object	false	"asset_id requis — POST uniquement"
 //	@Success		200	{array}		model.WorkspaceInstance
 //	@Success		200	{object}	componentDTO
-//	@Failure		400	{object}	map[string]string
+//	@Failure		400	{object}	map[string]string	"composition cyclique"
+//	@Failure		409	{object}	map[string]string	"asset déjà soumis (RM19)"
 //	@Security		MyrToken
 //	@Router			/components/{id}/instances [get]
 //	@Router			/components/{id}/instances [post]
@@ -1583,13 +1585,15 @@ func (h *Handler) handleConnections(w http.ResponseWriter, r *http.Request) {
 
 // createConnection crée une connexion simple entre deux assets.
 //
-//	@Summary	Créer une connexion
-//	@Tags		connections
-//	@Accept		json
-//	@Produce	json
-//	@Param		body	body		connectionDTO	true	"from et to requis ; label optionnel"
-//	@Success	201	{object}	connectionDTO
-//	@Failure	400	{object}	map[string]string
+//	@Summary		Créer une connexion
+//	@Description	Une connexion identique (même from et même to, sans interface) est refusée : le client la retrouve dans GET /connections.
+//	@Tags			connections
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		connectionDTO	true	"from et to requis ; label optionnel"
+//	@Success		201	{object}	connectionDTO
+//	@Failure		400	{object}	map[string]string
+//	@Failure		409	{object}	map[string]string	"connexion déjà existante"
 //	@Security	MyrToken
 //	@Router		/connections [post]
 func (h *Handler) createConnection(w http.ResponseWriter, r *http.Request) {
@@ -1653,13 +1657,14 @@ type assemblyLinkRequest struct {
 // handleAssemblyLinks crée une liaison interface→interface (assemblage).
 //
 //	@Summary		Créer une liaison entre deux interfaces
-//	@Description	Déclenche automatiquement la vérification de compatibilité (règle 11) ; les liaisons incompatibles portent incompatible:true et ne se suppriment pas automatiquement (règle 12). Une interface est à usage unique dans une liaison (règle 10).
+//	@Description	Sans asset d'accroche, les deux interfaces doivent être compatibles (RM10, critères RM11) ; avec une accroche, c'est elle qui doit l'être avec chacune. Une interface d'une instance donnée ne sert qu'à une liaison (RM09) et n'est jamais reliée à elle-même. Une liaison qui devient incompatible plus tard porte incompatible:true et n'est pas supprimée automatiquement (RM12).
 //	@Tags			connections
 //	@Accept			json
 //	@Produce		json
 //	@Param			body	body		assemblyLinkRequest	true	"from_iface_id et to_iface_id requis"
 //	@Success		201	{object}	connectionDTO
-//	@Failure		400	{object}	map[string]string
+//	@Failure		400	{object}	map[string]string	"interfaces incompatibles, ou interface reliée à elle-même"
+//	@Failure		409	{object}	map[string]string	"interface déjà engagée dans une liaison (RM09)"
 //	@Security		MyrToken
 //	@Router			/assembly-links [post]
 func (h *Handler) handleAssemblyLinks(w http.ResponseWriter, r *http.Request) {
@@ -1712,8 +1717,8 @@ type virtualConnectRequest struct {
 //	@Produce	json
 //	@Param		body	body		virtualConnectRequest	true	"virtual_iface_id et physical_iface_id requis"
 //	@Success	201	{object}	connectionDTO
-//	@Failure	400	{object}	map[string]string
-//	@Failure	409	{object}	map[string]string	"porteur du slot virtuel déjà soumis (RM19)"
+//	@Failure	400	{object}	map[string]string	"interfaces incompatibles (RM10)"
+//	@Failure	409	{object}	map[string]string	"porteur du slot virtuel déjà soumis (RM19), ou interface déjà engagée (RM09)"
 //	@Security	MyrToken
 //	@Router		/virtual-connect [post]
 func (h *Handler) handleVirtualConnect(w http.ResponseWriter, r *http.Request) {
@@ -2172,8 +2177,11 @@ func jsonError(w http.ResponseWriter, msg string, code int) {
 // ou injoignable (ErrBlockchainUnreachable), toutes deux transitoires et non des
 // erreurs de données (503) —, l'écriture sur le ledger sans identité signataire
 // (ErrSignerRequired, ADR-12, 403), la modification d'un asset soumis
-// (ErrAssetSubmitted, RM19, 409) et la licence refusée (catalogue ou RM03, 400)
-// des autres échecs du service domaine (500).
+// (ErrAssetSubmitted, RM19, 409), l'interface déjà engagée (RM09) ou la liaison
+// déjà existante (409), la licence refusée (catalogue ou RM03, 400) et la
+// liaison ou la composition refusée (RM10, liaison d'une interface à elle-même,
+// liaison étrangère au module, composition cyclique, 400) des autres échecs du
+// service domaine (500).
 // Pour une 500, le client ne reçoit le détail de l'erreur que si le serveur a été
 // démarré avec WithDebugErrors.
 func (h *Handler) internalErr(w http.ResponseWriter, err error) {
@@ -2186,11 +2194,13 @@ func (h *Handler) internalErr(w http.ResponseWriter, err error) {
 		code, msg = http.StatusServiceUnavailable, err.Error()
 	case errors.Is(err, model.ErrSignerRequired):
 		code, msg = http.StatusForbidden, err.Error()+" — reconnectez-vous avec votre identité (POST /api/identity/session)"
-	case errors.Is(err, model.ErrAssetSubmitted):
+	case errors.Is(err, model.ErrAssetSubmitted), errors.Is(err, model.ErrInterfaceInUse), errors.Is(err, model.ErrConnectionExists):
 		code, msg = http.StatusConflict, err.Error()
 	case errors.Is(err, model.ErrThumbnailTooLarge):
 		code, msg = http.StatusRequestEntityTooLarge, err.Error()
-	case errors.Is(err, model.ErrUnknownLicense), errors.Is(err, model.ErrLicenseIncompatible):
+	case errors.Is(err, model.ErrUnknownLicense), errors.Is(err, model.ErrLicenseIncompatible),
+		errors.Is(err, model.ErrIncompatibleInterfaces), errors.Is(err, model.ErrSelfLink),
+		errors.Is(err, model.ErrConnectionNotInModule), errors.Is(err, model.ErrCyclicComposition):
 		code, msg = http.StatusBadRequest, err.Error()
 	case h.debugErrors:
 		msg = err.Error()

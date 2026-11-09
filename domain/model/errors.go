@@ -73,3 +73,24 @@ func IsDegradedListErr(err error) bool {
 // Centralisé ici pour que CLI et REST affichent exactement le même avertissement (règle de
 // parité fonctionnelle des adapters d'entrée).
 const DegradedListWarning = "blockchain indisponible — liste limitée aux brouillons locaux non soumis"
+
+// Règles d'assemblage (UCAM01 : RM09, RM10, RM50, RM51, RM52).
+var (
+	// ErrInterfaceInUse : une interface (d'une instance donnée) est déjà engagée
+	// dans une liaison (RM09).
+	ErrInterfaceInUse = errors.New("model: interface déjà engagée dans une liaison")
+	// ErrIncompatibleInterfaces : la paire d'interfaces n'est pas compatible
+	// (RM10, critères RM11).
+	ErrIncompatibleInterfaces = errors.New("model: interfaces incompatibles")
+	// ErrSelfLink : une interface ne peut pas être reliée à elle-même.
+	ErrSelfLink = errors.New("model: une interface ne peut pas être reliée à elle-même")
+	// ErrConnectionExists : la liaison demandée existe déjà ; le client la
+	// retrouve dans la liste des liaisons, le serveur ne la devine pas.
+	ErrConnectionExists = errors.New("model: liaison déjà existante")
+	// ErrConnectionNotInModule : la liaison rattachée à un module n'existe pas,
+	// ou ne relie pas deux de ses instances.
+	ErrConnectionNotInModule = errors.New("model: liaison inexistante ou étrangère aux instances du module")
+	// ErrCyclicComposition : un asset ne peut pas contenir, même indirectement,
+	// le module auquel on l'ajoute.
+	ErrCyclicComposition = errors.New("model: composition cyclique — un module ne peut pas se contenir lui-même")
+)

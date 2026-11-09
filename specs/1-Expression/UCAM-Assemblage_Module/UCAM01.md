@@ -3,6 +3,7 @@ tags:
   - rm/RM09
   - rm/RM10
   - rm/RM11
+  - rm/RM50
 ---
 ﻿---
 categorie: Assemblage Module
@@ -59,30 +60,41 @@ Une liaison peut être **directe** (les interfaces se connectent sans intermédi
 
 ## Scénario
 
-**Étape initiale :** Sur le serveur (SSH), l'administrateur exécute `myr model link add --from <ifaceID_source> --to <ifaceID_cible> [--fastener <assetID>]` pour le compte du Concepteur — même effet via l'API REST équivalente (identifiants d'interfaces obtenus via `myr model interface list`, voir UCAM02)
+**Étape initiale :** Sur le serveur (SSH), l'administrateur exécute `myr model link add --from <ifaceID_source> --to <ifaceID_cible> [--from-instance <instanceID>] [--to-instance <instanceID>] [--fastener <assetID>]` pour le compte du Concepteur — même effet via `POST /api/assembly-links` (identifiants d'interfaces obtenus via `myr model interface list`, voir UCAM02 ; identifiant d'instance affiché par `myr model instance add`, ou lu via `GET /api/components/{id}/instances`)
 
 ### Flux nominal — Liaison directe
 
-1. Les identifiants des interfaces source et cible sont transmis
-2. Le service vérifie la compatibilité de la paire d'interfaces (catégorie, sens, tag, type, valeur — RM10/RM11)
-3. Aucun asset d'accroche n'est précisé : la liaison est enregistrée directement (`FastenerAssetID` vide)
-4. Les interfaces du composant résultant sont créées et conservées
+1. Les identifiants des interfaces source et cible sont transmis, avec l'instance de chacune dans le module
+2. Le service vérifie qu'aucune des deux interfaces n'est déjà engagée sur son instance (RM09)
+3. Le service vérifie la compatibilité de la paire d'interfaces (catégorie, sens, tag, type, valeur — RM10/RM11)
+4. Aucun asset d'accroche n'est précisé : la liaison est enregistrée directement (`FastenerAssetID` vide)
+5. Les interfaces du composant résultant sont créées et conservées
 
 ### Flux nominal — Liaison via asset d'accroche
 
 1. Étapes 1 à 2 identiques au flux nominal précédent
-2. Un asset d'accroche est précisé (`--fastener <assetID>`, voir UCAM07)
+2. Un asset d'accroche est précisé (`--fastener <assetID>`, voir UCAM07) : c'est lui qui doit être compatible avec chacune des deux interfaces (RM10)
 3. La liaison est enregistrée avec le `FastenerAssetID` de l'asset choisi
 
 ### Flux erreur — Interfaces incompatibles
 
 1. La paire d'interfaces transmise ne respecte pas les critères de compatibilité (RM10/RM11)
-2. Le service refuse la création de la liaison — message d'erreur métier explicite
+2. Le service refuse la création de la liaison — message d'erreur métier explicite (API : 400)
 
 ### Flux erreur — Interface déjà utilisée
 
-1. L'interface cible est déjà engagée dans une liaison existante (RM09)
-2. Le service refuse la création : "Cette interface est déjà utilisée dans une liaison"
+1. L'interface source ou cible est déjà engagée dans une liaison existante sur la même instance (RM09)
+2. Le service refuse la création : « interface déjà engagée dans une liaison », avec l'identifiant de la liaison existante (API : 409)
+
+### Flux erreur — Interface reliée à elle-même
+
+1. La source et la cible désignent la même interface sur la même instance (RM09)
+2. Le service refuse la création (API : 400)
+
+### Flux alternatif — Liaison directe entre deux assets
+
+1. Une liaison sans interface est demandée entre deux assets (`POST /api/connections`)
+2. Si une liaison directe relie déjà le même asset source au même asset cible, la création est refusée (RM50, API : 409) : la liaison existante se retrouve dans la liste des liaisons
 
 ### Flux — Liaison devenue incompatible après modification
 

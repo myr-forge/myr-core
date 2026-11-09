@@ -3,6 +3,7 @@ package cli
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"testing"
 
@@ -31,7 +32,7 @@ func TestRunModelLinkAdd_NominalCase(t *testing.T) {
 	}
 }
 
-/// @brief  runModelLinkAdd rejette l'appel si --from ou --to manque (RM09/RM10 en amont)
+/// @brief  runModelLinkAdd rejette l'appel si --from ou --to manque
 /// @input  from="", to="iface-2"
 /// @expect Erreur retournée sans appeler le service
 func TestRunModelLinkAdd_MissingFrom_Rejected(t *testing.T) {
@@ -49,19 +50,21 @@ func TestRunModelLinkAdd_MissingFrom_Rejected(t *testing.T) {
 	}
 }
 
-/// @brief  runModelLinkAdd affiche incompatible=true quand la liaison résultante est marquée incompatible (RM10/RM11)
-/// @input  service retournant Connection{Incompatible: true}
-/// @expect Sortie contient "incompatible=true"
-func TestRunModelLinkAdd_Incompatible(t *testing.T) {
-	svc := &mockModelSvc{addAssemblyLink: func(string, string, string, string, string, string) (*model.Connection, error) {
-		return &model.Connection{ID: "conn-1", Incompatible: true}, nil
-	}}
-	var buf bytes.Buffer
-	if err := runModelLinkAdd(&buf, svc, "iface-1", "iface-2", "", "", "", ""); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !strings.Contains(buf.String(), "incompatible=true") {
-		t.Fatalf("unexpected output: %q", buf.String())
+/// @brief  runModelLinkAdd remonte le refus du service pour une liaison incompatible ou une interface déjà engagée (RM10, RM09)
+/// @input  service retournant ErrIncompatibleInterfaces puis ErrInterfaceInUse
+/// @expect l'erreur du service est retournée telle quelle, rien n'est affiché
+func TestRunModelLinkAdd_RM10_Refused_ErrorReturned(t *testing.T) {
+	for _, want := range []error{model.ErrIncompatibleInterfaces, model.ErrInterfaceInUse} {
+		svc := &mockModelSvc{addAssemblyLink: func(string, string, string, string, string, string) (*model.Connection, error) {
+			return nil, want
+		}}
+		var buf bytes.Buffer
+		if err := runModelLinkAdd(&buf, svc, "iface-1", "iface-2", "", "", "", ""); !errors.Is(err, want) {
+			t.Errorf("%v attendue, obtenu %v", want, err)
+		}
+		if buf.Len() != 0 {
+			t.Errorf("aucune sortie attendue : %q", buf.String())
+		}
 	}
 }
 

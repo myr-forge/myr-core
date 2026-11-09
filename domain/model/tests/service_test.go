@@ -328,6 +328,25 @@ func newFullSvc(t *testing.T) *model.Service {
 		WithRemovedStore(newMockRemovedStore())
 }
 
+// assembleInModule ajoute au module une instance de a et une de b, puis y
+// rattache une liaison entre elles (R-16) ; retourne l'identifiant de la liaison.
+func assembleInModule(t *testing.T, svc *model.Service, moduleID, a, b string) string {
+	t.Helper()
+	for _, id := range []string{a, b} {
+		if _, err := svc.AddAssetToWorkspace(moduleID, id); err != nil {
+			t.Fatalf("AddAssetToWorkspace %s : %v", id, err)
+		}
+	}
+	conn, err := svc.AddConnection(a, b, "lien")
+	if err != nil {
+		t.Fatalf("AddConnection : %v", err)
+	}
+	if err := svc.AddAssemblyToModule(moduleID, conn.ID); err != nil {
+		t.Fatalf("AddAssemblyToModule : %v", err)
+	}
+	return conn.ID
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // Tests — assets basiques
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1263,20 +1282,16 @@ func TestModule_AddRemoveAssembly(t *testing.T) {
 	svc := newFullSvc(t)
 
 	p, _ := svc.CreateModule(model.ModuleRequest{Name: "P1", ChannelID: "ch1", OwnerID: "o1"})
-	conn, _ := svc.AddConnection("a1", "a2", "lien")
-
-	if err := svc.AddAssemblyToModule(p.ID, conn.ID); err != nil {
-		t.Fatalf("AddAssemblyToProduct: %v", err)
-	}
+	connID := assembleInModule(t, svc, p.ID, "a1", "a2")
 
 	// Idempotent — ajouter deux fois ne duplique pas
-	svc.AddAssemblyToModule(p.ID, conn.ID)
+	svc.AddAssemblyToModule(p.ID, connID)
 	p2, _ := svc.GetModule(p.ID)
 	if len(p2.Assemblies) != 1 {
 		t.Errorf("attendu 1 assembly, got %d", len(p2.Assemblies))
 	}
 
-	if err := svc.RemoveAssemblyFromModule(p.ID, conn.ID); err != nil {
+	if err := svc.RemoveAssemblyFromModule(p.ID, connID); err != nil {
 		t.Fatalf("RemoveAssemblyFromProduct: %v", err)
 	}
 	p3, _ := svc.GetModule(p.ID)
@@ -1289,8 +1304,7 @@ func TestModule_Submit(t *testing.T) {
 	svc := newFullSvc(t)
 
 	p, _ := svc.CreateModule(model.ModuleRequest{Name: "P1", ChannelID: "ch1", OwnerID: "o1"})
-	conn, _ := svc.AddConnection("a1", "a2", "lien")
-	svc.AddAssemblyToModule(p.ID, conn.ID)
+	connID := assembleInModule(t, svc, p.ID, "a1", "a2")
 
 	submitted, err := svc.SubmitModule(p.ID, "première livraison")
 	if err != nil {
@@ -1315,7 +1329,7 @@ func TestModule_Submit(t *testing.T) {
 	if v.BlockID == "" {
 		t.Error("BlockID ne doit pas être vide")
 	}
-	if len(v.Assemblies) != 1 || v.Assemblies[0] != conn.ID {
+	if len(v.Assemblies) != 1 || v.Assemblies[0] != connID {
 		t.Errorf("Assemblies snapshot incorrect: %v", v.Assemblies)
 	}
 }
@@ -2650,8 +2664,7 @@ func TestRemoveModule_Submitted_HidesLocally(t *testing.T) {
 		WithRemovedStore(newMockRemovedStore())
 
 	p, _ := svc.CreateModule(model.ModuleRequest{Name: "P1", ChannelID: "ch1", OwnerID: "o1"})
-	conn, _ := svc.AddConnection("a1", "a2", "lien")
-	svc.AddAssemblyToModule(p.ID, conn.ID)
+	assembleInModule(t, svc, p.ID, "a1", "a2")
 	submitted, err := svc.SubmitModule(p.ID, "v1")
 	if err != nil {
 		t.Fatalf("SubmitModule: %v", err)
@@ -2774,8 +2787,7 @@ func TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected(t *testing.T) {
 	parent, _ := svc.CreateModule(model.ModuleRequest{
 		Name: "Chassis v1", ChannelID: "ch1", OwnerID: "o1", LicenseID: "proprietary",
 	})
-	conn, _ := svc.AddConnection("comp-a", "comp-b", "lien")
-	svc.AddAssemblyToModule(parent.ID, conn.ID)
+	assembleInModule(t, svc, parent.ID, "comp-a", "comp-b")
 	submittedParent, err := svc.SubmitModule(parent.ID, "v1")
 	if err != nil {
 		t.Fatalf("SubmitModule: %v", err)

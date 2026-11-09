@@ -74,7 +74,7 @@ L'asset d'accroche est référencé par son identifiant `FastenerAssetID` dans l
 4. La `Connection` est créée avec `FastenerAssetID` renseigné
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 86 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 97 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -90,7 +90,7 @@ L'asset d'accroche est référencé par son identifiant `FastenerAssetID` dans l
 > - 🟡 [TestComponent_AddAssembly](../../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddAssembly_MissingConnectionID](../../../docs/tests/adapters-in-rest/TestComponent_AddAssembly_MissingConnectionID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddInstance](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance.md) — déduit : teste route `/api/components`
-> - … et 71 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 82 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Liaison directe (accroche omise)
@@ -99,10 +99,11 @@ L'asset d'accroche est référencé par son identifiant `FastenerAssetID` dans l
 2. La `Connection` est créée avec `FastenerAssetID: ""` — liaison directe
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 4 déduit(s)
 > - 🟡 [TestAssemblyLinks_MethodNotAllowed](../../../docs/tests/adapters-in-rest/TestAssemblyLinks_MethodNotAllowed.md) — déduit : teste route `/api/assembly-links`
 > - 🟡 [TestAssemblyLinks_POST_Created](../../../docs/tests/adapters-in-rest/TestAssemblyLinks_POST_Created.md) — déduit : teste route `/api/assembly-links`
 > - 🟡 [TestAssemblyLinks_POST_MissingToIface](../../../docs/tests/adapters-in-rest/TestAssemblyLinks_POST_MissingToIface.md) — déduit : teste route `/api/assembly-links`
+> - 🟡 [TestDomainErrors_AssemblyRules_MappedToHTTP](../../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — déduit : teste route `/api/assembly-links`
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Recherche par texte
@@ -111,7 +112,7 @@ L'asset d'accroche est référencé par son identifiant `FastenerAssetID` dans l
 2. La liste des composants correspondants est retournée
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 77 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 78 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -127,7 +128,7 @@ L'asset d'accroche est référencé par son identifiant `FastenerAssetID` dans l
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 62 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 63 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Accroche incompatible avec l'un des endpoints
