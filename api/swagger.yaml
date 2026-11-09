@@ -1,5 +1,16 @@
 basePath: /api
 definitions:
+  adapters_in_rest.accountDTO:
+    properties:
+      email:
+        type: string
+      org_id:
+        type: string
+      pseudo:
+        type: string
+      role:
+        type: string
+    type: object
   adapters_in_rest.accountRequestDTO:
     properties:
       display_name:
@@ -130,12 +141,21 @@ definitions:
         description: le réseau délivre un accès reader automatiquement
         type: boolean
       allow_auto_register:
-        description: le réseau enregistre les comptes automatiquement
+        description: le réseau accepte les demandes d'inscription
         type: boolean
       mode:
         description: '"blockchain"'
         type: string
       network_name:
+        type: string
+      require_approval:
+        description: une inscription doit être approuvée par l'admin avant d'être
+          active
+        type: boolean
+    type: object
+  adapters_in_rest.roleRequestDTO:
+    properties:
+      role:
         type: string
     type: object
   adapters_in_rest.sessionDTO:
@@ -219,6 +239,9 @@ definitions:
         type: string
       id:
         type: string
+      kind:
+        description: 'vide : inscription ; RequestKindRole : demande de rôle'
+        type: string
       message:
         description: message libre pour l'admin
         type: string
@@ -228,8 +251,11 @@ definitions:
       pseudo:
         description: identifiant souhaité
         type: string
+      role:
+        description: rôle demandé (demande de rôle uniquement)
+        type: string
       status:
-        description: '"pending" | "approved" | "rejected"'
+        description: '"pending" | "approved" | "rejected" | "failed"'
         type: string
     type: object
   myr-core_domain_model.AssetInterface:
@@ -613,7 +639,9 @@ paths:
         in: formData
         name: category
         type: string
-      - description: propriétaire
+      - description: 'propriétaire — ignoré quand la session est liée à une identité
+          : le propriétaire est alors cette identité (pseudo@org), qui signera la
+          soumission'
         in: formData
         name: owner_id
         type: string
@@ -717,9 +745,10 @@ paths:
     patch:
       consumes:
       - application/json
-      description: 'Champs modifiables : name, description, license_id, tags, links.
-        Le contenu blockchain déjà soumis reste immuable (règle 7) — seuls les champs
-        hors ledger sont mis à jour.'
+      description: 'Modifie un composant en brouillon. Champs modifiables : name,
+        description, license_id (présente au catalogue, compatible avec la licence
+        du parent — RM03), tags, links. Un composant soumis est immuable (RM19) :
+        409, toute évolution passe par un composant dérivé (parent_id).'
       parameters:
       - description: identifiant du composant
         in: path
@@ -740,7 +769,13 @@ paths:
           schema:
             $ref: '#/definitions/adapters_in_rest.componentDTO'
         "400":
-          description: Bad Request
+          description: licence absente du catalogue ou incompatible avec le parent
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: composant déjà soumis
           schema:
             additionalProperties:
               type: string
@@ -1116,12 +1151,12 @@ paths:
     post:
       consumes:
       - application/json
-      description: Committe en une transaction les métadonnées et les interfaces locales
-        du composant, puis passe "status" à "submitted". Pour un asset décomposé,
-        vérifie qu'au moins un assemblage existe (RM17) et crée une ModuleVersion
-        horodatée — le champ "note" optionnel du corps de la requête n'est utilisé
-        que dans ce cas. Échoue si l'asset n'est pas un brouillon local (déjà soumis
-        — sauf ré-soumission d'un asset décomposé pour une nouvelle version — ou inexistant).
+      description: 'Committe en une transaction les métadonnées et les interfaces
+        locales du composant, puis passe "status" à "submitted". Pour un asset décomposé,
+        vérifie qu''au moins un assemblage existe (RM17) et crée une ModuleVersion
+        horodatée — le champ "note" optionnel du corps de la requête n''est utilisé
+        que dans ce cas. Un asset déjà soumis n''est jamais re-soumis (RM19, 409)
+        : une nouvelle version est un asset dérivé (parent_id).'
       parameters:
       - description: identifiant du composant en brouillon
         in: path
@@ -1143,6 +1178,12 @@ paths:
             $ref: '#/definitions/adapters_in_rest.componentDTO'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: asset déjà soumis
           schema:
             additionalProperties:
               type: string
@@ -1315,7 +1356,8 @@ paths:
         name: files
         required: true
         type: file
-      - description: propriétaire, partagé par tous les fichiers
+      - description: propriétaire, partagé par tous les fichiers — ignoré quand la
+          session est liée à une identité (pseudo@org), qui devient le propriétaire
         in: formData
         name: owner_id
         type: string
@@ -1437,6 +1479,50 @@ paths:
       summary: Health check
       tags:
       - infra
+  /identity/accounts:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: pseudo et org_id requis — role vide = reader
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/adapters_in_rest.accountDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: '{handle, secret}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: pseudo, organisation ou rôle invalide (rôle absent de la table
+            des rôles)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Créer un compte (administrateur)
+      tags:
+      - identity
   /identity/enroll:
     post:
       consumes:
@@ -1461,6 +1547,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "429":
+          description: trop de tentatives (10 par minute et par adresse)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "503":
           description: Service Unavailable
           schema:
@@ -1474,6 +1566,8 @@ paths:
     post:
       consumes:
       - application/json
+      description: 'Déprécié : la lecture publique du catalogue ne demande aucun jeton.
+        Répond 200 {guest: true, token: ""} si le réseau l''autorise, 403 sinon.'
       parameters:
       - description: pseudo, display_name, email, org_id, message — tous optionnels
         in: body
@@ -1499,7 +1593,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Accès invité automatique
+      summary: Accès invité (lecture publique, sans session)
       tags:
       - identity
   /identity/policy:
@@ -1529,11 +1623,19 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: '{id, status (approved | pending), pseudo, org_id, secret}'
           schema:
-            $ref: '#/definitions/myr-core_domain_identity.AccountRequest'
+            additionalProperties:
+              type: string
+            type: object
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: le réseau n'accepte pas les demandes d'inscription
           schema:
             additionalProperties:
               type: string
@@ -1581,6 +1683,106 @@ paths:
       summary: Lister les demandes de compte
       tags:
       - identity
+  /identity/requests/{id}/{action}:
+    post:
+      parameters:
+      - description: identifiant de la demande
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: approve ou reject
+        in: path
+        name: action
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/myr-core_domain_identity.AccountRequest'
+        "400":
+          description: rôle demandé retiré de la table des rôles depuis la demande
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: la demande n'est plus en attente
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Approuver ou refuser une demande d'inscription ou de rôle
+      tags:
+      - identity
+  /identity/roles/request:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: rôle demandé
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/adapters_in_rest.roleRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: rôle attribué (status approved)
+          schema:
+            $ref: '#/definitions/myr-core_domain_identity.AccountRequest'
+        "202":
+          description: demande en attente de l'administrateur (status pending)
+          schema:
+            $ref: '#/definitions/myr-core_domain_identity.AccountRequest'
+        "400":
+          description: rôle déjà détenu ou absent de la table des rôles
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: identité inactive
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: une demande de rôle est déjà en attente
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - MyrToken: []
+      summary: Demander un rôle
+      tags:
+      - identity
   /identity/session:
     post:
       consumes:
@@ -1607,6 +1809,13 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: compte en attente d'approbation, suspendu, ou sans rôle dans
+            son certificat
           schema:
             additionalProperties:
               type: string
@@ -2150,6 +2359,12 @@ paths:
             $ref: '#/definitions/adapters_in_rest.connectionDTO'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: porteur du slot virtuel déjà soumis (RM19)
           schema:
             additionalProperties:
               type: string
