@@ -70,6 +70,38 @@ Le cœur ne reçoit plus que des assets complets, enregistrés en une écriture 
 
 Retrait côté cœur, une fois tranché : ports `DraftStore`, `ThumbnailStore`, `OGImageFetcher` et leurs adapters (dont `adapters/out/webimage`) ; `Virtual`, `X`/`Y` et les méthodes associées ; routes et commandes correspondantes ; specs (RM13 supprimée, RM16 et ADR-02 révisés, use cases réécrits en assets complets) et règles d'agent associées.
 
+## Inventaire du 2026-11-09 — ce que l'API fait à la place du client
+
+Demandé par le PO : lister ce que `myr-core` devine, complète ou facilite au lieu de s'en tenir au strict minimum, avec une proposition pour chaque point, à trancher.
+
+| # | Fonction | Ce que le cœur fait à la place du client | Où | Proposition |
+|---|----------|------------------------------------------|----|-------------|
+| 1 | Slots virtuels (tableau ci-dessus) | En plus : à la matérialisation, il **déduit** catégorie, type, sens inversé et valeurs de l'interface physique ; une **lecture** (`GET …/interfaces` d'un module, `GetModuleInterfaces`) crée un slot ; après `DELETE /api/interfaces/{id}`, c'est le **handler REST** qui recrée le slot (la CLI ne le fait pas) | `service.go` `ConnectVirtualToPhysical`, `getModuleInterfacesInto` ; `handlers.go` `handleInterface` | Retirer avec les slots (décision du 2026-11-08) |
+| 2 | Positions x/y (tableau ci-dessus) | — | — | Retirer (décision du 2026-11-08) |
+| 3 | Brouillons (tableau ci-dessus) | — | — | Retirer (décision du 2026-11-08), stockage à trancher |
+| 4 | Miniatures (tableau ci-dessus) | En plus : à la **création**, sans miniature fournie, le serveur télécharge l'`og:image` du premier lien | `handlers.go` `applyThumbnailFallback` | Retirer avec les miniatures ; supprimer d'abord ce téléchargement implicite |
+| 5 | Catégorie par défaut | `POST /api/components` et `/batch` posent `base` si la catégorie manque ; la CLI la laisse vide | `handlers.go` `createAsset`, `createComponentsBatch` ; `service.go` `Add` | Catégorie obligatoire (RM02), `400` sinon, en REST comme en CLI |
+| 6 | Canal par défaut | Sans `channel_id`, repli sur le canal de la session, puis sur celui de `fabric.env` | `handlers.go` `channelFor` | Refuser (`400`) une écriture sans canal explicite |
+| 7 | Création par lot | `POST /api/components/batch` crée un asset par fichier et **tire le nom du nom de fichier** | `handlers.go` `createComponentsBatch` | Retirer : le client appelle `POST /api/components` par fichier, avec un nom |
+| 8 | Copie de composition à la dérivation | Un asset dérivé d'un module reprend une copie de ses instances et liaisons | `service.go` `AddFull`, `copyModuleComposition` | À trancher : garder (UCMOD01 le décrit) ou laisser le client recopier |
+| 9 | Arborescence | `GET /api/components/{id}/tree` calcule ancêtres, descendants et liaisons | `handlers.go` `handleComponentTree` | À trancher : vue dérivée en lecture seule, que le client peut reconstruire depuis `parent_id` |
+| 10 | Interfaces exposées d'un module | Calcule les interfaces libres d'un module, récursivement | `service.go` `GetModuleInterfaces` | Garder (notion métier, sert UCREC02), sans création de slot à la lecture (point 1) |
+| 11 | Vérification d'intégrité | `POST …/verify` compare l'empreinte du ledger à elle-même : répond toujours `ok` (R-18) | `service.go` `Verify` | Retirer, ou recevoir l'empreinte du fichier du client |
+| 12 | Accès invité | `POST /api/identity/guest` ne crée plus rien (RM49) | `handlers_identity.go` | Retirer après la transition de myr-web |
+| 13 | Alias `/api/modules` | Redirige vers `/api/components` | `server.go` | Retrait daté : FT-022 |
+| 14 | Réseau actif par session | `PUT /api/networks/active` mémorise le choix du client | `handlers_network.go` | Garder : choix explicite du client |
+| 15 | Liste en mode dégradé | Ledger injoignable : renvoie les brouillons seuls, avec un avertissement | `service.go` `List` | Garder : signalé explicitement |
+
+**Contrôles absents — le cœur accepte au lieu de refuser :**
+
+| # | Constat | Où | Proposition |
+|---|---------|----|-------------|
+| A | Une interface peut être ajoutée à un asset inexistant, et une instance référencer un asset inexistant | `service.go` `AddInterface` (`requireDraftCarrier` ne refuse qu'un porteur trouvé et soumis), `AddAssetToWorkspace` | Refuser un asset inconnu |
+| B | `POST …/interfaces` accepte un `id` fourni par le client : avec l'identifiant d'une interface existante, il **l'écrase et la rattache à l'asset de l'appelant**, quel que soit son propriétaire | `handlers.go` `handleComponentInterfaces`, `service.go` `AddInterface`, enregistrement par identifiant | Identifiant toujours généré par le serveur |
+| C | `PATCH /api/interfaces/{id}` accepte `asset_id` dans le corps : l'interface change de porteur, y compris vers un asset soumis | `handlers.go` `handleInterface`, `service.go` `UpdateInterface` | Porteur non modifiable |
+
+B et C aggravent FT-001 (propriété non contrôlée côté serveur).
+
 ## Critères de clôture
 
 - [ ] Stockage des brouillons et des miniatures tranché, ordre de retrait coordonné avec `myr-web`
@@ -88,3 +120,4 @@ Retrait côté cœur, une fois tranché : ports `DraftStore`, `ThumbnailStore`, 
 
 - 2026-11-08 — Ticket créé ; décision du PO : slots virtuels, disposition à l'écran, brouillons et miniatures relèvent des outils extérieurs ; vocabulaire de référence et connexions libres restent dans le cœur. Stockage et ordre du retrait à trancher
 - 2026-11-09 — Décision du PO (R-15) : `myr-core` ne devine pas. Une connexion en double, auparavant dédoublonnée en silence (un identifiant jamais enregistré était renvoyé), est désormais refusée (`409`, RM50) ; créer une nouvelle interface reste une demande explicite de l'outil. Le PO estime que d'autres fonctions de l'API ne devraient pas exister dans le cœur : dresser l'inventaire des fonctions qui devinent ou facilitent à la place du client, et le trancher avec lui
+- 2026-11-09 — Inventaire dressé (§ Inventaire du 2026-11-09) : 15 fonctions et 3 contrôles absents, propositions à trancher par le PO
