@@ -217,7 +217,7 @@ func TestAddConnection_RM50_Duplicate_Rejected(t *testing.T) {
 func TestList_R14_LeftoverDraft_ListedOnce(t *testing.T) {
 	bc := newMockBC()
 	drafts := newMockDraftStore()
-	svc := model.NewService(bc, &mockFS{}).WithDraftStore(drafts)
+	svc := model.NewService(bc).WithDraftStore(drafts)
 	bc.records["vis"] = &model.Model3D{ID: "vis", Name: "vis", ChannelID: "ch1", Status: model.ModuleSubmitted}
 	drafts.drafts["vis"] = &model.Model3D{ID: "vis", Name: "vis (brouillon)", ChannelID: "ch1", Status: model.ModuleDraft}
 
@@ -317,7 +317,7 @@ func TestAddAssetToWorkspace_RM52_Cycle_Rejected(t *testing.T) {
 // / @expect GetModuleInterfaces(A) se termine sans erreur
 func TestGetModuleInterfaces_RM52_LegacyCycle_Terminates(t *testing.T) {
 	drafts := newMockDraftStore()
-	svc := model.NewService(newMockBC(), &mockFS{}).
+	svc := model.NewService(newMockBC()).
 		WithDraftStore(drafts).
 		WithIfaceStore(newMockIfaceStore()).
 		WithConnStore(newMockConnStore())
@@ -358,7 +358,7 @@ func TestAssembly_UnknownAsset_Rejected(t *testing.T) {
 // / @expect ErrInvalidCategory dans les deux cas ; aucun brouillon créé
 func TestAddFull_RM02_CategoryRequired_Rejected(t *testing.T) {
 	drafts := newMockDraftStore()
-	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(drafts)
+	svc := model.NewService(newMockBC()).WithDraftStore(drafts)
 	for _, c := range []model.Category{"", "gadget"} {
 		if _, err := svc.AddFull(model.AddRequest{Name: "vis", ChannelID: "ch1", Category: c}); !errors.Is(err, model.ErrInvalidCategory) {
 			t.Errorf("catégorie %q : ErrInvalidCategory attendu, obtenu %v", c, err)
@@ -373,7 +373,7 @@ func TestAddFull_RM02_CategoryRequired_Rejected(t *testing.T) {
 // / @input  AddFull puis CreateModule sans canal
 // / @expect ErrChannelRequired dans les deux cas
 func TestCreate_ChannelRequired_Rejected(t *testing.T) {
-	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
+	svc := model.NewService(newMockBC()).WithDraftStore(newMockDraftStore())
 	if _, err := svc.AddFull(model.AddRequest{Name: "vis", Category: model.CategoryBase}); !errors.Is(err, model.ErrChannelRequired) {
 		t.Errorf("AddFull : ErrChannelRequired attendu, obtenu %v", err)
 	}
@@ -395,7 +395,7 @@ func (failingDraftStore) GetDraft(string) (*model.Model3D, error) { return nil, 
 func TestGetAsset_UnreadableDraftStore_NotMasked(t *testing.T) {
 	bc := newMockBC()
 	bc.records["vis"] = &model.Model3D{ID: "vis", Status: model.ModuleSubmitted}
-	svc := model.NewService(bc, &mockFS{}).
+	svc := model.NewService(bc).
 		WithIfaceStore(newMockIfaceStore()).
 		WithDraftStore(failingDraftStore{newMockDraftStore()})
 	if err := svc.AddInterface(&model.AssetInterface{AssetID: "vis", Category: "ELEC"}); !errors.Is(err, errUnreadable) {
@@ -484,7 +484,7 @@ func (s *syncDraftStore) ListDrafts(string) ([]*model.Model3D, error) { return n
 // / @expect le module compte 20 instances
 func TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate(t *testing.T) {
 	store := &syncDraftStore{drafts: map[string][]byte{}}
-	svc := model.NewService(nil, &mockFS{}).WithDraftStore(store)
+	svc := model.NewService(nil).WithDraftStore(store)
 	mod, err := svc.CreateModule(model.ModuleRequest{Name: "drone", ChannelID: "ch1"})
 	if err != nil {
 		t.Fatalf("CreateModule : %v", err)

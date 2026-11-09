@@ -24,7 +24,7 @@ type submittedFixture struct {
 func newSubmittedFixture(t *testing.T) *submittedFixture {
 	t.Helper()
 	f := &submittedFixture{bc: newMockBC(), conns: newMockConnStore()}
-	f.svc = model.NewService(f.bc, &mockFS{}).
+	f.svc = model.NewService(f.bc).
 		WithConnStore(f.conns).
 		WithThumbStore(newMockThumbStore()).
 		WithIfaceStore(newMockIfaceStore()).
@@ -88,7 +88,7 @@ func TestSubmit_RM19_AlreadySubmitted_Rejected(t *testing.T) {
 func TestSubmit_DraftAlreadyOnLedger_Rejected(t *testing.T) {
 	bc := newMockBC()
 	drafts := newMockDraftStore()
-	svc := model.NewService(bc, &mockFS{}).WithIfaceStore(newMockIfaceStore()).WithDraftStore(drafts)
+	svc := model.NewService(bc).WithIfaceStore(newMockIfaceStore()).WithDraftStore(drafts)
 	m, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "vis", ChannelID: "ch1"})
 	if err != nil {
 		t.Fatalf("AddFull: %v", err)
@@ -240,7 +240,7 @@ func TestLicense_UnknownLicense_Rejected(t *testing.T) {
 // / @expect ErrLicenseIncompatible ; la licence du brouillon reste inchangée
 func TestUpdateAsset_RM03_IncompatibleLicense_Rejected(t *testing.T) {
 	bc := newMockBC()
-	svc := model.NewService(bc, &mockFS{}).WithIfaceStore(newMockIfaceStore()).WithDraftStore(newMockDraftStore())
+	svc := model.NewService(bc).WithIfaceStore(newMockIfaceStore()).WithDraftStore(newMockDraftStore())
 	bc.records["parent"] = &model.Model3D{ID: "parent", LicenseID: "cc-by-nd-4", Status: model.ModuleSubmitted}
 	child, err := svc.AddFull(model.AddRequest{ChannelID: "ch1", Name: "dérivé", ParentID: "parent", Category: model.CategoryAmelioration})
 	if err != nil {

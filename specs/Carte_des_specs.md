@@ -100,7 +100,7 @@ Domaines : `model`
 | UC | Titre | Expression | Analyse | Conception |
 |----|-------|------------|---------|------------|
 | UCCL01 | Faire une recherche par filtre | [UCCL01 (expression)](1-Expression/UCCL-Composant_Lecture/UCCL01.md) | [UCCL01 (analyse)](2-Analyse/UCCL-Composant_Lecture/UCCL01.md) | [API_REST](3-Conception/API_REST.md) · [Chaincode](3-Conception/Chaincode.md) · [DC_CLI_Model](3-Conception/DC_CLI_Model.md) · [DC_D1_Auth_Identity](3-Conception/DC_D1_Auth_Identity.md) |
-| UCCL03 | Vérifier la validité des emplacements externes d'un composant ou module | [UCCL03 (expression)](1-Expression/UCCL-Composant_Lecture/UCCL03.md) | — | [Architecture_Composition](3-Conception/Architecture_Composition.md) · [DC_CLI_Model](3-Conception/DC_CLI_Model.md) · [Modele_Domaine](3-Conception/Modele_Domaine.md) |
+| UCCL03 | Vérifier la validité des emplacements externes d'un composant ou module | [UCCL03 (expression)](1-Expression/UCCL-Composant_Lecture/UCCL03.md) | — | [DC_CLI_Model](3-Conception/DC_CLI_Model.md) · [Modele_Domaine](3-Conception/Modele_Domaine.md) |
 
 ### UCDEV — Developpement
 

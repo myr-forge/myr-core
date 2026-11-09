@@ -536,7 +536,7 @@ func TestIntegration_ModelService_SubmittedAsset(t *testing.T) {
 		t.Fatalf("StoreModelRecord : %s", detail(err))
 	}
 	store := localstorage.NewJSONBlockchain(filepath.Join(t.TempDir(), "assets.json"))
-	svc := model.NewService(bc, nil).WithDraftStore(store).WithIfaceStore(store)
+	svc := model.NewService(bc).WithDraftStore(store).WithIfaceStore(store)
 
 	if _, err := svc.UpdateAsset(model.UpdateRequest{ID: a.ID, Name: "renommé"}); err != nil {
 		t.Fatalf("UpdateAsset (nom) : %s", detail(err))

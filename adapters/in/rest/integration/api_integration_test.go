@@ -28,7 +28,6 @@ import (
 	"math/big"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -221,15 +220,12 @@ func (t tokenTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 func newIntegrationServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	dataDir := t.TempDir()
-	filesDir := filepath.Join(dataDir, "files")
-	os.MkdirAll(filesDir, 0755)
 
 	bc := newMemBC()
-	fs := localstorage.NewLocalStorage(filesDir)
 	db := localstorage.NewJSONBlockchain(filepath.Join(dataDir, "db.json"))
 
 	// Même câblage que cmd/api/main.go (hors Fabric, remplacé par memBC).
-	svc := model.NewService(bc, fs).
+	svc := model.NewService(bc).
 		WithConnStore(db).
 		WithThumbStore(db).
 		WithIfaceStore(db).

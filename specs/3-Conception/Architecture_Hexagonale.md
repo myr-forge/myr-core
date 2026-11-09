@@ -46,7 +46,6 @@ Cela vaut pour toutes les couches d'infrastructure :
 | Port sortant | Implémentation(s) | Ce que l'admin choisit |
 |---|---|---|
 | `BlockchainPort` | Fabric, JSON local, *(futur : Ethereum, Substrate…)* | Backend blockchain du réseau |
-| `FileStoragePort` | Stockage local | Aucun choix : Myr ne conserve aucune copie des fichiers 3D, seule leur empreinte SHA-256 est retenue (RM42) |
 | `IdentityPort` / `CAPort` | Fabric CA (certificats + fichiers wallet PEM locaux, non chiffrés — ADR-03) | Identité cryptographique — pas de base de données, pas de secret partagé |
 | `SessionService` | Fichier local / JSON, Redis | Sessions REST (mono vs multi-instances) |
 
@@ -55,7 +54,7 @@ Cela vaut pour toutes les couches d'infrastructure :
 ```
 // cmd/api/main.go — seul endroit qui connaît les implémentations concrètes
 blockchain := selectBlockchain(activeProfile)   // lit BlockchainType du profil réseau
-model.NewService(blockchain, nil, ...)          // aucun FileStoragePort : empreinte seule (RM42)
+model.NewService(blockchain)                    // aucun stockage de fichier : empreinte seule (RM42)
 ```
 
 **Conséquence pratique :** ajouter un nouveau backend = créer `adapters/out/<technologie>/` qui implémente les ports concernés + enregistrer le cas dans `cmd/`. Aucun fichier dans `domain/`, `adapters/in/` ni dans les autres adapters `out` n'a besoin de changer.
@@ -116,7 +115,6 @@ package "Domaine métier\n(domain/)" #fff9c4 {
 
   package "Ports sortants (interfaces Go)" {
     interface "BlockchainPort" as PBC
-    interface "FileStoragePort" as PFS
     interface "ConnectionStore" as PConn
     interface "InterfaceStore" as PIface
     interface "ThumbnailStore" as PThumb
@@ -171,7 +169,6 @@ IPayment <|.. SvcPayment
 ISession <|.. SvcSession
 
 SvcModel --> PBC
-SvcModel --> PFS
 SvcModel --> PConn
 SvcModel --> PIface
 SvcModel --> PThumb
@@ -185,7 +182,6 @@ SvcSession --> PSess
 
 PBC <|.. AdFabric
 PBC <|.. AdJSON
-PFS <|.. AdLocal
 PConn <|.. AdLocal
 PIface <|.. AdLocal
 PThumb <|.. AdLocal
@@ -255,7 +251,7 @@ done
 |---------|---------|-----------|--------------|
 | `FabricBlockchain` | `adapters/out/fabric/` | `BlockchainPort`, `CAPort`, `PaymentPort` | HyperLedger Fabric Gateway SDK v2 |
 | `JSONBlockchain` | `adapters/out/localstorage/` | `BlockchainPort` | JSON files (fallback sans Fabric) |
-| `LocalStore` | `adapters/out/localstorage/` | `FileStoragePort`, `ConnectionStore`, `InterfaceStore`, `ThumbnailStore`, `NetworkStore`, `RequestStore`, `role.Repo`, `session.Store` | JSON files (`data/`) + fichiers MSP non chiffrés (wallets, `~/.Myr/wallets/`) |
+| `LocalStore` | `adapters/out/localstorage/` | `ConnectionStore`, `InterfaceStore`, `ThumbnailStore`, `NetworkStore`, `RequestStore`, `role.Repo`, `session.Store` | JSON files (`data/`) + fichiers MSP non chiffrés (wallets, `~/.Myr/wallets/`) |
 | `Fetcher` | `adapters/out/webimage/` | `OGImageFetcher` | Requêtes HTTP sortantes vers la page web du premier lien externe d'un asset (`Model3D.Links`) — dérive sa miniature depuis la balise `og:image` |
 
 > **`AssetInterface` (ADR-02) :** `InterfaceStore` est un **brouillon** — l'état de travail d'une interface tant que l'asset qui la porte n'est pas soumis. À la soumission (création d'un composant ou `SubmitModule`), les interfaces du brouillon sont embarquées dans `Model3D.Interfaces` et écrites une seule fois via `BlockchainPort` (`FabricBlockchain` ou son fallback `JSONBlockchain`). `InterfaceStore` n'est donc pas une persistance parallèle définitive : c'est la source de vérité avant soumission, la blockchain devenant la source de vérité après.
@@ -307,9 +303,9 @@ BlockchainPort <|.. JSONBlockchain : dev/test fallback
 ```
 main.go
 ├── Crée FabricBlockchain(networkProfile) — laisse le port nil si Fabric est indisponible (aucun repli automatique)
-├── Aucun FileStoragePort : seule l'empreinte SHA-256 des fichiers est retenue (RM42)
+├── Aucun stockage de fichier : seule l'empreinte SHA-256 des fichiers est retenue (RM42)
 ├── Crée LocalStore(dataDir) — connexions, interfaces (brouillon), rôles, requêtes de compte...
-├── Injecte dans model.NewService(blockchain, storage).WithConnStore(...).WithIfaceStore(...) — les interfaces ne rejoignent `blockchain` (Model3D.Interfaces) qu'à la soumission de l'asset
+├── Injecte dans model.NewService(blockchain).WithConnStore(...).WithIfaceStore(...) — les interfaces ne rejoignent `blockchain` (Model3D.Interfaces) qu'à la soumission de l'asset
 ├── Crée identity.NewService(walletDir, caPort).WithRequestStore(requestStore)
 ├── Crée role.NewService(roleStore)
 ├── Crée network.NewService(networkStore, nil)

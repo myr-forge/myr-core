@@ -111,10 +111,10 @@ func main() {
 	// store partage le même fichier assets.json que myr-api (voir dataDir ci-dessus) —
 	// donne au CLI accès aux connexions/miniatures/interfaces hors blockchain gérées côté GUI.
 	store := localstorage.NewJSONBlockchain(filepath.Join(data, "assets.json"))
-	// Aucun FileStoragePort câblé : myr-core ne conserve jamais le fichier 3D
-	// transmis, seule son empreinte SHA-256 est retenue (traçabilité RM01) —
-	// voir RM42 pour la vérification des emplacements externes déclarés.
-	modelSvc := model.NewService(bc, nil).
+	// myr-core ne conserve jamais le fichier 3D transmis : seule son empreinte
+	// SHA-256 est retenue (traçabilité RM01) — voir RM42 pour la vérification
+	// des emplacements externes déclarés.
+	modelSvc := model.NewService(bc).
 		WithConnStore(store).
 		WithThumbStore(store).
 		WithIfaceStore(store).

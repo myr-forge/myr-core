@@ -35,7 +35,6 @@ tags:
   - rm/RM17
   - rm/RM18
   - rm/RM19
-  - rm/RM42
 ---
 # Architecture — Composition (D3/D5/D6 : composant, assemblage, module)
 
@@ -468,13 +467,6 @@ interface BlockchainPort {
   + ListModelRecords(channelID string) : ([]*Model3D, error)
 }
 
-interface FileStoragePort {
-  + Upload(filePath string) : (hash string, err error)
-  + Download(hash string, destPath string) : error
-  + Delete(hash string) : error
-  + Verify(ref, expectedHash string) : (location string, ok bool, err error)
-}
-
 interface ConnectionStore {
   + SaveConnection(c *Connection) : error
   + UpdateConnection(c *Connection) : error
@@ -506,21 +498,6 @@ note bottom of BlockchainPort
   Implémenté par adapters/out/fabric/
   (production) — pas de fallback JSON
   en production.
-end note
-
-note bottom of FileStoragePort
-  Aucun adapter câblé par défaut (RM42) : myr-core
-  ne conserve jamais de copie du fichier ressource,
-  seule son empreinte SHA-256 est retenue
-  (Model3D.Hash, RM01) — priorité à la traçabilité
-  (savoir où un composant/produit existe, voir
-  RM42/UCCL03) plutôt qu'à l'hébergement.
-  Le port reste défini pour l'interchangeabilité
-  technologique : adapters/out/localstorage/
-  (LocalStorage) l'implémente et reste disponible
-  pour un câblage explicite futur, mais n'est
-  instancié ni dans cmd/api/main.go ni dans
-  cmd/cli/main.go.
 end note
 
 note bottom of ConnectionStore
@@ -574,7 +551,7 @@ Le détail des écarts E1, E2, E4, E6, E8, E9 est centralisé dans `specs/2-Anal
 - [§ 6. Contrat anti-plagiat (RM01)](Architecture_Composition.md#6.%20Contrat%20anti-plagiat%20%28RM01%29) → [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md)
 - [§ 7. Règles de composition (RM09–RM19)](Architecture_Composition.md#7.%20Règles%20de%20composition%20%28RM09–RM19%29) → [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.EnsureVirtualSlot](../../docs/code/fonctions/model.ModelService.EnsureVirtualSlot.md) · [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
 - [§ Port entrant — ModelService (vue d'ensemble)](Architecture_Composition.md#Port%20entrant%20—%20ModelService%20%28vue%20d'ensemble%29) → [ModelService.AddAssemblyLink](../../docs/code/fonctions/model.ModelService.AddAssemblyLink.md) · [ModelService.AddAssemblyToModule](../../docs/code/fonctions/model.ModelService.AddAssemblyToModule.md) · [ModelService.AddAssetToWorkspace](../../docs/code/fonctions/model.ModelService.AddAssetToWorkspace.md) · [ModelService.AddConnection](../../docs/code/fonctions/model.ModelService.AddConnection.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.AddInterface](../../docs/code/fonctions/model.ModelService.AddInterface.md) · [ModelService.CheckLicenseCompatibility](../../docs/code/fonctions/model.ModelService.CheckLicenseCompatibility.md) · [ModelService.CheckModuleLicenseCompatibility](../../docs/code/fonctions/model.ModelService.CheckModuleLicenseCompatibility.md) · [ModelService.ConnectVirtualToPhysical](../../docs/code/fonctions/model.ModelService.ConnectVirtualToPhysical.md) · [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.EnsureVirtualSlot](../../docs/code/fonctions/model.ModelService.EnsureVirtualSlot.md) · [ModelService.GetChildren](../../docs/code/fonctions/model.ModelService.GetChildren.md) · [ModelService.GetLicense](../../docs/code/fonctions/model.ModelService.GetLicense.md) · [ModelService.GetModule](../../docs/code/fonctions/model.ModelService.GetModule.md) · [ModelService.GetModuleInterfaces](../../docs/code/fonctions/model.ModelService.GetModuleInterfaces.md) · [ModelService.ListLicenses](../../docs/code/fonctions/model.ModelService.ListLicenses.md) · [ModelService.ListModules](../../docs/code/fonctions/model.ModelService.ListModules.md) · [ModelService.RegenerateThumbnail](../../docs/code/fonctions/model.ModelService.RegenerateThumbnail.md) · [ModelService.RemoveAssemblyFromModule](../../docs/code/fonctions/model.ModelService.RemoveAssemblyFromModule.md) · [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md) · [ModelService.RemoveModule](../../docs/code/fonctions/model.ModelService.RemoveModule.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md) · [ModelService.UpdateAsset](../../docs/code/fonctions/model.ModelService.UpdateAsset.md) · [ModelService.UpdateInstancePosition](../../docs/code/fonctions/model.ModelService.UpdateInstancePosition.md) · [ModelService.UpdateInterface](../../docs/code/fonctions/model.ModelService.UpdateInterface.md)
-- [§ Ports sortants](Architecture_Composition.md#Ports%20sortants) → [BlockchainPort.GetModelRecord](../../docs/code/fonctions/model.BlockchainPort.GetModelRecord.md) · [BlockchainPort.ListModelRecords](../../docs/code/fonctions/model.BlockchainPort.ListModelRecords.md) · [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [ConnectionStore.SaveConnection](../../docs/code/fonctions/model.ConnectionStore.SaveConnection.md) · [ConnectionStore.UpdateConnection](../../docs/code/fonctions/model.ConnectionStore.UpdateConnection.md) · [FileStoragePort.Download](../../docs/code/fonctions/model.FileStoragePort.Download.md) · [FileStoragePort.Upload](../../docs/code/fonctions/model.FileStoragePort.Upload.md) · [FileStoragePort.Verify](../../docs/code/fonctions/model.FileStoragePort.Verify.md) · [InterfaceStore.SaveInterface](../../docs/code/fonctions/model.InterfaceStore.SaveInterface.md) · [OGImageFetcher.FetchOGImage](../../docs/code/fonctions/model.OGImageFetcher.FetchOGImage.md)
+- [§ Ports sortants](Architecture_Composition.md#Ports%20sortants) → [BlockchainPort.GetModelRecord](../../docs/code/fonctions/model.BlockchainPort.GetModelRecord.md) · [BlockchainPort.ListModelRecords](../../docs/code/fonctions/model.BlockchainPort.ListModelRecords.md) · [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [ConnectionStore.SaveConnection](../../docs/code/fonctions/model.ConnectionStore.SaveConnection.md) · [ConnectionStore.UpdateConnection](../../docs/code/fonctions/model.ConnectionStore.UpdateConnection.md) · [InterfaceStore.SaveInterface](../../docs/code/fonctions/model.InterfaceStore.SaveInterface.md) · [OGImageFetcher.FetchOGImage](../../docs/code/fonctions/model.OGImageFetcher.FetchOGImage.md)
 - [§ 11. Informations manquantes](Architecture_Composition.md#11.%20Informations%20manquantes) → [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
 
 <!-- liens-obsidian:end -->

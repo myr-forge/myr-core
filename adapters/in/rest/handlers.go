@@ -121,7 +121,6 @@ type Handler struct {
 
 	// Phase 2 : multi-réseau
 	bcRouter         blockchainRouter      // nil en mode legacy (réseau unique)
-	fileStore        model.FileStoragePort // toujours nil en pratique : myr-core ne persiste aucun fichier (RM42) — port conservé pour interchangeabilité future
 	connStore        model.ConnectionStore // pour svcFor
 	ogImageFetcher   model.OGImageFetcher  // pour svcFor
 	defaultNetworkID string                // réseau actif par défaut au démarrage
@@ -182,12 +181,6 @@ func (h *Handler) WithNetworkInfo(ni NetworkInfo) *Handler {
 // WithBlockchainRouter attache le routeur multi-réseau (fabric.NetworkPool).
 func (h *Handler) WithBlockchainRouter(r blockchainRouter) *Handler {
 	h.bcRouter = r
-	return h
-}
-
-// WithFileStore attache le stockage de fichiers (MinIO ou local) pour svcFor.
-func (h *Handler) WithFileStore(fs model.FileStoragePort) *Handler {
-	h.fileStore = fs
 	return h
 }
 
@@ -284,7 +277,7 @@ func (h *Handler) svcFor(r *http.Request) model.ModelService {
 		return h.modelSvc
 	}
 	bc := h.blockchainFor(r, networkID)
-	svc := model.NewService(bc, h.fileStore)
+	svc := model.NewService(bc)
 	if h.connStore != nil {
 		svc = svc.WithConnStore(h.connStore)
 	}

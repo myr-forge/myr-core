@@ -160,7 +160,7 @@ DomPayment --> Fabric
 | D1 — Session locale CLI | `Session` (`domain/session`, distinct de la session REST) | `SessionStore` | `localstorage` |
 | D2 — Réseau | `NetworkProfile`, `ChaincodeConfig` | `NetworkStore` | `localstorage` |
 | D2 — Canal | `Channel` | `ChannelPort` | `fabric` |
-| D3/D4 — Composant | `Model3D`, `Version`, `AssetInterface` (brouillon local jusqu'à soumission, puis embarquée dans `Model3D.Interfaces` — ADR-02) | `BlockchainPort`, `FileStoragePort`, `InterfaceStore` | `fabric`, `localstorage` |
+| D3/D4 — Composant | `Model3D`, `Version`, `AssetInterface` (brouillon local jusqu'à soumission, puis embarquée dans `Model3D.Interfaces` — ADR-02) | `BlockchainPort`, `InterfaceStore` | `fabric`, `localstorage` |
 | D5 — Composition de Module | `WorkspaceInstance`, `Connection` | `ConnectionStore`, `InterfaceStore` | `localstorage` |
 | D6 — Module | `Model3D` (module), `ModuleVersion` | `BlockchainPort` | `fabric` |
 | D7 — PI & Paiement | `Payment` ; `Order`, `OrderItem`, `Commission`, `AssetPrice`, `PITransfer`, `CloneRecord` (`DC_D7_Payment.md`) | `PaymentPort` | `fabric` |
@@ -189,7 +189,6 @@ package "Couche primaire (Driving)" #e8f4f8 {
 package "Domaine" #fff9c4 {
   [Service\n(logique métier)] as Svc
   interface "BlockchainPort (out)" as PortBC
-  interface "FileStoragePort (out)" as PortFS
   interface "ConnectionStore (out)" as PortConn
   interface "InterfaceStore (out)" as PortIface
   interface "IdentityPort / CAPort (out)" as PortIdentity
@@ -207,7 +206,6 @@ CliH --> PortIn
 PortIn --> Svc
 
 Svc --> PortBC
-Svc --> PortFS
 Svc --> PortConn
 Svc --> PortIface
 Svc --> PortIdentity
@@ -215,7 +213,6 @@ Svc --> PortRole
 Svc --> PortSession
 
 PortBC <|.. AdFabric
-PortFS <|.. AdLocal
 PortConn <|.. AdLocal
 PortIface <|.. AdLocal
 PortIdentity <|.. AdFabric

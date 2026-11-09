@@ -16,7 +16,6 @@ import (
 
 type Service struct {
 	blockchain     BlockchainPort // nullable — nil si Fabric indisponible (voir ErrBlockchainUnavailable)
-	fileStorage    FileStoragePort
 	connStore      ConnectionStore   // optionnel — nil hors mode GUI
 	thumbStore     ThumbnailStore    // optionnel — nil hors mode GUI
 	ifaceStore     InterfaceStore    // optionnel — nil hors mode GUI
@@ -25,8 +24,8 @@ type Service struct {
 	removedStore   RemovedAssetStore // optionnel — masquage local d'un asset déjà soumis (RM08)
 }
 
-func NewService(bc BlockchainPort, fs FileStoragePort) *Service {
-	return &Service{blockchain: bc, fileStorage: fs}
+func NewService(bc BlockchainPort) *Service {
+	return &Service{blockchain: bc}
 }
 
 // SetBlockchain remplace la blockchain active (utilisé après reconnexion).
