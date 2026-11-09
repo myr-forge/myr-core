@@ -5,7 +5,7 @@ type: securite
 statut: ouvert
 severite: critique
 detecte: 2026-10-02
-maj: 2026-10-02
+maj: 2026-11-09
 composants: [adapters/in/rest, domain/model]
 uc: [UCCE01, UCCE02, UCCE07, UCMOD03, UCMOD04, UCMOD08, UCPI07]
 rm: [RM08, RM23, RM24]
@@ -75,3 +75,4 @@ Faire porter l'identité appelante jusqu'au domaine (paramètre explicite ou con
 ## Historique
 
 - 2026-10-02 — Ticket créé ; constat vérifié dans le code au commit `2aa69c1`
+- 2026-11-09 — Deux failles qui aggravaient ce constat sont corrigées (commit `3c48a30`, FT-040 B et C) : un identifiant d'interface fourni par le client n'est plus repris (il permettait d'écraser l'interface d'un autre asset), et `PATCH /api/interfaces/{id}` refuse de changer l'asset porteur. Le contrôle de propriété lui-même reste ouvert : un contributeur peut toujours modifier le brouillon d'un autre
