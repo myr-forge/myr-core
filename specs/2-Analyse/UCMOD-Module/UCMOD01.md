@@ -96,18 +96,30 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 
 ### Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
 
-1. `POST /api/modules` est appelée avec `parent_id` renseigné, référençant un Module déjà soumis
+1. `POST /api/components` est appelée avec `parent_id` renseigné, référençant un Module (asset décomposé) déjà soumis — l'alias déprécié `POST /api/modules` y mène aussi
 2. Si `license_id` est fourni : le service vérifie la compatibilité avec la licence du Module parent (RM03), comme pour un composant dérivé (UCCE02, UCCE04)
 3. Le nouveau Module est créé en état **draft** avec `ParentID` renseigné
 4. La composition complète du Module parent est dupliquée dans le nouveau brouillon : chaque `WorkspaceInstance` est clonée avec un nouvel identifiant d'instance, et chaque Liaison interne (`Assemblies`) est reconstruite entre les instances clonées correspondantes
 5. Le Concepteur retrouve immédiatement l'assemblage complet du Module parent, prêt à être modifié, sans avoir ajouté une seule instance ni recréé une seule Liaison manuellement
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 4 déduit(s)
-> - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
-> - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
-> - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
-> - 🟡 [TestModules_Verify_OK](../../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : teste route `/api/modules`
+> [!check]- Tests — 0 explicite(s) · 81 déduit(s)
+> - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_GET](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_POST_BadJSON](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_BadJSON.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentInterfaces_POST_Created](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentTree_GET](../../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponentTree_MethodNotAllowed](../../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponent_AddAssembly](../../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponent_AddAssembly_MissingConnectionID](../../../docs/tests/adapters-in-rest/TestComponent_AddAssembly_MissingConnectionID.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponent_AddInstance](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
+> - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
+> - … et 66 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Dérivation avec licence incompatible
@@ -238,14 +250,14 @@ participant "Model Service\n(domain/model/)" as Service
 database "LocalStorage\n(adapters/out/localstorage/)" as Local
 database "Fabric\n(adapters/out/fabric/)" as Fabric
 
-Client -> REST : POST /api/modules\n{name, parent_id, license_id?, ...}
-REST -> Service : CreateModule(ModuleRequest{ParentID, ...})
+Client -> REST : POST /api/components\n{name, parent_id, license_id?, ...}
+REST -> Service : AddFull(AddRequest{ParentID, ...})
 Service -> Fabric : GetModelRecord(parentID)
 Fabric --> Service : *Model3D (module parent, submitted)
 
 alt license_id fourni et incompatible avec le parent (RM03)
     Service --> REST : erreur "incompatibilité de licence"
-    REST --> Client : 422 Unprocessable Entity
+    REST --> Client : 400 Bad Request (ErrLicenseIncompatible)
 else Compatible ou licence non fournie
     Service -> Service : Générer UUID (RM04)\nInitialiser Status=draft, ParentID
     loop pour chaque WorkspaceInstance du parent
@@ -290,7 +302,7 @@ end
 
 **Commande CLI équivalente :** `myr module create --name <nom> --channel <id> [--owner-id <id>] [--description <texte>] [--license <id>] [--parent-id <id>]` appelle le même `CreateModule(ModuleRequest)` que `POST /api/modules`. L'ajout de composants comme instances et la création de liaisons se poursuivent avec `myr model instance add <moduleID> <assetID>` et `myr model link add` (mêmes méthodes `AddAssetToWorkspace` / `AddAssemblyLink`, mêmes vérifications RM10/RM11/RM13 côté service, quel que soit le canal). Voir `specs/3-Conception/DC_CLI_Model.md` § 3.6 et § 5. Ces commandes sont exécutées par l'administrateur du serveur via SSH, pour le compte du Concepteur (principe d'exécution distante).
 
-**Dérivation (`parent_id`) — pourquoi une copie de composition et pas seulement une référence :** un simple lien de filiation (`ParentID` renseigné sans copie) documenterait la provenance mais laisserait le Concepteur reconstruire manuellement chaque instance et chaque Liaison — ce qui ne répond pas au besoin de reprendre un travail existant. `CreateModule()` clone donc `WorkspaceInstances` (nouveaux identifiants d'instance, pour ne jamais entrer en collision avec ceux du parent) et les Liaisons internes du parent (nouvelles `Connection`, mêmes attributs, instances remappées) dans le nouveau brouillon. Le Module parent, déjà soumis, n'est jamais modifié par cette opération — seule sa composition est lue.
+**Dérivation (`parent_id`) — pourquoi une copie de composition et pas seulement une référence :** un simple lien de filiation (`ParentID` renseigné sans copie) documenterait la provenance mais laisserait le Concepteur reconstruire manuellement chaque instance et chaque Liaison — ce qui ne répond pas au besoin de reprendre un travail existant. `AddFull()` clone donc, quand le parent est décomposé, ses `WorkspaceInstances` (nouveaux identifiants d'instance, pour ne jamais entrer en collision avec ceux du parent) et les Liaisons internes du parent (nouvelles `Connection`, mêmes attributs, instances remappées) dans le nouveau brouillon. Le Module parent, déjà soumis, n'est jamais modifié par cette opération — seule sa composition est lue.
 
 **Écart E2 à noter :** Le champ `Tag` est absent de `AssetInterface` dans `domain/model/entity.go`. La vérification RM11 ne comporte donc que 4 critères dans le code actuel (catégorie + type + sens + valeurs). Le champ `Tag` doit être ajouté pour la conformité complète à RM11.
 

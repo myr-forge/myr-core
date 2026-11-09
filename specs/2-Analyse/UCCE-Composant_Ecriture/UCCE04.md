@@ -79,13 +79,14 @@ Ce use case crée un nouvel asset `Model3D` avec `ParentID` renseigné — il ne
 8. L'API retourne `201 Created` avec le nouvel asset.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 28 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 29 déduit(s)
 > - 🟡 [TestAddFull_AllFields](../../../docs/tests/domain-model/TestAddFull_AllFields.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_AlwaysDraft_NoBlockchainWrite](../../../docs/tests/domain-model/TestAddFull_AlwaysDraft_NoBlockchainWrite.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_MissingFile_ReturnsError](../../../docs/tests/domain-model/TestAddFull_MissingFile_ReturnsError.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_NilBlockchain_StillWorks](../../../docs/tests/domain-model/TestAddFull_NilBlockchain_StillWorks.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_NilDraftStore_Rejected](../../../docs/tests/domain-model/TestAddFull_NilDraftStore_Rejected.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_NoFile_NoVersionNoHash](../../../docs/tests/domain-model/TestAddFull_NoFile_NoVersionNoHash.md) — déduit : teste `ModelService.AddFull`
+> - 🟡 [TestAddFull_RM19_DerivedFromSubmittedModule_CopiesComposition](../../../docs/tests/domain-model/TestAddFull_RM19_DerivedFromSubmittedModule_CopiesComposition.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_STLAndSTEP_BothAccepted](../../../docs/tests/domain-model/TestAddFull_STLAndSTEP_BothAccepted.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_WithFile_HashAndVersionCreated](../../../docs/tests/domain-model/TestAddFull_WithFile_HashAndVersionCreated.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_WithParent](../../../docs/tests/domain-model/TestAddFull_WithParent.md) — déduit : teste `ModelService.AddFull`
@@ -94,8 +95,7 @@ Ce use case crée un nouvel asset `Model3D` avec `ParentID` renseigné — il ne
 > - 🟡 [TestGetChildren_Success](../../../docs/tests/domain-model/TestGetChildren_Success.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed](../../../docs/tests/domain-model/TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed.md) — déduit : teste `ModelService.AddFull`
-> - … et 13 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 14 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Amélioration avec ajout d'interfaces (reclassification DERIVATION)

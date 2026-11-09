@@ -187,7 +187,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCCE01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 135 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 136 déduit(s)
 > - 🟡 [TestResolveOwner](../../docs/tests/adapters-in-cli/TestResolveOwner.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
 > - 🟡 [TestRunModelAdd_NominalCase](../../docs/tests/adapters-in-cli/TestRunModelAdd_NominalCase.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
 > - 🟡 [TestRunModelAdd_ServiceError_Rejected](../../docs/tests/adapters-in-cli/TestRunModelAdd_ServiceError_Rejected.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
@@ -203,7 +203,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestComponentInterfaces_POST_Created](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
 > - 🟡 [TestComponentTree_GET](../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
 > - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
-> - … et 120 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 121 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF11 — Enregistrer un composant numérique sur la blockchain
@@ -211,7 +211,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCCE03
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 47 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 48 déduit(s)
 > - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : via UCCE03 · Flux erreur — Échec endorsement Fabric
 > - 🟡 [TestFabricAdapter_StoreModelRecord_Success](../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_Success.md) — déduit : via UCCE03 · Flux erreur — Échec endorsement Fabric
 > - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : via UCCE03 · Flux erreur — Échec endorsement Fabric
@@ -227,7 +227,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestIntegration_RM48_WritePermissionFollowsTable](../../docs/tests/adapters-out-fabric/TestIntegration_RM48_WritePermissionFollowsTable.md) — déduit : via UCCE03 · Flux erreur — Échec endorsement Fabric
 > - 🟡 [TestIntegration_SharedIdentity_ChaincodeRefuses](../../docs/tests/adapters-out-fabric/TestIntegration_SharedIdentity_ChaincodeRefuses.md) — déduit : via UCCE03 · Flux erreur — Échec endorsement Fabric
 > - 🟡 [TestIntegration_SharedIdentity_ClientRefuses](../../docs/tests/adapters-out-fabric/TestIntegration_SharedIdentity_ClientRefuses.md) — déduit : via UCCE03 · Flux erreur — Échec endorsement Fabric
-> - … et 32 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 33 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF12 — Configurer les métadonnées d'un composant
@@ -259,7 +259,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCCE04, UCCE05
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 60 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 61 déduit(s)
 > - 🟡 [TestFabricAdapter_GetModelRecord_EvaluateError](../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_EvaluateError.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
 > - 🟡 [TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel](../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
 > - 🟡 [TestFabricAdapter_GetModelRecord_Success](../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_Success.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
@@ -275,7 +275,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestIntegration_ModelService_SubmittedAsset](../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
 > - 🟡 [TestIntegration_OwnerNotSigner_Rejected](../../docs/tests/adapters-out-fabric/TestIntegration_OwnerNotSigner_Rejected.md) — déduit : via UCCE04 · Flux erreur — Échec endorsement Fabric
 > - 🟡 [TestIntegration_PendingOrReader_Rejected](../../docs/tests/adapters-out-fabric/TestIntegration_PendingOrReader_Rejected.md) — déduit : via UCCE04 · Flux erreur — Échec endorsement Fabric
-> - … et 45 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 46 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF14 — Ajouter une interface à un composant existant
@@ -307,7 +307,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCCE01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 135 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 136 déduit(s)
 > - 🟡 [TestResolveOwner](../../docs/tests/adapters-in-cli/TestResolveOwner.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
 > - 🟡 [TestRunModelAdd_NominalCase](../../docs/tests/adapters-in-cli/TestRunModelAdd_NominalCase.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
 > - 🟡 [TestRunModelAdd_ServiceError_Rejected](../../docs/tests/adapters-in-cli/TestRunModelAdd_ServiceError_Rejected.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
@@ -323,7 +323,7 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 > - 🟡 [TestComponentInterfaces_POST_Created](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
 > - 🟡 [TestComponentTree_GET](../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
 > - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : via UCCE01 · Flux alternatif — Création en brouillon (soumission différée, RM16/RM19)
-> - … et 120 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 121 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF16 — Vérifier la compatibilité de licence lors d'une dérivation
@@ -331,23 +331,23 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCCE04, UCMOD01, UCMOD06
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 96 déduit(s)
-> - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : via UCMOD01 · Flux nominal — Module créé en état draft
-> - 🟡 [TestLegacyModulesAlias_ListRoute](../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : via UCMOD01 · Flux nominal — Module créé en état draft
-> - 🟡 [TestModules_RegenerateThumbnail_OK](../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : via UCMOD01 · Flux nominal — Module créé en état draft
-> - 🟡 [TestModules_Verify_OK](../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : via UCMOD01 · Flux nominal — Module créé en état draft
-> - 🟡 [TestFabricAdapter_GetModelRecord_EvaluateError](../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_EvaluateError.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
-> - 🟡 [TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel](../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
-> - 🟡 [TestFabricAdapter_GetModelRecord_Success](../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_Success.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
-> - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : via UCCE04 · Flux erreur — Échec endorsement Fabric
-> - 🟡 [TestFabricAdapter_StoreModelRecord_Success](../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_Success.md) — déduit : via UCCE04 · Flux erreur — Échec endorsement Fabric
-> - 🟡 [TestFabricBlockchain_GetModelRecord_EvaluateError](../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_EvaluateError.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
-> - 🟡 [TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError](../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
-> - 🟡 [TestFabricBlockchain_GetModelRecord_Success](../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_Success.md) — déduit : via UCCE04 · Flux erreur — Asset parent introuvable
-> - 🟡 [TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected](../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_ReadOnly_Rejected.md) — déduit : via UCCE04 · Flux erreur — Échec endorsement Fabric
-> - 🟡 [TestFabricBlockchain_StoreModelRecord_SubmitError](../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_SubmitError.md) — déduit : via UCCE04 · Flux erreur — Échec endorsement Fabric
-> - 🟡 [TestFabricBlockchain_StoreModelRecord_Success](../../docs/tests/adapters-out-fabric/TestFabricBlockchain_StoreModelRecord_Success.md) — déduit : via UCCE04 · Flux erreur — Échec endorsement Fabric
-> - … et 81 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 174 déduit(s)
+> - 🟡 [TestAPIIntegration_AssetLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponentInterfaces_GET](../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponentInterfaces_POST_BadJSON](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_BadJSON.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponentInterfaces_POST_Created](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponentTree_GET](../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_AddAssembly](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_AddAssembly_MissingConnectionID](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly_MissingConnectionID.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_AddInstance](../../docs/tests/adapters-in-rest/TestComponent_AddInstance.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_AddInstance_MissingAssetID](../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_AddTwoInstancesSequentially](../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_DELETE_NoContent](../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - … et 159 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF60 — Supprimer un composant (masquage local des listes, ledger jamais modifié)
@@ -593,23 +593,23 @@ Les exigences sont dérivées des objectifs du projet (section 2.1), des contrai
 - **Use cases couvrants** : UCMOD01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 41 déduit(s)
-> - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : via UCMOD01 · Flux nominal — Module créé en état draft
-> - 🟡 [TestLegacyModulesAlias_ListRoute](../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : via UCMOD01 · Flux nominal — Module créé en état draft
-> - 🟡 [TestModules_RegenerateThumbnail_OK](../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : via UCMOD01 · Flux nominal — Module créé en état draft
-> - 🟡 [TestModules_Verify_OK](../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : via UCMOD01 · Flux nominal — Module créé en état draft
-> - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalName](../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalName.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalValues](../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalValues.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - 🟡 [TestConnectVirtualToPhysical_NilConnStore_Error](../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilConnStore_Error.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : via UCMOD01 · Flux alternatif — Liaison via interface virtuelle
-> - … et 26 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> [!check]- Tests — 0 explicite(s) · 118 déduit(s)
+> - 🟡 [TestAPIIntegration_AssetLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponentInterfaces_GET](../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponentInterfaces_POST_BadJSON](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_BadJSON.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponentInterfaces_POST_Created](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponentTree_GET](../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_AddAssembly](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_AddAssembly_MissingConnectionID](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly_MissingConnectionID.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_AddInstance](../../docs/tests/adapters-in-rest/TestComponent_AddInstance.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_AddInstance_MissingAssetID](../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_AddTwoInstancesSequentially](../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - 🟡 [TestComponent_DELETE_NoContent](../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : via UCMOD01 · Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
+> - … et 103 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 #### EF27 — Soumettre un module à la blockchain (ModuleVersion immuable)

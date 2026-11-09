@@ -91,7 +91,7 @@ func (s *Service) AddFull(req AddRequest) (*Model3D, error) {
 	// Licence : présente au catalogue, compatible avec celle du parent s'il est
 	// connu de ce nœud (RM03) — le parent peut lui-même être encore un brouillon.
 	var parent *Model3D
-	if req.ParentID != "" && req.LicenseID != "" {
+	if req.ParentID != "" {
 		parent, _, _ = s.getAsset(req.ParentID, req.ChannelID)
 	}
 	if err := checkLicense(req.LicenseID, parent); err != nil {
@@ -122,6 +122,17 @@ func (s *Service) AddFull(req AddRequest) (*Model3D, error) {
 		}
 		m.Hash = hash
 		m.Versions = []Version{{Number: 1, Hash: hash, CreatedAt: time.Now()}}
+	}
+
+	// Dérivé d'un asset décomposé (module) : il reprend une copie indépendante
+	// de sa composition — c'est ainsi qu'évolue un module soumis, figé (UCMOD01,
+	// RM19).
+	if parent != nil && (parent.IsModule() || len(parent.WorkspaceInstances) > 0) {
+		m.WorkspaceInstances = []WorkspaceInstance{}
+		m.Assemblies = []string{}
+		if err := s.copyModuleComposition(parent, m); err != nil {
+			return nil, fmt.Errorf("copie de la composition du parent : %w", err)
+		}
 	}
 
 	m.Status = ModuleDraft

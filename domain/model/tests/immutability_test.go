@@ -298,3 +298,26 @@ func TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected(t *testing.T) {
 		t.Errorf("aucune liaison ne doit être créée (%d → %d)", len(before), len(after))
 	}
 }
+
+// / @brief  Un asset créé avec parent_id d'un module soumis reprend une copie indépendante de sa composition, puis se soumet (UCMOD01, RM19)
+// / @input  module soumis (1 instance, 1 liaison) ; AddFull(ParentID = module, licence compatible) ; Submit du dérivé
+// / @expect le dérivé est un brouillon avec 1 instance et 1 liaison de nouveaux identifiants ; le module d'origine est inchangé ; Submit réussit
+func TestAddFull_RM19_DerivedFromSubmittedModule_CopiesComposition(t *testing.T) {
+	f := newSubmittedFixture(t)
+	d, err := f.svc.AddFull(model.AddRequest{Name: "drone v2", ChannelID: "ch1", ParentID: f.module.ID, Category: model.CategoryAmelioration})
+	if err != nil {
+		t.Fatalf("AddFull : %v", err)
+	}
+	if d.Status != model.ModuleDraft || len(d.WorkspaceInstances) != 1 || len(d.Assemblies) != 1 {
+		t.Fatalf("dérivé inattendu : status %s, %d instance(s), %d liaison(s)", d.Status, len(d.WorkspaceInstances), len(d.Assemblies))
+	}
+	if d.WorkspaceInstances[0].ID == f.instance || d.Assemblies[0] == f.assembly {
+		t.Error("la composition copiée doit avoir de nouveaux identifiants")
+	}
+	if got := f.bc.records[f.module.ID]; len(got.WorkspaceInstances) != 1 || len(got.Assemblies) != 1 {
+		t.Errorf("le module d'origine ne doit pas changer : %+v", got)
+	}
+	if _, err := f.svc.Submit(d.ID, "v2"); err != nil {
+		t.Errorf("Submit du dérivé : %v", err)
+	}
+}

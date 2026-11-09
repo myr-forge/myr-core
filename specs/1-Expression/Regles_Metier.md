@@ -287,12 +287,13 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD06, UCCE06, UCCE02, UCMOD03
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 11 explicite(s) · 0 déduit(s)
+> [!check]- Tests — 12 explicite(s) · 0 déduit(s)
 > - ✅ [TestDomainErrors_SubmittedAndLicense_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_SubmittedAndLicense_MappedToHTTP.md) — explicite (le test cite RM19)
 > - ✅ [TestIntegration_ModelService_SubmittedAsset](../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — explicite (le test cite RM19)
 > - ✅ [TestIntegration_RM06_WriteOnce](../../docs/tests/adapters-out-fabric/TestIntegration_RM06_WriteOnce.md) — explicite (le test cite RM19)
 > - ✅ [TestIntegration_RM19_DraftRejected](../../docs/tests/adapters-out-fabric/TestIntegration_RM19_DraftRejected.md) — explicite (le test cite RM19)
 > - ✅ [TestIntegration_UpdateMetadata_OwnerOnly](../../docs/tests/adapters-out-fabric/TestIntegration_UpdateMetadata_OwnerOnly.md) — explicite (le test cite RM19)
+> - ✅ [TestAddFull_RM19_DerivedFromSubmittedModule_CopiesComposition](../../docs/tests/domain-model/TestAddFull_RM19_DerivedFromSubmittedModule_CopiesComposition.md) — explicite (le test cite RM19)
 > - ✅ [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — explicite (le test cite RM19)
 > - ✅ [TestCreateModule_RM19_ForkOfSubmitted_Submittable](../../docs/tests/domain-model/TestCreateModule_RM19_ForkOfSubmitted_Submittable.md) — explicite (le test cite RM19)
 > - ✅ [TestModuleComposition_RM19_Submitted_Rejected](../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — explicite (le test cite RM19)
