@@ -59,7 +59,7 @@ Le Développeur n'a **pas** accès au CLI — il interagit avec MYR exclusivemen
 
 Les groupes `model`, `channel`, `payment` et `peer` sont **implémentés** (`adapters/in/cli/`). Les groupes `network`, `org` et `node` (UCADM01–05) sont **à implémenter** — leur contrat d'interface complet est défini dans `specs/3-Conception/DC_CLI_Admin.md`.
 
-`myr model` n'est aujourd'hui qu'un sous-ensemble de `ModelService` (`add`/`get`/`list`/`verify`). Le port domaine expose déjà les interfaces physiques, les liaisons, les instances et les modules (UCCE02/06, UCAM01–05/07/08, UCMOD01–06) — leur exposition CLI cible (`myr model interface/link/instance`, `myr module`) est définie dans `specs/3-Conception/DC_CLI_Model.md`, sur le même principe que `DC_CLI_Admin.md` pour l'administration réseau : aucun changement de domaine requis, seul l'adaptateur `adapters/in/cli/` reste à écrire.
+`myr model` n'est aujourd'hui qu'un sous-ensemble de `ModelService` (`add`/`get`/`list`). Le port domaine expose déjà les interfaces physiques, les liaisons, les instances et les modules (UCCE02/06, UCAM01–05/07/08, UCMOD01–06) — leur exposition CLI cible (`myr model interface/link/instance`, `myr module`) est définie dans `specs/3-Conception/DC_CLI_Model.md`, sur le même principe que `DC_CLI_Admin.md` pour l'administration réseau : aucun changement de domaine requis, seul l'adaptateur `adapters/in/cli/` reste à écrire.
 
 ## Pré-conditions
 
@@ -131,21 +131,6 @@ Les groupes `model`, `channel`, `payment` et `peer` sont **implémentés** (`ada
 > - 🟡 [TestRunNetworkImport_NameOverride](../../../docs/tests/adapters-in-cli/TestRunNetworkImport_NameOverride.md) — déduit : teste commande `myr network import`
 > - 🟡 [TestRunNetworkImport_NetworkProfileJSON_NominalCase](../../../docs/tests/adapters-in-cli/TestRunNetworkImport_NetworkProfileJSON_NominalCase.md) — déduit : teste commande `myr network import`
 > - … et 29 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
-<!-- tests-obsidian:end -->
-
-### Flux nominal — Vérification d'intégrité d'un modèle
-
-1. `myr model verify <id>`
-2. Le service recalcule le hash SHA-256 du fichier associé
-3. Comparaison avec le hash enregistré sur la blockchain
-4. Affichage : "OK modele [id] : integrité vérifiée" ou "KO modele [id] : integrité compromise"
-
-<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 4 déduit(s)
-> - 🟡 [TestRunModelVerify_Compromised](../../../docs/tests/adapters-in-cli/TestRunModelVerify_Compromised.md) — déduit : teste commande `myr model verify`
-> - 🟡 [TestRunModelVerify_FileMissing](../../../docs/tests/adapters-in-cli/TestRunModelVerify_FileMissing.md) — déduit : teste commande `myr model verify`
-> - 🟡 [TestRunModelVerify_HashMismatch](../../../docs/tests/adapters-in-cli/TestRunModelVerify_HashMismatch.md) — déduit : teste commande `myr model verify`
-> - 🟡 [TestRunModelVerify_OK](../../../docs/tests/adapters-in-cli/TestRunModelVerify_OK.md) — déduit : teste commande `myr model verify`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Adapter Fabric non configuré
@@ -264,7 +249,7 @@ CLIHandler --> Dev : "Réseau démantelé."
 
 | Groupe | Commandes | Fichier | État |
 |--------|-----------|---------|------|
-| `myr model` | `add`, `get`, `list`, `verify` | `adapters/in/cli/model.go` | ✅ Implémenté |
+| `myr model` | `add`, `get`, `list` | `adapters/in/cli/model.go` | ✅ Implémenté |
 | `myr channel` | `get`, `list` | `adapters/in/cli/channel.go` | ✅ Implémenté |
 | `myr payment` | — | `adapters/in/cli/payment.go` | ✅ Implémenté |
 | `myr peer` | `add` (CA registration) | `adapters/in/cli/peer.go` | ✅ Implémenté |

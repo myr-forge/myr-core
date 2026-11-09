@@ -377,21 +377,15 @@ func TestIntegration_UpdateMetadata_OwnerOnly(t *testing.T) {
 
 // ── Lecture ──────────────────────────────────────────────────────────────────
 
-// / @brief  VerifyIntegrity compare l'empreinte enregistrée ; ListModelRecords ne liste que des assets
-// / @input  asset enregistré de hash h ; hash correct puis incorrect ; liste du canal
-// / @expect true puis false ; la liste contient l'asset et aucune entrée sans ID (index ou table des rôles)
-func TestIntegration_VerifyAndList(t *testing.T) {
+// / @brief  ListModelRecords ne liste que des assets
+// / @input  asset enregistré ; liste du canal
+// / @expect la liste contient l'asset et aucune entrée sans ID (index ou table des rôles)
+func TestIntegration_List(t *testing.T) {
 	ch := integrationConfig(t).FabricChannel
 	bc := fabric.NewUserFabricBlockchain(userGateway(t, "alice"))
-	a := submitted(uniqueID("verify"), handle(t, "alice"), ch)
+	a := submitted(uniqueID("list"), handle(t, "alice"), ch)
 	if err := bc.StoreModelRecord(a); err != nil {
 		t.Fatalf("StoreModelRecord : %s", detail(err))
-	}
-	if ok, err := bc.VerifyIntegrity(a.ID, a.Hash, ch); err != nil || !ok {
-		t.Errorf("hash correct : %v, %v", ok, err)
-	}
-	if ok, err := bc.VerifyIntegrity(a.ID, "sha256:faux", ch); err != nil || ok {
-		t.Errorf("hash incorrect : %v, %v", ok, err)
 	}
 	list, err := fabric.NewFabricBlockchain(newGateway(t)).ListModelRecords(ch)
 	if err != nil {

@@ -208,4 +208,3 @@ func (o *offlineBlockchain) UpdateModelMetadata(_, _ string, _ model.AssetMetada
 }
 func (o *offlineBlockchain) GetModelRecord(_, _ string) (*model.Model3D, error)  { return nil, o.err() }
 func (o *offlineBlockchain) ListModelRecords(_ string) ([]*model.Model3D, error) { return nil, o.err() }
-func (o *offlineBlockchain) VerifyIntegrity(_, _, _ string) (bool, error)        { return false, o.err() }

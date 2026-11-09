@@ -274,7 +274,6 @@ interface BlockchainPort {
   + StoreModelRecord(m *Model3D) : error
   + GetModelRecord(id, channelID string) : (*Model3D, error)
   + ListModelRecords(channelID string) : ([]*Model3D, error)
-  + VerifyIntegrity(id, hash, channelID string) : (bool, error)
 }
 
 class FabricBlockchain {
@@ -283,7 +282,6 @@ class FabricBlockchain {
   + StoreModelRecord(m *Model3D) : error
   + GetModelRecord(id, channelID string) : (*Model3D, error)
   + ListModelRecords(channelID string) : ([]*Model3D, error)
-  + VerifyIntegrity(id, hash, channelID string) : (bool, error)
 }
 
 class JSONBlockchain {
@@ -292,7 +290,6 @@ class JSONBlockchain {
   + StoreModelRecord(m *Model3D) : error
   + GetModelRecord(id, channelID string) : (*Model3D, error)
   + ListModelRecords(channelID string) : ([]*Model3D, error)
-  + VerifyIntegrity(id, hash, channelID string) : (bool, error)
 }
 
 BlockchainPort <|.. FabricBlockchain : production
@@ -337,6 +334,6 @@ main.go
 - [§ 1.2 Adapters remplaçables par configuration](Architecture_Hexagonale.md#1.2%20Adapters%20remplaçables%20par%20configuration) → [CLI myr network add](../../docs/code/commandes/CLI%20myr-network-add.md)
 - [§ Routes REST — niveaux d'accès](Architecture_Hexagonale.md#Routes%20REST%20—%20niveaux%20d'accès) → [REST /api/refs](../../docs/code/routes/REST%20api-refs.md) · [REST /api/admin/sessions](../../docs/code/routes/REST%20api-admin-sessions.md) · [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [REST /api/identity/policy](../../docs/code/routes/REST%20api-identity-policy.md) · [REST /api/modules](../../docs/code/routes/REST%20api-modules.md) · [REST /api/assembly-links](../../docs/code/routes/REST%20api-assembly-links.md) · [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
 - [§ 5. Adapters sortants (OUT)](Architecture_Hexagonale.md#5.%20Adapters%20sortants%20%28OUT%29) → [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
-- [§ 6. Mode de fallback (JSONBlockchain)](Architecture_Hexagonale.md#6.%20Mode%20de%20fallback%20%28JSONBlockchain%29) → [BlockchainPort.GetModelRecord](../../docs/code/fonctions/model.BlockchainPort.GetModelRecord.md) · [BlockchainPort.ListModelRecords](../../docs/code/fonctions/model.BlockchainPort.ListModelRecords.md) · [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [BlockchainPort.VerifyIntegrity](../../docs/code/fonctions/model.BlockchainPort.VerifyIntegrity.md)
+- [§ 6. Mode de fallback (JSONBlockchain)](Architecture_Hexagonale.md#6.%20Mode%20de%20fallback%20%28JSONBlockchain%29) → [BlockchainPort.GetModelRecord](../../docs/code/fonctions/model.BlockchainPort.GetModelRecord.md) · [BlockchainPort.ListModelRecords](../../docs/code/fonctions/model.BlockchainPort.ListModelRecords.md) · [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md)
 
 <!-- liens-obsidian:end -->

@@ -229,65 +229,6 @@ func TestFabricAdapter_ListModelRecords_EvaluateError(t *testing.T) {
 	}
 }
 
-// FabricAdapter.VerifyIntegrity appelle EvaluateTransaction("VerifyModel", id, hash)
-
-// / @brief  Vérifie que VerifyIntegrity retourne true lorsque le chaincode confirme l'intégrité
-// / @input  stubContract dont evaluateFn retourne []byte("true") ; appel VerifyIntegrity("a1", "sha256:abc", "")
-// / @expect retourne (true, nil) ; lastEvaluateName == "VerifyModel" ; args == ["a1", "sha256:abc"]
-func TestFabricAdapter_VerifyIntegrity_True(t *testing.T) {
-	stub := &stubContract{
-		evaluateFn: func(_ string, _ ...string) ([]byte, error) { return []byte("true"), nil },
-	}
-	adapter := fabric.NewFabricAdapter(stub)
-
-	ok, err := adapter.VerifyIntegrity("a1", "sha256:abc", "")
-	if err != nil {
-		t.Fatalf("inattendu : err = %v", err)
-	}
-	if stub.lastEvaluateName != "VerifyModel" {
-		t.Errorf("fonction chaincode attendue %q, obtenu %q", "VerifyModel", stub.lastEvaluateName)
-	}
-	if len(stub.lastEvaluateArgs) < 2 || stub.lastEvaluateArgs[0] != "a1" || stub.lastEvaluateArgs[1] != "sha256:abc" {
-		t.Errorf("arguments (id, hash) incorrects : %v", stub.lastEvaluateArgs)
-	}
-	if !ok {
-		t.Error("true attendu, obtenu false")
-	}
-}
-
-// / @brief  Vérifie que VerifyIntegrity retourne false lorsque le chaincode infirme l'intégrité
-// / @input  stubContract dont evaluateFn retourne []byte("false") ; appel VerifyIntegrity("a1", "sha256:bad", "")
-// / @expect retourne (false, nil)
-func TestFabricAdapter_VerifyIntegrity_False(t *testing.T) {
-	stub := &stubContract{
-		evaluateFn: func(_ string, _ ...string) ([]byte, error) { return []byte("false"), nil },
-	}
-	adapter := fabric.NewFabricAdapter(stub)
-
-	ok, err := adapter.VerifyIntegrity("a1", "sha256:bad", "")
-	if err != nil {
-		t.Fatalf("inattendu : err = %v", err)
-	}
-	if ok {
-		t.Error("false attendu, obtenu true")
-	}
-}
-
-// / @brief  Vérifie que VerifyIntegrity propage l'erreur retournée par EvaluateTransaction
-// / @input  stubContract dont evaluateFn retourne errors.New("fabric: endorsement failed")
-// / @expect retourne l'erreur du chaincode via errors.Is
-func TestFabricAdapter_VerifyIntegrity_EvaluateError(t *testing.T) {
-	expectedErr := errors.New("fabric: endorsement failed")
-	stub := &stubContract{
-		evaluateFn: func(_ string, _ ...string) ([]byte, error) { return nil, expectedErr },
-	}
-	adapter := fabric.NewFabricAdapter(stub)
-
-	if _, err := adapter.VerifyIntegrity("a1", "sha256:abc", ""); !errors.Is(err, expectedErr) {
-		t.Errorf("erreur attendue %v, obtenu %v", expectedErr, err)
-	}
-}
-
 // ── FabricBlockchain ──────────────────────────────────────────────────────────
 // FabricBlockchain.StoreModelRecord appelle ContractFor(channelID).SubmitTransaction("StoreModel", <json>)
 // Note : la fonction chaincode est "StoreModel" (≠ "CreateModel" utilisé par FabricAdapter).
@@ -534,65 +475,6 @@ func TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreach
 	}
 	if !errors.Is(err, grpcErr) {
 		t.Errorf("l'erreur gRPC d'origine devrait rester dans la chaîne : obtenu %v", err)
-	}
-}
-
-// FabricBlockchain.VerifyIntegrity appelle Contract().EvaluateTransaction("VerifyModel", id, hash)
-
-// / @brief  Vérifie que VerifyIntegrity retourne true lorsque le chaincode confirme l'intégrité
-// / @input  stubContract dont evaluateFn retourne []byte("true") ; appel VerifyIntegrity("b1", "sha256:xyz", "")
-// / @expect retourne (true, nil) ; lastEvaluateName == "VerifyModel" ; args == ["b1", "sha256:xyz"]
-func TestFabricBlockchain_VerifyIntegrity_True(t *testing.T) {
-	stub := &stubContract{
-		evaluateFn: func(_ string, _ ...string) ([]byte, error) { return []byte("true"), nil },
-	}
-	bc := fabric.NewFabricBlockchain(&stubGateway{contract: stub})
-
-	ok, err := bc.VerifyIntegrity("b1", "sha256:xyz", "")
-	if err != nil {
-		t.Fatalf("inattendu : err = %v", err)
-	}
-	if stub.lastEvaluateName != "VerifyModel" {
-		t.Errorf("fonction chaincode attendue %q, obtenu %q", "VerifyModel", stub.lastEvaluateName)
-	}
-	if len(stub.lastEvaluateArgs) < 2 || stub.lastEvaluateArgs[0] != "b1" || stub.lastEvaluateArgs[1] != "sha256:xyz" {
-		t.Errorf("arguments (id, hash) incorrects : %v", stub.lastEvaluateArgs)
-	}
-	if !ok {
-		t.Error("true attendu, obtenu false")
-	}
-}
-
-// / @brief  Vérifie que VerifyIntegrity retourne false lorsque le chaincode infirme l'intégrité
-// / @input  stubContract dont evaluateFn retourne []byte("false") ; appel VerifyIntegrity("b1", "sha256:wrong", "")
-// / @expect retourne (false, nil)
-func TestFabricBlockchain_VerifyIntegrity_False(t *testing.T) {
-	stub := &stubContract{
-		evaluateFn: func(_ string, _ ...string) ([]byte, error) { return []byte("false"), nil },
-	}
-	bc := fabric.NewFabricBlockchain(&stubGateway{contract: stub})
-
-	ok, err := bc.VerifyIntegrity("b1", "sha256:wrong", "")
-	if err != nil {
-		t.Fatalf("inattendu : err = %v", err)
-	}
-	if ok {
-		t.Error("false attendu, obtenu true")
-	}
-}
-
-// / @brief  Vérifie que VerifyIntegrity propage l'erreur retournée par EvaluateTransaction
-// / @input  stubContract dont evaluateFn retourne errors.New("fabric: endorsement policy failure")
-// / @expect retourne l'erreur du chaincode via errors.Is
-func TestFabricBlockchain_VerifyIntegrity_EvaluateError(t *testing.T) {
-	expectedErr := errors.New("fabric: endorsement policy failure")
-	stub := &stubContract{
-		evaluateFn: func(_ string, _ ...string) ([]byte, error) { return nil, expectedErr },
-	}
-	bc := fabric.NewFabricBlockchain(&stubGateway{contract: stub})
-
-	if _, err := bc.VerifyIntegrity("b1", "sha256:xyz", ""); !errors.Is(err, expectedErr) {
-		t.Errorf("erreur attendue %v, obtenu %v", expectedErr, err)
 	}
 }
 

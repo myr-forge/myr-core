@@ -359,49 +359,6 @@ func (s *Service) filterHidden(assets []*Model3D) []*Model3D {
 	return filtered
 }
 
-// Verify vérifie l'intégrité d'un modèle sur le canal indiqué.
-// channelID="" utilise le canal par défaut configuré dans l'adapter.
-// Verify vérifie l'intégrité d'un asset en deux temps : d'abord la cohérence
-// blockchain de ses métadonnées (si l'asset est déjà soumis), puis — s'il porte
-// un fichier ressource (Hash non vide) — la présence et l'intégrité de ce
-// fichier dans le stockage actif (RM38). Un brouillon local n'a pas encore de
-// transaction blockchain : seule la vérification du fichier s'applique.
-func (s *Service) Verify(id, channelID string) (bool, string, error) {
-	m, isDraft, err := s.getAsset(id, channelID)
-	if err != nil {
-		return false, "", err
-	}
-
-	if !isDraft {
-		if s.blockchain == nil {
-			return false, "", ErrBlockchainUnavailable
-		}
-		ok, err := s.blockchain.VerifyIntegrity(id, m.Hash, channelID)
-		if err != nil {
-			return false, "", err
-		}
-		if !ok {
-			return false, "", nil
-		}
-	}
-
-	if m.Hash == "" || s.fileStorage == nil || len(m.Versions) == 0 {
-		return true, "", nil
-	}
-	ref := m.Versions[len(m.Versions)-1].Hash
-	location, ok, err := s.fileStorage.Verify(ref, m.Hash)
-	if err != nil {
-		return false, "", fmt.Errorf("vérification du fichier source : %w", err)
-	}
-	if !ok {
-		if location == "" {
-			return false, "", ErrFileSourceMissing
-		}
-		return false, location, ErrFileSourceHashMismatch
-	}
-	return true, location, nil
-}
-
 // ── Connexions d'assemblage (requiert connStore) ────────────────────────────
 
 // connectionsLock sérialise la vérification et l'enregistrement des liaisons :

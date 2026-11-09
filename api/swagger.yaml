@@ -1383,37 +1383,6 @@ paths:
       summary: Arbre d'évolution d'un composant
       tags:
       - components
-  /components/{id}/verify:
-    post:
-      description: Vérifie la cohérence blockchain des métadonnées puis, si l'asset
-        porte un fichier ressource, sa présence et son intégrité dans le stockage
-        actif. Répond toujours 200 avec un statut explicite ("ok", "reason", "location")
-        — un résultat négatif est un résultat métier, pas une erreur de transport.
-      parameters:
-      - description: identifiant de l'asset
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "503":
-          description: blockchain indisponible
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Vérifier l'intégrité d'un asset et la localisation de son fichier source
-      tags:
-      - components
   /components/batch:
     post:
       consumes:

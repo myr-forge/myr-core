@@ -25,7 +25,6 @@ func (emptyLedger) GetModelRecord(_, _ string) (*model.Model3D, error) {
 	return nil, model.ErrNotFound
 }
 func (emptyLedger) ListModelRecords(string) ([]*model.Model3D, error) { return nil, nil }
-func (emptyLedger) VerifyIntegrity(_, _, _ string) (bool, error)      { return false, nil }
 
 // recordingRouter enregistre l'accès demandé pour chaque requête.
 type recordingRouter struct {

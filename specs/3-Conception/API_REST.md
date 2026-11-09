@@ -2,7 +2,6 @@
 tags:
   - couche/conception
   - type/conception
-  - rm/RM01
   - rm/RM03
   - rm/RM08
   - rm/RM09
@@ -185,21 +184,11 @@ La famille `/api/modules/*` n'est plus une ressource distincte : toutes les rout
 
 ---
 
-## 8bis. Vérification d'intégrité blockchain
-
-Myr ne conserve jamais de copie du fichier ressource transmis — seule son empreinte (`Model3D.Hash`) est retenue à la soumission (RM01). Il n'y a donc rien à relocaliser ni à revérifier dans un stockage propre à Myr ; `verify` ne porte que sur la cohérence des métadonnées inscrites sur la blockchain. Pour la traçabilité des emplacements où un composant ou produit existe réellement, voir §8ter (RM42).
-
-| Méthode | Route | Accès | Description |
-|---------|-------|-------|-------------|
-| POST | `/api/components/{id}/verify` | Contributor | Vérifie la cohérence blockchain des métadonnées d'un asset déjà soumis (aucune vérification requise pour un brouillon local, jamais encore ancré), quel que soit son nombre d'instances — même handler Go `verifyAsset` (ADR-11). Répond toujours `200` : `{ "ok": true }` en cas de succès, `{ "ok": false, "reason": "blockchain_integrity_failed" }` en cas d'échec. Échoue en `503` uniquement si la blockchain est indisponible et l'asset n'est pas un brouillon local |
-
----
-
 ## 8ter. Traçabilité et alerte des emplacements externes (RM42)
 
 | Méthode | Route | Accès | Description |
 |---------|-------|-------|-------------|
-| POST | `/api/components/{id}/locations/check` | Contributor | Vérifie l'accessibilité de chaque emplacement externe enregistré (`Locations`) par une requête sur son URL, quel que soit le nombre d'instances de l'asset — même handler Go `checkLocations` (ADR-11). Met à jour le statut et la date de vérification de chaque emplacement (`LocationCheck`, hors blockchain — voir `Modele_Domaine.md` §3) sans jamais modifier `Model3D` lui-même, qu'il soit brouillon ou déjà soumis (RM19 non concerné). Répond toujours `200` avec le détail par emplacement : `{ "locations": [ { "url": "...", "status": "reachable"\|"unreachable", "checked_at": "..." } ] }` ; `{ "locations": [] }` si l'asset ne porte aucun emplacement externe. Ne vérifie que l'accessibilité de l'URL, jamais le contenu qui y est exposé — Myr ne conservant aucune copie du fichier ressource (§8bis), il n'a lui-même rien à comparer à `Model3D.Hash` |
+| POST | `/api/components/{id}/locations/check` | Contributor | Vérifie l'accessibilité de chaque emplacement externe enregistré (`Locations`) par une requête sur son URL, quel que soit le nombre d'instances de l'asset — même handler Go `checkLocations` (ADR-11). Met à jour le statut et la date de vérification de chaque emplacement (`LocationCheck`, hors blockchain — voir `Modele_Domaine.md` §3) sans jamais modifier `Model3D` lui-même, qu'il soit brouillon ou déjà soumis (RM19 non concerné). Répond toujours `200` avec le détail par emplacement : `{ "locations": [ { "url": "...", "status": "reachable"\|"unreachable", "checked_at": "..." } ] }` ; `{ "locations": [] }` si l'asset ne porte aucun emplacement externe. Ne vérifie que l'accessibilité de l'URL, jamais le contenu qui y est exposé — Myr ne conservant aucune copie du fichier ressource (RM42), il n'a lui-même rien à comparer à `Model3D.Hash` |
 
 ---
 
@@ -288,7 +277,6 @@ En cas d'écart entre les tableaux `§1`–`§12` de ce document et `api/swagger
 - [§ 6. D6 — Modules (retiré, fusionné dans §4 — ADR-11)](API_REST.md#6.%20D6%20—%20Modules%20%28retiré,%20fusionné%20dans%20§4%20—%20ADR-11%29) → [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [REST /api/modules](../../docs/code/routes/REST%20api-modules.md)
 - [§ 7. Licences](API_REST.md#7.%20Licences) → [REST /api/licenses](../../docs/code/routes/REST%20api-licenses.md)
 - [§ 8. Miniatures](API_REST.md#8.%20Miniatures) → [REST /api/components](../../docs/code/routes/REST%20api-components.md)
-- [§ 8bis. Vérification d'intégrité blockchain](API_REST.md#8bis.%20Vérification%20d'intégrité%20blockchain) → [REST /api/components](../../docs/code/routes/REST%20api-components.md)
 - [§ 8ter. Traçabilité et alerte des emplacements externes (RM42)](API_REST.md#8ter.%20Traçabilité%20et%20alerte%20des%20emplacements%20externes%20%28RM42%29) → [REST /api/components](../../docs/code/routes/REST%20api-components.md)
 - [§ 9. Infrastructure](API_REST.md#9.%20Infrastructure) → [REST /api/health](../../docs/code/routes/REST%20api-health.md) · [REST /api/ping](../../docs/code/routes/REST%20api-ping.md) · [REST /api/status](../../docs/code/routes/REST%20api-status.md) · [REST /metrics](../../docs/code/routes/REST%20metrics.md)
 - [§ 12. D9 — Automatisation avancée](API_REST.md#12.%20D9%20—%20Automatisation%20avancée) → [REST /api/components](../../docs/code/routes/REST%20api-components.md)

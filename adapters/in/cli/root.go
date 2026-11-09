@@ -46,7 +46,7 @@ var rootCmd = &cobra.Command{
 	Long: `Myr is a command-line tool to manage 3D models on a blockchain
 network.
 
-Publish, inspect and verify 3D assets, manage blockchain channels, process
+Publish and inspect 3D assets, manage blockchain channels, process
 payments and administer network nodes.
 
 Run 'myr man [command]' to read the full manual for any command.`,

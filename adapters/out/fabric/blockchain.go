@@ -149,16 +149,3 @@ func (f *FabricBlockchain) ListModelRecords(channelID string) ([]*model.Model3D,
 	}
 	return list, nil
 }
-
-// VerifyIntegrity vérifie l'intégrité d'un modèle sur le canal spécifié.
-// channelID="" utilise le canal par défaut de la configuration.
-func (f *FabricBlockchain) VerifyIntegrity(id, hash, channelID string) (bool, error) {
-	if err := validateID(id, "model ID"); err != nil {
-		return false, err
-	}
-	result, err := f.gc.ContractFor(channelID).EvaluateTransaction("VerifyModel", id, hash)
-	if err != nil {
-		return false, wrapGatewayErr("VerifyIntegrity evaluate", err)
-	}
-	return string(result) == "true", nil
-}

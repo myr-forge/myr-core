@@ -96,16 +96,6 @@ func (b *memBC) ListModelRecords(channelID string) ([]*model.Model3D, error) {
 	return list, nil
 }
 
-func (b *memBC) VerifyIntegrity(id, hash, _ string) (bool, error) {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	m, ok := b.records[id]
-	if !ok {
-		return false, fmt.Errorf("modèle introuvable : %s", id)
-	}
-	return m.Hash == hash, nil
-}
-
 func (b *memBC) RemoveModelRecord(id string) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()

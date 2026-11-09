@@ -197,66 +197,6 @@ func TestRunModelList_BlockchainUnreachable_NoDrafts_Rejected(t *testing.T) {
 	}
 }
 
-/// @brief  runModelVerify affiche OK quand l'intégrité est vérifiée
-/// @input  service retournant true
-/// @expect Sortie contient "OK"
-func TestRunModelVerify_OK(t *testing.T) {
-	svc := &mockModelSvc{verify: func(string, string) (bool, string, error) { return true, "", nil }}
-	var buf bytes.Buffer
-	if err := runModelVerify(&buf, svc, "abc"); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !strings.Contains(buf.String(), "OK") {
-		t.Fatalf("expected OK in output, got: %q", buf.String())
-	}
-}
-
-/// @brief  runModelVerify affiche KO quand l'intégrité est compromise
-/// @input  service retournant false
-/// @expect Sortie contient "KO"
-func TestRunModelVerify_Compromised(t *testing.T) {
-	svc := &mockModelSvc{verify: func(string, string) (bool, string, error) { return false, "", nil }}
-	var buf bytes.Buffer
-	if err := runModelVerify(&buf, svc, "abc"); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !strings.Contains(buf.String(), "KO") {
-		t.Fatalf("expected KO in output, got: %q", buf.String())
-	}
-}
-
-/// @brief  runModelVerify affiche KO quand le fichier source est introuvable (RM38)
-/// @input  service retournant model.ErrFileSourceMissing
-/// @expect Sortie contient "KO" et "introuvable", pas d'erreur retournée (résultat métier, pas une panne)
-func TestRunModelVerify_FileMissing(t *testing.T) {
-	svc := &mockModelSvc{verify: func(string, string) (bool, string, error) {
-		return false, "", model.ErrFileSourceMissing
-	}}
-	var buf bytes.Buffer
-	if err := runModelVerify(&buf, svc, "abc"); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !strings.Contains(buf.String(), "KO") || !strings.Contains(buf.String(), "introuvable") {
-		t.Fatalf("expected KO + introuvable in output, got: %q", buf.String())
-	}
-}
-
-/// @brief  runModelVerify affiche KO et l'emplacement quand le hash du fichier source diverge (RM38)
-/// @input  service retournant model.ErrFileSourceHashMismatch et un emplacement
-/// @expect Sortie contient "KO" et l'emplacement retourné
-func TestRunModelVerify_HashMismatch(t *testing.T) {
-	svc := &mockModelSvc{verify: func(string, string) (bool, string, error) {
-		return false, "/data/models/abc.stl", model.ErrFileSourceHashMismatch
-	}}
-	var buf bytes.Buffer
-	if err := runModelVerify(&buf, svc, "abc"); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !strings.Contains(buf.String(), "KO") || !strings.Contains(buf.String(), "/data/models/abc.stl") {
-		t.Fatalf("expected KO + location in output, got: %q", buf.String())
-	}
-}
-
 /// @brief  runModelUpdate transmet la requête de patch et affiche l'id mis à jour
 /// @input  UpdateRequest{ID: "abc", Description: "new"}
 /// @expect Requête transmise telle quelle, sortie contient l'id

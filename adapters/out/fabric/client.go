@@ -50,11 +50,3 @@ func (f *FabricAdapter) ListModelRecords(channelID string) ([]*model.Model3D, er
 	json.Unmarshal(result, &list)
 	return list, nil
 }
-
-func (f *FabricAdapter) VerifyIntegrity(id, hash, _ string) (bool, error) {
-	result, err := f.contract.EvaluateTransaction("VerifyModel", id, hash)
-	if err != nil {
-		return false, err
-	}
-	return string(result) == "true", nil
-}

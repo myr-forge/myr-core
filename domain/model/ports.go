@@ -17,9 +17,6 @@ type BlockchainPort interface {
 	// ErrNotFound.
 	GetModelRecord(id, channelID string) (*Model3D, error)
 	ListModelRecords(channelID string) ([]*Model3D, error)
-	// VerifyIntegrity vérifie l'intégrité d'un modèle sur le canal indiqué.
-	// channelID="" utilise le canal par défaut configuré dans l'adapter.
-	VerifyIntegrity(id, hash, channelID string) (bool, error)
 }
 
 // FileStoragePort est le contrat que tout adapter de stockage de fichiers doit respecter.

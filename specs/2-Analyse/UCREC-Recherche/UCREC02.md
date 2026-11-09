@@ -116,7 +116,7 @@ La compatibilité est déterminée par l'algorithme `ifacesCompatible()` (RM11) 
 > - 🟡 [TestFabricBlockchain_ListModelRecords_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_EvaluateError.md) — déduit : teste `BlockchainPort.ListModelRecords`
 > - 🟡 [TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_NoPeersAvailable_ErrBlockchainUnreachable.md) — déduit : teste `BlockchainPort.ListModelRecords`
 > - 🟡 [TestFabricBlockchain_ListModelRecords_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_ListModelRecords_Success.md) — déduit : teste `BlockchainPort.ListModelRecords`
-> - 🟡 [TestIntegration_VerifyAndList](../../../docs/tests/adapters-out-fabric/TestIntegration_VerifyAndList.md) — déduit : teste `BlockchainPort.ListModelRecords`
+> - 🟡 [TestIntegration_List](../../../docs/tests/adapters-out-fabric/TestIntegration_List.md) — déduit : teste `BlockchainPort.ListModelRecords`
 <!-- tests-obsidian:end -->
 
 ## Post-conditions

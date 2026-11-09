@@ -3,7 +3,6 @@ package cli
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -19,7 +18,7 @@ import (
 var modelCmd = &cobra.Command{
 	Use:   "model",
 	Short: "Manage 3D models",
-	Long: `Commands to publish, inspect and verify 3D models on the Myr platform.
+	Long: `Commands to publish and inspect 3D models on the Myr platform.
 
 Models are stored on the active blockchain network. Each model has a
 unique ID and belongs to a channel.`,
@@ -184,49 +183,6 @@ Examples:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		channelID, _ := cmd.Flags().GetString("channel")
 		return runModelList(cmd.OutOrStdout(), modelSvc, channelID)
-	},
-}
-
-// ── verify ────────────────────────────────────────────────────────────────────
-
-func runModelVerify(w io.Writer, svc model.ModelService, id string) error {
-	ok, location, err := svc.Verify(id, "")
-	switch {
-	case errors.Is(err, model.ErrFileSourceMissing):
-		fmt.Fprintf(w, "KO  modèle %s : fichier source introuvable à l'emplacement enregistré\n", id)
-		return nil
-	case errors.Is(err, model.ErrFileSourceHashMismatch):
-		fmt.Fprintf(w, "KO  modèle %s : le fichier source (%s) ne correspond plus au hash enregistré\n", id, location)
-		return nil
-	case err != nil:
-		return err
-	}
-	if ok {
-		if location != "" {
-			fmt.Fprintf(w, "OK  modèle %s : intégrité vérifiée (fichier source : %s)\n", id, location)
-		} else {
-			fmt.Fprintf(w, "OK  modèle %s : intégrité vérifiée\n", id)
-		}
-	} else {
-		fmt.Fprintf(w, "KO  modèle %s : intégrité compromise\n", id)
-	}
-	return nil
-}
-
-var modelVerifyCmd = &cobra.Command{
-	Use:   "verify <id>",
-	Short: "Verify the integrity of a model",
-	Long: `Recompute the hash of the file associated with the model and compare it
-to the hash recorded on the blockchain, then locate its source file in the
-active file storage and confirm it is still present and unaltered. Returns
-OK if both checks pass, KO if a divergence or a missing source file is
-detected.
-
-Example:
-  myr model verify abc123def456`,
-	Args: cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return runModelVerify(cmd.OutOrStdout(), modelSvc, args[0])
 	},
 }
 
@@ -462,7 +418,7 @@ func init() {
 	modelThumbnailCmd.AddCommand(modelThumbnailSetCmd, modelThumbnailGetCmd, modelThumbnailRegenerateCmd)
 
 	modelCmd.AddCommand(
-		modelAddCmd, modelSubmitCmd, modelGetCmd, modelListCmd, modelVerifyCmd,
+		modelAddCmd, modelSubmitCmd, modelGetCmd, modelListCmd,
 		modelUpdateCmd, modelRemoveCmd, modelChildrenCmd, modelThumbnailCmd,
 	)
 }

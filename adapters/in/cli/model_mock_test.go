@@ -66,12 +66,6 @@ func (m *mockModelSvc) List(channelID string) ([]*model.Model3D, error) {
 	}
 	return nil, nil
 }
-func (m *mockModelSvc) Verify(id, channelID string) (bool, string, error) {
-	if m.verify != nil {
-		return m.verify(id, channelID)
-	}
-	return true, "", nil
-}
 func (m *mockModelSvc) AddFull(req model.AddRequest) (*model.Model3D, error) {
 	if m.addFull != nil {
 		return m.addFull(req)

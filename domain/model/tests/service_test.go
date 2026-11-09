@@ -66,14 +66,6 @@ func (m *mockBC) ListModelRecords(channelID string) ([]*model.Model3D, error) {
 	return list, nil
 }
 
-func (m *mockBC) VerifyIntegrity(id, hash, _ string) (bool, error) {
-	mod, err := m.GetModelRecord(id, "")
-	if err != nil {
-		return false, err
-	}
-	return mod.Hash == hash, nil
-}
-
 func (m *mockBC) RemoveModelRecord(id string) error {
 	if _, ok := m.records[id]; !ok {
 		return fmt.Errorf("modèle introuvable: %s", id)
@@ -90,27 +82,6 @@ func (m *mockFS) Upload(filePath string) (string, error) { return "hash:" + file
 func (m *mockFS) Download(hash, destPath string) error   { return nil }
 func (m *mockFS) Delete(hash string) error               { return nil }
 func (m *mockFS) Verify(ref, expectedHash string) (string, bool, error) {
-	return ref, true, nil
-}
-
-// mockFSFn est une version configurable de mockFS pour simuler des erreurs.
-type mockFSFn struct {
-	uploadFn func(filePath string) (string, error)
-	verifyFn func(ref, expectedHash string) (string, bool, error)
-}
-
-func (m *mockFSFn) Upload(filePath string) (string, error) {
-	if m.uploadFn != nil {
-		return m.uploadFn(filePath)
-	}
-	return "hash:" + filePath, nil
-}
-func (m *mockFSFn) Download(hash, destPath string) error { return nil }
-func (m *mockFSFn) Delete(hash string) error             { return nil }
-func (m *mockFSFn) Verify(ref, expectedHash string) (string, bool, error) {
-	if m.verifyFn != nil {
-		return m.verifyFn(ref, expectedHash)
-	}
 	return ref, true, nil
 }
 
@@ -588,81 +559,6 @@ func TestModelList_BlockchainUnreachable_NoDrafts_ReturnsError(t *testing.T) {
 	}
 	if len(all) != 0 {
 		t.Errorf("aucun résultat attendu, obtenu %v", all)
-	}
-}
-
-// / @brief  Vérification de l'intégrité d'un asset dont le hash est intact
-// / @input  mockBC avec un asset uploadé, hash non altéré
-// / @expect Verify retourne true sans erreur
-func TestModelVerify(t *testing.T) {
-	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
-
-	path := tempFile(t, "contenu stable")
-	m, _ := svc.Add(path, "cube", "ch1", "o1", nil)
-
-	ok, _, err := svc.Verify(m.ID, "")
-	if err != nil {
-		t.Fatalf("Verify: %v", err)
-	}
-	if !ok {
-		t.Error("vérification devrait réussir")
-	}
-}
-
-// / @brief  Vérification d'intégrité d'un asset avec un ID inconnu
-// / @input  mockBC vide, ID "inexistant"
-// / @expect Retour d'une erreur
-func TestModelVerify_NotFound(t *testing.T) {
-	svc := model.NewService(newMockBC(), &mockFS{}).WithDraftStore(newMockDraftStore())
-
-	_, _, err := svc.Verify("inexistant", "")
-	if err == nil {
-		t.Error("expected error for unknown ID")
-	}
-}
-
-// / @brief  Vérification d'intégrité : le fichier source est introuvable à son emplacement (RM38)
-// / @input  Asset uploadé, FileStoragePort.Verify simulé retournant "fichier introuvable"
-// / @expect Verify retourne model.ErrFileSourceMissing
-func TestModelVerify_FileMissing_Rejected(t *testing.T) {
-	fs := &mockFSFn{verifyFn: func(ref, expectedHash string) (string, bool, error) {
-		return "", false, nil
-	}}
-	svc := model.NewService(newMockBC(), fs).WithDraftStore(newMockDraftStore())
-
-	path := tempFile(t, "contenu stable")
-	m, _ := svc.Add(path, "cube", "ch1", "o1", nil)
-
-	ok, _, err := svc.Verify(m.ID, "")
-	if ok {
-		t.Error("vérification ne devrait pas réussir")
-	}
-	if !errors.Is(err, model.ErrFileSourceMissing) {
-		t.Fatalf("erreur attendue ErrFileSourceMissing, got %v", err)
-	}
-}
-
-// / @brief  Vérification d'intégrité : le fichier source a un contenu divergent du hash enregistré (RM38)
-// / @input  Asset uploadé, FileStoragePort.Verify simulé retournant un emplacement avec ok=false
-// / @expect Verify retourne model.ErrFileSourceHashMismatch et l'emplacement du fichier
-func TestModelVerify_HashMismatch_Rejected(t *testing.T) {
-	fs := &mockFSFn{verifyFn: func(ref, expectedHash string) (string, bool, error) {
-		return ref, false, nil
-	}}
-	svc := model.NewService(newMockBC(), fs).WithDraftStore(newMockDraftStore())
-
-	path := tempFile(t, "contenu stable")
-	m, _ := svc.Add(path, "cube", "ch1", "o1", nil)
-
-	ok, location, err := svc.Verify(m.ID, "")
-	if ok {
-		t.Error("vérification ne devrait pas réussir")
-	}
-	if !errors.Is(err, model.ErrFileSourceHashMismatch) {
-		t.Fatalf("erreur attendue ErrFileSourceHashMismatch, got %v", err)
-	}
-	if location == "" {
-		t.Error("l'emplacement du fichier devrait être renseigné même en cas de divergence de hash")
 	}
 }
 
