@@ -2,7 +2,6 @@
 tags:
   - couche/expression
   - type/regles-metier
-  - relecture/incoherence
   - relecture/question
 ---
 # Règles métier — Myr System
@@ -173,12 +172,10 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 
 - **Déclencheur** : Appel de `ifacesCompatible`
 - **Condition** : Toujours
-- **Conséquence** : Deux interfaces sont compatibles si : (1) même catégorie (Électrique, Mécanique, Numérique…), (2) même tag (Câble, vis…) si renseigné, (3) même type (USB-C, UART…) si renseigné, (4) sens complémentaires (♂/♀ ou bidirectionnel), (5) valeurs se chevauchant (`ValueMin`/`ValueMax`) : une valeur simple vaut l'intervalle [v ; v] et 0 est une vraie valeur (0 V, 0 bar) ; une interface sans unité n'impose aucune contrainte de valeur
+- **Conséquence** : Deux interfaces sont compatibles si : (1) même catégorie (Électrique, Mécanique, Numérique…), (2) même type (USB-C, UART…), y compris quand il n'est renseigné que d'un côté, (3) sens complémentaires (♂/♀ ou bidirectionnel), (4) valeurs se chevauchant (`ValueMin`/`ValueMax`) : une valeur simple vaut l'intervalle [v ; v] et 0 est une vraie valeur (0 V, 0 bar) ; une interface sans unité n'impose aucune contrainte de valeur
 - **Use cases** : UCAM01, UCAM03
 
-#incoherence — critères (2) et (3) : une interface (`AssetInterface`) ne porte aucun tag, donc (2) n'est jamais vérifié ; et `ifacesCompatible` exige un type identique même quand il n'est renseigné que d'un côté, alors que (3) ne l'impose que « si renseigné ».
-
-#question — critère (5) : deux interfaces dotées d'unités différentes (ex. V et mA) ont leurs valeurs comparées comme si l'unité était la même. Faut-il refuser la paire, ou ignorer les valeurs ?
+#question — critère (4) : une interface peut porter plusieurs contraintes de valeur, chacune avec son unité (ex. une tension ET un courant — décision du PO). Restent à trancher : la correspondance entre contraintes (même unité, ou même grandeur avec conversion), et le cas d'une contrainte présente d'un seul côté — voir FT-042.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 2 explicite(s) · 0 déduit(s)
@@ -868,7 +865,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | [RM08](#RM08%20—%20Masquage%20local,%20ledger%20jamais%20modifié) | ErrNotSupported retourné sur tentative de suppression | Blockchain |
 | [RM09](#RM09%20—%20Interface%20à%20usage%20unique) | Interface à usage unique dans une liaison, par instance ; jamais reliée à elle-même | Interfaces |
 | [RM10](#RM10%20—%20Vérification%20de%20compatibilité%20automatique) | Vérification de compatibilité automatique à la création | Interfaces |
-| [RM11](#RM11%20—%20Critères%20de%20compatibilité%20d'interfaces) | Critères de compatibilité : catégorie + tag + type + sens + plage de valeurs | Interfaces |
+| [RM11](#RM11%20—%20Critères%20de%20compatibilité%20d'interfaces) | Critères de compatibilité : catégorie + type + sens + valeurs | Interfaces |
 | [RM12](#RM12%20—%20Persistance%20des%20liaisons%20incompatibles) | Liaison incompatible persistante (`Incompatible:true`, non supprimée automatiquement) | Interfaces |
 | [RM13](#RM13%20—%20Slot%20virtuel%20garanti) | Slot virtuel garanti et recréé automatiquement à chaque matérialisation | Interfaces |
 | [RM50](#RM50%20—%20Liaison%20directe%20unique) | Liaison directe en double refusée, jamais renvoyée ni dupliquée | Interfaces |

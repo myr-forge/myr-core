@@ -50,7 +50,7 @@ Chaque composant possède toujours un **slot d'interface virtuel** (`Virtual=tru
 Une interface peut être créée de deux façons :
 
 - **Connexion depuis un slot virtuel** : le slot virtuel d'un composant est relié à une interface physique existante d'un autre composant. Le service déduit automatiquement la plupart des propriétés de la nouvelle interface à partir de la cible — seul le tag doit être renseigné explicitement.
-- **Création manuelle** : tous les attributs de la nouvelle interface (catégorie, sens, tag, type, valeur/plage, unité) sont renseignés explicitement.
+- **Création manuelle** : tous les attributs de la nouvelle interface (catégorie, sens, type, valeur/plage, unité) sont renseignés explicitement.
 
 ## Pré-conditions
 
@@ -117,7 +117,7 @@ if (Méthode de création?) then (connexion virtuelle)
     stop
   endif
 else (attributs explicites)
-  :Transmettre les attributs (catégorie, sens, tag, type, valeur, unité);
+  :Transmettre les attributs (catégorie, sens, type, valeur, unité);
   :Enregistrer l'interface (draft);
   stop
 endif

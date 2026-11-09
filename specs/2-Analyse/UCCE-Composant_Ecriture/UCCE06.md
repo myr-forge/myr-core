@@ -32,7 +32,7 @@ actor "Concepteur" as C
 
 rectangle "Application MYR" {
     usecase "Ajouter une interface à un composant" as UC1
-    usecase "Définir catégorie, tag, type, sens et valeur" as UC2
+    usecase "Définir catégorie, type, sens et valeur" as UC2
     usecase "Sauvegarder l'interface en brouillon (local)" as UC3
     usecase "Créer un fork si le composant\nest déjà soumis" as UC4
 }
@@ -55,9 +55,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 
 **Décision de conception (RM16/RM19 généralisées, `Regles_Metier.md` §5 ; ADR-02, `Conception_intro.md`) :** un composant est `submitted` par défaut dès sa création (UCCE01 nominal, comportement actuel inchangé) — ce use case ne s'applique alors qu'en créant un **fork** (flux alternatif ci-dessous). Il ne s'applique directement, sans fork, que si le composant a été créé avec `draft: true` (UCCE01, « Flux alternatif — Création en brouillon ») et n'a pas encore été soumis. **Écart de code restant (E8, `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus) :** `domain/model/entity.go`/`service.go` ne portent pas encore cette distinction — c'est une tâche d'implémentation, la décision de conception est prise.
 
-**Écart code connu (E2) :** Le champ `Tag` est défini dans les specs (RM11) comme l'un des 6 attributs d'une `AssetInterface`, mais il est **absent de la struct `AssetInterface` dans `domain/model/entity.go`**. Il doit être ajouté. Sans ce champ, la vérification de compatibilité (`ifacesCompatible`) ne peut pas vérifier le 5e critère de RM11.
-
-**`AssetInterface` cible (avec `Tag`) :**
+**`AssetInterface` :**
 
 | Champ | Type | Description |
 |-------|------|-------------|
@@ -65,7 +63,6 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 | `AssetID` | string | ID du composant auquel appartient l'interface |
 | `Name` | string | Label optionnel (ex : "Alimentation principale") |
 | `Category` | string | Famille physique : `ELEC`, `MECA`, `HYD`, custom |
-| `Tag` | string | Type de connecteur : `Câble`, `Vis`, `Connecteur`, `Push-fit`… **(à ajouter — E2)** |
 | `Type` | string | Standard précis : `USB-C`, `Vis M3`, `BSP 1/4"` |
 | `Direction` | string | `in`, `out`, `bidir` |
 | `ValueMin` | float64 | Valeur unique ou borne basse |
@@ -87,13 +84,12 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 ### Flux nominal — Composant en brouillon : interface ajoutée localement
 
 1. La **catégorie** est transmise (`ELEC`, `MECA`, `HYD` ou personnalisée — référentiel via `GetRefs()`)
-2. Le **tag** est transmis : type de connecteur physique (ex : `Câble`, `Vis`, `Connecteur`, `Push-fit`)
-3. Le **type** est transmis : standard précis (ex : `USB-C`, `Vis M3`, `BSP 1/4"`)
-4. Le **sens** est transmis : `in`, `out`, ou `bidir`
-5. La **valeur** ou plage de valeurs (`ValueMin`, `ValueMax`) et l'**unité** (`Unit`) sont transmises
-6. Le REST Handler valide les champs obligatoires (`Category`, `Type`, `Direction`).
-7. Le handler appelle `service.AddInterface(iface)`.
-8. Le service vérifie que le composant est encore en `draft` (pas encore soumis).
+2. Le **type** est transmis : standard précis (ex : `USB-C`, `Vis M3`, `BSP 1/4"`)
+3. Le **sens** est transmis : `in`, `out`, ou `bidir`
+4. La **valeur** ou plage de valeurs (`ValueMin`, `ValueMax`) et l'**unité** (`Unit`) sont transmises
+5. Le REST Handler valide les champs obligatoires (`Category`, `Type`, `Direction`).
+6. Le handler appelle `service.AddInterface(iface)`.
+7. Le service vérifie que le composant est encore en `draft` (pas encore soumis).
 9. Le service génère un UUID pour l'interface si absent et la sauvegarde localement via `ifaceStore.SaveInterface(iface)` — **aucune transaction Fabric à cette étape**.
 10. L'API retourne `201 Created` avec l'`AssetInterface` créée (en brouillon). Elle rejoindra la blockchain à la prochaine soumission du composant.
 
@@ -231,13 +227,13 @@ participant "Model Service\n(domain/model/)" as ModelSvc
 database "Fabric\n(adapters/out/fabric/)" as Fabric
 database "LocalStorage\n(adapters/out/localstorage/)" as Local
 
-Browser -> REST : POST /api/components/<assetID>/interfaces\n{ Category, Tag, Type, Direction, ValueMin, ValueMax, IsRange, Unit, Name? }
+Browser -> REST : POST /api/components/<assetID>/interfaces\n{ Category, Type, Direction, ValueMin, ValueMax, IsRange, Unit, Name? }
 REST -> REST : validateFields(Category, Type, Direction requis)
 
 alt Champ obligatoire absent
     REST --> Browser : 400 Champs obligatoires manquants
 else Champs valides
-    REST -> ModelSvc : AddInterface(&AssetInterface{AssetID, Category, Tag, Type, Direction, ...})
+    REST -> ModelSvc : AddInterface(&AssetInterface{AssetID, Category, Type, Direction, ...})
 
     ModelSvc -> ModelSvc : resolveAsset(assetID)\n[brouillon local, sinon Fabric]
 
@@ -249,7 +245,7 @@ else Champs valides
         ModelSvc -> Local : ifaceStore.SaveInterface(iface)
         Local --> ModelSvc : ok
         note right : Aucune transaction Fabric ici —\nrejoindra la blockchain à la soumission du composant
-        ModelSvc --> REST : AssetInterface{ID, AssetID, Category, Tag, Type, ...}
+        ModelSvc --> REST : AssetInterface{ID, AssetID, Category, Type, ...}
         REST --> Browser : 201 Created { interface }
     else Composant déjà soumis (immuable, RM19)
         ModelSvc --> REST : ErrAssetSubmitted\n("créer un fork — voir flux alternatif")
@@ -284,7 +280,7 @@ REST --> Browser : 200 OK { interface }
 
 | Règle | Description |
 |-------|-------------|
-| **RM11** | Une interface est définie par 6 attributs : Catégorie + **Tag** + Type + Sens + ValeurMin/Max + Unité |
+| **RM11** | Une interface est définie par 5 attributs : Catégorie + Type + Sens + ValeurMin/Max + Unité |
 | **RM12** | Lors de la mise à jour d'une interface : les connexions devenues incompatibles reçoivent `Incompatible: true` sans suppression automatique |
 | **RM13** | Chaque asset dispose toujours d'au moins un slot virtuel (`EnsureVirtualSlot`) |
 
@@ -299,20 +295,9 @@ REST --> Browser : 200 OK { interface }
 
 **Écart code connu (E8, décision de conception prise — voir `specs/2-Analyse/Analyse_des_besoins.md` § Écarts structurels connus) :** Le code actuel persiste l'interface localement via `ifaceStore.SaveInterface()` (`adapters/out/localstorage/`) — ce qui est correct pour un composant en brouillon — mais synchronise ensuite Fabric de façon **facultative** (`StoreModelRecord()` optionnel, jamais lié à un véritable événement de soumission), et les composants standalone n'ont pas de champ `Status` (`draft`/`submitted`) dans `domain/model/entity.go` (contrairement au module). À corriger : rendre `Status` disponible pour les composants (`AddFull(AddRequest{Draft: true, ...})`), refuser toute mutation d'interface si `Status == submitted` (proposer un fork à la place, RM19), et déclencher l'écriture Fabric de `Interfaces` uniquement à la soumission explicite du composant (`myr model submit <id>`, voir UCCE01) — jamais de façon facultative ou par appel individuel.
 
-**Commande CLI équivalente :** `myr model interface add <assetID> --category <ELEC|MECA|HYD|...> --type <type> --direction <in|out|bidir> [--value-min <f>] [--value-max <f>] [--unit <u>] --tag <tag> [--name <label>]` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.2), appelant `service.AddInterface(*AssetInterface)` — la même méthode domaine que le handler REST `handleComponentInterfaces()`, avec le même comportement (génération d'UUID, sauvegarde en brouillon local via `ifaceStore.SaveInterface()`, refus si le composant est déjà soumis). Le flag `--tag` dépend du champ `Tag` sur `AssetInterface` (écart E2 ci-dessous) et doit rester cohérent entre CLI et REST.
+**Commande CLI équivalente :** `myr model interface add <assetID> --category <ELEC|MECA|HYD|...> --type <type> --direction <in|out|bidir> [--value-min <f>] [--value-max <f>] [--unit <u>] [--name <label>]` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.2), appelant `service.AddInterface(*AssetInterface)` — la même méthode domaine que le handler REST `handleComponentInterfaces()`, avec le même comportement (génération d'UUID, sauvegarde en brouillon local via `ifaceStore.SaveInterface()`, refus si le composant est déjà soumis).
 
-**Écart E2 — Champ `Tag` absent :** `AssetInterface` dans `domain/model/entity.go` ne contient pas de champ `Tag`. À ajouter :
-```go
-Tag  string `json:"tag,omitempty"` // ex: "Câble", "Vis", "Connecteur", "Push-fit"
-```
-Sans ce champ, `ifacesCompatible()` dans `service.go` ne vérifie que 4 critères sur 5 (RM11). Après ajout, mettre à jour `ifacesCompatible()` :
-```go
-if a.Tag != "" && b.Tag != "" && a.Tag != b.Tag {
-    return false
-}
-```
-
-**Référentiel des catégories, tags, types et unités :** `service.GetRefs()` retourne un `InterfaceRefs` avec les listes prédéfinies, consultable par tout client avant de transmettre une interface. L'ajout de nouvelles catégories/types/unités est possible via `AddRefCategory()`, `AddRefType()`, `AddRefUnit()`.
+**Référentiel des catégories, types et unités :** `service.GetRefs()` retourne un `InterfaceRefs` avec les listes prédéfinies, consultable par tout client avant de transmettre une interface. L'ajout de nouvelles catégories/types/unités est possible via `AddRefCategory()`, `AddRefType()`, `AddRefUnit()`.
 
 **Slot virtuel :** Chaque asset possède automatiquement au moins un slot virtuel (`Virtual: true`) créé par `EnsureVirtualSlot()`. Ce slot devient une interface physique lors de la première liaison via `ConnectVirtualToPhysical()`.
 

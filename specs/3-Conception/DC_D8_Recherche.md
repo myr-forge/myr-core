@@ -9,7 +9,6 @@ tags:
   - uc/UCREC04
   - uc/UCREC05
   - rm/RM02
-  - rm/RM11
   - rm/RM15
   - rm/RM16
   - rm/RM42
@@ -44,8 +43,6 @@ type CompatibleAsset struct {
 ```
 
 Algorithme : cf. `specs/2-Analyse/UCREC-Recherche/UCREC02.md` § Diagramme de séquence (déjà détaillé au niveau analyse — O(n × m), n = composants du canal, m = interfaces par composant).
-
-**Écart requis en amont :** dépend de l'écart E2 (`Tag` manquant sur `AssetInterface`, `Architecture_Composition.md` §5) pour appliquer les 5 critères complets de RM11.
 
 ---
 
@@ -142,7 +139,6 @@ Résolution récursive via `WorkspaceInstances` (composant feuille → ligne BOM
 | E-D8-03 | Aucune méthode `FindModulesUsingComponent` | `domain/model/port_in.go`, `service.go` | UCREC04 non implémentable |
 | E-D8-04 | Aucune méthode `ResolveBOM` | `domain/model/port_in.go`, `service.go` | UCREC05 non implémentable |
 | E-D8-05 | Aucune comparaison `OwnerID == requesterID` pour filtrer les `draft` d'autrui | `adapters/in/rest/handlers.go`, `adapters/in/cli/` | UCREC04 (visibilité RM16) — écart de sécurité transverse, déjà signalé pour UCA06/`Securite.md` |
-| — (rappel) | Dépendance sur écart E2 (`Tag` absent) | `domain/model/entity.go` | UCREC02 : compatibilité limitée à 4/5 critères tant que E2 n'est pas corrigé |
 
 ---
 

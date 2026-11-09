@@ -58,7 +58,7 @@ C -> In : myr model link add\nPOST /api/connections
 In -> Svc : AddAssemblyLink(fromIfaceID, toIfaceID, ...)
 Svc -> IfaceS : GetInterface(fromIfaceID), GetInterface(toIfaceID)
 IfaceS --> Svc : AssetInterface x2
-Svc -> Svc : ifacesCompatible()\n(RM10 — vérification automatique,\n5 critères RM11, voir Architecture_Composition.md §5)
+Svc -> Svc : ifacesCompatible()\n(RM10 — vérification automatique,\n4 critères RM11, voir Architecture_Composition.md §5)
 alt interfaces compatibles
   Svc -> Svc : vérifier usage unique (RM09)
   Svc -> ConnS : SaveConnection(Connection{Incompatible: false})

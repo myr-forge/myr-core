@@ -87,7 +87,7 @@ skin rose
 title Visualiser les interfaces physiques de composants
 start
 :Transmettre l'identifiant du composant ou du module (myr model interface list);
-:Lister les interfaces (catégorie, sens, tag, type, valeur, unité, statut);
+:Lister les interfaces (catégorie, sens, type, valeur, unité, statut);
 stop
 @enduml
 ```

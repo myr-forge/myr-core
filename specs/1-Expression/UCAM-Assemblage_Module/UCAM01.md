@@ -56,7 +56,7 @@ Une liaison peut être **directe** (les interfaces se connectent sans intermédi
 
 - Être connecté au réseau
 - Avoir au moins deux composants avec des interfaces existants
-- Les interfaces à relier doivent être compatibles (catégorie, sens, tag, type, valeur)
+- Les interfaces à relier doivent être compatibles (catégorie, sens, type, valeur)
 
 ## Scénario
 
@@ -66,7 +66,7 @@ Une liaison peut être **directe** (les interfaces se connectent sans intermédi
 
 1. Les identifiants des interfaces source et cible sont transmis, avec l'instance de chacune dans le module
 2. Le service vérifie qu'aucune des deux interfaces n'est déjà engagée sur son instance (RM09)
-3. Le service vérifie la compatibilité de la paire d'interfaces (catégorie, sens, tag, type, valeur — RM10/RM11)
+3. Le service vérifie la compatibilité de la paire d'interfaces (catégorie, sens, type, valeur — RM10/RM11)
 4. Aucun asset d'accroche n'est précisé : la liaison est enregistrée directement (`FastenerAssetID` vide)
 5. Les interfaces du composant résultant sont créées et conservées
 

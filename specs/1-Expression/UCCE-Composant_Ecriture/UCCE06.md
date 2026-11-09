@@ -25,7 +25,7 @@ actor "Concepteur" as C
 
 rectangle "Application MYR" {
     usecase "Ajouter une interface à un composant" as UC1
-    usecase "Définir catégorie, sens, tag, type et valeur" as UC2
+    usecase "Définir catégorie, sens, type et valeur" as UC2
     usecase "Mettre à jour sur la blockchain" as UC3
 }
 
@@ -54,7 +54,7 @@ Un utilisateur peut ajouter manuellement une interface à un composant qu'il a d
 
 1. La catégorie (Électrique, Mécanique, Hydraulique...) est définie
 2. Le sens (Entrée, Sortie, Bidirectionnel) est défini
-3. Le tag (Câble, connecteur, vis...) et le type (ex : USB-C) sont renseignés
+3. Le type (ex : USB-C) est renseigné
 4. La valeur ou plage de valeur et l'unité (Volt, mm...) sont renseignées
 5. La transaction de mise à jour est soumise sur la blockchain
 6. L'interface devient disponible pour les liaisons (voir UCAM01)
@@ -71,7 +71,7 @@ Un utilisateur peut ajouter manuellement une interface à un composant qu'il a d
 skin rose
 title Ajouter une interface à un Composant déjà créé
 start
-:Transmettre catégorie, sens, tag, type, valeur/plage et unité (myr model interface add);
+:Transmettre catégorie, sens, type, valeur/plage et unité (myr model interface add);
 :Soumettre la transaction de mise à jour sur la blockchain;
 stop
 @enduml

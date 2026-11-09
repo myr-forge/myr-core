@@ -2,10 +2,10 @@
 id: FT-015
 titre: "Critère tag absent des interfaces"
 type: ecart
-statut: ouvert
+statut: ferme
 severite: mineure
 detecte: 2026-10-02
-maj: 2026-10-02
+maj: 2026-11-09
 composants: [domain/model]
 uc: [UCAM01, UCREC02]
 rm: [RM11]
@@ -13,7 +13,7 @@ enf: []
 tags:
   - ticket
   - ticket/ecart
-  - statut/ouvert
+  - statut/ferme
   - severite/mineure
   - domaine/model
   - uc/UCAM01
@@ -22,7 +22,7 @@ tags:
 ---
 # FT-015 — Critère tag absent des interfaces
 
-> **Écart spec ↔ code** · sévérité **mineure** · statut **Ouvert** · détecté le 2026-10-02
+> **Écart spec ↔ code** · sévérité **mineure** · statut **Fermé** · détecté le 2026-10-02
 > Source : Écart E2 (Analyse_des_besoins.md)
 
 ## Constat
@@ -61,3 +61,4 @@ Ajouter `Tag` à `AssetInterface` et l'intégrer à `ifacesCompatible` (critère
 ## Historique
 
 - 2026-10-02 — Ticket créé
+- 2026-11-09 — Fermé, sans objet : décision du PO — le critère tag est retiré de RM11 et le type est exigé identique, comme le fait déjà `ifacesCompatible` ; specs alignées (RM11, UCAM01–03, UCCE06, analyses et conception). Les contraintes de valeur multiples sont suivies dans FT-042

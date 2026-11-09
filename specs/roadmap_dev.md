@@ -123,7 +123,7 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 - [ ] UCCE06 — Ajouter une interface à un composant existant
 - [ ] UCCE07 — Supprimer un composant (masquage local si déjà soumis, ledger jamais modifié — RM08)
 - [ ] Correctif entité : catégorie `découpage` ajoutée *(RM02 — 8e type, bloque UCAM05 — écart E1, non affecté par ADR-11 : voir § Écart de Conception — Fusion composant/module)*
-- [ ] Correctif entité : champ `Tag` dans `AssetInterface` *(5e critère de compatibilité RM11)*
+- [x] ~~Correctif entité : champ `Tag` dans `AssetInterface` *(5e critère de compatibilité RM11)*~~ — abandonné : critère tag retiré de RM11 (décision PO 2026-11-09)
 
 ### Atelier (Workspace) — UCAM01–08
 
@@ -185,7 +185,7 @@ Voir `Conception_intro.md` ADR-07 — un seul certificat admin CA par `NetworkPr
 
 ### Recherche avancée — UCREC02–05
 
-- [ ] UCREC02 — Composants compatibles (par type d'interface, catégorie, tag, sens)
+- [ ] UCREC02 — Composants compatibles (par type d'interface, catégorie, sens)
 - [ ] UCREC03 — Arbre de versions d'un composant (historique de dérivation)
 - [ ] UCREC04 — Modules qui intègrent un composant donné
 - [ ] UCREC05 — Export BOM (Bill of Materials) d'un module

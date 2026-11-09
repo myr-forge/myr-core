@@ -179,7 +179,6 @@ package "Agrégat Asset (D3-D6)" {
     id : uuid
     name : string
     category : string <<ELEC,MECA,HYD,...>>
-    tag : string <<à ajouter — E2>>
     type : string
     direction : enum(in,out,bidir)
     value_min : float
@@ -318,7 +317,7 @@ Entité `Payment` implémentée (paiement manuel).
 | RM04 | `Model3D.ID` | UUID généré côté serveur — jamais fourni par le client |
 | RM05 | `Model3D` | `Category != base` → `ParentID` obligatoire |
 | RM09 | `AssetInterface` | un `id` ne peut apparaître qu'une seule fois dans `Connection.FromIfaceID` ou `ToIfaceID` |
-| RM11 | `Connection` | `FromIface` et `ToIface` doivent satisfaire les 5 critères de compatibilité |
+| RM11 | `Connection` | `FromIface` et `ToIface` doivent satisfaire les 4 critères de compatibilité |
 | RM12 | `Connection` | jamais supprimée automatiquement — `Incompatible: true` si interfaces évoluent |
 | RM13 | `AssetInterface` | tout asset possède toujours au moins un `Virtual: true` |
 | RM14 | `WorkspaceInstance` | suppression → cascade sur toutes les `Connection` liées |

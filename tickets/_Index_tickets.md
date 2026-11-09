@@ -15,12 +15,13 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 
 | Statut | Nombre |
 |--------|--------|
-| Ouvert | 17 |
+| Ouvert | 16 |
 | À vérifier | 2 |
-| À trancher (PO) | 13 |
+| À trancher (PO) | 14 |
 | Différé | 1 |
 | En cours | 7 |
 | Résolu | 1 |
+| Fermé | 1 |
 
 ## Critiques à traiter en premier
 
@@ -46,7 +47,6 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-009 — Registrar CA unique par organisation](FT-009-registrar-ca-unique-par-organisation.md) | Risque | mineure | Ouvert | UCA01 |
 | [FT-041 — Rôles attribués aux organisations non implémentés](FT-041-roles-attribues-aux-organisations-non-implementes.md) | Écart spec ↔ code | mineure | Ouvert | UCADM06, UCADM07 |
 | [FT-011 — Commentaires JWT obsolètes dans les handlers REST](FT-011-commentaires-jwt-obsoletes-dans-les-handlers-rest.md) | Dette technique | mineure | Ouvert | — |
-| [FT-015 — Critère tag absent des interfaces](FT-015-critere-tag-absent-des-interfaces.md) | Écart spec ↔ code | mineure | Ouvert | UCAM01, UCREC02 |
 | [FT-020 — LocalStorage.Upload renvoie un chemin présenté comme un hash](FT-020-localstorage-upload-renvoie-un-chemin-presente-comme.md) | Dette technique | mineure | Ouvert | UCCL03 |
 | [FT-026 — Erreur Fabric indisponible renvoyée en 500 au lieu de 503](FT-026-erreur-fabric-indisponible-renvoyee-en-500-au.md) | Anomalie | mineure | Ouvert | UCCL01 |
 | [FT-029 — make deploy suppose un fabric.env présent sur le serveur](FT-029-make-deploy-suppose-un-fabric-env-present.md) | Anomalie | mineure | Ouvert | — |
@@ -72,6 +72,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-021 — Identifiant d'un asset décomposé en module](FT-021-identifiant-d-un-asset-decompose-en-module.md) | Décision à prendre | majeure | À trancher (PO) | UCAM05, UCAM09 |
 | [FT-036 — Commissions : composition seule ou aussi chaîne de dérivation](FT-036-commissions-composition-seule-ou-aussi-chaine-de.md) | Décision à prendre | majeure | À trancher (PO) | UCPI02, UCPI04, UCPI01 |
 | [FT-040 — Fonctions propres aux outils extérieurs implémentées dans myr-core](FT-040-fonctions-d-outils-exterieurs-dans-le-coeur.md) | Dette technique | majeure | À trancher (PO) | UCAM01, UCAM02, UCAM03, UCCE01, UCCE06, UCMOD01, UCMOD03, UCMOD06 |
+| [FT-042 — Interfaces à plusieurs contraintes de valeur](FT-042-interfaces-a-plusieurs-contraintes-de-valeur.md) | Décision à prendre | majeure | À trancher (PO) | UCAM01, UCAM03, UCCE06 |
 | [FT-010 — UCA04 et UCA07 s'appuient sur une commande qui ne couvre pas leur besoin](FT-010-uca04-et-uca07-s-appuient-sur-une.md) | Incohérence documentaire | mineure | À trancher (PO) | UCA04, UCA07 |
 | [FT-022 — Date de retrait des routes legacy /api/modules](FT-022-date-de-retrait-des-routes-legacy-api.md) | Décision à prendre | mineure | À trancher (PO) | UCMOD01, UCMOD04, UCMOD06 |
 | [FT-033 — UCMOD05 référencé mais inexistant](FT-033-ucmod05-reference-mais-inexistant.md) | Incohérence documentaire | mineure | À trancher (PO) | UCMOD02, UCMOD03 |
@@ -101,6 +102,12 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | Ticket | Type | Sévérité | Statut | Use cases |
 |--------|------|----------|--------|-----------|
 | [FT-017 — GetModuleInterfaces n'exposait qu'une interface par asset partagé](FT-017-getmoduleinterfaces-n-exposait-qu-une-interface-par.md) | Anomalie | majeure | Résolu | UCMOD04, UCAM02 |
+
+## Fermé
+
+| Ticket | Type | Sévérité | Statut | Use cases |
+|--------|------|----------|--------|-----------|
+| [FT-015 — Critère tag absent des interfaces](FT-015-critere-tag-absent-des-interfaces.md) | Écart spec ↔ code | mineure | Fermé | UCAM01, UCREC02 |
 
 ## Fonctionnement
 

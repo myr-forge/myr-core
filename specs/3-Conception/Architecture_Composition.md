@@ -145,7 +145,6 @@ package "domain/model" {
     + AssetID : string <<FK Model3D>>
     + Name : string <<optionnel>>
     + Category : string <<ELEC, MECA, HYD, custom>>
-    + Tag : string <<E2 : absent du code>>
     + Type : string <<ex: USB-C, Vis M3>>
     + Direction : IfaceDirection
     + ValueMin : float64
@@ -156,10 +155,6 @@ package "domain/model" {
   }
 
   note right of AssetInterface
-    E2 : champ Tag absent du code.
-    Requis par RM11 pour la
-    vérification de compatibilité
-    (5e critère). À ajouter dans entity.go.
     Brouillon local (InterfaceStore) tant que
     l'asset porteur est en draft — embarquée
     dans Model3D.Interfaces à la soumission
@@ -288,11 +283,10 @@ note "Un composant peut devenir\nun module via Category=decoupage\n(UCAM05 — b
 
 ### AssetInterface
 
-- **Rôle :** Décrit un point de connexion physique ou un slot virtuel d'un composant. Deux interfaces sont compatibles si les 5 critères de RM11 sont satisfaits (§5).
+- **Rôle :** Décrit un point de connexion physique ou un slot virtuel d'un composant. Deux interfaces sont compatibles si les 4 critères de RM11 sont satisfaits (§5).
 - **Invariants :**
-  - Une interface engagée dans une `Connection` ne peut plus être utilisée dans une autre (RM09).
+  - Une interface d'une instance donnée, engagée dans une `Connection`, ne peut plus être utilisée dans une autre ; elle reste libre dans les autres instances du composant (RM09).
   - `Virtual: true` = slot non encore matérialisé — tout asset possède toujours au moins un slot virtuel (RM13, `EnsureVirtualSlot`).
-  - Champ `Tag` **manquant dans le code** (écart E2) — requis pour la vérification de compatibilité (5e critère RM11).
   - Éditée localement (`InterfaceStore`) tant que l'asset porteur est en `draft` ; embarquée dans `Model3D.Interfaces` à la soumission (ADR-02).
 
 ### Connection
@@ -312,7 +306,7 @@ note "Un composant peut devenir\nun module via Category=decoupage\n(UCAM05 — b
 
 ## 5. Algorithme de compatibilité d'interfaces (RM11)
 
-Deux interfaces `A` et `B` sont compatibles si et seulement si les **5 critères** suivants sont satisfaits :
+Deux interfaces `A` et `B` sont compatibles si et seulement si les **4 critères** suivants sont satisfaits :
 
 ```plantuml
 @startuml
@@ -322,13 +316,7 @@ if (Égales?) then (non)
   :INCOMPATIBLE;
   stop
 endif
-:Vérifier Tag\n(si l'un des deux est renseigné — §6.4 Analyse : "si renseigné");
-note right: E2 — champ Tag absent du code
-if (Tags incompatibles?) then (oui)
-  :INCOMPATIBLE;
-  stop
-endif
-:Vérifier Type\n(A.Type == B.Type si renseignés);
+:Vérifier Type\n(A.Type == B.Type);
 if (Incompatibles?) then (oui)
   :INCOMPATIBLE;
   stop
@@ -343,7 +331,7 @@ if (Non complémentaires?) then (oui)
   :INCOMPATIBLE;
   stop
 endif
-:Vérifier plages de valeurs\n(chevauchement ValueMin/Max);
+:Vérifier les valeurs\n(sans unité : aucune contrainte ;\nvaleur simple = [v ; v])\n(chevauchement ValueMin/Max);
 if (Aucun chevauchement?) then (oui)
   :INCOMPATIBLE;
   stop
@@ -352,10 +340,6 @@ endif
 stop
 @enduml
 ```
-
-**État d'implémentation actuel :** `domain/model/service.go` `ifacesCompatible()` implémente 4 critères sur 5 (Tag absent — écart E2).
-
-**Question ouverte pour le PO** (déjà notée `specs/2-Analyse/todo.md`) : le critère Tag est-il obligatoire (les deux interfaces doivent porter le même tag) ou seulement vérifié « si renseigné » sur l'une des deux ? Ce document ne tranche pas — l'algorithme ci-dessus documente la seconde lecture (cohérente avec `Analyse_des_besoins.md` §6.4) sans figer une réponse.
 
 ---
 
@@ -396,9 +380,9 @@ Seuil d'application : `score > 0.50` → rejet de la soumission (RM01), avant to
 
 | RM | Règle | État d'implémentation |
 |----|-------|---------------|
-| RM09 | Interface à usage unique | ❌ Non vérifié dans `AddAssemblyLink()` |
+| RM09 | Interface à usage unique, par instance | ✅ `checkLinkable()` |
 | RM10 | Vérification automatique de compatibilité | ✅ `ifacesCompatible()` appelée |
-| RM11 | 5 critères de compatibilité | ⚠️ 4/5 — Tag manquant (E2) |
+| RM11 | 4 critères de compatibilité | ✅ `ifacesCompatible()` |
 | RM12 | Liaison incompatible → `Incompatible: true` sans suppression | ✅ Champ présent, géré |
 | RM13 | Slot virtuel toujours présent | ✅ `EnsureVirtualSlot()` |
 | RM14 | Suppression instance → cascade connexions | ✅ `RemoveAssetFromWorkspace()` |
@@ -590,7 +574,7 @@ Le détail des écarts E1, E2, E4, E6, E8, E9 est centralisé dans `specs/2-Anal
 - [§ AssetInterface](Architecture_Composition.md#AssetInterface) → [ModelService.EnsureVirtualSlot](../../docs/code/fonctions/model.ModelService.EnsureVirtualSlot.md)
 - [§ WorkspaceInstance](Architecture_Composition.md#WorkspaceInstance) → [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md)
 - [§ 6. Contrat anti-plagiat (RM01)](Architecture_Composition.md#6.%20Contrat%20anti-plagiat%20%28RM01%29) → [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md)
-- [§ 7. Règles de composition (RM09–RM19)](Architecture_Composition.md#7.%20Règles%20de%20composition%20%28RM09–RM19%29) → [ModelService.AddAssemblyLink](../../docs/code/fonctions/model.ModelService.AddAssemblyLink.md) · [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.EnsureVirtualSlot](../../docs/code/fonctions/model.ModelService.EnsureVirtualSlot.md) · [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
+- [§ 7. Règles de composition (RM09–RM19)](Architecture_Composition.md#7.%20Règles%20de%20composition%20%28RM09–RM19%29) → [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.EnsureVirtualSlot](../../docs/code/fonctions/model.ModelService.EnsureVirtualSlot.md) · [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
 - [§ Port entrant — ModelService (vue d'ensemble)](Architecture_Composition.md#Port%20entrant%20—%20ModelService%20%28vue%20d'ensemble%29) → [ModelService.AddAssemblyLink](../../docs/code/fonctions/model.ModelService.AddAssemblyLink.md) · [ModelService.AddAssemblyToModule](../../docs/code/fonctions/model.ModelService.AddAssemblyToModule.md) · [ModelService.AddAssetToWorkspace](../../docs/code/fonctions/model.ModelService.AddAssetToWorkspace.md) · [ModelService.AddConnection](../../docs/code/fonctions/model.ModelService.AddConnection.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.AddInterface](../../docs/code/fonctions/model.ModelService.AddInterface.md) · [ModelService.CheckLicenseCompatibility](../../docs/code/fonctions/model.ModelService.CheckLicenseCompatibility.md) · [ModelService.CheckModuleLicenseCompatibility](../../docs/code/fonctions/model.ModelService.CheckModuleLicenseCompatibility.md) · [ModelService.ConnectVirtualToPhysical](../../docs/code/fonctions/model.ModelService.ConnectVirtualToPhysical.md) · [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.EnsureVirtualSlot](../../docs/code/fonctions/model.ModelService.EnsureVirtualSlot.md) · [ModelService.GetChildren](../../docs/code/fonctions/model.ModelService.GetChildren.md) · [ModelService.GetLicense](../../docs/code/fonctions/model.ModelService.GetLicense.md) · [ModelService.GetModule](../../docs/code/fonctions/model.ModelService.GetModule.md) · [ModelService.GetModuleInterfaces](../../docs/code/fonctions/model.ModelService.GetModuleInterfaces.md) · [ModelService.ListLicenses](../../docs/code/fonctions/model.ModelService.ListLicenses.md) · [ModelService.ListModules](../../docs/code/fonctions/model.ModelService.ListModules.md) · [ModelService.RegenerateThumbnail](../../docs/code/fonctions/model.ModelService.RegenerateThumbnail.md) · [ModelService.RemoveAssemblyFromModule](../../docs/code/fonctions/model.ModelService.RemoveAssemblyFromModule.md) · [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md) · [ModelService.RemoveModule](../../docs/code/fonctions/model.ModelService.RemoveModule.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md) · [ModelService.UpdateAsset](../../docs/code/fonctions/model.ModelService.UpdateAsset.md) · [ModelService.UpdateInstancePosition](../../docs/code/fonctions/model.ModelService.UpdateInstancePosition.md) · [ModelService.UpdateInterface](../../docs/code/fonctions/model.ModelService.UpdateInterface.md)
 - [§ Ports sortants](Architecture_Composition.md#Ports%20sortants) → [BlockchainPort.GetModelRecord](../../docs/code/fonctions/model.BlockchainPort.GetModelRecord.md) · [BlockchainPort.ListModelRecords](../../docs/code/fonctions/model.BlockchainPort.ListModelRecords.md) · [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [BlockchainPort.VerifyIntegrity](../../docs/code/fonctions/model.BlockchainPort.VerifyIntegrity.md) · [ConnectionStore.SaveConnection](../../docs/code/fonctions/model.ConnectionStore.SaveConnection.md) · [ConnectionStore.UpdateConnection](../../docs/code/fonctions/model.ConnectionStore.UpdateConnection.md) · [FileStoragePort.Download](../../docs/code/fonctions/model.FileStoragePort.Download.md) · [FileStoragePort.Upload](../../docs/code/fonctions/model.FileStoragePort.Upload.md) · [InterfaceStore.SaveInterface](../../docs/code/fonctions/model.InterfaceStore.SaveInterface.md) · [OGImageFetcher.FetchOGImage](../../docs/code/fonctions/model.OGImageFetcher.FetchOGImage.md)
 - [§ 11. Informations manquantes](Architecture_Composition.md#11.%20Informations%20manquantes) → [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)

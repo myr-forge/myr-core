@@ -45,7 +45,7 @@ UC1 .> UC3 : <<extend>>
 
 À partir d'un Composant identifié, lister tous les Composants du réseau dont les Interfaces sont compatibles avec au moins une Interface libre du Composant source. Cette fonctionnalité est essentielle pour guider la composition d'un module : elle permet au Concepteur de découvrir les Composants complémentaires avant d'assembler un Module.
 
-La compatibilité est déterminée par l'algorithme `ifacesCompatible()` (RM11) : même catégorie + même tag (manquant — E2) + même type + sens complémentaires + plages de valeurs se chevauchant.
+La compatibilité est déterminée par l'algorithme `ifacesCompatible()` (RM11) : même catégorie + même type + sens complémentaires + valeurs se chevauchant.
 
 **Statut d'implémentation :** L'endpoint `/api/components/:id/compatible` est **absent** du code actuel. Cette fonctionnalité est à implémenter.
 
@@ -168,7 +168,7 @@ end
 | Règle | Description | Point d'application |
 |-------|-------------|---------------------|
 | **RM10** | Compatibilité vérifiée selon les critères RM11 | `ifacesCompatible()` (service.go:~211) réutilisée |
-| **RM11** | 5 critères : catégorie + tag (absent E2) + type + sens + valeurs | `ifacesCompatible()` — tag manquant dans le code |
+| **RM11** | 4 critères : catégorie + type + sens + valeurs | `ifacesCompatible()` |
 
 ## Exigences non-fonctionnelles
 
@@ -183,8 +183,6 @@ end
 **Performance :** L'algorithme est O(n × m) où n = nombre de Composants sur le réseau et m = interfaces par Composant. Pour les gros réseaux (milliers de Composants), un index par catégorie d'interface côté chaincode est recommandé. La version initiale peut se contenter du filtrage côté handler.
 
 **Réutilisation de `ifacesCompatible()`** : La fonction est déjà implémentée dans `service.go:~211`. Elle doit être rendue accessible depuis le handler ou encapsulée dans une méthode de service publique comme `FindCompatibleAssets(sourceID, channelID string) ([]*Model3D, error)`.
-
-**Écart E2 (tag manquant) :** L'algorithme actuel compare catégorie + type + sens + valeurs (4 critères). RM11 en définit 5. Le champ `Tag` doit être ajouté à `AssetInterface` avant l'implémentation complète.
 
 **Commande CLI équivalente (point ouvert) :** Aucune méthode `ModelService` de type `FindCompatibleAssets` n'existe aujourd'hui — ni l'endpoint REST ni une commande CLI ne peuvent donc offrir cette fonctionnalité tant que ce point n'est pas conçu au niveau du domaine. En attendant, `myr model interface list <assetID>` (méthode `ListInterfacesForAsset`) et `myr model list` permettent une reconstitution manuelle côté script, sans appliquer `ifacesCompatible()` automatiquement.
 

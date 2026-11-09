@@ -62,7 +62,7 @@ Un slot virtuel (`Virtual: true`) est toujours présent sur chaque asset (RM13),
 1. Le client appelle `GET /api/components/:id/interfaces`
 2. Le handler appelle `service.ListInterfacesForAsset(assetID)`, qui lit le brouillon local (`InterfaceStore`) si l'asset n'est pas encore soumis, sinon `Model3D.Interfaces` via `blockchain.GetModelRecord()`
 3. Si aucune interface n'existe encore, `EnsureVirtualSlot(assetID)` crée un slot virtuel (RM13) et le persiste localement (brouillon)
-4. La liste des interfaces est retournée : chaque interface contient `{ id, asset_id, name, category, tag, type, direction, value_min, value_max, is_range, unit, virtual }`
+4. La liste des interfaces est retournée : chaque interface contient `{ id, asset_id, name, category, type, direction, value_min, value_max, is_range, unit, virtual }`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 0 explicite(s) · 91 déduit(s)
@@ -168,7 +168,7 @@ alt Composant simple
     end
 
     Service --> REST : []*AssetInterface
-    REST --> Client : 200 [{ id, category, tag, type,\n  direction, value_min, value_max,\n  is_range, unit, virtual }]
+    REST --> Client : 200 [{ id, category, type,\n  direction, value_min, value_max,\n  is_range, unit, virtual }]
 
 else Module (interfaces exposées)
     Client -> REST : GET /api/modules/:id/interfaces
@@ -191,7 +191,7 @@ end
 | Règle | Description | État code |
 |-------|-------------|-----------|
 | **RM13** | Slot virtuel garanti : si aucune interface définie, un slot `Virtual: true` est créé automatiquement | Implémenté (`EnsureVirtualSlot`) |
-| **RM11** | Les 6 attributs d'interface (`Category`, `Tag`, `Type`, `Direction`, `ValueMin/Max`, `Unit`) doivent être affichés | Partiel — `Tag` absent du modèle code (E2) |
+| **RM11** | Les 5 attributs d'interface (`Category`, `Type`, `Direction`, `ValueMin/Max`, `Unit`) doivent être affichés | `AssetInterface` |
 
 ## Exigences non-fonctionnelles
 
@@ -199,8 +199,6 @@ end
 - Temps de réponse `GET /api/components/:id/interfaces` : `< 200 ms` (opération locale)
 
 ## Notes d'implémentation
-
-**Champ Tag manquant (E2) :** La struct `AssetInterface` dans `domain/model/entity.go` ne contient pas de champ `Tag`. Selon la spec §6.4 et RM11, ce champ est obligatoire. L'ajouter avant toute implémentation de l'UI d'affichage pour éviter une migration de données ultérieure.
 
 **Routes REST concernées :**
 - `GET /api/components/:id/interfaces` → `handleComponentInterfaces()` — retourne `ListInterfacesForAsset`

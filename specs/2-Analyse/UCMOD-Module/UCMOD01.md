@@ -283,7 +283,7 @@ end
 | **RM03** | Compatibilité de licence si `ParentID` et `LicenseID` sont renseignés à la création | `CreateModule()`, même vérification que `AddFull()` |
 | **RM04** | UUID généré par le système, jamais par le client | `generateID()` dans `CreateModule()` |
 | **RM10** | Vérification de compatibilité à chaque création de Liaison | `ifacesCompatible()` dans `AddAssemblyLink()` |
-| **RM11** | 5 critères : catégorie + tag (manquant E2) + type + sens + plages | `ifacesCompatible()` — tag absent du code |
+| **RM11** | 4 critères : catégorie + type + sens + valeurs | `ifacesCompatible()` |
 | **RM13** | Au moins un slot virtuel garanti par asset instancié | `EnsureVirtualSlot()` dans `AddAssetToWorkspace()` |
 | **RM16** | Module initialisé en état `draft` obligatoirement | `Status: ModuleDraft` dans `CreateModule()` |
 
@@ -304,8 +304,6 @@ end
 **Commande CLI équivalente :** `myr module create --name <nom> --channel <id> [--owner-id <id>] [--description <texte>] [--license <id>] [--parent-id <id>]` appelle le même `CreateModule(ModuleRequest)` que `POST /api/modules`. L'ajout de composants comme instances et la création de liaisons se poursuivent avec `myr model instance add <moduleID> <assetID>` et `myr model link add` (mêmes méthodes `AddAssetToWorkspace` / `AddAssemblyLink`, mêmes vérifications RM10/RM11/RM13 côté service, quel que soit le canal). Voir `specs/3-Conception/DC_CLI_Model.md` § 3.6 et § 5. Ces commandes sont exécutées par l'administrateur du serveur via SSH, pour le compte du Concepteur (principe d'exécution distante).
 
 **Dérivation (`parent_id`) — pourquoi une copie de composition et pas seulement une référence :** un simple lien de filiation (`ParentID` renseigné sans copie) documenterait la provenance mais laisserait le Concepteur reconstruire manuellement chaque instance et chaque Liaison — ce qui ne répond pas au besoin de reprendre un travail existant. `AddFull()` clone donc, quand le parent est décomposé, ses `WorkspaceInstances` (nouveaux identifiants d'instance, pour ne jamais entrer en collision avec ceux du parent) et les Liaisons internes du parent (nouvelles `Connection`, mêmes attributs, instances remappées) dans le nouveau brouillon. Le Module parent, déjà soumis, n'est jamais modifié par cette opération — seule sa composition est lue.
-
-**Écart E2 à noter :** Le champ `Tag` est absent de `AssetInterface` dans `domain/model/entity.go`. La vérification RM11 ne comporte donc que 4 critères dans le code actuel (catégorie + type + sens + valeurs). Le champ `Tag` doit être ajouté pour la conformité complète à RM11.
 
 **Module soumis (RM19) :** `AddAssemblyToModule()` n'opère que sur un brouillon — sur un module soumis, il retourne `ErrAssetSubmitted` (409). La composition d'un module soumis évolue par dérivation (flux « Dérivation d'un Module existant » ci-dessus, UCMOD06).
 

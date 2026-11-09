@@ -13,7 +13,6 @@ tags:
   - uc/UCAM03
   - rm/RM09
   - rm/RM10
-  - rm/RM11
   - rm/RM13
   - rm/RM19
   - enf/ENF12
@@ -59,8 +58,6 @@ Une interface peut être créée de deux façons :
 
 **Invariant RM13 :** Dès qu'un slot virtuel est matérialisé (Flux A), un nouveau slot virtuel est immédiatement recréé sur le même asset (`EnsureVirtualSlot`). Un asset a toujours au moins un slot virtuel disponible.
 
-**Champ Tag (E2) :** Le tag est un attribut obligatoire selon RM11. Il est absent de la struct `AssetInterface` dans le code actuel. Dans les deux flux, le tag doit être transmis explicitement (non déduit automatiquement depuis l'interface cible).
-
 ## Pré-conditions
 
 - L'identité agit avec le rôle **Concepteur** (`contributor`)
@@ -80,8 +77,7 @@ Une interface peut être créée de deux façons :
    - **Sens (Direction)** : inversé (`out` → `in` ; `in` → `out` ; `bidir` → `bidir`)
    - **Type** : identique à la cible
    - **Valeur/Unité** : inférée depuis la cible
-3. Le **Tag** doit être transmis explicitement (`--tag`/`tag`, REQUIS) — jamais déduit
-4. Le client transmet `{ virtual_iface_id, physical_iface_id, name, value_min, value_max, is_range, unit, from_instance_id, to_instance_id }`
+3. Le client transmet `{ virtual_iface_id, physical_iface_id, name, value_min, value_max, is_range, unit, from_instance_id, to_instance_id }`
 5. Le service `ConnectVirtualToPhysical()` :
    a. Récupère les deux interfaces (`GetInterface`) — brouillon local tant que les composants concernés ne sont pas soumis (ADR-02)
    b. Vérifie que `virtualIfaceID` est bien `Virtual: true`
@@ -115,7 +111,7 @@ Une interface peut être créée de deux façons :
 
 **Étape initiale :** `POST /api/components/:id/interfaces` est appelée (ou l'équivalent CLI `myr model interface add`) avec tous les attributs de l'interface
 
-1. Le client transmet catégorie, sens, tag, type, valeur/plage, unité
+1. Le client transmet catégorie, sens, type, valeur/plage, unité
 2. Le handler appelle `service.AddInterface(&iface)` — génère un ID si absent
 3. L'interface est persistée en brouillon local dans `ifaceStore.SaveInterface()` (ADR-02) — aucune transaction Fabric tant que le composant n'est pas soumis
 4. La réponse `201 Created` retourne l'interface créée
@@ -263,7 +259,7 @@ database "LocalStorage\n(adapters/out/localstorage/)" as Local
 
 alt Flux A — Connexion virtuelle
 
-    Client -> REST : POST /api/virtual-connect\n{ virtual_iface_id, physical_iface_id,\n  name, value_min, value_max,\n  is_range, unit, tag,\n  from_instance_id, to_instance_id }
+    Client -> REST : POST /api/virtual-connect\n{ virtual_iface_id, physical_iface_id,\n  name, value_min, value_max,\n  is_range, unit,\n  from_instance_id, to_instance_id }
 
     REST -> Service : ConnectVirtualToPhysical(\n  virtualIfaceID, physicalIfaceID,\n  values, fromInstID, toInstID)
 
@@ -290,7 +286,7 @@ alt Flux A — Connexion virtuelle
 
 else Flux B — Attributs explicites
 
-    Client -> REST : POST /api/components/:id/interfaces\n{ category, tag, type, direction,\n  value_min, value_max, is_range, unit }
+    Client -> REST : POST /api/components/:id/interfaces\n{ category, type, direction,\n  value_min, value_max, is_range, unit }
 
     REST -> REST : iface.AssetID = assetID
 
@@ -313,9 +309,8 @@ end
 |-------|-------------|-----------|
 | **RM13** | Slot virtuel garanti : après matérialisation (Flux A), `EnsureVirtualSlot` recrée immédiatement un slot | Implémenté dans `ConnectVirtualToPhysical` |
 | **RM19** | Un asset soumis est figé : son slot virtuel ne se matérialise pas en interface physique | `ConnectVirtualToPhysical()` → `requireDraftCarrier` (`ErrAssetSubmitted`, 409) |
-| **RM11** | Le **Tag** est un critère de compatibilité obligatoire — doit être renseigné à la création | A implémenter (champ `Tag` absent E2) |
 | **RM10** | La liaison créée par Flux A passe par `AddAssemblyLink` qui vérifie `ifacesCompatible` | Implémenté |
-| **RM09** | L'interface nouvellement créée (Flux A) ne peut pas être réutilisée dans une autre liaison | A implémenter (RM09 absent du code) |
+| **RM09** | L'interface nouvellement créée (Flux A) ne peut pas être réutilisée dans une autre liaison sur la même instance ; la liaison est vérifiée avant la matérialisation du slot | `checkLinkable` dans `ConnectVirtualToPhysical` |
 
 ## Exigences non-fonctionnelles
 
@@ -333,13 +328,11 @@ end
 5. Crée la liaison (`AddAssemblyLink` avec from=physique, to=virtuel — ordre inversé intentionnel)
 6. Appelle `EnsureVirtualSlot` pour maintenir RM13
 
-**Tag non déduit automatiquement :** Contrairement à catégorie, type et direction, le Tag ne peut pas être déduit de l'interface cible (il représente une qualification sémantique libre). Le client doit le transmettre explicitement, en le choisissant parmi le vocabulaire existant (`GET /api/refs`) ou en le créant.
-
 **Flux B — route :** `POST /api/components/:id/interfaces` → `handleComponentInterfaces()` case `MethodPost`. Le handler extrait `assetID` du path et appelle `service.AddInterface()`. Aucune vérification de compatibilité n'est faite dans ce flux (l'interface est ajoutée sans liaison).
 
 **EnsureVirtualSlot — idempotence :** La fonction vérifie d'abord si un slot `Virtual: true` existe déjà sur l'asset avant d'en créer un nouveau. Elle est donc idempotente et peut être appelée à tout moment sans risque de duplication.
 
-**Commande CLI équivalente :** Le Flux B (attributs explicites) correspond à `myr model interface add <assetID> --category --type --direction [--value-min --value-max --unit] --tag <tag> [--name <label>]` (voir `DC_CLI_Model.md` § 3.2), qui appelle `ModelService.AddInterface(&iface)` — la même méthode que le handler `POST /api/components/:id/interfaces`. Le Flux A (connexion virtuelle / matérialisation + liaison en une opération) correspond à `myr model link connect-virtual --virtual-iface <id> --physical-iface <id> --tag <tag>`, appelant `ModelService.ConnectVirtualToPhysical()` — la même méthode que le handler `POST /api/virtual-connect`, avec le même maintien du slot virtuel (RM13). Le comportement (règles métier, erreurs) est strictement identique quel que soit le canal ; seul le format de sortie change (texte terminal vs JSON HTTP). Le champ Tag (E2) reste à transmettre explicitement dans les deux cas, puisqu'il n'est pas déductible automatiquement.
+**Commande CLI équivalente :** Le Flux B (attributs explicites) correspond à `myr model interface add <assetID> --category --type --direction [--value-min --value-max --unit] [--name <label>]` (voir `DC_CLI_Model.md` § 3.2), qui appelle `ModelService.AddInterface(&iface)` — la même méthode que le handler `POST /api/components/:id/interfaces`. Le Flux A (connexion virtuelle / matérialisation + liaison en une opération) correspond à `myr model link connect-virtual --virtual <id> --physical <id>`, appelant `ModelService.ConnectVirtualToPhysical()` — la même méthode que le handler `POST /api/virtual-connect`, avec le même maintien du slot virtuel (RM13). Le comportement (règles métier, erreurs) est strictement identique quel que soit le canal ; seul le format de sortie change (texte terminal vs JSON HTTP).
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens

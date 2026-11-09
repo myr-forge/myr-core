@@ -51,9 +51,7 @@ La liaison est l'opération centrale de la composition d'un module. Elle relie d
 
 Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'accroche** (`FastenerAssetID` renseigné — voir UCAM07). La vérification de compatibilité (RM10) est systématique et automatique à la création.
 
-**Invariant RM09 :** Une interface physique ne peut participer qu'à une seule liaison. Toute tentative de réutiliser un `FromIfaceID` ou `ToIfaceID` déjà engagé dans une connexion existante est refusée.
-
-**Écart connu (E2) :** Le critère `Tag` de RM11 est absent de la struct `AssetInterface` dans le code. La vérification `ifacesCompatible()` dans `domain/model/service.go` ne contrôle pas le tag. Ce champ doit être ajouté à `AssetInterface` et intégré dans la fonction de compatibilité.
+**Invariant RM09 :** Une interface d'une instance donnée ne participe qu'à une seule liaison : réutiliser le couple (`FromIfaceID`, `FromInstanceID`) ou (`ToIfaceID`, `ToInstanceID`) d'une connexion existante est refusé (`ErrInterfaceInUse`, 409), de même qu'une liaison d'une interface à elle-même sur la même instance (`ErrSelfLink`, 400). La même interface reste libre dans les autres instances du composant.
 
 ## Pré-conditions
 
@@ -238,7 +236,7 @@ alt fastenerAssetID renseigné
     end
 end
 
-Service -> Service : ifacesCompatible(fromIface, toIface)\n[RM10, RM11 : catégorie + Tag(REQUIS) + type\n + sens complémentaires + plages chevauchantes]
+Service -> Service : ifacesCompatible(fromIface, toIface)\n[RM10, RM11 : catégorie + type\n + sens complémentaires + valeurs chevauchantes]
 
 alt Incompatibles
     Service --> REST : error
@@ -259,9 +257,9 @@ end
 
 | Règle | Description | État code |
 |-------|-------------|-----------|
-| **RM09** | Interface à usage unique — `FromIfaceID`/`ToIfaceID` déjà utilisé → liaison refusée | A implémenter dans `AddAssemblyLink` |
+| **RM09** | Interface à usage unique par instance — (interface, instance) déjà engagée → liaison refusée ; liaison réflexive refusée | `checkLinkable` (appelé par `AddAssemblyLink` et `ConnectVirtualToPhysical`) |
 | **RM10** | Vérification de compatibilité automatique à toute création de liaison | Implémenté (`ifacesCompatible`) |
-| **RM11** | 5 critères : catégorie + **Tag** (REQUIS, absent du code) + type + sens complémentaires + plages chevauchantes | Partiel — Tag manquant |
+| **RM11** | 4 critères : catégorie + type + sens complémentaires + valeurs chevauchantes | `ifacesCompatible` |
 | **RM12** | Liaison incompatible → `Incompatible: true`, jamais supprimée auto | Implémenté (`UpdateInterface`) |
 | **RM13** | Slot virtuel garanti après matérialisation (flux UCAM03) | Implémenté (`EnsureVirtualSlot`) |
 
@@ -273,32 +271,13 @@ end
 
 ## Notes d'implémentation
 
-**Champ Tag manquant (E2) :** Ajouter dans `domain/model/entity.go` :
-```go
-type AssetInterface struct {
-    // ... champs existants ...
-    Tag string `json:"tag,omitempty"` // ex: "Câble", "Vis", "Connecteur"
-}
-```
-
-Puis modifier `ifacesCompatible()` dans `service.go` pour vérifier `a.Tag == b.Tag` quand les deux champs sont non vides.
-
-**RM09 manquant :** Ajouter dans `AddAssemblyLink()` une vérification des connexions existantes avant création :
-```go
-conns, _ := s.connStore.ListConnections()
-for _, c := range conns {
-    if c.FromIfaceID == fromIfaceID || c.ToIfaceID == fromIfaceID ||
-       c.FromIfaceID == toIfaceID   || c.ToIfaceID == toIfaceID {
-        return nil, fmt.Errorf("cette interface est déjà utilisée dans une liaison")
-    }
-}
-```
+**RM09, RM10 :** `checkLinkable()` refuse, sous un même verrou que l'enregistrement de la liaison, une liaison réflexive, une paire incompatible (sans asset d'accroche) et une extrémité (interface, instance) déjà engagée.
 
 **Route REST concernée :** `POST /api/assembly-links` → `handleAssemblyLinks()` dans `handlers.go`
 
 **Route virtuel→physique :** `POST /api/virtual-connect` → `handleVirtualConnect()` dans `handlers.go`
 
-**Commande CLI équivalente :** `myr model link add --from <ifaceID> --to <ifaceID> [--fastener <assetID>] [--label <texte>] [--from-instance <id>] [--to-instance <id>]` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.4). Elle appelle la même méthode de service, `ModelService.AddAssemblyLink(fromIfaceID, toIfaceID, label, fromInstanceID, toInstanceID, fastenerAssetID)`, que le handler `POST /api/assembly-links` — même vérification de compatibilité (RM10/RM11), même unicité d'interface (RM09), mêmes messages d'erreur métier, quel que soit le canal. Le flux via slot virtuel (`POST /api/virtual-connect`) a pour équivalent `myr model link connect-virtual --virtual-iface <id> --physical-iface <id>`, appelant `ModelService.ConnectVirtualToPhysical()`. Seul le format de sortie change (texte terminal vs JSON HTTP) ; les écarts de code notés ci-dessus (RM09 à implémenter, HTTP 500 à affiner) s'appliquent identiquement quel que soit le canal, puisque la vérification est faite dans le service et non dans le handler.
+**Commande CLI équivalente :** `myr model link add --from <ifaceID> --to <ifaceID> [--fastener <assetID>] [--label <texte>] [--from-instance <id>] [--to-instance <id>]` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.4). Elle appelle la même méthode de service, `ModelService.AddAssemblyLink(fromIfaceID, toIfaceID, label, fromInstanceID, toInstanceID, fastenerAssetID)`, que le handler `POST /api/assembly-links` — même vérification de compatibilité (RM10/RM11), même unicité d'interface (RM09), mêmes messages d'erreur métier, quel que soit le canal. Le flux via slot virtuel (`POST /api/virtual-connect`) a pour équivalent `myr model link connect-virtual --virtual <id> --physical <id>`, appelant `ModelService.ConnectVirtualToPhysical()`. Seul le format de sortie change (texte terminal vs JSON HTTP) : la vérification est faite dans le service et non dans le handler.
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens

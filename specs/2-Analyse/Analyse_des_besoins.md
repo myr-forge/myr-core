@@ -307,7 +307,7 @@ Domaines mobilisés : `domain/identity/`, `domain/role/`, `adapters/out/localsto
 - Ajout/retrait d'instances de composants sur un module : action brute et directe (`AddAssetToWorkspace`/`RemoveAssetFromWorkspace`), locale au serveur, hors blockchain, modifiable librement
 - Gestion d'instances indépendantes lors de l'ajout d'un module déjà instancié (RM15)
 - Chaque asset possède toujours au moins un slot virtuel (RM13)
-- Création de liaisons entre interfaces : vérification de compatibilité automatique (RM10) selon 5 critères (RM11)
+- Création de liaisons entre interfaces : vérification de compatibilité automatique (RM10) selon 4 critères (RM11)
 - Interface à usage unique par liaison (RM09)
 - Liaison devenant incompatible → `Incompatible: true` sans suppression automatique (RM12)
 - Retrait d'une instance → suppression en cascade de toutes ses connexions (RM14)
@@ -315,7 +315,7 @@ Domaines mobilisés : `domain/identity/`, `domain/role/`, `adapters/out/localsto
 
 **Points d'attention :**
 - Les liaisons incompatibles (`Incompatible: true`) restent consultables jusqu'à suppression manuelle — aucune suppression automatique
-- La vérification RM11 porte sur 5 critères : catégorie + **tag** + type + sens complémentaires + plages de valeurs — le champ `Tag` est actuellement absent de `AssetInterface` dans le code (à ajouter)
+- La vérification RM11 porte sur 4 critères : catégorie + type + sens complémentaires + valeurs
 - Le CLI/API n'expose aucun espace navigable : chaque action (ajout/retrait d'instance, création de liaison) s'exécute directement sur un module identifié. Les méthodes Go historiques (`AddAssetToWorkspace`) portent encore le nom « Workspace » en interne, mais ce nom ne doit apparaître ni dans les use cases ni dans le nommage des commandes CLI
 
 **Code existant :** `domain/model/service.go` — liaisons, slots virtuels, cascade opérationnels. `ifacesCompatible()` implémentée (critère tag manquant). `adapters/in/rest/handlers.go` — endpoints d'instance/liaison exposés.
@@ -474,20 +474,17 @@ L'entité centrale du système est `Model3D` — elle représente à la fois un 
 
 ### 6.4 Interfaces physiques
 
-Une `AssetInterface` est définie par 6 attributs (RM11) :
+Une `AssetInterface` est définie par 5 attributs (RM11) :
 
 | Champ | Description | Exemple |
 |-------|-------------|---------|
 | `Category` | Famille physique | `ELEC`, `MECA`, `HYD` |
-| `Tag` | Type de connecteur | `Câble`, `Vis`, `Connecteur` |
 | `Type` | Standard précis | `USB-C`, `Vis M3`, `BSP 1/4"` |
 | `Direction` | Sens du flux | `in`, `out`, `bidir` |
 | `ValueMin/Max` | Plage de valeurs | `5.0` / `5.0` (fixe) ou `3.3` / `5.0` (plage) |
 | `Unit` | Unité associée | `V`, `mm`, `bar` |
 
-> Le champ `Tag` est défini dans les specs (RM11) mais absent de la struct `AssetInterface` dans le code — à ajouter.
-
-Deux interfaces sont **compatibles** si et seulement si les 5 critères de RM11 sont satisfaits : même catégorie + même tag (si renseigné) + même type (si renseigné) + sens complémentaires + plages de valeurs se chevauchant.
+Deux interfaces sont **compatibles** si et seulement si les 4 critères de RM11 sont satisfaits : même catégorie + même type + sens complémentaires + valeurs se chevauchant.
 
 ---
 
@@ -534,7 +531,6 @@ D2 (réseau) → D1 (auth) → D4 (lecture) → D3 (écriture) → D5 (compositi
 | ID | Écart | Fichier | RM/ENF |
 |----|-------|---------|--------|
 | E1 | Catégorie `decoupage` absente | `domain/model/entity.go` | RM02 |
-| E2 | `AssetInterface.Tag` absent | `domain/model/entity.go` | RM11 |
 | E4 | Anti-plagiat RM01 : comparaison avec assets existants absente | `domain/model/service.go` | RM01 |
 | E6 | Entité chaincode `Model3D` incomplète (7 vs 20+ champs) | `chaincode/model/entity.go` | RM06 |
 | E8 | `Status`/soumission traités uniquement pour les modules — pas de méthode `ModelService` généralisant `SubmitModule` à tout `Model3D` (composant en brouillon) | `domain/model/entity.go`, `domain/model/service.go` | RM16, RM19 |
@@ -586,7 +582,7 @@ Chaque use case doit contenir :
 
 À vérifier dans tout use case de **composition de module** (UCAM) :
 
-- [ ] La vérification de compatibilité RM11 est-elle appelée ? (5 critères dont Tag)
+- [ ] La vérification de compatibilité RM11 est-elle appelée ? (4 critères)
 - [ ] Un slot virtuel est-il garanti après toute matérialisation ? (RM13)
 - [ ] La cascade de suppression est-elle décrite pour le retrait d'asset ? (RM14)
 

@@ -86,7 +86,6 @@ type AssetInterface struct {
     AssetID   string  `json:"asset_id"`
     Name      string  `json:"name,omitempty"`
     Category  string  `json:"category"`
-    Tag       string  `json:"tag,omitempty"`
     Type      string  `json:"type"`
     Direction string  `json:"direction"` // in|out|bidir
     ValueMin  float64 `json:"value_min"`
