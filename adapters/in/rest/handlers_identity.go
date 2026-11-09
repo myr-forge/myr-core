@@ -591,11 +591,15 @@ func (h *Handler) handleIdentitySession(w http.ResponseWriter, r *http.Request) 
 	jsonOK(w, sessionDTO{Token: sess.Token, Role: sess.Role, Pseudo: sess.Pseudo, Channel: sess.Channel})
 }
 
-// handleIdentityGuest délivre un token reader si le réseau autorise l'accès
-// automatique (AllowAutoGuest=true), et répond 403 sinon. Une inscription passe
-// par POST /api/identity/request, selon les règles du réseau.
+// handleIdentityGuest indique si le réseau ouvre la lecture publique du
+// catalogue (AllowAutoGuest, RM49) : 200 avec guest=true et un jeton vide — la
+// lecture se fait sans jeton, aucune session n'est créée —, 403 sinon. Route
+// conservée pour les clients qui demandaient un jeton invité ; GET
+// /api/identity/policy donne la même information. Une inscription passe par
+// POST /api/identity/request, selon les règles du réseau.
 //
-//	@Summary	Accès invité automatique
+//	@Summary	Accès invité (lecture publique, sans session)
+//	@Description	Déprécié : la lecture publique du catalogue ne demande aucun jeton. Répond 200 {guest: true, token: ""} si le réseau l'autorise, 403 sinon.
 //	@Tags		identity
 //	@Accept		json
 //	@Produce	json
@@ -623,34 +627,13 @@ func (h *Handler) handleIdentityGuest(w http.ResponseWriter, r *http.Request) {
 	// Corps optionnel — un accès guest pur n'en a pas besoin
 	json.NewDecoder(r.Body).Decode(&body) //nolint:errcheck
 
-	// Vérifier la politique réseau
-	var allowGuest bool
-	var networkOrgID string
-	if h.networkSvc != nil {
-		profile, err := h.networkSvc.GetActive()
-		if err == nil && profile != nil {
-			allowGuest = profile.AllowAutoGuest
-			networkOrgID = profile.MSPID
-		}
-	}
-
-	if allowGuest {
-		// Délivrer un token reader immédiatement
+	if h.publicRead() {
+		// Lecture publique : aucune session, le visiteur lit sans jeton (RM49).
 		pseudo := strings.TrimSpace(body.Pseudo)
 		if pseudo == "" {
 			pseudo = "guest"
 		}
-		orgID := networkOrgID
-		if orgID == "" {
-			orgID = strings.TrimSpace(body.OrgID)
-		}
-		_ = orgID // utilisé comme contexte, le token est suffisant
-		sess, err := h.sessions.create(pseudo, "", "reader", h.netInfo.Channel) // invité : aucune identité, lecture seule
-		if err != nil {
-			jsonError(w, "erreur interne", http.StatusInternalServerError)
-			return
-		}
-		jsonOK(w, sessionDTO{Token: sess.Token, Role: sess.Role, Pseudo: sess.Pseudo, Channel: sess.Channel, Guest: true})
+		jsonOK(w, sessionDTO{Role: rbac.NameReader, Pseudo: pseudo, Channel: h.netInfo.Channel, Guest: true})
 		return
 	}
 

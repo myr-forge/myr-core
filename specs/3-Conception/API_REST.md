@@ -17,6 +17,7 @@ tags:
   - rm/RM41
   - rm/RM42
   - rm/RM47
+  - rm/RM49
   - enf/ENF18
   - enf/ENF25
   - relecture/incoherence
@@ -42,6 +43,7 @@ tags:
 | Niveau | Middleware | Condition |
 |--------|-----------|-----------|
 | Public | aucun | Toujours accessible |
+| Catalogue | `requireReader` | Lecture (`GET`) : session valide, ou aucune session si le réseau a ouvert la lecture publique (`AllowAutoGuest`, RM49) — un visiteur ne voit que les assets soumis, un brouillon lui répond `404`. Écriture : comme `Write`. S'applique à `/api/components*`, `/api/modules*`, `/api/refs*`, `/api/licenses*` |
 | Auth | `requireAuth` | Token de session valide requis (`X-Myr-Token`) |
 | Write | `requireRole(rbac.PermWrite)` | Session valide + permission `write` (rôle `contributor` par défaut) |
 | Admin | `requireRole(rbac.PermAdmin)` | Session valide + permission `admin` uniquement |
@@ -67,7 +69,7 @@ tags:
 | GET | `/api/identity/policy` | Public | Politique du réseau actif (AllowAutoGuest, AllowAutoRegister, RequireApproval) |
 | POST | `/api/identity/enroll` | Public | Enrôlement Fabric CA avec secret d'enrollment (sans créer de session REST) — limité à 10 tentatives/min par adresse (`429`) |
 | POST | `/api/identity/session` | Public | (Ré-)enrôlement + création d'une session REST (token opaque) portant le rôle du certificat — `403` si l'identité n'est pas active ou n'a pas de rôle |
-| POST | `/api/identity/guest` | Public | Token `reader` automatique (si `AllowAutoGuest=true`) |
+| POST | `/api/identity/guest` | Public | Déprécié — indique si la lecture publique est ouverte : `200 {guest: true, token: ""}` si `AllowAutoGuest=true` (aucune session créée, la lecture se fait sans jeton, RM49), `403` sinon |
 | POST | `/api/identity/request` | Public | Demande d'accès selon les règles du réseau (UCA01) : `403` si `AllowAutoRegister=false` ; sinon identité créée avec le rôle par défaut, active, ou en attente si `RequireApproval=true` — `201 {id, status, pseudo, org_id, secret}` |
 | POST | `/api/identity/roles/request` | Auth | Demander un rôle pour l'identité de la session (`{role}`, UCA08, RM47) — `200` rôle attribué (attribution automatique), `202` demande en attente de l'administrateur ; `400` rôle déjà détenu ou absent de la table des rôles, `409` autre demande de rôle en attente, `403` identité inactive. Le rôle prend effet à la prochaine connexion |
 | GET | `/api/identity/requests` | Admin | Liste des demandes d'inscription et de rôle (`kind`, `role`) et de leur statut — expose des données personnelles (email, message libre), réservée à `identity.admin` |
@@ -269,7 +271,7 @@ En cas d'écart entre les tableaux `§1`–`§12` de ce document et `api/swagger
 ## Liens
 
 **Étape suivante — code, par section**
-- [§ Niveaux d'accès](API_REST.md#Niveaux%20d'accès) → [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md)
+- [§ Niveaux d'accès](API_REST.md#Niveaux%20d'accès) → [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [REST /api/licenses](../../docs/code/routes/REST%20api-licenses.md) · [REST /api/modules](../../docs/code/routes/REST%20api-modules.md) · [REST /api/refs](../../docs/code/routes/REST%20api-refs.md)
 - [§ 2. D1 — Identité & RBAC](API_REST.md#2.%20D1%20—%20Identité%20&%20RBAC) → [REST /api/identity/accounts](../../docs/code/routes/REST%20api-identity-accounts.md) · [REST /api/identity/enroll](../../docs/code/routes/REST%20api-identity-enroll.md) · [REST /api/identity/guest](../../docs/code/routes/REST%20api-identity-guest.md) · [REST /api/identity/policy](../../docs/code/routes/REST%20api-identity-policy.md) · [REST /api/identity/request](../../docs/code/routes/REST%20api-identity-request.md) · [REST /api/identity/requests](../../docs/code/routes/REST%20api-identity-requests.md) · [REST /api/identity/roles/request](../../docs/code/routes/REST%20api-identity-roles-request.md) · [REST /api/identity/session](../../docs/code/routes/REST%20api-identity-session.md) · [REST /api/identity/status](../../docs/code/routes/REST%20api-identity-status.md) · [REST /api/identity/wallets](../../docs/code/routes/REST%20api-identity-wallets.md) · [CLI myr role](../../docs/code/commandes/CLI%20myr-role.md)
 - [§ 3. D2 — Administration](API_REST.md#3.%20D2%20—%20Administration) → [REST /api/admin/sessions](../../docs/code/routes/REST%20api-admin-sessions.md) · [REST /api/channels](../../docs/code/routes/REST%20api-channels.md) · [REST /api/networks](../../docs/code/routes/REST%20api-networks.md) · [REST /api/networks/active](../../docs/code/routes/REST%20api-networks-active.md) · [CLI myr node add](../../docs/code/commandes/CLI%20myr-node-add.md) · [CLI myr org add](../../docs/code/commandes/CLI%20myr-org-add.md)
 - [§ 4. D3/D4/D6 — Composants (ressource unique, ADR-11)](API_REST.md#4.%20D3/D4/D6%20—%20Composants%20%28ressource%20unique,%20ADR-11%29) → [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [REST /api/modules](../../docs/code/routes/REST%20api-modules.md) · [ModelService.AddAssetToWorkspace](../../docs/code/fonctions/model.ModelService.AddAssetToWorkspace.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)

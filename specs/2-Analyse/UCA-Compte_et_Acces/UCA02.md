@@ -15,6 +15,7 @@ tags:
   - rm/RM20
   - rm/RM22
   - rm/RM45
+  - rm/RM49
   - enf/ENF01
   - enf/ENF12
 ---
@@ -51,7 +52,7 @@ Il n'y a pas de distinction « connexion standard / première connexion avec pro
 
 Le certificat tout juste émis est la seule source de vérité de l'autorisation (ADR-12) : `Enroll` lit ses attributs `Myr.status` et `Myr.role` (`CAPort.CertAttributes`) dans le `WalletEntry` retourné, et `WalletEntry.CanSignIn` n'autorise l'ouverture de session qu'à une identité `active` dotée d'un rôle. La session porte ce rôle et l'identifiant `pseudo@org` de l'identité, dont le wallet signe ensuite ses écritures sur le ledger. Comme chaque connexion ré-enrôle, une approbation, un refus (UCA01) ou un changement de rôle (UCA08) s'appliquent dès la connexion suivante.
 
-Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/identity/guest` délivre directement un token `reader` si le réseau autorise l'accès automatique (`AllowAutoGuest=true`), sans secret ni pseudo obligatoires.
+Un visiteur sans compte n'ouvre aucune session : quand l'administrateur a ouvert la lecture publique du réseau (`AllowAutoGuest=true`), il lit le catalogue publié sans jeton (RM49, UCCL01). `POST /api/identity/guest` ne fait que l'indiquer au client, sans créer de session ni délivrer de jeton.
 
 ## Pré-conditions
 
@@ -90,17 +91,20 @@ Un second flux, **invité**, ne passe par aucune identité CA : `POST /api/ident
 > - … et 4 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
-### Flux nominal — Accès invité (réseau public)
+### Flux nominal — Accès invité (réseau ouvert à la lecture publique)
 
-1. Le client soumet `POST /api/identity/guest` (corps optionnel : `{pseudo, display_name, email, org_id, message}`)
+1. Le client soumet `POST /api/identity/guest` (corps optionnel : `{pseudo, display_name, email, org_id, message}`) — ou lit directement `allow_auto_guest` dans `GET /api/identity/policy`
 2. Le réseau actif a `AllowAutoGuest=true`
-3. Une session est créée immédiatement avec le rôle `reader`, pseudo `"guest"` par défaut (ou celui fourni)
-4. Réponse `HTTP 200` avec `{token, role:"reader", pseudo, channel, guest:true}` — aucun enrôlement CA n'a lieu
+3. Réponse `HTTP 200` avec `{token:"", role:"reader", pseudo, channel, guest:true}` : aucune session n'est créée, aucun enrôlement CA n'a lieu
+4. Le client lit ensuite le catalogue publié sans jeton (RM49, UCCL01) ; toute écriture exige une connexion avec secret
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
-> - 🟡 [TestHandleIdentityGuest_AllowedDeliversToken](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_AllowedDeliversToken.md) — déduit : teste route `/api/identity/guest`
+> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
 > - 🟡 [TestHandleIdentityGuest_DisallowedReturnsForbidden](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_DisallowedReturnsForbidden.md) — déduit : teste route `/api/identity/guest`
+> - 🟡 [TestHandleIdentityGuest_RM49_PublicRead_NoSession](../../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_RM49_PublicRead_NoSession.md) — déduit : teste route `/api/identity/guest`
+> - 🟡 [TestHandleIdentityPolicy_BlockchainPrivate](../../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_BlockchainPrivate.md) — déduit : teste route `/api/identity/policy`
+> - 🟡 [TestHandleIdentityPolicy_BlockchainPublic](../../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_BlockchainPublic.md) — déduit : teste route `/api/identity/policy`
+> - 🟡 [TestHandleIdentityPolicy_RequireApproval](../../../docs/tests/adapters-in-rest/TestHandleIdentityPolicy_RequireApproval.md) — déduit : teste route `/api/identity/policy`
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Accès invité refusé (réseau privé)

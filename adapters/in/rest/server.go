@@ -131,20 +131,26 @@ func (s *Server) buildMux() (http.Handler, error) {
 	mux.HandleFunc("/api/identity/status", s.handler.requireAuth(s.handler.handleIdentityStatus))
 	mux.HandleFunc("/api/identity/roles/request", s.handler.requireAuth(s.handler.handleIdentityRoleRequest))
 
-	// Routes de données — lecture : reader+, écriture (POST/PUT/PATCH/DELETE) : contributor+
+	// Routes de données — lecture : reader+, écriture (POST/PUT/PATCH/DELETE) : contributor+.
+	// catalogue : lecture du catalogue, ouverte aux visiteurs sans compte
+	// quand le réseau l'autorise (RM49) ; les autres lectures exigent une session.
 	auth := s.handler.requireAuth
-	contrib := func(next http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			switch r.Method {
-			case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
-				s.handler.requireRole(rbac.PermWrite, next)(w, r)
-			default:
-				auth(next)(w, r)
+	writeOr := func(read func(http.HandlerFunc) http.HandlerFunc) func(http.HandlerFunc) http.HandlerFunc {
+		return func(next http.HandlerFunc) http.HandlerFunc {
+			return func(w http.ResponseWriter, r *http.Request) {
+				switch r.Method {
+				case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
+					s.handler.requireRole(rbac.PermWrite, next)(w, r)
+				default:
+					read(next)(w, r)
+				}
 			}
 		}
 	}
-	mux.HandleFunc("/api/components", contrib(s.handler.handleComponents))
-	mux.HandleFunc("/api/components/", contrib(s.handler.handleComponent))
+	contrib := writeOr(auth)
+	catalogue := writeOr(s.handler.requireReader)
+	mux.HandleFunc("/api/components", catalogue(s.handler.handleComponents))
+	mux.HandleFunc("/api/components/", catalogue(s.handler.handleComponent))
 	mux.HandleFunc("/api/connections", contrib(s.handler.handleConnections))
 	mux.HandleFunc("/api/connections/", contrib(s.handler.handleConnection))
 	mux.HandleFunc("/api/assembly-links", contrib(s.handler.handleAssemblyLinks))
@@ -152,20 +158,20 @@ func (s *Server) buildMux() (http.Handler, error) {
 	// /api/modules/* — alias déprécié, ADR-11 : Model3D est désormais une
 	// ressource REST unique (component), retirer ces deux lignes clôt la
 	// fenêtre de transition une fois myr-web basculé.
-	mux.HandleFunc("/api/modules", contrib(legacyModulesAlias(s.handler.handleComponents)))
-	mux.HandleFunc("/api/modules/", contrib(legacyModulesAlias(s.handler.handleComponent)))
+	mux.HandleFunc("/api/modules", catalogue(legacyModulesAlias(s.handler.handleComponents)))
+	mux.HandleFunc("/api/modules/", catalogue(legacyModulesAlias(s.handler.handleComponent)))
 	mux.HandleFunc("/api/interfaces/", contrib(s.handler.handleInterface))
-	mux.HandleFunc("/api/refs", auth(s.handler.handleRefs))
-	mux.HandleFunc("/api/refs/categories", auth(s.handler.handleRefCategories))
-	mux.HandleFunc("/api/refs/types", auth(s.handler.handleRefTypes))
-	mux.HandleFunc("/api/refs/units", auth(s.handler.handleRefUnits))
+	mux.HandleFunc("/api/refs", catalogue(s.handler.handleRefs))
+	mux.HandleFunc("/api/refs/categories", catalogue(s.handler.handleRefCategories))
+	mux.HandleFunc("/api/refs/types", catalogue(s.handler.handleRefTypes))
+	mux.HandleFunc("/api/refs/units", catalogue(s.handler.handleRefUnits))
 	mux.HandleFunc("/api/channels", s.handler.handleChannels)             // GET public, PUT protégé
 	mux.HandleFunc("/api/networks", s.handler.handleNetworks)             // GET liste des réseaux
 	mux.HandleFunc("/api/networks/active", s.handler.handleNetworkActive) // GET/PUT réseau actif session
 	mux.HandleFunc("/api/ping", s.handler.handlePing)                     // liveness — pas d'appel Fabric
 	mux.HandleFunc("/api/status", s.handler.handleStatus)                 // status toujours accessible
-	mux.HandleFunc("/api/licenses", contrib(s.handler.handleLicenses))
-	mux.HandleFunc("/api/licenses/", contrib(s.handler.handleLicense))
+	mux.HandleFunc("/api/licenses", catalogue(s.handler.handleLicenses))
+	mux.HandleFunc("/api/licenses/", catalogue(s.handler.handleLicense))
 
 	// Health + métriques — non authentifiés (appelés par infra/load-balancer)
 	mux.HandleFunc("/api/health", s.handler.handleHealth)

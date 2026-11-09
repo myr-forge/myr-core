@@ -342,6 +342,32 @@ func (h *Handler) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// requireReader protège une route de lecture du catalogue (composants, modules,
+// référentiels, licences) : une session suffit ; sans jeton, une lecture (GET,
+// HEAD) est admise comme visiteur quand le réseau actif ouvre la lecture
+// publique (AllowAutoGuest, RM49). Un jeton présent mais invalide reste refusé
+// (401) : le client doit apprendre que sa session a expiré. Toute écriture
+// passe par requireRole.
+func (h *Handler) requireReader(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-Myr-Token") == "" && (r.Method == http.MethodGet || r.Method == http.MethodHead) && h.publicRead() {
+			next(w, r.WithContext(context.WithValue(r.Context(), ctxVisitor, true)))
+			return
+		}
+		h.requireAuth(next)(w, r)
+	}
+}
+
+// publicRead indique si le réseau actif ouvre la lecture du catalogue aux
+// visiteurs sans compte (réglage de l'administrateur, désactivé par défaut).
+func (h *Handler) publicRead() bool {
+	if h.networkSvc == nil {
+		return false
+	}
+	p, err := h.networkSvc.GetActive()
+	return err == nil && p != nil && p.AllowAutoGuest
+}
+
 // legacyRoleRank est le repli utilisé quand aucun rbac.RoleService n'est injecté
 // (compatibilité rétroactive) : hiérarchie reader < contributor < admin.
 var legacyRoleRank = map[string]int{"reader": 1, "contributor": 2, "admin": 3}
@@ -555,7 +581,12 @@ func (h *Handler) listGraph(w http.ResponseWriter, r *http.Request) {
 
 	// Filtrer
 	var filtered []*model.Model3D
+	visitor := isVisitor(r)
 	for _, m := range all {
+		// Un visiteur ne voit que le catalogue publié, jamais les brouillons (RM49).
+		if visitor && m.Status != model.ModuleSubmitted {
+			continue
+		}
 		if len(catSet) > 0 && !catSet[string(m.Category)] {
 			continue
 		}
@@ -918,6 +949,15 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 	if rest == "" {
 		http.NotFound(w, r)
 		return
+	}
+	// Un visiteur ne lit qu'un asset publié et ses sous-ressources (RM49) : un
+	// brouillon lui est inconnu.
+	if isVisitor(r) {
+		id, _, _ := strings.Cut(rest, "/")
+		if m, err := h.svcFor(r).Get(id, h.channelFor(r)); err != nil || m.Status != model.ModuleSubmitted {
+			jsonError(w, "asset introuvable", http.StatusNotFound)
+			return
+		}
 	}
 	// /api/components/batch — création de plusieurs composants en un seul appel.
 	// Traité ici (et non via un mux.HandleFunc séparé) pour ne jamais être

@@ -2,10 +2,10 @@
 id: FT-007
 titre: "Lecture du catalogue sans compte"
 type: decision
-statut: a-trancher
+statut: en-cours
 severite: mineure
 detecte: 2026-10-02
-maj: 2026-10-02
+maj: 2026-11-09
 composants: [adapters/in/rest]
 uc: [UCA01, UCCL01]
 rm: []
@@ -13,7 +13,7 @@ enf: [ENF12]
 tags:
   - ticket
   - ticket/decision
-  - statut/a-trancher
+  - statut/en-cours
   - severite/mineure
   - domaine/identity
   - domaine/role
@@ -23,7 +23,7 @@ tags:
 ---
 # FT-007 — Lecture du catalogue sans compte
 
-> **Décision à prendre** · sévérité **mineure** · statut **À trancher (PO)** · détecté le 2026-10-02
+> **Décision à prendre** · sévérité **mineure** · statut **En cours** · détecté le 2026-10-02
 > Source : Annotation #remarque de UCA01 (expression) ; roadmap (UCCL01) ; note « TODO MYR-CORE (backend) » du vault
 
 ## Constat
@@ -48,9 +48,9 @@ Ajouter au profil réseau un réglage « lecture publique » (désactivé par d�
 
 ## Critères de clôture
 
-- [ ] Règle écrite dans les specs (UCA01, UCCL01, ENF12)
-- [ ] Lecture anonyme possible uniquement quand le réseau l'autorise
-- [ ] Écriture toujours refusée aux visiteurs
+- [x] Règle écrite dans les specs (RM49 ; UCA02, UCCL01, API_REST)
+- [x] Lecture anonyme possible uniquement quand le réseau l'autorise
+- [x] Écriture toujours refusée aux visiteurs
 
 ## Liens
 
@@ -62,3 +62,4 @@ Ajouter au profil réseau un réglage « lecture publique » (désactivé par d�
 ## Historique
 
 - 2026-10-02 — Ticket créé
+- 2026-11-09 — Tranché par le PO (option « pas de session » pour les visiteurs, en réponse à R-06) et implémenté sur `feature/ledger-invariants` : le réglage existant `AllowAutoGuest` (`myr network add|update --auto-guest`, fermé par défaut) ouvre la lecture du catalogue publié sans session ni jeton (RM49) ; les brouillons restent invisibles des visiteurs (404), toute écriture exige une session ; `POST /api/identity/guest` ne crée plus de session. Passe à `resolu` à la fusion dans `develop`

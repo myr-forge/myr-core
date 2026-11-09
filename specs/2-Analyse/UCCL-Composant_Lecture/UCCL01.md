@@ -11,6 +11,7 @@ tags:
   - famille/UCCL
   - domaine/model
   - uc/UCCL01
+  - rm/RM49
   - enf/ENF01
   - enf/ENF12
   - enf/ENF14
@@ -45,14 +46,14 @@ UC1 ..> UC2 : <<extend>>
 
 ## Contexte
 
-La recherche par filtre est le point d'entrée principal sur les assets du réseau. Elle doit être accessible sans authentification pour les visiteurs (accès public), conformément à l'exigence EF17 du domaine D4.
+La recherche par filtre est le point d'entrée principal sur les assets du réseau. Quand l'administrateur a ouvert la lecture publique du réseau (`myr network add|update --auto-guest`), elle est accessible sans authentification aux visiteurs, conformément à l'exigence EF17 du domaine D4 : un visiteur lit le catalogue publié — les assets soumis — sans session ni jeton, jamais les brouillons (RM49).
 
 Le système interroge la blockchain via `GET /api/components` avec des paramètres de filtre. Le résultat est un graphe `{ components, connections, total }` décrivant les assets correspondants et leurs liaisons.
 
 ## Pré-conditions
 
 - Le serveur Myr est démarré et joignable
-- Pour un visiteur : aucune authentification requise (lecture publique, EF17)
+- Pour un visiteur : aucune authentification, si le réseau a ouvert la lecture publique (RM49) ; sinon `401`
 - Pour un utilisateur authentifié : token de session opaque valide dans l'en-tête `X-Myr-Token`
 - La blockchain accessible n'est requise que pour obtenir la liste complète (assets on-chain inclus) — voir Flux alternatif « Mode dégradé » pour le cas où seuls des brouillons locaux peuvent être retournés
 
@@ -76,7 +77,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 8. Le client reçoit `{ components: [...], connections: [...], total: N }`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 80 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 83 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -92,7 +93,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 65 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 68 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Aucun résultat
@@ -111,7 +112,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 2. Une nouvelle requête `GET /api/components` est émise avec les critères mis à jour
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 74 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 77 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -127,7 +128,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 59 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 62 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Mode dégradé (blockchain injoignable, brouillons locaux disponibles)
@@ -168,7 +169,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 2. Le middleware `requireRole("contributor")` renvoie HTTP 401 `{ "error": "authentification requise" }`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 74 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 77 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -184,7 +185,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 59 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 62 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## Post-conditions

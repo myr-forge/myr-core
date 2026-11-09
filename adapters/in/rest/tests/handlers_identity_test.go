@@ -586,7 +586,10 @@ func TestHandleIdentityPolicy_RequireApproval(t *testing.T) {
 
 // ── POST /api/identity/guest ──────────────────────────────────────────────────
 
-func TestHandleIdentityGuest_AllowedDeliversToken(t *testing.T) {
+// / @brief  POST /api/identity/guest sur un réseau ouvert à la lecture publique : aucune session créée (RM49)
+// / @input  réseau AllowAutoGuest=true, corps {pseudo: visiteur}
+// / @expect 200, guest=true, role reader, jeton vide — la lecture se fait sans jeton
+func TestHandleIdentityGuest_RM49_PublicRead_NoSession(t *testing.T) {
 	netSvc := &mockNetworkSvc{
 		getActive: func() (*network.NetworkProfile, error) {
 			return &network.NetworkProfile{AllowAutoGuest: true, MSPID: "Org1MSP"}, nil
@@ -608,8 +611,8 @@ func TestHandleIdentityGuest_AllowedDeliversToken(t *testing.T) {
 		Guest bool   `json:"guest"`
 	}
 	json.NewDecoder(w.Body).Decode(&sess)
-	if sess.Token == "" {
-		t.Error("token attendu dans la réponse")
+	if sess.Token != "" {
+		t.Errorf("aucun jeton attendu (lecture publique sans session), obtenu %q", sess.Token)
 	}
 	if sess.Role != "reader" {
 		t.Errorf("role reader attendu, obtenu %q", sess.Role)

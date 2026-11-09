@@ -59,10 +59,10 @@ type NetworkProfile struct {
 	// Exemple : "https://myr.monorg.com:8080"
 	// Vide = le GUI gère lui-même (mode standalone, dev uniquement).
 	ServerURL string `json:"server_url,omitempty"`
-	// AllowAutoGuest contrôle si un inconnu peut obtenir automatiquement un accès
-	// en lecture seule sans validation préalable de l'admin.
-	// false (défaut) : tout accès requiert une identité validée par l'admin.
-	// true  : POST /api/identity/guest délivre immédiatement un token reader.
+	// AllowAutoGuest ouvre la lecture publique du catalogue (RM49) : un visiteur
+	// sans compte lit les assets publiés, sans session ni jeton.
+	// false (défaut) : toute lecture requiert une session.
+	// true  : les routes de lecture du catalogue acceptent les requêtes sans jeton.
 	AllowAutoGuest bool `json:"allow_auto_guest,omitempty"`
 	// AllowAutoRegister contrôle si les utilisateurs peuvent s'inscrire seuls
 	// (ADR-12 ; requiert des credentials admin CA configurés).

@@ -17,9 +17,9 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 |--------|--------|
 | Ouvert | 17 |
 | À vérifier | 2 |
-| À trancher (PO) | 14 |
+| À trancher (PO) | 13 |
 | Différé | 1 |
-| En cours | 6 |
+| En cours | 7 |
 | Résolu | 1 |
 
 ## Critiques à traiter en premier
@@ -72,7 +72,6 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-021 — Identifiant d'un asset décomposé en module](FT-021-identifiant-d-un-asset-decompose-en-module.md) | Décision à prendre | majeure | À trancher (PO) | UCAM05, UCAM09 |
 | [FT-036 — Commissions : composition seule ou aussi chaîne de dérivation](FT-036-commissions-composition-seule-ou-aussi-chaine-de.md) | Décision à prendre | majeure | À trancher (PO) | UCPI02, UCPI04, UCPI01 |
 | [FT-040 — Fonctions propres aux outils extérieurs implémentées dans myr-core](FT-040-fonctions-d-outils-exterieurs-dans-le-coeur.md) | Dette technique | majeure | À trancher (PO) | UCAM01, UCAM02, UCAM03, UCCE01, UCCE06, UCMOD01, UCMOD03, UCMOD06 |
-| [FT-007 — Lecture du catalogue sans compte](FT-007-lecture-du-catalogue-sans-compte.md) | Décision à prendre | mineure | À trancher (PO) | UCA01, UCCL01 |
 | [FT-010 — UCA04 et UCA07 s'appuient sur une commande qui ne couvre pas leur besoin](FT-010-uca04-et-uca07-s-appuient-sur-une.md) | Incohérence documentaire | mineure | À trancher (PO) | UCA04, UCA07 |
 | [FT-022 — Date de retrait des routes legacy /api/modules](FT-022-date-de-retrait-des-routes-legacy-api.md) | Décision à prendre | mineure | À trancher (PO) | UCMOD01, UCMOD04, UCMOD06 |
 | [FT-033 — UCMOD05 référencé mais inexistant](FT-033-ucmod05-reference-mais-inexistant.md) | Incohérence documentaire | mineure | À trancher (PO) | UCMOD02, UCMOD03 |
@@ -95,6 +94,7 @@ Vue dynamique : [Tickets.base](Tickets.base) (Obsidian Bases) · Modèle : [_Mod
 | [FT-012 — Un module soumis peut être soumis à nouveau sans fork](FT-012-un-module-soumis-peut-etre-soumis-a.md) | Écart spec ↔ code | majeure | En cours | UCMOD06 |
 | [FT-034 — Modèle de domaine : ligne RM22 décrivant un écart](FT-034-modele-de-domaine-ligne-rm22-decrivant-un.md) | Incohérence documentaire | mineure | En cours | UCA02 |
 | [FT-039 — Tests d'intégration REST en échec depuis l'authentification obligatoire](FT-039-tests-d-integration-rest-en-echec.md) | Anomalie | majeure | En cours | UCDEV01, UCMOD06, UCCE06 |
+| [FT-007 — Lecture du catalogue sans compte](FT-007-lecture-du-catalogue-sans-compte.md) | Décision à prendre | mineure | En cours | UCA01, UCCL01 |
 
 ## Résolu
 

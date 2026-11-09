@@ -528,8 +528,6 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Conséquence** : La table des rôles et de leurs permissions est publiée sur le ledger, un exemplaire par canal du réseau, et appliquée par le chaincode comme par chaque serveur. Seule une identité dont le rôle porte `role.admin` la modifie. Tous les rôles se modifient ou se suppriment, sauf `admin`, qui porte toujours toutes les permissions. Tant qu'aucune table n'est publiée, la table initiale s'applique (`reader`, `contributor`, `auditor`, `admin`) ; si la table devient illisible, un serveur applique la dernière table lue, à défaut la table initiale. Une identité dont le rôle a été supprimé n'a plus aucune permission. Les droits effectifs d'une identité sont l'union des permissions de son rôle (certificat) et de celles des rôles attribués à son organisation (RM37, UCADM06)
 - **Use cases** : UCA05, UCADM06, UCADM07
 
----
-
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 14 explicite(s) · 0 déduit(s)
 > - ✅ [TestFabricRoleStore_RM48_PublishedOnEveryChannel](../../docs/tests/adapters-out-fabric/TestFabricRoleStore_RM48_PublishedOnEveryChannel.md) — explicite (le test cite RM48)
@@ -546,6 +544,35 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - ✅ [TestTable_RM48_Unreachable_NeverRead_DefaultRoles](../../docs/tests/domain-role/TestTable_RM48_Unreachable_NeverRead_DefaultRoles.md) — explicite (le test cite RM48)
 > - ✅ [TestUpdate_RM48_Admin_Rejected](../../docs/tests/domain-role/TestUpdate_RM48_Admin_Rejected.md) — explicite (le test cite RM48)
 > - ✅ [TestUpdate_RM48_DefaultRoleEditable](../../docs/tests/domain-role/TestUpdate_RM48_DefaultRoleEditable.md) — explicite (le test cite RM48)
+<!-- tests-obsidian:end -->
+
+### RM49 — Lecture publique du catalogue, ouverte par l'administrateur
+
+- **Déclencheur** : Lecture du catalogue sans session — liste et détail des composants et modules (`GET /api/components`, `/api/components/{id}` et ses sous-ressources), référentiels d'interfaces (`/api/refs`), catalogue des licences (`/api/licenses`)
+- **Condition** : L'administrateur a ouvert la lecture publique du réseau (`myr network add|update --auto-guest`) ; elle est fermée par défaut
+- **Conséquence** : Un visiteur sans compte lit le catalogue publié — les assets soumis et leurs sous-ressources — sans session ni jeton. Les brouillons lui restent inconnus (404) et il n'écrit jamais. Réseau fermé : toute lecture exige une session (401). Un jeton présent mais invalide est refusé, même lecture ouverte, pour que le client apprenne l'expiration de sa session. Aucune session invitée n'est créée
+- **Use cases** : UCCL01, UCA02
+
+---
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 4 explicite(s) · 91 déduit(s)
+> - ✅ [TestHandleIdentityGuest_RM49_PublicRead_NoSession](../../docs/tests/adapters-in-rest/TestHandleIdentityGuest_RM49_PublicRead_NoSession.md) — explicite (le test cite RM49)
+> - ✅ [TestPublicRead_RM49_Closed_SessionRequired](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_Closed_SessionRequired.md) — explicite (le test cite RM49)
+> - ✅ [TestPublicRead_RM49_Open_PublishedOnly](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_Open_PublishedOnly.md) — explicite (le test cite RM49)
+> - ✅ [TestPublicRead_RM49_WritesAndOtherRoutes_Refused](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_WritesAndOtherRoutes_Refused.md) — explicite (le test cite RM49)
+> - 🟡 [TestRunNetworkAdd_InvalidPeer_Rejected](../../docs/tests/adapters-in-cli/TestRunNetworkAdd_InvalidPeer_Rejected.md) — déduit : teste commande `myr network add`
+> - 🟡 [TestRunNetworkAdd_NoApproval_NotSet](../../docs/tests/adapters-in-cli/TestRunNetworkAdd_NoApproval_NotSet.md) — déduit : teste commande `myr network add`
+> - 🟡 [TestRunNetworkAdd_NominalCase](../../docs/tests/adapters-in-cli/TestRunNetworkAdd_NominalCase.md) — déduit : teste commande `myr network add`
+> - 🟡 [TestRunNetworkAdd_RequireApproval](../../docs/tests/adapters-in-cli/TestRunNetworkAdd_RequireApproval.md) — déduit : teste commande `myr network add`
+> - 🟡 [TestAPIIntegration_AssetLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_LicenseCatalog](../../docs/tests/adapters-in-rest/TestAPIIntegration_LicenseCatalog.md) — déduit : teste route `/api/licenses`
+> - 🟡 [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — déduit : teste route `/api/components`
+> - 🟡 [TestAPIIntegration_RefsCategoryPersists](../../docs/tests/adapters-in-rest/TestAPIIntegration_RefsCategoryPersists.md) — déduit : teste route `/api/refs`
+> - 🟡 [TestComponentInterfaces_GET](../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : teste route `/api/components`
+> - … et 80 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## 7. Propriété intellectuelle et commissions
@@ -779,6 +806,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | [RM46](#RM46%20—%20Rôle%20attribué%20toujours%20défini%20dans%20la%20table%20des%20rôles) | Rôle attribué toujours présent dans la table des rôles ; rôle d'inscription par défaut sans droit d'administration | Compte |
 | [RM47](#RM47%20—%20Demande%20de%20rôle,%20attribution%20automatique%20ou%20approbation) | Demande de rôle attribuée aussitôt si le rôle est en attribution automatique, sinon soumise à l'administrateur ; jamais automatique pour un rôle d'administration | Compte |
 | [RM48](#RM48%20—%20Table%20des%20rôles%20partagée%20par%20le%20réseau,%20rôle%20administrateur%20immuable) | Table des rôles publiée sur le ledger et appliquée par tout le réseau ; `admin` immuable ; table initiale tant qu'aucune n'est publiée | Compte |
+| [RM49](#RM49%20—%20Lecture%20publique%20du%20catalogue,%20ouverte%20par%20l'administrateur) | Lecture du catalogue publié sans compte ni session si l'administrateur l'ouvre ; brouillons jamais visibles d'un visiteur | Compte |
 | [RM23](#RM23%20—%20Distribution%20automatique%20des%20commissions) | Commissions distribuées automatiquement à la livraison | PI |
 | [RM24](#RM24%20—%20Répartition%20proportionnelle%20multi-auteurs) | Répartition proportionnelle par auteur | PI |
 | [RM25](#RM25%20—%20Transfert%20de%20propriété%20définitif) | Transfert de propriété définitif et immuable | PI |

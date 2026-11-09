@@ -197,7 +197,15 @@ type ctxKey int
 
 const (
 	ctxSession ctxKey = iota
+	// ctxVisitor marque une lecture publique du catalogue, sans session (RM49).
+	ctxVisitor
 )
+
+// isVisitor indique si la requête est une lecture publique, sans session.
+func isVisitor(r *http.Request) bool {
+	v, _ := r.Context().Value(ctxVisitor).(bool)
+	return v
+}
 
 // sessionFromCtx récupère la session depuis le contexte de la requête.
 func sessionFromCtx(r *http.Request) *myrSession {
