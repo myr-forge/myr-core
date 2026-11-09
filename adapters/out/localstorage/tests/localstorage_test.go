@@ -2,6 +2,7 @@ package localstorage_test
 
 import (
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"myr-core/adapters/out/localstorage"
 	"os"
@@ -550,31 +551,59 @@ func TestSaveConnection_And_List(t *testing.T) {
 	}
 }
 
-// / @brief  Vérifie la déduplication des connexions simples ayant le même From/To sans identifiants d'interface
-// / @input  Connexions c1 et c2 avec mêmes From="A" et To="B", sans FromIfaceID ni ToIfaceID
-// / @expect ListConnections retourne exactement 1 connexion (la première est conservée)
-func TestSaveConnection_Dedup_SimpleLink(t *testing.T) {
+// / @brief  SaveConnection enregistre chaque connexion telle quelle et remplace celle de même ID — le refus d'un doublon relève du domaine (R-15)
+// / @input  c1 et c2 de même paire A→B ; puis c1 réenregistrée avec un autre label
+// / @expect 2 connexions ; c1 porte le nouveau label
+func TestSaveConnection_StoresAsIs_ReplacesSameID(t *testing.T) {
 	db, _ := tmpDB(t)
 	_ = db.SaveConnection(newConn("c1", "A", "B"))
-	_ = db.SaveConnection(newConn("c2", "A", "B")) // same From/To, no iface IDs
+	_ = db.SaveConnection(newConn("c2", "A", "B"))
+	_ = db.SaveConnection(&model.Connection{ID: "c1", From: "A", To: "B", Label: "relabel"})
 	list, _ := db.ListConnections()
-	if len(list) != 1 {
-		t.Fatalf("expected dedup to 1, got %d", len(list))
+	if len(list) != 2 || list[0].ID != "c1" || list[0].Label != "relabel" {
+		t.Fatalf("connexions inattendues : %+v", list)
 	}
 }
 
-// / @brief  Vérifie la déduplication des connexions d'interface ayant les mêmes From, To, FromIfaceID, ToIfaceID et InstanceIDs
-// / @input  Connexions c1 et c2 avec mêmes endpoints d'interface (if1→if2, inst1→inst2)
-// / @expect ListConnections retourne exactement 1 connexion
-func TestSaveConnection_Dedup_IfaceLink(t *testing.T) {
-	db, _ := tmpDB(t)
-	c1 := &model.Connection{ID: "c1", From: "A", To: "B", FromIfaceID: "if1", ToIfaceID: "if2", FromInstanceID: "inst1", ToInstanceID: "inst2"}
-	c2 := &model.Connection{ID: "c2", From: "A", To: "B", FromIfaceID: "if1", ToIfaceID: "if2", FromInstanceID: "inst1", ToInstanceID: "inst2"}
-	_ = db.SaveConnection(c1)
-	_ = db.SaveConnection(c2)
-	list, _ := db.ListConnections()
-	if len(list) != 1 {
-		t.Fatalf("expected dedup to 1 for same iface link, got %d", len(list))
+// / @brief  Un fichier d'état local illisible n'est jamais traité comme vide ni réécrit (R-21)
+// / @input  fichier contenant du JSON invalide ; lecture puis écriture d'une connexion
+// / @expect les deux opérations échouent avec ErrCorruptStore ; le fichier est inchangé
+func TestJSONStore_R21_CorruptFile_RefusedNotOverwritten(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "assets.json")
+	corrupt := []byte(`{"connections": [ {"id": "c1"`)
+	if err := os.WriteFile(path, corrupt, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	db := localstorage.NewJSONBlockchain(path)
+	if _, err := db.ListConnections(); !errors.Is(err, localstorage.ErrCorruptStore) {
+		t.Errorf("lecture : ErrCorruptStore attendu, obtenu %v", err)
+	}
+	if err := db.SaveConnection(newConn("c2", "A", "B")); !errors.Is(err, localstorage.ErrCorruptStore) {
+		t.Errorf("écriture : ErrCorruptStore attendu, obtenu %v", err)
+	}
+	if got, _ := os.ReadFile(path); string(got) != string(corrupt) {
+		t.Error("le fichier corrompu ne doit pas être modifié")
+	}
+}
+
+// / @brief  L'écriture passe par un fichier temporaire renommé et laisse le fichier en 0600 (R-21)
+// / @input  enregistrement d'une connexion dans un répertoire vide
+// / @expect seul le fichier de données (et son verrou) existe ; il est relu correctement
+func TestJSONStore_R21_AtomicWrite_NoTempLeft(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "assets.json")
+	db := localstorage.NewJSONBlockchain(path)
+	if err := db.SaveConnection(newConn("c1", "A", "B")); err != nil {
+		t.Fatalf("SaveConnection : %v", err)
+	}
+	entries, _ := os.ReadDir(dir)
+	for _, e := range entries {
+		if e.Name() != "assets.json" && e.Name() != "assets.json.lock" {
+			t.Errorf("fichier résiduel : %s", e.Name())
+		}
+	}
+	if list, err := localstorage.NewJSONBlockchain(path).ListConnections(); err != nil || len(list) != 1 {
+		t.Errorf("relecture : %v, %v", list, err)
 	}
 }
 

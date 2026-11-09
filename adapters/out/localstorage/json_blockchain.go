@@ -5,11 +5,7 @@
 package localstorage
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
-	"os"
-	"sync"
 
 	"myr-core/domain/model"
 )
@@ -27,26 +23,21 @@ var _ model.RemovedAssetStore = (*JSONBlockchain)(nil)
 
 // JSONBlockchain persiste les données GUI locales (connexions, miniatures, interfaces, brouillons).
 // Il implémente ConnectionStore, ThumbnailStore, InterfaceStore, DraftStore et RemovedAssetStore.
+// Le fichier est partagé par le serveur et la CLI (jsonFile : verrou, écriture
+// atomique, fichier illisible jamais écrasé).
 type JSONBlockchain struct {
-	path string
-	mu   sync.RWMutex
+	file *jsonFile
 }
 
 func NewJSONBlockchain(path string) *JSONBlockchain {
-	return &JSONBlockchain{path: path}
+	return &JSONBlockchain{file: newJSONFile(path, 0o600)}
 }
 
 // ── persistance interne ──────────────────────────────────────────────────────
 
-func (j *JSONBlockchain) load() *dbFile {
-	data, err := os.ReadFile(j.path)
-	var db dbFile
-	if err == nil {
-		if unmarshalErr := json.Unmarshal(data, &db); unmarshalErr != nil {
-			log.Printf("[localstorage] fichier DB corrompu (%s), démarrage à vide : %v", j.path, unmarshalErr)
-		}
-	}
-	// Initialiser tous les champs nuls pour éviter les panics sur les callers.
+// withDefaults initialise les champs absents du fichier, pour qu'aucun
+// appelant ne manipule une carte ou une liste nulle.
+func (db *dbFile) withDefaults() *dbFile {
 	if db.Thumbnails == nil {
 		db.Thumbnails = map[string]string{}
 	}
@@ -66,127 +57,124 @@ func (j *JSONBlockchain) load() *dbFile {
 	if db.Refs == nil || len(db.Refs.Categories) == 0 {
 		db.Refs = model.DefaultInterfaceRefs()
 	}
-	return &db
+	return db
 }
 
-func (j *JSONBlockchain) save(db *dbFile) error {
-	data, err := json.MarshalIndent(db, "", "  ")
-	if err != nil {
-		return err
+// read retourne le contenu du fichier.
+func (j *JSONBlockchain) read() (*dbFile, error) {
+	var db dbFile
+	if err := j.file.view(&db); err != nil {
+		return nil, err
 	}
-	return os.WriteFile(j.path, data, 0644)
+	return db.withDefaults(), nil
+}
+
+// update applique change au contenu du fichier et l'écrit, sous verrou.
+func (j *JSONBlockchain) update(change func(db *dbFile) error) error {
+	var db dbFile
+	return j.file.update(&db, func() error { return change(db.withDefaults()) })
 }
 
 // ── model.ConnectionStore ────────────────────────────────────────────────────
 
+// SaveConnection enregistre c, ou remplace la connexion de même ID. Le refus
+// d'une liaison en double relève du domaine (RM09, AddConnection).
 func (j *JSONBlockchain) SaveConnection(c *model.Connection) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-
-	// Dédoublonnage : même paire d'interfaces ET même paire d'instances
-	// (les mêmes interfaces peuvent être reconnectées dans un autre produit/contexte)
-	for _, existing := range db.Connections {
-		if c.FromIfaceID != "" && c.ToIfaceID != "" {
-			if existing.FromIfaceID == c.FromIfaceID && existing.ToIfaceID == c.ToIfaceID &&
-				existing.FromInstanceID == c.FromInstanceID && existing.ToInstanceID == c.ToInstanceID {
-				return nil
-			}
-		} else {
-			if existing.From == c.From && existing.To == c.To {
+	return j.update(func(db *dbFile) error {
+		for i, existing := range db.Connections {
+			if existing.ID == c.ID {
+				db.Connections[i] = c
 				return nil
 			}
 		}
-	}
-	db.Connections = append(db.Connections, c)
-	return j.save(db)
+		db.Connections = append(db.Connections, c)
+		return nil
+	})
 }
 
 func (j *JSONBlockchain) UpdateConnection(c *model.Connection) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	for i, existing := range db.Connections {
-		if existing.ID == c.ID {
-			db.Connections[i] = c
-			return j.save(db)
+	return j.update(func(db *dbFile) error {
+		for i, existing := range db.Connections {
+			if existing.ID == c.ID {
+				db.Connections[i] = c
+				return nil
+			}
 		}
-	}
-	return fmt.Errorf("connexion %s introuvable", c.ID)
+		return fmt.Errorf("connexion %s introuvable", c.ID)
+	})
 }
 
 func (j *JSONBlockchain) RemoveConnection(id string) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	filtered := db.Connections[:0]
-	for _, c := range db.Connections {
-		if c.ID != id {
-			filtered = append(filtered, c)
+	return j.update(func(db *dbFile) error {
+		filtered := db.Connections[:0]
+		for _, c := range db.Connections {
+			if c.ID != id {
+				filtered = append(filtered, c)
+			}
 		}
-	}
-	db.Connections = filtered
-	return j.save(db)
+		db.Connections = filtered
+		return nil
+	})
 }
 
 func (j *JSONBlockchain) ListConnections() ([]*model.Connection, error) {
-	j.mu.RLock()
-	defer j.mu.RUnlock()
-	db := j.load()
+	db, err := j.read()
+	if err != nil {
+		return nil, err
+	}
 	return db.Connections, nil
 }
 
 // ── model.ThumbnailStore ─────────────────────────────────────────────────────
 
 func (j *JSONBlockchain) SaveThumbnail(assetID, dataURL string) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	db.Thumbnails[assetID] = dataURL
-	return j.save(db)
+	return j.update(func(db *dbFile) error {
+		db.Thumbnails[assetID] = dataURL
+		return nil
+	})
 }
 
 func (j *JSONBlockchain) GetThumbnail(assetID string) (string, error) {
-	j.mu.RLock()
-	defer j.mu.RUnlock()
-	db := j.load()
+	db, err := j.read()
+	if err != nil {
+		return "", err
+	}
 	return db.Thumbnails[assetID], nil
 }
 
 // ── model.InterfaceStore ─────────────────────────────────────────────────────
 
 func (j *JSONBlockchain) SaveInterface(iface *model.AssetInterface) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	for i, existing := range db.Interfaces {
-		if existing.ID == iface.ID {
-			db.Interfaces[i] = iface
-			return j.save(db)
+	return j.update(func(db *dbFile) error {
+		for i, existing := range db.Interfaces {
+			if existing.ID == iface.ID {
+				db.Interfaces[i] = iface
+				return nil
+			}
 		}
-	}
-	db.Interfaces = append(db.Interfaces, iface)
-	return j.save(db)
+		db.Interfaces = append(db.Interfaces, iface)
+		return nil
+	})
 }
 
 func (j *JSONBlockchain) RemoveInterface(id string) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	filtered := db.Interfaces[:0]
-	for _, iface := range db.Interfaces {
-		if iface.ID != id {
-			filtered = append(filtered, iface)
+	return j.update(func(db *dbFile) error {
+		filtered := db.Interfaces[:0]
+		for _, iface := range db.Interfaces {
+			if iface.ID != id {
+				filtered = append(filtered, iface)
+			}
 		}
-	}
-	db.Interfaces = filtered
-	return j.save(db)
+		db.Interfaces = filtered
+		return nil
+	})
 }
 
 func (j *JSONBlockchain) ListInterfacesForAsset(assetID string) ([]*model.AssetInterface, error) {
-	j.mu.RLock()
-	defer j.mu.RUnlock()
-	db := j.load()
+	db, err := j.read()
+	if err != nil {
+		return nil, err
+	}
 	var result []*model.AssetInterface
 	for _, iface := range db.Interfaces {
 		if iface.AssetID == assetID {
@@ -197,9 +185,10 @@ func (j *JSONBlockchain) ListInterfacesForAsset(assetID string) ([]*model.AssetI
 }
 
 func (j *JSONBlockchain) GetInterface(id string) (*model.AssetInterface, error) {
-	j.mu.RLock()
-	defer j.mu.RUnlock()
-	db := j.load()
+	db, err := j.read()
+	if err != nil {
+		return nil, err
+	}
 	for _, iface := range db.Interfaces {
 		if iface.ID == id {
 			return iface, nil
@@ -211,23 +200,23 @@ func (j *JSONBlockchain) GetInterface(id string) (*model.AssetInterface, error) 
 // ── model.DraftStore ─────────────────────────────────────────────────────────
 
 func (j *JSONBlockchain) SaveDraft(m *model.Model3D) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	for i, existing := range db.Drafts {
-		if existing.ID == m.ID {
-			db.Drafts[i] = m
-			return j.save(db)
+	return j.update(func(db *dbFile) error {
+		for i, existing := range db.Drafts {
+			if existing.ID == m.ID {
+				db.Drafts[i] = m
+				return nil
+			}
 		}
-	}
-	db.Drafts = append(db.Drafts, m)
-	return j.save(db)
+		db.Drafts = append(db.Drafts, m)
+		return nil
+	})
 }
 
 func (j *JSONBlockchain) GetDraft(id string) (*model.Model3D, error) {
-	j.mu.RLock()
-	defer j.mu.RUnlock()
-	db := j.load()
+	db, err := j.read()
+	if err != nil {
+		return nil, err
+	}
 	for _, m := range db.Drafts {
 		if m.ID == id {
 			return m, nil
@@ -237,23 +226,23 @@ func (j *JSONBlockchain) GetDraft(id string) (*model.Model3D, error) {
 }
 
 func (j *JSONBlockchain) RemoveDraft(id string) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	filtered := db.Drafts[:0]
-	for _, m := range db.Drafts {
-		if m.ID != id {
-			filtered = append(filtered, m)
+	return j.update(func(db *dbFile) error {
+		filtered := db.Drafts[:0]
+		for _, m := range db.Drafts {
+			if m.ID != id {
+				filtered = append(filtered, m)
+			}
 		}
-	}
-	db.Drafts = filtered
-	return j.save(db)
+		db.Drafts = filtered
+		return nil
+	})
 }
 
 func (j *JSONBlockchain) ListDrafts(channelID string) ([]*model.Model3D, error) {
-	j.mu.RLock()
-	defer j.mu.RUnlock()
-	db := j.load()
+	db, err := j.read()
+	if err != nil {
+		return nil, err
+	}
 	if channelID == "" {
 		return db.Drafts, nil
 	}
@@ -269,73 +258,72 @@ func (j *JSONBlockchain) ListDrafts(channelID string) ([]*model.Model3D, error) 
 // ── model.RemovedAssetStore ──────────────────────────────────────────────────
 
 func (j *JSONBlockchain) HideAsset(id string) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	db.HiddenIDs[id] = true
-	return j.save(db)
+	return j.update(func(db *dbFile) error {
+		db.HiddenIDs[id] = true
+		return nil
+	})
 }
 
 func (j *JSONBlockchain) IsHidden(id string) (bool, error) {
-	j.mu.RLock()
-	defer j.mu.RUnlock()
-	db := j.load()
+	db, err := j.read()
+	if err != nil {
+		return false, err
+	}
 	return db.HiddenIDs[id], nil
 }
 
 func (j *JSONBlockchain) GetRefs() (*model.InterfaceRefs, error) {
-	j.mu.RLock()
-	defer j.mu.RUnlock()
-	return j.load().Refs, nil // toujours non-nil grâce à load()
+	db, err := j.read()
+	if err != nil {
+		return nil, err
+	}
+	return db.Refs, nil // toujours non-nil grâce à withDefaults
 }
 
 func (j *JSONBlockchain) AddRefCategory(cat string) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	for _, c := range db.Refs.Categories {
-		if c == cat {
-			return nil
+	return j.update(func(db *dbFile) error {
+		for _, c := range db.Refs.Categories {
+			if c == cat {
+				return nil
+			}
 		}
-	}
-	db.Refs.Categories = append(db.Refs.Categories, cat)
-	if db.Refs.Types == nil {
-		db.Refs.Types = map[string][]string{}
-	}
-	if db.Refs.Units == nil {
-		db.Refs.Units = map[string][]string{}
-	}
-	if _, ok := db.Refs.Types[cat]; !ok {
-		db.Refs.Types[cat] = []string{}
-	}
-	if _, ok := db.Refs.Units[cat]; !ok {
-		db.Refs.Units[cat] = []string{}
-	}
-	return j.save(db)
+		db.Refs.Categories = append(db.Refs.Categories, cat)
+		if db.Refs.Types == nil {
+			db.Refs.Types = map[string][]string{}
+		}
+		if db.Refs.Units == nil {
+			db.Refs.Units = map[string][]string{}
+		}
+		if _, ok := db.Refs.Types[cat]; !ok {
+			db.Refs.Types[cat] = []string{}
+		}
+		if _, ok := db.Refs.Units[cat]; !ok {
+			db.Refs.Units[cat] = []string{}
+		}
+		return nil
+	})
 }
 
 func (j *JSONBlockchain) AddRefType(cat, typeName string) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	for _, t := range db.Refs.Types[cat] {
-		if t == typeName {
-			return nil
+	return j.update(func(db *dbFile) error {
+		for _, t := range db.Refs.Types[cat] {
+			if t == typeName {
+				return nil
+			}
 		}
-	}
-	db.Refs.Types[cat] = append(db.Refs.Types[cat], typeName)
-	return j.save(db)
+		db.Refs.Types[cat] = append(db.Refs.Types[cat], typeName)
+		return nil
+	})
 }
 
 func (j *JSONBlockchain) AddRefUnit(cat, unit string) error {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	db := j.load()
-	for _, u := range db.Refs.Units[cat] {
-		if u == unit {
-			return nil
+	return j.update(func(db *dbFile) error {
+		for _, u := range db.Refs.Units[cat] {
+			if u == unit {
+				return nil
+			}
 		}
-	}
-	db.Refs.Units[cat] = append(db.Refs.Units[cat], unit)
-	return j.save(db)
+		db.Refs.Units[cat] = append(db.Refs.Units[cat], unit)
+		return nil
+	})
 }

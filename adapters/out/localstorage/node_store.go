@@ -7,10 +7,7 @@
 package localstorage
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"sync"
 	"time"
 )
 
@@ -28,74 +25,64 @@ type nodeDB struct {
 	Nodes []*ProvisionedNode `json:"nodes"`
 }
 
-// JSONNodeStore persiste les nœuds provisionnés dans un fichier JSON. Thread-safe.
+// JSONNodeStore persiste les nœuds provisionnés dans un fichier JSON, partagé
+// par le serveur et la CLI (jsonFile).
 type JSONNodeStore struct {
-	path string
-	mu   sync.RWMutex
+	file *jsonFile
 }
 
 func NewJSONNodeStore(path string) *JSONNodeStore {
-	return &JSONNodeStore{path: path}
+	return &JSONNodeStore{file: newJSONFile(path, 0o600)}
 }
 
-func (s *JSONNodeStore) load() *nodeDB {
+// read retourne les nœuds enregistrés.
+func (s *JSONNodeStore) read() ([]*ProvisionedNode, error) {
 	var db nodeDB
-	data, err := os.ReadFile(s.path)
-	if err == nil {
-		json.Unmarshal(data, &db) //nolint:errcheck — fichier corrompu traité comme vide
+	if err := s.file.view(&db); err != nil {
+		return nil, err
 	}
-	if db.Nodes == nil {
-		db.Nodes = []*ProvisionedNode{}
-	}
-	return &db
-}
-
-func (s *JSONNodeStore) save(db *nodeDB) error {
-	data, err := json.MarshalIndent(db, "", "  ")
-	if err != nil {
-		return fmt.Errorf("node_store marshal : %w", err)
-	}
-	return os.WriteFile(s.path, data, 0644)
+	return db.Nodes, nil
 }
 
 // Add enregistre un nœud (upsert par ChannelID+Addr).
 func (s *JSONNodeStore) Add(n *ProvisionedNode) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	db := s.load()
-	for i, existing := range db.Nodes {
-		if existing.ChannelID == n.ChannelID && existing.Addr == n.Addr {
-			db.Nodes[i] = n
-			return s.save(db)
+	var db nodeDB
+	return s.file.update(&db, func() error {
+		for i, existing := range db.Nodes {
+			if existing.ChannelID == n.ChannelID && existing.Addr == n.Addr {
+				db.Nodes[i] = n
+				return nil
+			}
 		}
-	}
-	if n.CreatedAt.IsZero() {
-		n.CreatedAt = time.Now()
-	}
-	db.Nodes = append(db.Nodes, n)
-	return s.save(db)
+		if n.CreatedAt.IsZero() {
+			n.CreatedAt = time.Now()
+		}
+		db.Nodes = append(db.Nodes, n)
+		return nil
+	})
 }
 
 // Deactivate marque un nœud comme inactif (retiré du canal) sans supprimer son historique.
 func (s *JSONNodeStore) Deactivate(channelID, addr string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	db := s.load()
-	for _, n := range db.Nodes {
-		if n.ChannelID == channelID && n.Addr == addr {
-			n.Active = false
-			return s.save(db)
+	var db nodeDB
+	return s.file.update(&db, func() error {
+		for _, n := range db.Nodes {
+			if n.ChannelID == channelID && n.Addr == addr {
+				n.Active = false
+				return nil
+			}
 		}
-	}
-	return fmt.Errorf("nœud %s introuvable sur le canal %s", addr, channelID)
+		return fmt.Errorf("nœud %s introuvable sur le canal %s", addr, channelID)
+	})
 }
 
 // Find retourne le nœud correspondant, ou nil si absent.
 func (s *JSONNodeStore) Find(channelID, addr string) (*ProvisionedNode, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	db := s.load()
-	for _, n := range db.Nodes {
+	nodes, err := s.read()
+	if err != nil {
+		return nil, err
+	}
+	for _, n := range nodes {
 		if n.ChannelID == channelID && n.Addr == addr {
 			return n, nil
 		}
@@ -105,11 +92,12 @@ func (s *JSONNodeStore) Find(channelID, addr string) (*ProvisionedNode, error) {
 
 // ActiveCount retourne le nombre de nœuds actifs sur un canal.
 func (s *JSONNodeStore) ActiveCount(channelID string) (int, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	db := s.load()
+	nodes, err := s.read()
+	if err != nil {
+		return 0, err
+	}
 	count := 0
-	for _, n := range db.Nodes {
+	for _, n := range nodes {
 		if n.ChannelID == channelID && n.Active {
 			count++
 		}
@@ -119,11 +107,12 @@ func (s *JSONNodeStore) ActiveCount(channelID string) (int, error) {
 
 // ListActive retourne les nœuds actifs d'un canal, filtrés par type si fourni ("" = tous).
 func (s *JSONNodeStore) ListActive(channelID, nodeType string) ([]*ProvisionedNode, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	db := s.load()
+	nodes, err := s.read()
+	if err != nil {
+		return nil, err
+	}
 	var out []*ProvisionedNode
-	for _, n := range db.Nodes {
+	for _, n := range nodes {
 		if n.ChannelID == channelID && n.Active && (nodeType == "" || n.Type == nodeType) {
 			out = append(out, n)
 		}

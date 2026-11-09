@@ -11,13 +11,6 @@ import (
 	"myr-core/domain/model"
 )
 
-// #incoherence — ce fichier n'expose que FileStoragePort (blobs bruts) ; il
-// n'y a aucun helper JSON partagé (loadJSON/saveJSON) alors que les 8 autres
-// fichiers du paquet (channel_store.go, network_store.go, node_store.go,
-// request_store.go, role_store.go, session_store.go, json_blockchain.go,
-// json_modules.go) réimplémentent chacun indépendamment le même motif
-// lecture/écriture JSON — voir specs/roadmap_dev.md § Écarts — revue de
-// code, E7.
 var _ model.FileStoragePort = (*LocalStorage)(nil)
 
 type LocalStorage struct {

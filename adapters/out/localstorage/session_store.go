@@ -2,7 +2,6 @@
 package localstorage
 
 import (
-	"encoding/json"
 	"errors"
 	"os"
 
@@ -11,39 +10,34 @@ import (
 
 var _ session.Store = (*JSONSessionStore)(nil)
 
+// JSONSessionStore persiste le compte local de la CLI (un seul
+// enregistrement) dans un fichier JSON lisible par son seul utilisateur.
 type JSONSessionStore struct {
-	path string
+	file *jsonFile
 }
 
 func NewJSONSessionStore(path string) *JSONSessionStore {
-	return &JSONSessionStore{path: path}
+	return &JSONSessionStore{file: newJSONFile(path, 0o600)}
 }
 
 func (s *JSONSessionStore) Save(sess *session.Session) error {
-	data, err := json.MarshalIndent(sess, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(s.path, data, 0600) // 0600 : lisible uniquement par le user
+	var current *session.Session
+	return s.file.update(&current, func() error {
+		current = sess
+		return nil
+	})
 }
 
 func (s *JSONSessionStore) Load() (*session.Session, error) {
-	data, err := os.ReadFile(s.path)
-	if errors.Is(err, os.ErrNotExist) {
-		return nil, nil // pas de session active
-	}
-	if err != nil {
+	var sess *session.Session
+	if err := s.file.view(&sess); err != nil {
 		return nil, err
 	}
-	var sess session.Session
-	if err := json.Unmarshal(data, &sess); err != nil {
-		return nil, err
-	}
-	return &sess, nil
+	return sess, nil // nil : pas de session active
 }
 
 func (s *JSONSessionStore) Clear() error {
-	err := os.Remove(s.path)
+	err := os.Remove(s.file.path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
