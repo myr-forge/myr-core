@@ -432,6 +432,24 @@ func TestFabricBlockchain_GetModelRecord_EvaluateError(t *testing.T) {
 	}
 }
 
+// / @brief  Un asset absent du ledger est signalé par model.ErrNotFound, une autre erreur du chaincode non
+// / @input  stubContract qui répond « GetModel : asset b2 introuvable », puis « fabric: peer timeout »
+// / @expect ErrNotFound dans le premier cas seulement ; l'erreur d'origine reste accessible
+func TestFabricBlockchain_GetModelRecord_Missing_ErrNotFound(t *testing.T) {
+	missing := errors.New("chaincode response 500, GetModel : asset b2 introuvable")
+	answer := missing
+	stub := &stubContract{evaluateFn: func(_ string, _ ...string) ([]byte, error) { return nil, answer }}
+	bc := fabric.NewFabricBlockchain(&stubGateway{contract: stub})
+
+	if _, err := bc.GetModelRecord("b2", ""); !errors.Is(err, model.ErrNotFound) || !errors.Is(err, missing) {
+		t.Errorf("ErrNotFound enveloppant l'erreur du chaincode attendu, obtenu %v", err)
+	}
+	answer = errors.New("fabric: peer timeout")
+	if _, err := bc.GetModelRecord("b2", ""); errors.Is(err, model.ErrNotFound) {
+		t.Errorf("une autre erreur ne doit pas devenir ErrNotFound : %v", err)
+	}
+}
+
 // / @brief  Vérifie que GetModelRecord retourne une erreur lorsque le JSON retourné est invalide
 // / @details Contrairement à FabricAdapter, FabricBlockchain propage l'erreur d'unmarshal.
 // / @input  stubContract dont evaluateFn retourne []byte("{bad json}") ; appel GetModelRecord("b2", "")

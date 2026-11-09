@@ -353,6 +353,30 @@ func TestAssembly_UnknownAsset_Rejected(t *testing.T) {
 	}
 }
 
+// failingDraftStore simule un stockage de brouillons illisible.
+type failingDraftStore struct{ *mockDraftStore }
+
+var errUnreadable = errors.New("stockage illisible")
+
+func (failingDraftStore) GetDraft(string) (*model.Model3D, error) { return nil, errUnreadable }
+
+// / @brief  Un stockage de brouillons illisible est signalé tel quel, pas masqué par une recherche sur le ledger
+// / @input  stockage de brouillons dont toute lecture échoue ; asset présent sur le ledger ; AddInterface et Get
+// / @expect l'erreur du stockage, ni ErrNotFound ni l'asset du ledger
+func TestGetAsset_UnreadableDraftStore_NotMasked(t *testing.T) {
+	bc := newMockBC()
+	bc.records["vis"] = &model.Model3D{ID: "vis", Status: model.ModuleSubmitted}
+	svc := model.NewService(bc, &mockFS{}).
+		WithIfaceStore(newMockIfaceStore()).
+		WithDraftStore(failingDraftStore{newMockDraftStore()})
+	if err := svc.AddInterface(&model.AssetInterface{AssetID: "vis", Category: "ELEC"}); !errors.Is(err, errUnreadable) {
+		t.Errorf("AddInterface : erreur du stockage attendue, obtenu %v", err)
+	}
+	if _, err := svc.Get("vis", ""); !errors.Is(err, errUnreadable) {
+		t.Errorf("Get : erreur du stockage attendue, obtenu %v", err)
+	}
+}
+
 // / @brief  L'identifiant d'une interface est attribué par le serveur : un identifiant fourni ne remplace pas l'interface existante qui le porte
 // / @input  interface de asset1 ; AddInterface sur asset2 avec l'identifiant de cette interface
 // / @expect nouvel identifiant attribué ; l'interface de asset1 est inchangée
@@ -411,7 +435,7 @@ func (s *syncDraftStore) GetDraft(id string) (*model.Model3D, error) {
 	b, ok := s.drafts[id]
 	s.mu.Unlock()
 	if !ok {
-		return nil, fmt.Errorf("brouillon introuvable: %s", id)
+		return nil, fmt.Errorf("%w : brouillon %s", model.ErrNotFound, id)
 	}
 	var m model.Model3D
 	return &m, json.Unmarshal(b, &m)

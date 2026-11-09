@@ -195,9 +195,16 @@ func (s *Service) Submit(assetID, note string) (*Model3D, error) {
 // domaine — indique en retour si l'asset provient du brouillon, seul état
 // modifiable (voir draftAsset).
 func (s *Service) getAsset(id, channelID string) (*Model3D, bool, error) {
+	if id == "" {
+		return nil, false, fmt.Errorf("%w : identifiant d'asset vide", ErrNotFound)
+	}
 	if s.draftStore != nil {
-		if m, err := s.draftStore.GetDraft(id); err == nil {
+		m, err := s.draftStore.GetDraft(id)
+		if err == nil {
 			return m, true, nil
+		}
+		if !errors.Is(err, ErrNotFound) {
+			return nil, false, err // stockage local inutilisable : ne pas le masquer par le ledger
 		}
 	}
 	if s.blockchain == nil {
@@ -214,7 +221,7 @@ func (s *Service) getAsset(id, channelID string) (*Model3D, bool, error) {
 func (s *Service) draftAsset(id string) (*Model3D, error) {
 	m, isDraft, err := s.getAsset(id, "")
 	if err != nil {
-		return nil, assetLookupErr(id, err)
+		return nil, err
 	}
 	if !isDraft {
 		return nil, fmt.Errorf("%w : %s", ErrAssetSubmitted, id)
@@ -246,16 +253,6 @@ func (s *Service) saveDraft(m *Model3D) error {
 		return fmt.Errorf("stockage de brouillons non configuré")
 	}
 	return s.draftStore.SaveDraft(m)
-}
-
-// assetLookupErr qualifie l'échec de lecture de l'asset id : une blockchain
-// indisponible est remontée telle quelle, tout autre échec signifie que
-// l'asset n'existe ni en brouillon ni sur le ledger (ErrNotFound).
-func assetLookupErr(id string, err error) error {
-	if errors.Is(err, ErrBlockchainUnavailable) || errors.Is(err, ErrBlockchainUnreachable) {
-		return err
-	}
-	return fmt.Errorf("%w : asset %s", ErrNotFound, id)
 }
 
 // editDraft applique change au brouillon id puis l'enregistre, sous le verrou
@@ -726,7 +723,7 @@ func (s *Service) UpdateInterface(iface *AssetInterface) error {
 	}
 	existing, err := s.ifaceStore.GetInterface(iface.ID)
 	if err != nil {
-		return fmt.Errorf("%w : interface %s", ErrNotFound, iface.ID)
+		return err
 	}
 	if iface.AssetID != existing.AssetID {
 		return fmt.Errorf("%w : %s appartient à %s", ErrInterfaceCarrierChange, iface.ID, existing.AssetID)
@@ -849,9 +846,13 @@ func (s *Service) removeConnectionsFor(id string) {
 // disparaît de List()/ListModules() mais reste résolvable par Get()/GetModule().
 func (s *Service) Remove(id string) error {
 	if s.draftStore != nil {
-		if _, err := s.draftStore.GetDraft(id); err == nil {
+		_, err := s.draftStore.GetDraft(id)
+		if err == nil {
 			s.removeConnectionsFor(id)
 			return s.draftStore.RemoveDraft(id)
+		}
+		if !errors.Is(err, ErrNotFound) {
+			return err
 		}
 	}
 	if s.removedStore == nil {
@@ -1185,7 +1186,7 @@ func (s *Service) AddAssetToWorkspace(moduleID, assetID string) (*Model3D, error
 	m, err := s.editDraft(moduleID, func(m *Model3D) error {
 		added, _, err := s.getAsset(assetID, "")
 		if err != nil {
-			return assetLookupErr(assetID, err)
+			return err
 		}
 		if err := s.checkNotContaining(added, moduleID); err != nil {
 			return err

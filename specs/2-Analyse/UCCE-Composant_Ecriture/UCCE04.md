@@ -138,12 +138,13 @@ Ce use case crée un nouvel asset `Model3D` avec `ParentID` renseigné — il ne
 2. L'API retourne `404 Not Found` : `{ "error": "Asset parent introuvable." }`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 11 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 12 déduit(s)
 > - 🟡 [TestFabricAdapter_GetModelRecord_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_EvaluateError.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricAdapter_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricBlockchain_GetModelRecord_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_EvaluateError.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestFabricBlockchain_GetModelRecord_Missing_ErrNotFound](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_Missing_ErrNotFound.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricBlockchain_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestIntegration_GetModelRecord_NotFound](../../../docs/tests/adapters-out-fabric/TestIntegration_GetModelRecord_NotFound.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestIntegration_ModelService_SubmittedAsset](../../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — déduit : teste `BlockchainPort.GetModelRecord`

@@ -83,7 +83,7 @@ La particularité de l'extension est que les **interfaces du composant de base s
 10. L'API retourne `201 Created` avec le nouvel asset.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 39 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 40 déduit(s)
 > - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestAddAssemblyToModule_RM51_Component_StaysComponent](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_Component_StaysComponent.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_AllFields](../../../docs/tests/domain-model/TestAddFull_AllFields.md) — déduit : teste `ModelService.AddFull`
@@ -99,7 +99,7 @@ La particularité de l'extension est que les **interfaces du composant de base s
 > - 🟡 [TestAddInterface_ClientID_NoOverwrite](../../../docs/tests/domain-model/TestAddInterface_ClientID_NoOverwrite.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestAssembly_UnknownAsset_Rejected](../../../docs/tests/domain-model/TestAssembly_UnknownAsset_Rejected.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.AddFull`
-> - … et 24 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 25 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Extension sans fichier 3D (composant virtuel/numérique)
@@ -140,12 +140,13 @@ La particularité de l'extension est que les **interfaces du composant de base s
 2. L'API retourne `404 Not Found` : `{ "error": "Asset parent introuvable." }`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 11 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 12 déduit(s)
 > - 🟡 [TestFabricAdapter_GetModelRecord_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_EvaluateError.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_InvalidJSON_ReturnsEmptyModel.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricAdapter_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricBlockchain_GetModelRecord_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_EvaluateError.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_InvalidJSON_ReturnsError.md) — déduit : teste `BlockchainPort.GetModelRecord`
+> - 🟡 [TestFabricBlockchain_GetModelRecord_Missing_ErrNotFound](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_Missing_ErrNotFound.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestFabricBlockchain_GetModelRecord_Success](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_GetModelRecord_Success.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestIntegration_GetModelRecord_NotFound](../../../docs/tests/adapters-out-fabric/TestIntegration_GetModelRecord_NotFound.md) — déduit : teste `BlockchainPort.GetModelRecord`
 > - 🟡 [TestIntegration_ModelService_SubmittedAsset](../../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — déduit : teste `BlockchainPort.GetModelRecord`

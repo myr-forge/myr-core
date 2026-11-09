@@ -586,6 +586,25 @@ func TestJSONStore_R21_CorruptFile_RefusedNotOverwritten(t *testing.T) {
 	}
 }
 
+// / @brief  Un brouillon ou une interface absents sont signalés par model.ErrNotFound ; un fichier illisible ne l'est pas
+// / @input  stockage vide, puis fichier corrompu ; GetDraft et GetInterface d'un identifiant inconnu
+// / @expect ErrNotFound sur le stockage vide ; ErrCorruptStore, et non ErrNotFound, sur le fichier corrompu
+func TestJSONStore_Missing_ErrNotFound_CorruptNot(t *testing.T) {
+	db := localstorage.NewJSONBlockchain(filepath.Join(t.TempDir(), "assets.json"))
+	if _, err := db.GetDraft("x"); !errors.Is(err, model.ErrNotFound) {
+		t.Errorf("GetDraft : ErrNotFound attendu, obtenu %v", err)
+	}
+	if _, err := db.GetInterface("x"); !errors.Is(err, model.ErrNotFound) {
+		t.Errorf("GetInterface : ErrNotFound attendu, obtenu %v", err)
+	}
+	path := filepath.Join(t.TempDir(), "assets.json")
+	os.WriteFile(path, []byte(`{"drafts": [`), 0o600)
+	bad := localstorage.NewJSONBlockchain(path)
+	if _, err := bad.GetDraft("x"); errors.Is(err, model.ErrNotFound) || !errors.Is(err, localstorage.ErrCorruptStore) {
+		t.Errorf("GetDraft sur fichier corrompu : ErrCorruptStore attendu, obtenu %v", err)
+	}
+}
+
 // / @brief  L'écriture passe par un fichier temporaire renommé et laisse le fichier en 0600 (R-21)
 // / @input  enregistrement d'une connexion dans un répertoire vide
 // / @expect seul le fichier de données (et son verrou) existe ; il est relu correctement

@@ -80,7 +80,7 @@ func (b *memBC) GetModelRecord(id, _ string) (*model.Model3D, error) {
 		cp := *m
 		return &cp, nil
 	}
-	return nil, fmt.Errorf("modèle introuvable : %s", id)
+	return nil, fmt.Errorf("%w : modèle %s", model.ErrNotFound, id)
 }
 
 func (b *memBC) ListModelRecords(channelID string) ([]*model.Model3D, error) {

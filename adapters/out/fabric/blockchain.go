@@ -40,6 +40,15 @@ func wrapGatewayErr(op string, err error) error {
 	return fmt.Errorf("fabric %s : %w", op, err)
 }
 
+// ledgerLookupErr traduit le refus du chaincode pour un asset absent du
+// ledger (« GetModel : asset … introuvable ») en model.ErrNotFound.
+func ledgerLookupErr(id string, err error) error {
+	if err != nil && strings.Contains(err.Error(), "introuvable") {
+		return fmt.Errorf("%w : asset %s sur le ledger : %w", model.ErrNotFound, id, err)
+	}
+	return err
+}
+
 var _ model.BlockchainPort = (*FabricBlockchain)(nil)
 
 // FabricBlockchain implémente model.BlockchainPort via le chaincode myrcc.
@@ -116,7 +125,7 @@ func (f *FabricBlockchain) GetModelRecord(id, channelID string) (*model.Model3D,
 	}
 	result, err := f.gc.ContractFor(channelID).EvaluateTransaction("GetModel", id)
 	if err != nil {
-		return nil, wrapGatewayErr("GetModelRecord evaluate", err)
+		return nil, ledgerLookupErr(id, wrapGatewayErr("GetModelRecord evaluate", err))
 	}
 	var m model.Model3D
 	if err := json.Unmarshal(result, &m); err != nil {

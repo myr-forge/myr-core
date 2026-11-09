@@ -13,6 +13,8 @@ type BlockchainPort interface {
 	UpdateModelMetadata(id, channelID string, meta AssetMetadata) error
 	// GetModelRecord récupère un modèle par son ID sur le canal indiqué.
 	// channelID="" utilise le canal par défaut configuré dans l'adapter.
+	// Un identifiant absent du ledger renvoie une erreur enveloppant
+	// ErrNotFound.
 	GetModelRecord(id, channelID string) (*Model3D, error)
 	ListModelRecords(channelID string) ([]*Model3D, error)
 	// VerifyIntegrity vérifie l'intégrité d'un modèle sur le canal indiqué.
@@ -66,6 +68,9 @@ type OGImageFetcher interface {
 // module peut être créé : AddFull/CreateModule échouent sans lui.
 type DraftStore interface {
 	SaveDraft(m *Model3D) error
+	// GetDraft renvoie une erreur enveloppant ErrNotFound si aucun brouillon
+	// ne porte cet identifiant ; toute autre erreur signale un stockage
+	// inutilisable (fichier illisible…).
 	GetDraft(id string) (*Model3D, error)
 	RemoveDraft(id string) error
 	ListDrafts(channelID string) ([]*Model3D, error)
@@ -87,6 +92,8 @@ type InterfaceStore interface {
 	SaveInterface(iface *AssetInterface) error
 	RemoveInterface(id string) error
 	ListInterfacesForAsset(assetID string) ([]*AssetInterface, error)
+	// GetInterface renvoie une erreur enveloppant ErrNotFound si aucune
+	// interface ne porte cet identifiant.
 	GetInterface(id string) (*AssetInterface, error)
 
 	// Vocabulaire extensible (catégories, types, unités)

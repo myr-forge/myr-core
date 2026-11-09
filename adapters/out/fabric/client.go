@@ -34,7 +34,7 @@ func (f *FabricAdapter) UpdateModelMetadata(id, _ string, meta model.AssetMetada
 func (f *FabricAdapter) GetModelRecord(id, _ string) (*model.Model3D, error) {
 	result, err := f.contract.EvaluateTransaction("GetModel", id)
 	if err != nil {
-		return nil, err
+		return nil, ledgerLookupErr(id, err)
 	}
 	var m model.Model3D
 	json.Unmarshal(result, &m)

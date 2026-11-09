@@ -94,7 +94,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 10. L'API retourne `201 Created` avec l'`AssetInterface` créée (en brouillon). Elle rejoindra la blockchain à la prochaine soumission du composant.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 19 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 20 déduit(s)
 > - 🟡 [TestInterface_Persistence](../../../docs/tests/adapters-out-localstorage/TestInterface_Persistence.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestListInterfacesForAsset](../../../docs/tests/adapters-out-localstorage/TestListInterfacesForAsset.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestRemoveInterface](../../../docs/tests/adapters-out-localstorage/TestRemoveInterface.md) — déduit : teste `InterfaceStore.SaveInterface`
@@ -105,12 +105,12 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 > - 🟡 [TestAssembly_UnknownAsset_Rejected](../../../docs/tests/domain-model/TestAssembly_UnknownAsset_Rejected.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddInterface`
+> - 🟡 [TestGetAsset_UnreadableDraftStore_NotMasked](../../../docs/tests/domain-model/TestGetAsset_UnreadableDraftStore_NotMasked.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed](../../../docs/tests/domain-model/TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestGetModuleInterfaces_SimpleComponent](../../../docs/tests/domain-model/TestGetModuleInterfaces_SimpleComponent.md) — déduit : teste `ModelService.AddInterface`
-> - 🟡 [TestInterface_AddListRemove](../../../docs/tests/domain-model/TestInterface_AddListRemove.md) — déduit : teste `ModelService.AddInterface`
-> - … et 4 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 5 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Composant déjà soumis : création d'un fork

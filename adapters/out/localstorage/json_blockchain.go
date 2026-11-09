@@ -194,7 +194,7 @@ func (j *JSONBlockchain) GetInterface(id string) (*model.AssetInterface, error) 
 			return iface, nil
 		}
 	}
-	return nil, fmt.Errorf("interface %q introuvable", id)
+	return nil, fmt.Errorf("%w : interface %q", model.ErrNotFound, id)
 }
 
 // ── model.DraftStore ─────────────────────────────────────────────────────────
@@ -222,7 +222,7 @@ func (j *JSONBlockchain) GetDraft(id string) (*model.Model3D, error) {
 			return m, nil
 		}
 	}
-	return nil, fmt.Errorf("brouillon %q introuvable", id)
+	return nil, fmt.Errorf("%w : brouillon %q", model.ErrNotFound, id)
 }
 
 func (j *JSONBlockchain) RemoveDraft(id string) error {

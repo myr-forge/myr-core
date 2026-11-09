@@ -48,7 +48,7 @@ func (m *mockBC) UpdateModelMetadata(id, _ string, meta model.AssetMetadata) err
 func (m *mockBC) GetModelRecord(id, _ string) (*model.Model3D, error) {
 	mod, ok := m.records[id]
 	if !ok {
-		return nil, fmt.Errorf("modèle introuvable: %s", id)
+		return nil, fmt.Errorf("%w : modèle %s", model.ErrNotFound, id)
 	}
 	return mod, nil
 }
@@ -225,7 +225,7 @@ func (s *mockIfaceStore) ListInterfacesForAsset(assetID string) ([]*model.AssetI
 func (s *mockIfaceStore) GetInterface(id string) (*model.AssetInterface, error) {
 	iface, ok := s.ifaces[id]
 	if !ok {
-		return nil, fmt.Errorf("interface introuvable: %s", id)
+		return nil, fmt.Errorf("%w : interface %s", model.ErrNotFound, id)
 	}
 	return iface, nil
 }
@@ -271,7 +271,7 @@ func (s *mockDraftStore) SaveDraft(m *model.Model3D) error {
 func (s *mockDraftStore) GetDraft(id string) (*model.Model3D, error) {
 	m, ok := s.drafts[id]
 	if !ok {
-		return nil, fmt.Errorf("brouillon introuvable: %s", id)
+		return nil, fmt.Errorf("%w : brouillon %s", model.ErrNotFound, id)
 	}
 	return m, nil
 }
