@@ -173,10 +173,8 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 
 - **Déclencheur** : Appel de `ifacesCompatible`
 - **Condition** : Toujours
-- **Conséquence** : Deux interfaces sont compatibles si : (1) même catégorie (Électrique, Mécanique, Numérique…), (2) même type (USB-C, UART…), y compris quand il n'est renseigné que d'un côté, (3) sens complémentaires (♂/♀ ou bidirectionnel), (4) valeurs se chevauchant (`ValueMin`/`ValueMax`) : une valeur simple vaut l'intervalle [v ; v] et 0 est une vraie valeur (0 V, 0 bar) ; une interface sans unité n'impose aucune contrainte de valeur
+- **Conséquence** : Deux interfaces sont compatibles si : (1) même catégorie (Électrique, Mécanique, Numérique…), (2) même type (USB-C, UART…), y compris quand il n'est renseigné que d'un côté, (3) sens complémentaires (♂/♀ ou bidirectionnel), (4) valeurs compatibles : une interface porte zéro, une ou plusieurs contraintes de valeur, chacune avec sa valeur ou sa plage et son unité (ex. une alimentation : 5 V et 0 à 2 A). Chaque contrainte dont l'unité de base figure des deux côtés doit se chevaucher, préfixes convertis (1 V = 1 000 mV, RM53) ; une valeur simple vaut l'intervalle [v ; v] et 0 est une vraie valeur (0 V, 0 bar). Une contrainte présente d'un seul côté n'impose rien ; deux interfaces qui portent chacune des contraintes sans aucune unité de base commune sont incompatibles. Une interface sans contrainte n'en impose aucune
 - **Use cases** : UCAM01, UCAM03
-
-#question — critère (4) : une interface peut porter plusieurs contraintes de valeur, chacune avec son unité (ex. une tension ET un courant — décision du PO). Restent à trancher : la correspondance entre contraintes (même unité, ou même grandeur avec conversion), et le cas d'une contrainte présente d'un seul côté — voir FT-042.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 2 explicite(s) · 0 déduit(s)
@@ -222,6 +220,18 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - ✅ [TestConnections_GET_RM50_ListsAll](../../docs/tests/adapters-in-rest/TestConnections_GET_RM50_ListsAll.md) — explicite (le test cite RM50)
 > - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM50)
 > - ✅ [TestAddConnection_RM50_Duplicate_Rejected](../../docs/tests/domain-model/TestAddConnection_RM50_Duplicate_Rejected.md) — explicite (le test cite RM50)
+<!-- tests-obsidian:end -->
+
+### RM53 — Unité d'une contrainte de valeur
+
+- **Déclencheur** : Ajout ou modification d'une interface portant une contrainte de valeur
+- **Condition** : Toujours
+- **Conséquence** : L'unité est lue ainsi : (1) une unité connue telle quelle du vocabulaire des unités (ex. `min`, `Pa`, `mol`, `bar`) vaut facteur 1 ; (2) sinon, un préfixe SI usuel — `n`, `µ` ou `u`, `m`, `c`, `d`, `k`, `M`, `G`, la casse comptant (`m` milli, `M` méga) — suivi d'une unité connue applique son facteur (`mV` = 0,001 V, `kW` = 1 000 W, `mm` = 0,001 m) ; (3) sinon, l'unité est inconnue et l'interface est refusée — le système ne devine pas. Deux contraintes ne se comparent que sur la même unité de base : aucune conversion entre unités différentes (`bar` et `Pa`, `L` et `m³`, `°C` et `K`)
+- **Use cases** : UCCE06, UCAM03
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## 4. Composition d'un Module (instances)
@@ -867,10 +877,11 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | [RM08](#RM08%20—%20Masquage%20local,%20ledger%20jamais%20modifié) | ErrNotSupported retourné sur tentative de suppression | Blockchain |
 | [RM09](#RM09%20—%20Interface%20à%20usage%20unique) | Interface à usage unique dans une liaison, par instance ; jamais reliée à elle-même | Interfaces |
 | [RM10](#RM10%20—%20Vérification%20de%20compatibilité%20automatique) | Vérification de compatibilité automatique à la création | Interfaces |
-| [RM11](#RM11%20—%20Critères%20de%20compatibilité%20d'interfaces) | Critères de compatibilité : catégorie + type + sens + valeurs | Interfaces |
+| [RM11](#RM11%20—%20Critères%20de%20compatibilité%20d'interfaces) | Critères de compatibilité : catégorie + type + sens + contraintes de valeur (unités de base communes chevauchantes, aucune en commun = incompatible) | Interfaces |
 | [RM12](#RM12%20—%20Persistance%20des%20liaisons%20incompatibles) | Liaison incompatible persistante (`Incompatible:true`, non supprimée automatiquement) | Interfaces |
 | [RM13](#RM13%20—%20Slot%20virtuel%20garanti) | Slot virtuel garanti et recréé automatiquement à chaque matérialisation | Interfaces |
 | [RM50](#RM50%20—%20Liaison%20directe%20unique) | Liaison directe en double refusée, jamais renvoyée ni dupliquée | Interfaces |
+| [RM53](#RM53%20—%20Unité%20d'une%20contrainte%20de%20valeur) | Unité lue dans le vocabulaire, sinon préfixe SI usuel + unité connue, sinon refusée ; comparaison sur la même unité de base | Interfaces |
 | [RM14](#RM14%20—%20Suppression%20en%20cascade%20des%20connexions) | Suppression en cascade des connexions au retrait d'une instance | Composition (instances) |
 | [RM15](#RM15%20—%20Instance%20indépendante) | Seconde instance indépendante si module déjà instancié dans le module hôte | Composition (instances) |
 | [RM51](#RM51%20—%20Assemblage%20interne%20au%20module) | Seule une liaison existante entre deux instances de l'asset s'y rattache | Composition (instances) |

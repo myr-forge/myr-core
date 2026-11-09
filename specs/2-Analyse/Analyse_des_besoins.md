@@ -474,15 +474,14 @@ L'entité centrale du système est `Model3D` — elle représente à la fois un 
 
 ### 6.4 Interfaces physiques
 
-Une `AssetInterface` est définie par 5 attributs (RM11) :
+Une `AssetInterface` est définie par 4 attributs (RM11) :
 
 | Champ | Description | Exemple |
 |-------|-------------|---------|
 | `Category` | Famille physique | `ELEC`, `MECA`, `HYD` |
 | `Type` | Standard précis | `USB-C`, `Vis M3`, `BSP 1/4"` |
 | `Direction` | Sens du flux | `in`, `out`, `bidir` |
-| `ValueMin/Max` | Plage de valeurs | `5.0` / `5.0` (fixe) ou `3.3` / `5.0` (plage) |
-| `Unit` | Unité associée | `V`, `mm`, `bar` |
+| `Constraints` | Zéro, une ou plusieurs contraintes de valeur, chacune `{value_min, value_max, is_range, unit}` (RM53) | `5 V` et `0–2 A` |
 
 Deux interfaces sont **compatibles** si et seulement si les 4 critères de RM11 sont satisfaits : même catégorie + même type + sens complémentaires + valeurs se chevauchant.
 

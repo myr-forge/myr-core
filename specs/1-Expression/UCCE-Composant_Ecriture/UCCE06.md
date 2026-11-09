@@ -1,3 +1,9 @@
+---
+tags:
+  - rm/RM11
+  - rm/RM53
+  - relecture/remarque
+---
 ﻿---
 categorie: Composant Ecriture
 titre: "Ajouter une interface à un Composant déjà créé"
@@ -55,9 +61,16 @@ Un utilisateur peut ajouter manuellement une interface à un composant qu'il a d
 1. La catégorie (Électrique, Mécanique, Hydraulique...) est définie
 2. Le sens (Entrée, Sortie, Bidirectionnel) est défini
 3. Le type (ex : USB-C) est renseigné
-4. La valeur ou plage de valeur et l'unité (Volt, mm...) sont renseignées
+4. Zéro, une ou plusieurs contraintes de valeur sont renseignées, chacune avec sa valeur ou sa plage et son unité (ex. 5 V et 0 à 2 A ; RM11, RM53)
 5. La transaction de mise à jour est soumise sur la blockchain
 6. L'interface devient disponible pour les liaisons (voir UCAM01)
+
+### Flux erreur — Unité inconnue
+
+1. Une contrainte porte une unité absente du vocabulaire des unités, même après lecture d'un préfixe SI usuel (RM53)
+2. L'interface est refusée (API : 400) : le système ne devine pas l'unité
+
+#remarque — la syntaxe CLI d'une interface à plusieurs contraintes (l'exemple de l'étape initiale n'en porte qu'une) est à définir dans `DC_CLI_Model.md` lors de la mise en œuvre de FT-042.
 
 ## Post-conditions
 
@@ -71,7 +84,7 @@ Un utilisateur peut ajouter manuellement une interface à un composant qu'il a d
 skin rose
 title Ajouter une interface à un Composant déjà créé
 start
-:Transmettre catégorie, sens, type, valeur/plage et unité (myr model interface add);
+:Transmettre catégorie, sens, type et contraintes de valeur (myr model interface add);
 :Soumettre la transaction de mise à jour sur la blockchain;
 stop
 @enduml

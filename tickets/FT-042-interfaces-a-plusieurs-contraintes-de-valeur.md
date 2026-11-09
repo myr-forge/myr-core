@@ -2,28 +2,29 @@
 id: FT-042
 titre: "Interfaces à plusieurs contraintes de valeur"
 type: decision
-statut: a-trancher
+statut: ouvert
 severite: majeure
 detecte: 2026-11-09
 maj: 2026-11-09
 composants: [domain/model, chaincode/model, adapters/in/rest, adapters/in/cli]
 uc: [UCAM01, UCAM03, UCCE06]
-rm: [RM11]
+rm: [RM11, RM53]
 enf: []
 tags:
   - ticket
   - ticket/decision
-  - statut/a-trancher
+  - statut/ouvert
   - severite/majeure
   - domaine/model
   - uc/UCAM01
   - uc/UCAM03
   - uc/UCCE06
   - rm/RM11
+  - rm/RM53
 ---
 # FT-042 — Interfaces à plusieurs contraintes de valeur
 
-> **Décision à prendre** · sévérité **majeure** · statut **À trancher (PO)** · détecté le 2026-11-09
+> **Décision à prendre** · sévérité **majeure** · statut **Ouvert** · détecté le 2026-11-09
 > Source : revue de code (R-13) et décision du PO du 2026-11-09
 
 ## Constat
@@ -52,15 +53,17 @@ Le modèle n'a qu'une valeur par interface, dans le domaine ([entity.go](../doma
 - `AssetInterface.Constraints` : liste de contraintes `{value_min, value_max, is_range, unit}`. Les champs actuels se lisent comme une première contrainte, pour les assets déjà soumis.
 - Compatibilité : pour chaque contrainte présente des deux côtés, les valeurs se chevauchent (valeur simple = [v ; v], RM11).
 
-**À trancher :**
-1. **Correspondance entre contraintes** : même unité exacte (V avec V ; mV et V ne correspondent pas, myr-core ne convertit rien), ou même grandeur avec conversion (mV ↔ V).
-2. **Contrainte présente d'un seul côté** (alimentation 5 V / 2 A ↔ consommateur 5 V qui n'indique pas de courant) : ignorée (paire compatible) ou paire refusée.
-3. **Aucune unité commune** (V d'un côté, mA de l'autre) : paire compatible faute de contrainte comparable, ou refusée.
-4. **Forme de l'API** : `constraints: [...]` seul, ou champs actuels conservés un temps pour myr-web.
+**Décisions du PO (2026-11-09)**, consignées dans RM11 et RM53 :
+1. **Correspondance** : par unité de base, préfixes SI convertis (1 V = 1 000 mV). L'unité est lue dans le vocabulaire telle quelle, sinon comme un préfixe usuel (`n`, `µ`/`u`, `m`, `c`, `d`, `k`, `M`, `G`, casse comprise) suivi d'une unité connue, sinon refusée. Aucune conversion entre unités de base différentes.
+2. **Contrainte présente d'un seul côté** : elle n'impose rien, la paire reste compatible.
+3. **Aucune unité de base commune** entre deux interfaces qui portent chacune des contraintes : paire incompatible.
+4. **API** : `constraints: [{value_min, value_max, is_range, unit}]` remplace les quatre champs actuels ; les interfaces déjà soumises sont relues comme une contrainte unique.
+
+Le développement viendra à la demande du PO : domaine, chaincode (montée de version répétée sur myr-test), REST, CLI (syntaxe à définir dans `DC_CLI_Model.md`), lecture des interfaces déjà soumises, guide myr-web.
 
 ## Critères de clôture
 
-- [ ] Points 1 à 4 tranchés ; RM11 mise à jour
+- [x] Points 1 à 4 tranchés ; RM11 mise à jour et RM53 créée
 - [ ] Domaine, chaincode, REST, CLI et guide myr-web alignés ; chaincode mis à jour sur le réseau de test, puis en production
 - [ ] Tests RM11 : plusieurs contraintes, contrainte présente d'un seul côté, aucune unité commune, interface soumise avant le changement
 
@@ -74,3 +77,4 @@ Le modèle n'a qu'une valeur par interface, dans le domaine ([entity.go](../doma
 ## Historique
 
 - 2026-11-09 — Ticket créé ; décision du PO : une interface peut porter une ou plusieurs contraintes de valeur (ex. tension ET courant). Points 1 à 4 à trancher
+- 2026-11-09 — Décisions du PO sur les points 1 à 4 (voir § Piste) ; RM11 révisée et RM53 créée ; développement à faire sur demande du PO

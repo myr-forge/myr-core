@@ -17,6 +17,7 @@ tags:
   - rm/RM13
   - rm/RM16
   - rm/RM19
+  - rm/RM53
   - enf/ENF12
 ---
 
@@ -65,10 +66,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 | `Category` | string | Famille physique : `ELEC`, `MECA`, `HYD`, custom |
 | `Type` | string | Standard précis : `USB-C`, `Vis M3`, `BSP 1/4"` |
 | `Direction` | string | `in`, `out`, `bidir` |
-| `ValueMin` | float64 | Valeur unique ou borne basse |
-| `ValueMax` | float64 | Borne haute (si `IsRange`) |
-| `IsRange` | bool | `true` si plage de valeurs |
-| `Unit` | string | `V`, `mm`, `bar`… |
+| `Constraints` | liste | Contraintes de valeur, chacune `{ValueMin, ValueMax, IsRange, Unit}` : valeur unique ou plage, unité lue selon RM53 (`V`, `mA`, `mm`, `bar`…) |
 | `Virtual` | bool | `true` = slot non encore matérialisé |
 
 ## Pré-conditions
@@ -86,7 +84,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 1. La **catégorie** est transmise (`ELEC`, `MECA`, `HYD` ou personnalisée — référentiel via `GetRefs()`)
 2. Le **type** est transmis : standard précis (ex : `USB-C`, `Vis M3`, `BSP 1/4"`)
 3. Le **sens** est transmis : `in`, `out`, ou `bidir`
-4. La **valeur** ou plage de valeurs (`ValueMin`, `ValueMax`) et l'**unité** (`Unit`) sont transmises
+4. Les **contraintes de valeur** (`Constraints`) sont transmises : zéro, une ou plusieurs, chacune avec sa valeur ou sa plage et son unité ; une unité inconnue est refusée (RM53)
 5. Le REST Handler valide les champs obligatoires (`Category`, `Type`, `Direction`).
 6. Le handler appelle `service.AddInterface(iface)`.
 7. Le service vérifie que le composant est encore en `draft` (pas encore soumis).
