@@ -1259,6 +1259,11 @@ func (s *Service) ConnectVirtualToPhysical(
 	if !virtual.Virtual {
 		return nil, fmt.Errorf("l'interface %s n'est pas virtuelle", virtualIfaceID)
 	}
+	// Matérialiser le slot ajoute une interface physique à son porteur : refusé
+	// si celui-ci est soumis, comme toute mutation d'interface (règle 27, RM19).
+	if err := s.requireDraftCarrier(virtual.AssetID); err != nil {
+		return nil, err
+	}
 
 	oppositeDir := func(d IfaceDirection) IfaceDirection {
 		switch d {

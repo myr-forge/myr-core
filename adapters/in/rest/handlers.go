@@ -1678,6 +1678,7 @@ type virtualConnectRequest struct {
 //	@Param		body	body		virtualConnectRequest	true	"virtual_iface_id et physical_iface_id requis"
 //	@Success	201	{object}	connectionDTO
 //	@Failure	400	{object}	map[string]string
+//	@Failure	409	{object}	map[string]string	"porteur du slot virtuel déjà soumis (RM19)"
 //	@Security	MyrToken
 //	@Router		/virtual-connect [post]
 func (h *Handler) handleVirtualConnect(w http.ResponseWriter, r *http.Request) {

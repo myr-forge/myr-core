@@ -82,7 +82,7 @@ L'entité produite est identique à un composant physique : un `Model3D` avec `H
 10. L'API retourne `201 Created` avec le `Model3D` JSON.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 27 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 28 déduit(s)
 > - 🟡 [TestAddFull_AllFields](../../../docs/tests/domain-model/TestAddFull_AllFields.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_AlwaysDraft_NoBlockchainWrite](../../../docs/tests/domain-model/TestAddFull_AlwaysDraft_NoBlockchainWrite.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_MissingFile_ReturnsError](../../../docs/tests/domain-model/TestAddFull_MissingFile_ReturnsError.md) — déduit : teste `ModelService.AddFull`
@@ -92,13 +92,13 @@ L'entité produite est identique à un composant physique : un `Model3D` avec `H
 > - 🟡 [TestAddFull_STLAndSTEP_BothAccepted](../../../docs/tests/domain-model/TestAddFull_STLAndSTEP_BothAccepted.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_WithFile_HashAndVersionCreated](../../../docs/tests/domain-model/TestAddFull_WithFile_HashAndVersionCreated.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_WithParent](../../../docs/tests/domain-model/TestAddFull_WithParent.md) — déduit : teste `ModelService.AddFull`
+> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestGetChildren_Empty](../../../docs/tests/domain-model/TestGetChildren_Empty.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestGetChildren_Success](../../../docs/tests/domain-model/TestGetChildren_Success.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed](../../../docs/tests/domain-model/TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestGetModuleInterfaces_SimpleComponent](../../../docs/tests/domain-model/TestGetModuleInterfaces_SimpleComponent.md) — déduit : teste `ModelService.AddFull`
-> - … et 12 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 13 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Composant numérique dérivé (firmware basé sur un firmware existant)

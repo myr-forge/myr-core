@@ -89,11 +89,12 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 8. Le module passe en état `submitted`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 34 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 35 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_Verify_OK](../../../docs/tests/adapters-in-rest/TestModules_Verify_OK.md) — déduit : teste route `/api/modules`
+> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.EnsureVirtualSlot`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`, `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_ParentID_NotFound_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_NotFound_Rejected.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.CreateModule`, `ModelService.SubmitModule`
@@ -104,8 +105,7 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 > - 🟡 [TestIsModule_DraftComponent_NotMisclassified](../../../docs/tests/domain-model/TestIsModule_DraftComponent_NotMisclassified.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestModuleComposition_RM19_Submitted_Rejected](../../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - 🟡 [TestModule_AddRemoveAssembly](../../../docs/tests/domain-model/TestModule_AddRemoveAssembly.md) — déduit : teste `ModelService.CreateModule`
-> - … et 19 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 20 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Composant sans interfaces définies

@@ -15,6 +15,7 @@ tags:
   - rm/RM10
   - rm/RM11
   - rm/RM13
+  - rm/RM19
   - enf/ENF12
   - enf/ENF18
 ---
@@ -91,7 +92,7 @@ Une interface peut être créée de deux façons :
 6. La réponse `201 Created` retourne le DTO de la connexion créée
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 22 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 23 déduit(s)
 > - 🟡 [TestRunModelLinkConnectVirtual_MissingVirtual_Rejected](../../../docs/tests/adapters-in-cli/TestRunModelLinkConnectVirtual_MissingVirtual_Rejected.md) — déduit : teste commande `myr model link connect-virtual`
 > - 🟡 [TestRunModelLinkConnectVirtual_NominalCase](../../../docs/tests/adapters-in-cli/TestRunModelLinkConnectVirtual_NominalCase.md) — déduit : teste commande `myr model link connect-virtual`
 > - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddAssemblyLink`
@@ -106,8 +107,8 @@ Une interface peut être créée de deux façons :
 > - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - … et 7 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`, `ModelService.EnsureVirtualSlot`
+> - … et 8 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux B — Attributs explicites
@@ -120,7 +121,7 @@ Une interface peut être créée de deux façons :
 4. La réponse `201 Created` retourne l'interface créée
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 91 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 92 déduit(s)
 > - 🟡 [TestRunModelInterfaceAdd_NominalCase](../../../docs/tests/adapters-in-cli/TestRunModelInterfaceAdd_NominalCase.md) — déduit : teste commande `myr model interface add`
 > - 🟡 [TestRunModelInterfaceAdd_ServiceError_Rejected](../../../docs/tests/adapters-in-cli/TestRunModelInterfaceAdd_ServiceError_Rejected.md) — déduit : teste commande `myr model interface add`
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
@@ -136,7 +137,7 @@ Une interface peut être créée de deux façons :
 > - 🟡 [TestComponent_AddAssembly_MissingConnectionID](../../../docs/tests/adapters-in-rest/TestComponent_AddAssembly_MissingConnectionID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddInstance](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
-> - … et 76 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 77 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif A2 — Ajustement des valeurs déduites
@@ -167,7 +168,7 @@ Une interface peut être créée de deux façons :
 2. Le handler retourne HTTP 500 avec le message d'erreur
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 14 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
 > - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
@@ -177,6 +178,7 @@ Une interface peut être créée de deux façons :
 > - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
@@ -191,7 +193,7 @@ Une interface peut être créée de deux façons :
 3. Le handler retourne HTTP 500
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 14 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
 > - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
@@ -201,6 +203,33 @@ Une interface peut être créée de deux façons :
 > - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestWorkspace_VirtualIsClickable](../../../docs/tests/domain-model/TestWorkspace_VirtualIsClickable.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestWorkspace_VirtualSlot_ChainedConnections](../../../docs/tests/domain-model/TestWorkspace_VirtualSlot_ChainedConnections.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+<!-- tests-obsidian:end -->
+
+### Flux erreur — Slot virtuel d'un asset soumis (RM19)
+
+1. Le slot virtuel appartient à un asset déjà soumis (composant ou module)
+2. `ConnectVirtualToPhysical()` refuse de le matérialiser (`ErrAssetSubmitted`) : ce serait ajouter une interface physique à un asset figé (RM19)
+3. L'API retourne `409 Conflict` ; le slot reste virtuel et aucune liaison n'est créée
+4. Relier cet asset passe par ses interfaces physiques existantes (UCAM01), ou par un asset dérivé auquel ajouter l'interface
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
+> - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_NilConnStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilConnStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
@@ -280,6 +309,7 @@ end
 | Règle | Description | État code |
 |-------|-------------|-----------|
 | **RM13** | Slot virtuel garanti : après matérialisation (Flux A), `EnsureVirtualSlot` recrée immédiatement un slot | Implémenté dans `ConnectVirtualToPhysical` |
+| **RM19** | Un asset soumis est figé : son slot virtuel ne se matérialise pas en interface physique | `ConnectVirtualToPhysical()` → `requireDraftCarrier` (`ErrAssetSubmitted`, 409) |
 | **RM11** | Le **Tag** est un critère de compatibilité obligatoire — doit être renseigné à la création | A implémenter (champ `Tag` absent E2) |
 | **RM10** | La liaison créée par Flux A passe par `AddAssemblyLink` qui vérifie `ifacesCompatible` | Implémenté |
 | **RM09** | L'interface nouvellement créée (Flux A) ne peut pas être réutilisée dans une autre liaison | A implémenter (RM09 absent du code) |

@@ -130,7 +130,7 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 4. La Liaison est créée et le module reste en état `draft`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 14 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
 > - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
@@ -140,6 +140,7 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 > - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`

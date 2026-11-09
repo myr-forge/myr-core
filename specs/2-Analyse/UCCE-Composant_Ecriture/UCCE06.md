@@ -98,13 +98,14 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 10. L'API retourne `201 Created` avec l'`AssetInterface` créée (en brouillon). Elle rejoindra la blockchain à la prochaine soumission du composant.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 17 déduit(s)
 > - 🟡 [TestInterface_Persistence](../../../docs/tests/adapters-out-localstorage/TestInterface_Persistence.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestListInterfacesForAsset](../../../docs/tests/adapters-out-localstorage/TestListInterfacesForAsset.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestRemoveInterface](../../../docs/tests/adapters-out-localstorage/TestRemoveInterface.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestSaveInterface_And_GetInterface](../../../docs/tests/adapters-out-localstorage/TestSaveInterface_And_GetInterface.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestSaveInterface_Update](../../../docs/tests/adapters-out-localstorage/TestSaveInterface_Update.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddInterface`
+> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddInterface`
@@ -113,8 +114,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 > - 🟡 [TestInterface_AddListRemove](../../../docs/tests/domain-model/TestInterface_AddListRemove.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestInterface_IDPreservedIfGiven](../../../docs/tests/domain-model/TestInterface_IDPreservedIfGiven.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestInterface_NilStore_ReturnsError](../../../docs/tests/domain-model/TestInterface_NilStore_ReturnsError.md) — déduit : teste `ModelService.AddInterface`
-> - 🟡 [TestInterfaces_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestInterfaces_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.AddInterface`
-> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 2 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Composant déjà soumis : création d'un fork
@@ -137,7 +137,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 3. Lors d'une liaison (UCAM01/UCAM03), le slot virtuel sera matérialisé en interface physique via `ConnectVirtualToPhysical()`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 14 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
 > - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
@@ -147,6 +147,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 > - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
+> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
 > - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`

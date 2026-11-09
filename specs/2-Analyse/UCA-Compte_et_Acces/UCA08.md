@@ -86,11 +86,12 @@ L'administrateur peut aussi changer directement le rôle d'une identité, sans d
 5. Le CLI affiche : « Rôle consumer attribué à pseudo@org. Il s'applique au prochain ré-enrôlement de l'identité (myr identity re-enroll). » ; l'API répond `200 OK` avec la demande
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 6 déduit(s)
 > - 🟡 [TestRunIdentityReEnroll_NoLocalWallet_Rejected](../../../docs/tests/adapters-in-cli/TestRunIdentityReEnroll_NoLocalWallet_Rejected.md) — déduit : teste commande `myr identity re-enroll`
 > - 🟡 [TestRunIdentityReEnroll_NominalCase](../../../docs/tests/adapters-in-cli/TestRunIdentityReEnroll_NominalCase.md) — déduit : teste commande `myr identity re-enroll`
 > - 🟡 [TestRunIdentityRequestRole_RM47_GrantedOrPending](../../../docs/tests/adapters-in-cli/TestRunIdentityRequestRole_RM47_GrantedOrPending.md) — déduit : teste commande `myr identity request-role`
 > - 🟡 [TestSessionIdentity](../../../docs/tests/adapters-in-cli/TestSessionIdentity.md) — déduit : teste commande `myr identity request-role`
+> - 🟡 [TestCAClient_IdentityPath_NonASCIIEnrollmentID](../../../docs/tests/adapters-out-fabric/TestCAClient_IdentityPath_NonASCIIEnrollmentID.md) — déduit : teste `CAPort.UpdateAttributes`
 > - 🟡 [TestCAClient_UpdateAttributes_SEC1AndPKCS8Keys](../../../docs/tests/adapters-out-fabric/TestCAClient_UpdateAttributes_SEC1AndPKCS8Keys.md) — déduit : teste `CAPort.UpdateAttributes`
 <!-- tests-obsidian:end -->
 
