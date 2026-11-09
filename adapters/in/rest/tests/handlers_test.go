@@ -909,6 +909,36 @@ func TestComponents_POST_WithoutFile(t *testing.T) {
 	}
 }
 
+/// @brief  Sans miniature fournie, POST /api/components ne télécharge pas l'og:image des liens (FT-040)
+/// @input  POST /api/components avec un lien externe et sans miniature
+/// @expect HTTP 201 ; ni RegenerateThumbnail ni SaveThumbnail appelés
+func TestComponents_POST_NoThumbnail_NoImplicitDownload(t *testing.T) {
+	called := false
+	svc := &mockSvc{
+		addFull: func(req model.AddRequest) (*model.Model3D, error) {
+			return &model.Model3D{ID: "c5", Name: req.Name, Links: req.Links, CreatedAt: time.Now()}, nil
+		},
+		regenerateThumbnail: func(string) (string, error) { called = true; return "", nil },
+		saveThumbnail:       func(string, string) error { called = true; return nil },
+	}
+	body, ct := buildMultipartForm(t,
+		map[string]string{"name": "Rotor", "links": `["https://example.com/rotor"]`},
+		"stl", "rotor.stl", []byte("solid rotor\nendsolid rotor\n"))
+	req := httptest.NewRequest(http.MethodPost, "/api/components", body)
+	req.Header.Set("Content-Type", ct)
+	w := httptest.NewRecorder()
+	mux := newTestMux(t, svc)
+	req.Header.Set("X-Myr-Token", loginToken(t, mux))
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Fatalf("got %d, want 201 (body: %s)", w.Code, w.Body.String())
+	}
+	if called {
+		t.Error("aucune miniature ne doit être produite par le serveur")
+	}
+}
+
 /// @brief  Vérifie que POST /api/components sauvegarde la miniature fournie en data-URL
 /// @input  POST /api/components, multipart avec name="Rotor", thumbnail (data-URL PNG), fichier STL
 /// @expect HTTP 201, SaveThumbnail appelé avec la data-URL exacte

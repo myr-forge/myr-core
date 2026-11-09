@@ -628,10 +628,10 @@ paths:
       - multipart/form-data
       description: Crée un asset (catégorie par défaut "base"). Le fichier CAO 3D
         est optionnel (champ "file", ou "stl" pour rétrocompatibilité) ; une miniature
-        base64 peut être fournie directement ou est dérivée de l'og:image du premier
-        lien si aucun fichier n'est envoyé. Le composant est toujours créé en brouillon
-        local ("status":"draft", aucune transaction blockchain) — voir POST /components/{id}/submit
-        pour l'engager explicitement sur la blockchain.
+        base64 peut être fournie, le serveur n'en dérive aucune de lui-même. Le composant
+        est toujours créé en brouillon local ("status":"draft", aucune transaction
+        blockchain) — voir POST /components/{id}/submit pour l'engager explicitement
+        sur la blockchain.
       parameters:
       - description: nom du composant (max 256 caractères)
         in: formData

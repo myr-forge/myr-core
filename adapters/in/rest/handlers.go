@@ -681,7 +681,7 @@ func assetMatchesQuery(m *model.Model3D, q string) bool {
 // createAsset crée un composant à partir d'un formulaire multipart.
 //
 //	@Summary		Créer un composant
-//	@Description	Crée un asset (catégorie par défaut "base"). Le fichier CAO 3D est optionnel (champ "file", ou "stl" pour rétrocompatibilité) ; une miniature base64 peut être fournie directement ou est dérivée de l'og:image du premier lien si aucun fichier n'est envoyé. Le composant est toujours créé en brouillon local ("status":"draft", aucune transaction blockchain) — voir POST /components/{id}/submit pour l'engager explicitement sur la blockchain.
+//	@Description	Crée un asset (catégorie par défaut "base"). Le fichier CAO 3D est optionnel (champ "file", ou "stl" pour rétrocompatibilité) ; une miniature base64 peut être fournie, le serveur n'en dérive aucune de lui-même. Le composant est toujours créé en brouillon local ("status":"draft", aucune transaction blockchain) — voir POST /components/{id}/submit pour l'engager explicitement sur la blockchain.
 //	@Tags			components
 //	@Accept			multipart/form-data
 //	@Produce		json
@@ -769,9 +769,11 @@ func (h *Handler) createAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Miniature base64 envoyée par le frontend (Three.js renderer STL), sinon
-	// dérivée de l'og:image du premier lien si aucun n'est fourni.
-	h.applyThumbnailFallback(r, m.ID, r.FormValue("thumbnail"), req.Links)
+	// Miniature fournie par le client (rendu côté client) : le serveur n'en
+	// produit aucune de lui-même (FT-040).
+	if thumb := r.FormValue("thumbnail"); thumb != "" {
+		_ = h.svcFor(r).SaveThumbnail(m.ID, thumb)
+	}
 
 	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
 	w.WriteHeader(http.StatusCreated)
@@ -811,17 +813,6 @@ func (h *Handler) createOneComponent(r *http.Request, req model.AddRequest, file
 		req.FilePath = tmp.Name()
 	}
 	return h.svcFor(r).AddFull(req)
-}
-
-// applyThumbnailFallback sauvegarde thumb (data URL fournie explicitement)
-// si non vide, sinon dérive la miniature de l'og:image du premier lien
-// externe si des liens sont fournis. Sans effet si ni l'un ni l'autre.
-func (h *Handler) applyThumbnailFallback(r *http.Request, assetID, thumb string, links []string) {
-	if thumb != "" {
-		_ = h.svcFor(r).SaveThumbnail(assetID, thumb)
-	} else if len(links) > 0 {
-		_, _ = h.svcFor(r).RegenerateThumbnail(assetID)
-	}
 }
 
 // ── /api/components/:id ──────────────────────────────────────────────────────────
