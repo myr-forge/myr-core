@@ -5,7 +5,7 @@ type: dette
 statut: a-trancher
 severite: majeure
 detecte: 2026-11-08
-maj: 2026-11-09
+maj: 2026-11-10
 composants: [domain/model, adapters/in/rest, adapters/in/cli, adapters/out/localstorage, adapters/out/webimage]
 uc: [UCAM01, UCAM02, UCAM03, UCCE01, UCCE06, UCMOD01, UCMOD03, UCMOD06]
 rm: [RM13, RM16, RM17]
@@ -126,3 +126,4 @@ B et C aggravent FT-001 (propriété non contrôlée côté serveur).
 - 2026-11-09 — Points 11, 7, 4, 5 et 6 corrigés sur `feature/ledger-invariants`, non déployés : `verify` retiré en REST et en CLI (`bf2c832`), création par lot retirée (`10847b5`), plus de téléchargement d'`og:image` à la création (`08ee6bb`), catégorie et canal obligatoires, `Service.Add` retiré (`51f12f3`). Changements cassants pour myr-web : mise en production à coordonner. `FileStoragePort` n'a plus d'utilisateur dans le domaine : retrait à trancher. Point 12 après la transition de myr-web
 - 2026-11-09 — Point 12 fait (commit `89fa3ca`) : `POST /api/identity/guest` retiré, sur décision du PO, sans attendre myr-web. `FileStoragePort` retiré (commit `e5e6b10`)
 - 2026-11-09 — Déployé en production : API et CLI `5503f80` (points 4, 5, 6, 7, 11 et 12, retrait de `FileStoragePort`), sur décision du PO sans attendre l'adaptation de myr-web ; répétition sur myr-test 48 OK, 0 NOK, 19 tests d'intégration Fabric OK ; sauvegarde `~/.Myr/server-data.bak-20261109-204305`, binaires `b5ed57f` conservés en `.prev`
+- 2026-11-09 — Décisions du PO : les brouillons **restent dans le cœur** (parité CLI/REST, assemblage pas à pas ; pas de R-20 ni de format d'asset complet à ce stade) ; les slots virtuels, les positions x/y et les miniatures sont **retirés maintenant**, déploiement sur accord du PO

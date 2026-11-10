@@ -2,10 +2,10 @@
 id: FT-001
 titre: "Propriété des assets non contrôlée côté serveur"
 type: securite
-statut: ouvert
+statut: en-cours
 severite: critique
 detecte: 2026-10-02
-maj: 2026-11-09
+maj: 2026-11-10
 composants: [adapters/in/rest, domain/model]
 uc: [UCCE01, UCCE02, UCCE07, UCMOD03, UCMOD04, UCMOD08, UCPI07]
 rm: [RM08, RM23, RM24]
@@ -13,7 +13,7 @@ enf: [ENF12]
 tags:
   - ticket
   - ticket/securite
-  - statut/ouvert
+  - statut/en-cours
   - severite/critique
   - domaine/model
   - uc/UCCE01
@@ -30,7 +30,7 @@ tags:
 ---
 # FT-001 — Propriété des assets non contrôlée côté serveur
 
-> **Sécurité** · sévérité **critique** · statut **Ouvert** · détecté le 2026-10-02
+> **Sécurité** · sévérité **critique** · statut **En cours** · détecté le 2026-10-02
 > Source : Analyse du code (création des tickets) ; annotation #incoherence de Modele_Domaine.md
 
 ## Constat
@@ -77,3 +77,4 @@ Faire porter l'identité appelante jusqu'au domaine (paramètre explicite ou con
 - 2026-10-02 — Ticket créé ; constat vérifié dans le code au commit `2aa69c1`
 - 2026-11-09 — Deux failles qui aggravaient ce constat sont corrigées (commit `3c48a30`, FT-040 B et C) : un identifiant d'interface fourni par le client n'est plus repris (il permettait d'écraser l'interface d'un autre asset), et `PATCH /api/interfaces/{id}` refuse de changer l'asset porteur. Le contrôle de propriété lui-même reste ouvert : un contributeur peut toujours modifier le brouillon d'un autre
 - 2026-11-09 — Déployé en production : API et CLI `b5ed57f` depuis `feature/ledger-invariants`, après répétition sur myr-test (42 OK, 0 NOK) et 19 tests d'intégration Fabric OK ; sauvegarde `~/.Myr/server-data.bak-20261109-185157`, anciens binaires conservés en `.prev` (corrections des deux failles aggravantes)
+- 2026-11-09 — Décision du PO : seul le propriétaire modifie, supprime ou soumet un asset, administrateur compris (RM54). Corrigé sur `feature/ledger-invariants` (commit `c533dae`) : `ModelService.As`, appelé par la REST (identité de la session) et la CLI (compte local) ; refus `ErrNotOwner` (403). Décision du PO pour les 55 brouillons de production antérieurs à ADR-12 (propriétaire sous forme de pseudo) : migration unique au déploiement, service arrêté et après sauvegarde — Becky → Becky@Org1, KIKI → KIKI@moi, Pwet → Pwet@Moi, Yann → Yann@Org1, bob → bob@Org1, Christophe → Christophe@poc. Non déployé
