@@ -106,7 +106,6 @@ func init() {
 	modelLinkAddCmd.Flags().String("from-instance", "", "ID instance de module pour l'interface source (optionnel)")
 	modelLinkAddCmd.Flags().String("to-instance", "", "ID instance de module pour l'interface cible (optionnel)")
 
-
 	modelLinkCmd.AddCommand(modelLinkAddCmd, modelLinkRemoveCmd, modelLinkListCmd)
 	modelCmd.AddCommand(modelLinkCmd)
 }

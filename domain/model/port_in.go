@@ -82,5 +82,4 @@ type ModelService interface {
 	GetLicense(id string) (*License, error)
 	CheckLicenseCompatibility(parentLicenseID, proposedLicenseID string) *LicenseCheck
 	CheckModuleLicenseCompatibility(componentLicenseIDs []string, proposedProductLicenseID string) *LicenseCheck
-
 }

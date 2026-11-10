@@ -145,14 +145,14 @@ const (
 type AssetInterface struct {
 	ID        string         `json:"id"`
 	AssetID   string         `json:"asset_id"`
-	Name      string         `json:"name,omitempty"`    // label optionnel
-	Category  string         `json:"category"`          // "ELEC", "MECA", "HYD" ou custom
-	Type      string         `json:"type"`              // ex: "DIN", "Vis M3"
-	Direction IfaceDirection `json:"direction"`         // "in", "out", "bidir"
-	ValueMin  float64        `json:"value_min"`         // valeur unique ou borne basse
-	ValueMax  float64        `json:"value_max"`         // borne haute (si IsRange)
-	IsRange   bool           `json:"is_range"`          // true si plage de valeurs
-	Unit      string         `json:"unit,omitempty"`    // ex: "V", "mm", "bar"
+	Name      string         `json:"name,omitempty"` // label optionnel
+	Category  string         `json:"category"`       // "ELEC", "MECA", "HYD" ou custom
+	Type      string         `json:"type"`           // ex: "DIN", "Vis M3"
+	Direction IfaceDirection `json:"direction"`      // "in", "out", "bidir"
+	ValueMin  float64        `json:"value_min"`      // valeur unique ou borne basse
+	ValueMax  float64        `json:"value_max"`      // borne haute (si IsRange)
+	IsRange   bool           `json:"is_range"`       // true si plage de valeurs
+	Unit      string         `json:"unit,omitempty"` // ex: "V", "mm", "bar"
 }
 
 // InterfaceRefs contient le vocabulaire extensible des catégories, types et unités.

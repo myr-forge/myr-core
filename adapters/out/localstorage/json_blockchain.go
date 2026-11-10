@@ -11,12 +11,12 @@ import (
 )
 
 type dbFile struct {
-	Thumbnails  map[string]string       `json:"thumbnails"`
-	Connections []*model.Connection     `json:"connections"`
-	Interfaces  []*storedInterface      `json:"interfaces"`
-	Refs        *model.InterfaceRefs    `json:"refs"`
-	Drafts      []*model.Model3D        `json:"drafts"`
-	HiddenIDs   map[string]bool         `json:"hidden_ids"`
+	Thumbnails  map[string]string    `json:"thumbnails"`
+	Connections []*model.Connection  `json:"connections"`
+	Interfaces  []*storedInterface   `json:"interfaces"`
+	Refs        *model.InterfaceRefs `json:"refs"`
+	Drafts      []*model.Model3D     `json:"drafts"`
+	HiddenIDs   map[string]bool      `json:"hidden_ids"`
 }
 
 // storedInterface est une interface telle qu'enregistrée. Les fichiers

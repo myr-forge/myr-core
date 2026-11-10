@@ -1443,7 +1443,6 @@ func (s *Service) CheckModuleLicenseCompatibility(componentLicenseIDs []string, 
 	return CheckModuleLicenseCompatibility(componentLicenseIDs, proposedProductLicenseID)
 }
 
-
 // ── interne ──────────────────────────────────────────────────────────────────
 
 func (s *Service) hashFile(path string) (string, error) {
