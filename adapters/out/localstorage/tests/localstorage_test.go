@@ -20,7 +20,6 @@ func tmpDB(t *testing.T) (*localstorage.JSONBlockchain, string) {
 	return localstorage.NewJSONBlockchain(path), path
 }
 
-
 // ── GetRefs ───────────────────────────────────────────────────────────────────
 
 // / @brief  Vérifie que GetRefs retourne les valeurs par défaut quand le fichier JSON est absent
@@ -49,7 +48,7 @@ func TestGetRefs_EmptyCategories_ReturnsDefaults(t *testing.T) {
 	// Simulate a JSON file with refs present but Categories empty (pre-fix bug).
 	dir := t.TempDir()
 	path := filepath.Join(dir, "test.json")
-	if err := os.WriteFile(path, []byte(`{"thumbnails":{},"connections":[],"interfaces":[],"refs":{"categories":[],"types":{},"units":{}}}`), 0644); err != nil {
+	if err := os.WriteFile(path, []byte(`{"connections":[],"interfaces":[],"refs":{"categories":[],"types":{},"units":{}}}`), 0644); err != nil {
 		t.Fatal(err)
 	}
 	db := localstorage.NewJSONBlockchain(path)
@@ -680,67 +679,6 @@ func TestConnection_Persistence(t *testing.T) {
 	}
 }
 
-// ── SaveThumbnail / GetThumbnail ──────────────────────────────────────────────
-
-// / @brief  Vérifie que SaveThumbnail persiste une miniature et que GetThumbnail la retourne fidèlement
-// / @input  Miniature "data:image/png;base64,abc123" associée à "asset-1"
-// / @expect GetThumbnail("asset-1") retourne exactement "data:image/png;base64,abc123", sans erreur
-func TestSaveThumbnail_And_Get(t *testing.T) {
-	db, _ := tmpDB(t)
-	if err := db.SaveThumbnail("asset-1", "data:image/png;base64,abc123"); err != nil {
-		t.Fatalf("SaveThumbnail: %v", err)
-	}
-	got, err := db.GetThumbnail("asset-1")
-	if err != nil {
-		t.Fatalf("GetThumbnail: %v", err)
-	}
-	if got != "data:image/png;base64,abc123" {
-		t.Fatalf("unexpected thumbnail: %q", got)
-	}
-}
-
-// / @brief  Vérifie que GetThumbnail retourne une chaîne vide sans erreur pour un asset inconnu
-// / @input  Base vide, appel de GetThumbnail avec l'ID "nonexistent"
-// / @expect Aucune erreur, chaîne vide retournée
-func TestGetThumbnail_Missing_ReturnsEmpty(t *testing.T) {
-	db, _ := tmpDB(t)
-	got, err := db.GetThumbnail("nonexistent")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if got != "" {
-		t.Fatalf("expected empty, got %q", got)
-	}
-}
-
-// / @brief  Vérifie que SaveThumbnail écrase la miniature précédente pour le même asset
-// / @input  Miniature "first" puis "second" sauvegardées pour "asset-1"
-// / @expect GetThumbnail retourne "second"
-func TestThumbnail_Overwrite(t *testing.T) {
-	db, _ := tmpDB(t)
-	_ = db.SaveThumbnail("asset-1", "first")
-	_ = db.SaveThumbnail("asset-1", "second")
-	got, _ := db.GetThumbnail("asset-1")
-	if got != "second" {
-		t.Fatalf("expected overwrite to second, got %q", got)
-	}
-}
-
-// / @brief  Vérifie que les miniatures sauvegardées sont relues correctement après rechargement du fichier
-// / @input  Miniature "data:image/png;base64,xyz" pour "asset-1" sauvegardée, rechargement via un nouveau JSONBlockchain
-// / @expect GetThumbnail("asset-1") retourne "data:image/png;base64,xyz"
-func TestThumbnail_Persistence(t *testing.T) {
-	db, path := tmpDB(t)
-	_ = db.SaveThumbnail("asset-1", "data:image/png;base64,xyz")
-
-	db2 := localstorage.NewJSONBlockchain(path)
-	got, _ := db2.GetThumbnail("asset-1")
-	if got != "data:image/png;base64,xyz" {
-		t.Fatalf("thumbnail not persisted, got %q", got)
-	}
-}
-
-
 // / @brief  Les slots virtuels d'un fichier antérieur à leur retrait (FT-040) sont écartés à la lecture et disparaissent à l'écriture suivante
 // / @input  assets.json avec une interface physique et un slot marqué "virtual" ; lecture, puis enregistrement d'une autre interface
 // / @expect seule l'interface physique est lue ; après l'écriture, le fichier ne contient plus de slot
@@ -766,5 +704,26 @@ func TestJSONStore_LegacyVirtualSlots_Dropped(t *testing.T) {
 	}
 	if raw, _ := os.ReadFile(path); strings.Contains(string(raw), `"slot"`) || strings.Contains(string(raw), "virtual") {
 		t.Errorf("le slot doit avoir disparu du fichier : %s", raw)
+	}
+}
+
+// / @brief  Les miniatures d'un fichier antérieur à leur retrait (FT-040) disparaissent à l'écriture suivante, sans gêner la lecture
+// / @input  assets.json avec une carte "thumbnails" et une connexion ; lecture, puis enregistrement d'une connexion
+// / @expect la connexion est lue ; après l'écriture, le fichier ne contient plus de miniature
+func TestJSONStore_LegacyThumbnails_Dropped(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "assets.json")
+	legacy := `{"thumbnails": {"a": "data:image/png;base64,AAAA"}, "connections": [{"id": "c1", "from": "a", "to": "b"}]}`
+	if err := os.WriteFile(path, []byte(legacy), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	db := localstorage.NewJSONBlockchain(path)
+	if conns, err := db.ListConnections(); err != nil || len(conns) != 1 {
+		t.Fatalf("connexion attendue : %+v, %v", conns, err)
+	}
+	if err := db.SaveConnection(newConn("c2", "b", "c")); err != nil {
+		t.Fatalf("SaveConnection : %v", err)
+	}
+	if raw, _ := os.ReadFile(path); strings.Contains(string(raw), "thumbnails") {
+		t.Errorf("les miniatures doivent avoir disparu du fichier : %s", raw)
 	}
 }

@@ -67,10 +67,9 @@ La clé de cette opération est la gestion des **instances indépendantes** (RM1
 5. Le Module source est instancié dans le module hôte, avec ses interfaces exposées
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 17 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
-> - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestAddAssemblyToModule_RM51_InstanceLink_OK](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_InstanceLink_OK.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate](../../../docs/tests/domain-model/TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate.md) — déduit : teste `ModelService.AddAssetToWorkspace`
@@ -83,7 +82,8 @@ La clé de cette opération est la gestion des **instances indépendantes** (RM1
 > - 🟡 [TestModuleComposition_RM19_Submitted_Rejected](../../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_AddRemoveInstance](../../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_NilStore_ReturnsError](../../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - … et 2 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestWorkspace_ThreeAssets_AllPresent](../../../docs/tests/domain-model/TestWorkspace_ThreeAssets_AllPresent.md) — déduit : teste `ModelService.AddAssetToWorkspace`
+> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Module déjà instancié dans le module hôte (RM15)
@@ -94,10 +94,9 @@ La clé de cette opération est la gestion des **instances indépendantes** (RM1
 4. Les deux instances sont consultables via `GET /api/modules/:hostModuleID/instances`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 3 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 2 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
-> - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Module introuvable sur la blockchain

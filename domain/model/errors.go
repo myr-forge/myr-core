@@ -35,17 +35,9 @@ var ErrAssetSubmitted = errors.New("model: asset soumis, immuable — créez un 
 // n'existe pas dans le catalogue.
 var ErrUnknownLicense = errors.New("model: licence absente du catalogue")
 
-// ErrThumbnailTooLarge est retournée par SaveThumbnail pour une image
-// dépassant MaxThumbnailBytes.
-var ErrThumbnailTooLarge = errors.New("model: miniature trop volumineuse")
-
 // ErrLicenseIncompatible est retournée quand la licence proposée pour un
 // asset dérivé n'est pas compatible avec celle de son parent (RM03).
 var ErrLicenseIncompatible = errors.New("model: incompatibilité de licence avec l'asset parent")
-
-// ErrNoThumbnailSource est retournée par Service.RegenerateThumbnail quand l'asset
-// n'a aucun lien externe (Links) — seule source de miniature régénérable côté serveur.
-var ErrNoThumbnailSource = errors.New("model: aucun lien externe enregistré pour régénérer la miniature")
 
 // IsDegradedListErr indique si err signale que List/ListModules a échoué à joindre la
 // blockchain (ErrBlockchainUnavailable ou ErrBlockchainUnreachable) — dans ce cas la méthode

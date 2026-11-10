@@ -13,9 +13,6 @@ import (
 const (
 	// maxJSONBody borne un corps JSON ordinaire.
 	maxJSONBody = 1 << 20
-	// maxThumbnailBody borne l'envoi d'une miniature : une image de 2 Mo
-	// (model.MaxThumbnailBytes) encodée en base64 dans une data URL.
-	maxThumbnailBody = 3 << 20
 	// DefaultMaxUpload borne un envoi de fichier (multipart) : le fichier CAO
 	// n'est reçu que pour en calculer l'empreinte (RM42).
 	DefaultMaxUpload = 256 << 20
@@ -104,7 +101,7 @@ func (h *Handler) clientIP(r *http.Request) string {
 }
 
 // limitBodies borne le corps de chaque requête : maxUpload pour un envoi de
-// fichier (multipart), maxThumbnailBody pour une miniature, maxJSONBody sinon.
+// fichier (multipart), maxJSONBody sinon.
 // Une longueur déclarée au-delà est refusée d'emblée (413) ; un corps de
 // longueur non déclarée est interrompu à la borne.
 func (h *Handler) limitBodies(next http.Handler) http.Handler {
@@ -113,8 +110,6 @@ func (h *Handler) limitBodies(next http.Handler) http.Handler {
 		switch {
 		case strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/"):
 			limit = h.maxUpload
-		case strings.HasSuffix(r.URL.Path, "/thumbnail"):
-			limit = maxThumbnailBody
 		}
 		if r.ContentLength > limit {
 			jsonError(w, fmt.Sprintf("corps de requête trop volumineux (%d octets au plus)", limit), http.StatusRequestEntityTooLarge)

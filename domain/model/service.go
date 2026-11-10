@@ -4,7 +4,6 @@ package model
 import (
 	"crypto/rand"
 	"crypto/sha256"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -15,13 +14,11 @@ import (
 )
 
 type Service struct {
-	blockchain     BlockchainPort    // nullable — nil si Fabric indisponible (voir ErrBlockchainUnavailable)
-	connStore      ConnectionStore   // optionnel — nil hors mode GUI
-	thumbStore     ThumbnailStore    // optionnel — nil hors mode GUI
-	ifaceStore     InterfaceStore    // optionnel — nil hors mode GUI
-	draftStore     DraftStore        // optionnel — requis uniquement pour AddRequest.Draft / Submit
-	ogImageFetcher OGImageFetcher    // optionnel — nil si non câblé (pas d'accès réseau depuis les tests domaine)
-	removedStore   RemovedAssetStore // optionnel — masquage local d'un asset déjà soumis (RM08)
+	blockchain   BlockchainPort    // nullable — nil si Fabric indisponible (voir ErrBlockchainUnavailable)
+	connStore    ConnectionStore   // optionnel — nil hors mode GUI
+	ifaceStore   InterfaceStore    // optionnel — nil hors mode GUI
+	draftStore   DraftStore        // optionnel — requis uniquement pour AddRequest.Draft / Submit
+	removedStore RemovedAssetStore // optionnel — masquage local d'un asset déjà soumis (RM08)
 	// actor est l'identité pour laquelle le service agit (As) ; acting indique
 	// qu'As a été appelé.
 	actor  string
@@ -77,12 +74,6 @@ func (s *Service) WithConnStore(cs ConnectionStore) *Service {
 	return s
 }
 
-// WithThumbStore attache un store de miniatures (mode GUI).
-func (s *Service) WithThumbStore(ts ThumbnailStore) *Service {
-	s.thumbStore = ts
-	return s
-}
-
 // WithIfaceStore attache un store d'interfaces physiques (mode GUI).
 func (s *Service) WithIfaceStore(is InterfaceStore) *Service {
 	s.ifaceStore = is
@@ -92,12 +83,6 @@ func (s *Service) WithIfaceStore(is InterfaceStore) *Service {
 // WithDraftStore attache un store de brouillons (requis pour AddRequest.Draft et Submit).
 func (s *Service) WithDraftStore(ds DraftStore) *Service {
 	s.draftStore = ds
-	return s
-}
-
-// WithOGImageFetcher attache la source de régénération de miniature depuis un lien web.
-func (s *Service) WithOGImageFetcher(f OGImageFetcher) *Service {
-	s.ogImageFetcher = f
 	return s
 }
 
@@ -617,72 +602,6 @@ func (s *Service) GetChildren(parentID string) ([]*Model3D, error) {
 		}
 	}
 	return children, nil
-}
-
-// ── Miniatures STL (requiert thumbStore) ────────────────────────────────────
-
-func (s *Service) SaveThumbnail(assetID, dataURL string) error {
-	if s.thumbStore == nil {
-		return fmt.Errorf("thumbnail store non configuré")
-	}
-	if err := checkThumbnailSize(dataURL); err != nil {
-		return err
-	}
-	return s.thumbStore.SaveThumbnail(assetID, dataURL)
-}
-
-// MaxThumbnailBytes borne la taille de l'image d'une miniature.
-const MaxThumbnailBytes = 2 << 20
-
-// checkThumbnailSize refuse une miniature dont l'image dépasserait
-// MaxThumbnailBytes (data URL : en-tête, puis image encodée en base64).
-func checkThumbnailSize(dataURL string) error {
-	payload := dataURL
-	if _, data, ok := strings.Cut(dataURL, ","); ok {
-		payload = data
-	}
-	padding := len(payload) - len(strings.TrimRight(payload, "="))
-	if n := base64.StdEncoding.DecodedLen(len(payload)) - padding; n > MaxThumbnailBytes {
-		return fmt.Errorf("%w : %d octets, %d au plus", ErrThumbnailTooLarge, n, MaxThumbnailBytes)
-	}
-	return nil
-}
-
-func (s *Service) GetThumbnail(assetID string) (string, error) {
-	if s.thumbStore == nil {
-		return "", nil
-	}
-	return s.thumbStore.GetThumbnail(assetID)
-}
-
-// RegenerateThumbnail redérive la miniature d'un asset depuis sa seule source durable
-// accessible côté serveur : l'og:image du premier lien externe enregistré (Links).
-// Un modèle 3D n'a pas de source régénérable côté serveur (pas de moteur de rendu 3D
-// dans le domaine) — sa miniature est produite par le rendu client (GUI) et poussée
-// via SaveThumbnail ; RegenerateThumbnail échoue avec ErrNoThumbnailSource si l'asset
-// n'a aucun lien externe.
-func (s *Service) RegenerateThumbnail(assetID string) (string, error) {
-	if s.thumbStore == nil {
-		return "", fmt.Errorf("thumbnail store non configuré")
-	}
-	if s.ogImageFetcher == nil {
-		return "", fmt.Errorf("aucune source de régénération de miniature configurée")
-	}
-	m, err := s.Get(assetID, "")
-	if err != nil {
-		return "", err
-	}
-	if len(m.Links) == 0 {
-		return "", ErrNoThumbnailSource
-	}
-	dataURL, err := s.ogImageFetcher.FetchOGImage(m.Links[0])
-	if err != nil {
-		return "", fmt.Errorf("récupération og:image: %w", err)
-	}
-	if err := s.thumbStore.SaveThumbnail(assetID, dataURL); err != nil {
-		return "", err
-	}
-	return dataURL, nil
 }
 
 // ── Interfaces physiques (requiert ifaceStore) ───────────────────────────────

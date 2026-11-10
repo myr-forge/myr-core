@@ -43,7 +43,6 @@ import (
 	"myr-core/adapters/in/rest"
 	fabricadapter "myr-core/adapters/out/fabric"
 	"myr-core/adapters/out/localstorage"
-	"myr-core/adapters/out/webimage"
 	"myr-core/domain/identity"
 	"myr-core/domain/model"
 	"myr-core/domain/network"
@@ -129,11 +128,9 @@ func main() {
 	// des emplacements externes déclarés.
 	modelSvc := model.NewService(bc).
 		WithConnStore(store).
-		WithThumbStore(store).
 		WithIfaceStore(store).
 		WithDraftStore(store).
-		WithRemovedStore(store).
-		WithOGImageFetcher(webimage.New())
+		WithRemovedStore(store)
 
 	walletDir := filepath.Join(*dataDir, "wallets")
 	_ = os.MkdirAll(walletDir, 0700)
@@ -180,7 +177,7 @@ func main() {
 		netInfo.Channels = []string{"sandbox"}
 	}
 
-	handler := rest.NewHandler(modelSvc, store, store).
+	handler := rest.NewHandler(modelSvc, store).
 		WithIdentityService(identitySvc).
 		WithNetworkService(networkSvc).
 		WithRoleService(roleSvc).
@@ -190,7 +187,6 @@ func main() {
 		WithConnStore(store).
 		WithDraftStore(store).
 		WithRemovedStore(store).
-		WithOGImageFetcher(webimage.New()).
 		WithDefaultNetwork(defaultNetworkID).
 		WithFabricConnected(fabricConnected).
 		WithBuildDate(BuildDate).

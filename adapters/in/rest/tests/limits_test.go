@@ -39,7 +39,7 @@ func sessionAttempt(mux http.Handler, remote string, xff ...string) int {
 
 func newIdentityHandler() *rest.Handler {
 	store := &mockStore{}
-	return rest.NewHandler(&mockSvc{}, store, store).WithIdentityService(&mockIdentitySvc{})
+	return rest.NewHandler(&mockSvc{}, store).WithIdentityService(&mockIdentitySvc{})
 }
 
 // / @brief  Un X-Forwarded-For forgé par un client externe ne contourne pas la limite de débit (R-05)
@@ -140,7 +140,7 @@ func TestStatus_R06_AssetCountCached(t *testing.T) {
 		return []*model.Model3D{{ID: "a"}, {ID: "b"}}, nil
 	}}
 	store := &mockStore{}
-	mux := newLimitsMux(t, rest.NewHandler(svc, store, store))
+	mux := newLimitsMux(t, rest.NewHandler(svc, store))
 	for i := 0; i < 3; i++ {
 		w := httptest.NewRecorder()
 		mux.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/api/status", nil))
@@ -158,10 +158,9 @@ func TestStatus_R06_AssetCountCached(t *testing.T) {
 // / @expect 413 pour les trois
 func TestLimitBodies_R07_TooLarge_Rejected(t *testing.T) {
 	store := &mockStore{}
-	mux := newLimitsMux(t, rest.NewHandler(&mockSvc{}, store, store).WithMaxUpload(1024))
+	mux := newLimitsMux(t, rest.NewHandler(&mockSvc{}, store).WithMaxUpload(1024))
 
 	big := `{"name":"` + strings.Repeat("x", 2<<20) + `"}`
-	thumb := `{"thumbnail":"data:image/png;base64,` + strings.Repeat("A", 4<<20) + `"}`
 	var form bytes.Buffer
 	mw := multipart.NewWriter(&form)
 	fw, _ := mw.CreateFormFile("file", "piece.stl")
@@ -173,7 +172,6 @@ func TestLimitBodies_R07_TooLarge_Rejected(t *testing.T) {
 		body              []byte
 	}{
 		{"JSON", "/api/connections", "application/json", []byte(big)},
-		{"miniature", "/api/components/a1/thumbnail", "application/json", []byte(thumb)},
 		{"fichier", "/api/components", mw.FormDataContentType(), form.Bytes()},
 	}
 	for _, c := range cases {

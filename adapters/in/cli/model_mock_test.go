@@ -15,9 +15,6 @@ type mockModelSvc struct {
 	removeConnection                func(id string) error
 	listConnections                 func() ([]*model.Connection, error)
 	getChildren                     func(parentID string) ([]*model.Model3D, error)
-	saveThumbnail                   func(assetID, dataURL string) error
-	getThumbnail                    func(assetID string) (string, error)
-	regenerateThumbnail             func(assetID string) (string, error)
 	addInterface                    func(iface *model.AssetInterface) error
 	updateInterface                 func(iface *model.AssetInterface) error
 	removeInterface                 func(id string) error
@@ -105,24 +102,6 @@ func (m *mockModelSvc) GetChildren(parentID string) ([]*model.Model3D, error) {
 		return m.getChildren(parentID)
 	}
 	return nil, nil
-}
-func (m *mockModelSvc) SaveThumbnail(assetID, dataURL string) error {
-	if m.saveThumbnail != nil {
-		return m.saveThumbnail(assetID, dataURL)
-	}
-	return nil
-}
-func (m *mockModelSvc) GetThumbnail(assetID string) (string, error) {
-	if m.getThumbnail != nil {
-		return m.getThumbnail(assetID)
-	}
-	return "", nil
-}
-func (m *mockModelSvc) RegenerateThumbnail(assetID string) (string, error) {
-	if m.regenerateThumbnail != nil {
-		return m.regenerateThumbnail(assetID)
-	}
-	return "", nil
 }
 func (m *mockModelSvc) AddInterface(iface *model.AssetInterface) error {
 	if m.addInterface != nil {

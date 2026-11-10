@@ -9,7 +9,6 @@ import (
 	"myr-core/adapters/in/cli"
 	fabricadapter "myr-core/adapters/out/fabric"
 	"myr-core/adapters/out/localstorage"
-	"myr-core/adapters/out/webimage"
 	"myr-core/domain/channel"
 	"myr-core/domain/identity"
 	"myr-core/domain/model"
@@ -116,11 +115,9 @@ func main() {
 	// des emplacements externes déclarés.
 	modelSvc := model.NewService(bc).
 		WithConnStore(store).
-		WithThumbStore(store).
 		WithIfaceStore(store).
 		WithDraftStore(store).
-		WithRemovedStore(store).
-		WithOGImageFetcher(webimage.New())
+		WithRemovedStore(store)
 
 	nodeStore := localstorage.NewJSONNodeStore(filepath.Join(data, "nodes.json"))
 	channelStore := localstorage.NewJSONChannelStore(filepath.Join(data, "channels.json"))

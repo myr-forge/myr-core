@@ -19,7 +19,7 @@ import (
 // emptyLedger est un BlockchainPort vide.
 type emptyLedger struct{}
 
-func (emptyLedger) StoreModelRecord(*model.Model3D) error { return nil }
+func (emptyLedger) StoreModelRecord(*model.Model3D) error                        { return nil }
 func (emptyLedger) UpdateModelMetadata(_, _ string, _ model.AssetMetadata) error { return nil }
 func (emptyLedger) GetModelRecord(_, _ string) (*model.Model3D, error) {
 	return nil, model.ErrNotFound
@@ -54,7 +54,7 @@ func newSignerMux(t *testing.T, router *recordingRouter, walletFound bool) http.
 		}
 		return identity.WalletEntry{}, identity.ErrWalletNotFound
 	}}
-	h := rest.NewHandler(&mockSvc{}, store, store).
+	h := rest.NewHandler(&mockSvc{}, store).
 		WithIdentityService(ids).
 		WithBlockchainRouter(router).
 		WithDefaultNetwork("net1")

@@ -66,7 +66,7 @@ tags:
 | 400 | Corps invalide, champs requis manquants |
 | 401 | Secret d'enrôlement CA invalide, token de session absent/expiré |
 | 403 | Permission insuffisante, accès invité refusé (réseau privé) |
-| 413 | Corps de requête trop volumineux : JSON au-delà de 1 Mo, miniature au-delà de 2 Mo, fichier au-delà de `MYR_MAX_UPLOAD_MB` (256 Mo par défaut) — voir `Securite.md` § 8.1 |
+| 413 | Corps de requête trop volumineux : JSON au-delà de 1 Mo, fichier au-delà de `MYR_MAX_UPLOAD_MB` (256 Mo par défaut) — voir `Securite.md` § 8.1 |
 | 429 | Trop de tentatives (`authLimiter`, 10/min par adresse du client) — routes publiques `/api/identity/session`, `/enroll`, `/request`, `/guest` |
 
 ---
@@ -113,7 +113,7 @@ tags:
 | Méthode | Route | Accès | Description |
 |---------|-------|-------|-------------|
 | GET | `/api/components` | Public (DC-D1-06) | Liste de tous les composants, décomposés ou non (filtres: q, categories, owner_id, parent_id, hash, tags, channel, status, limit — `?uses_component={id}` pour les assets qui intègrent un composant donné, `DC_D8_Recherche.md` §4, UCREC04) |
-| POST | `/api/components` | Contributor | Créer un composant (`AddFull`), un fichier CAO par appel ; catégorie (`category`, RM02) et canal (`channel_id`) obligatoires, sans valeur par défaut (`400` sinon) ; une miniature n'est enregistrée que si le client la fournit (`thumbnail`) ; `parent_id` optionnel pour dériver d'un asset existant (composant ou déjà décomposé), avec copie de sa composition le cas échéant (UCMOD01) |
+| POST | `/api/components` | Contributor | Créer un composant (`AddFull`), un fichier CAO par appel ; catégorie (`category`, RM02) et canal (`channel_id`) obligatoires, sans valeur par défaut (`400` sinon) ; `parent_id` optionnel pour dériver d'un asset existant (composant ou déjà décomposé), avec copie de sa composition le cas échéant (UCMOD01) |
 | GET | `/api/components/{id}` | Auth | Détail d'un composant, décomposé ou non |
 | PATCH | `/api/components/{id}` | Contributor | Modifier les métadonnées (patch : name, description, tags, locations, license_id — UCCE02/UCMOD03, mêmes champs quel que soit le nombre d'instances). Brouillon : modification locale, licence vérifiée contre le catalogue et le parent (RM03, `400` si refusée). Asset soumis (RM19) : seuls name, description, tags et liens changent, sur le ledger via l'opération chaincode `UpdateMetadata` signée par le propriétaire ; un changement de licence est refusé (`409`) — #incoherence la méthode documentée ici était PUT, mais le handler (`adapters/in/rest/handlers.go`, `patchComponent`) répond uniquement à PATCH ; corrigé pour refléter le comportement réel, à confirmer que PUT n'était pas l'intention initiale |
 | DELETE | `/api/components/{id}` | Contributor | Supprimer (UCCE07/UCMOD08) — brouillon retiré du stockage local ; asset déjà soumis masqué localement (disparaît des listes), son enregistrement blockchain (y compris ses `ModuleVersion` éventuelles) n'est jamais modifié (RM08) |
@@ -169,16 +169,6 @@ La famille `/api/modules/*` n'est plus une ressource distincte : toutes les rout
 | GET | `/api/licenses/{id}` | Auth | Détail d'une licence |
 | POST | `/api/licenses/check` | Auth | Vérifie la compatibilité `{ parent_license_id, proposed_license_id }` (règle 8) — #remarque route implémentée (`handleLicense`) mais absente de ce tableau jusqu'ici |
 | POST | `/api/licenses/check-product` | Auth | Vérifie la compatibilité d'un module assemblant plusieurs composants `{ component_license_ids[], proposed_module_license_id }` (règle 8) — #remarque idem |
-
----
-
-## 8. Miniatures
-
-| Méthode | Route | Accès | Description |
-|---------|-------|-------|-------------|
-| POST | `/api/components/{id}/thumbnail` | Contributor | Sauvegarder une miniature STL (data URL base64), quel que soit le nombre d'instances de l'asset — #incoherence route absente du routeur (`server.go`) et du handler (`handleComponent` ne reconnaît que les suffixes `/interfaces`, `/tree` et `/thumbnail/regenerate`) ; la miniature d'un composant se fixe uniquement au moment de sa création via le champ `thumbnail` du formulaire multipart de `POST /api/components` |
-| GET | `/api/components/{id}/thumbnail` | Auth | Récupérer la miniature — #incoherence idem, non routée ; la miniature est aujourd'hui exposée via le champ `thumbnail` de `componentDTO` (`GET /api/components`, `GET /api/components/{id}`) |
-| POST | `/api/components/{id}/thumbnail/regenerate` | Contributor | Redériver la miniature depuis la seule source durable accessible côté serveur : l'og:image du premier emplacement externe enregistré (`Locations`) — un modèle 3D sans emplacement n'a pas de source régénérable côté serveur (le rendu 3D est produit par le client GUI, pas par `myr`, voir § Séparation des dépôts) ; répond `{ "thumbnail": "<dataURL>" }` (jamais le DTO complet de l'asset) ; échoue en 500 aussi bien pour l'absence d'emplacement externe que pour un échec réseau, un timeout ou une balise `og:image` absente sur la page cible — ces cas ne sont distingués par aucun code ni champ d'erreur dédié, seul le texte du message diffère ; échoue en 503 si l'asset n'est ni un brouillon local ni joignable sur une blockchain configurée — même handler Go `regenerateThumbnail` quel que soit le nombre d'instances de l'asset (ADR-11) — #remarque aucun test (unitaire ou intégration) ne couvre `adapters/out/webimage.Fetcher` (le scraping HTTP réel de la balise `og:image`) ; seuls des tests avec `OGImageFetcher`/service mockés existent (`domain/model/tests/`, `adapters/in/rest/tests/`, `adapters/in/cli/model_test.go`) — aucune preuve qu'un client ait déjà exercé ce chemin contre une vraie page web |
 
 ---
 
@@ -274,7 +264,6 @@ En cas d'écart entre les tableaux `§1`–`§12` de ce document et `api/swagger
 - [§ 5. D5 — Connexions et Interfaces (Composition de Module)](API_REST.md#5.%20D5%20—%20Connexions%20et%20Interfaces%20%28Composition%20de%20Module%29) → [REST /api/assembly-links](../../docs/code/routes/REST%20api-assembly-links.md) · [REST /api/connections](../../docs/code/routes/REST%20api-connections.md) · [REST /api/interfaces](../../docs/code/routes/REST%20api-interfaces.md) · [REST /api/refs](../../docs/code/routes/REST%20api-refs.md) · [REST /api/refs/categories](../../docs/code/routes/REST%20api-refs-categories.md) · [REST /api/refs/types](../../docs/code/routes/REST%20api-refs-types.md) · [REST /api/refs/units](../../docs/code/routes/REST%20api-refs-units.md)
 - [§ 6. D6 — Modules (retiré, fusionné dans §4 — ADR-11)](API_REST.md#6.%20D6%20—%20Modules%20%28retiré,%20fusionné%20dans%20§4%20—%20ADR-11%29) → [REST /api/components](../../docs/code/routes/REST%20api-components.md) · [REST /api/modules](../../docs/code/routes/REST%20api-modules.md)
 - [§ 7. Licences](API_REST.md#7.%20Licences) → [REST /api/licenses](../../docs/code/routes/REST%20api-licenses.md)
-- [§ 8. Miniatures](API_REST.md#8.%20Miniatures) → [REST /api/components](../../docs/code/routes/REST%20api-components.md)
 - [§ 8ter. Traçabilité et alerte des emplacements externes (RM42)](API_REST.md#8ter.%20Traçabilité%20et%20alerte%20des%20emplacements%20externes%20%28RM42%29) → [REST /api/components](../../docs/code/routes/REST%20api-components.md)
 - [§ 9. Infrastructure](API_REST.md#9.%20Infrastructure) → [REST /api/health](../../docs/code/routes/REST%20api-health.md) · [REST /api/ping](../../docs/code/routes/REST%20api-ping.md) · [REST /api/status](../../docs/code/routes/REST%20api-status.md) · [REST /metrics](../../docs/code/routes/REST%20metrics.md)
 - [§ 12. D9 — Automatisation avancée](API_REST.md#12.%20D9%20—%20Automatisation%20avancée) → [REST /api/components](../../docs/code/routes/REST%20api-components.md)

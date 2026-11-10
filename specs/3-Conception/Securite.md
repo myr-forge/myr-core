@@ -223,7 +223,6 @@ Au-delà, `HTTP 429` est retourné.
 | Borne | Valeur | Effet |
 |-------|--------|-------|
 | Corps JSON | 1 Mo | `413` au-delà |
-| Miniature (`/thumbnail`) | image de 2 Mo (`model.MaxThumbnailBytes`), soit un corps de 3 Mo encodé en base64 | `413` au-delà |
 | Envoi de fichier (multipart) | `MYR_MAX_UPLOAD_MB`, 256 Mo par défaut — le fichier n'est reçu que pour son empreinte (RM42) | `413` au-delà, y compris pour les fichiers temporaires de l'analyse multipart |
 | En-têtes HTTP | 10 s pour les recevoir | connexion fermée (protection Slowloris) |
 | Lecture / écriture d'une requête | 10 min / 15 min | couvre un envoi de taille maximale sur un lien lent et une transaction Fabric (ENF02) |
@@ -250,7 +249,6 @@ Au-delà, `HTTP 429` est retourné.
 | Module immuable | Un module `submitted` ne doit plus être modifiable directement | Garde `Status != submitted`, fork obligatoire (RM19) |
 | Identité bootstrap de la Fabric CA | Un identifiant connu (ex. `admin:adminpw`) permet à quiconque joint le port de la CA de s'enrôler comme registrar et d'émettre des identités arbitraires | Aucun identifiant par défaut : le secret est généré aléatoirement à chaque création de réseau (`myr network create`) et conservé uniquement sur le serveur, en fichier `0600` à côté du certificat de l'admin bootstrap |
 | Base d'état CouchDB des peers | Un CouchDB joignable permet de modifier l'état du ledger sans passer par l'endorsement | Port CouchDB jamais publié hors du réseau Docker interne ; mot de passe généré aléatoirement à chaque création de réseau |
-| Miniature dérivée d'un lien (`og:image`) | Le serveur télécharge une URL choisie par l'utilisateur, puis par la page elle-même, et restitue le contenu en miniature : lecture de services internes (SSRF) | Seuls `http`/`https` vers des adresses publiques d'Internet ; contrôle à chaque connexion, résolution DNS et redirections comprises ; adresses du serveur lui-même exclues ; réponse retenue seulement si c'est une image matricielle (SVG exclu) |
 
 État de suivi de ces écarts : `specs/roadmap_dev.md` § Écarts Identité & Session et § Bugs bloquants.
 

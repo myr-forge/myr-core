@@ -33,9 +33,6 @@ type mockSvc struct {
 	removeConnection         func(id string) error
 	listConnections          func() ([]*model.Connection, error)
 	getChildren              func(parentID string) ([]*model.Model3D, error)
-	saveThumbnail            func(assetID, dataURL string) error
-	getThumbnail             func(assetID string) (string, error)
-	regenerateThumbnail      func(assetID string) (string, error)
 	addInterface             func(iface *model.AssetInterface) error
 	updateInterface          func(iface *model.AssetInterface) error
 	removeInterface          func(id string) error
@@ -131,24 +128,6 @@ func (m *mockSvc) GetChildren(parentID string) ([]*model.Model3D, error) {
 		return m.getChildren(parentID)
 	}
 	return nil, nil
-}
-func (m *mockSvc) SaveThumbnail(assetID, dataURL string) error {
-	if m.saveThumbnail != nil {
-		return m.saveThumbnail(assetID, dataURL)
-	}
-	return nil
-}
-func (m *mockSvc) GetThumbnail(assetID string) (string, error) {
-	if m.getThumbnail != nil {
-		return m.getThumbnail(assetID)
-	}
-	return "", nil
-}
-func (m *mockSvc) RegenerateThumbnail(assetID string) (string, error) {
-	if m.regenerateThumbnail != nil {
-		return m.regenerateThumbnail(assetID)
-	}
-	return "", nil
 }
 func (m *mockSvc) AddInterface(iface *model.AssetInterface) error {
 	if m.addInterface != nil {
@@ -290,12 +269,10 @@ func (m *mockSvc) CheckModuleLicenseCompatibility(componentIDs []string, propose
 	return &model.LicenseCheck{Compatible: true}
 }
 
-// ── Mock ThumbnailStore / InterfaceStore ──────────────────────────────────────
+// ── Mock InterfaceStore ──────────────────────────────────────
 
 type mockStore struct{}
 
-func (s *mockStore) SaveThumbnail(assetID, dataURL string) error { return nil }
-func (s *mockStore) GetThumbnail(assetID string) (string, error) { return "", nil }
 func (s *mockStore) SaveInterface(iface *model.AssetInterface) error {
 	return nil
 }
@@ -321,7 +298,7 @@ func (s *mockStore) AddRefUnit(cat, unit string) error     { return nil }
 func newTestMux(t *testing.T, svc model.ModelService) http.Handler {
 	t.Helper()
 	store := &mockStore{}
-	h := rest.NewHandler(svc, store, store)
+	h := rest.NewHandler(svc, store)
 	h.WithIdentityService(&mockIdentitySvc{})
 	srv := rest.NewServer(h, "localhost:0")
 	mux, err := srv.Handler()
@@ -335,7 +312,7 @@ func newTestMux(t *testing.T, svc model.ModelService) http.Handler {
 func newBlockchainMux(t *testing.T, svc model.ModelService) http.Handler {
 	t.Helper()
 	store := &mockStore{}
-	h := rest.NewHandler(svc, store, store)
+	h := rest.NewHandler(svc, store)
 	h.WithIdentityService(&mockIdentitySvc{})
 	h.WithNetworkInfo(rest.NetworkInfo{Network: "peer0.example.com:7051", Channel: "mychannel"})
 	srv := rest.NewServer(h, "localhost:0")
@@ -413,9 +390,9 @@ func buildMultipartForm(t *testing.T, fields map[string]string, fileField, filen
 
 // ── /api/status ───────────────────────────────────────────────────────────────
 
-/// @brief  Vérifie que GET /api/status retourne le mode et le nombre d'assets
-/// @input  GET /api/status, aucun réseau Fabric configuré, mockSvc.list retourne 2 assets
-/// @expect HTTP 200, mode="blockchain", assets=2
+// / @brief  Vérifie que GET /api/status retourne le mode et le nombre d'assets
+// / @input  GET /api/status, aucun réseau Fabric configuré, mockSvc.list retourne 2 assets
+// / @expect HTTP 200, mode="blockchain", assets=2
 func TestStatus_ReturnsMode(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{{ID: "a"}, {ID: "b"}}, nil
@@ -439,9 +416,9 @@ func TestStatus_ReturnsMode(t *testing.T) {
 
 // ── /api/components ───────────────────────────────────────────────────────────
 
-/// @brief  Vérifie que GET /api/components retourne une liste vide quand aucun asset n'existe
-/// @input  GET /api/components, mockSvc.list retourne nil
-/// @expect HTTP 200, total=0
+// / @brief  Vérifie que GET /api/components retourne une liste vide quand aucun asset n'existe
+// / @input  GET /api/components, mockSvc.list retourne nil
+// / @expect HTTP 200, total=0
 func TestComponents_GET_Empty(t *testing.T) {
 	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/components", "")
 	if w.Code != http.StatusOK {
@@ -456,10 +433,10 @@ func TestComponents_GET_Empty(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que GET /api/components inclut les assets décomposés (ADR-11 —
-///         Model3D est une ressource unique, plus de /api/modules séparé)
-/// @input  GET /api/components, mockSvc.list retourne 2 assets dont 1 décomposé (Assemblies non nil)
-/// @expect HTTP 200, total=2 (l'asset décomposé est inclus, pas exclu)
+// / @brief  Vérifie que GET /api/components inclut les assets décomposés (ADR-11 —
+// /         Model3D est une ressource unique, plus de /api/modules séparé)
+// / @input  GET /api/components, mockSvc.list retourne 2 assets dont 1 décomposé (Assemblies non nil)
+// / @expect HTTP 200, total=2 (l'asset décomposé est inclus, pas exclu)
 func TestComponents_GET_IncludesDecomposedAssets(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{
@@ -477,9 +454,9 @@ func TestComponents_GET_IncludesDecomposedAssets(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que GET /api/components?status= filtre par statut (draft/submitted)
-/// @input  GET /api/components?status=draft, 2 assets de statuts différents
-/// @expect HTTP 200, total=1 (seul l'asset draft correspond)
+// / @brief  Vérifie que GET /api/components?status= filtre par statut (draft/submitted)
+// / @input  GET /api/components?status=draft, 2 assets de statuts différents
+// / @expect HTTP 200, total=1 (seul l'asset draft correspond)
 func TestComponents_GET_FilterByStatus(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{
@@ -497,9 +474,9 @@ func TestComponents_GET_FilterByStatus(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que GET /api/components?q= filtre les composants par nom
-/// @input  GET /api/components?q=vis, mockSvc.list retourne "Vis M3" et "Engrenage"
-/// @expect HTTP 200, total=1 (seul "Vis M3" correspond)
+// / @brief  Vérifie que GET /api/components?q= filtre les composants par nom
+// / @input  GET /api/components?q=vis, mockSvc.list retourne "Vis M3" et "Engrenage"
+// / @expect HTTP 200, total=1 (seul "Vis M3" correspond)
 func TestComponents_GET_FilterByQuery(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{
@@ -521,9 +498,9 @@ func TestComponents_GET_FilterByQuery(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que GET /api/components?categories= filtre les composants par catégorie
-/// @input  GET /api/components?categories=base, mockSvc.list retourne 1 asset "base" et 1 "variation"
-/// @expect HTTP 200, total=1 (seule la catégorie "base" correspond)
+// / @brief  Vérifie que GET /api/components?categories= filtre les composants par catégorie
+// / @input  GET /api/components?categories=base, mockSvc.list retourne 1 asset "base" et 1 "variation"
+// / @expect HTTP 200, total=1 (seule la catégorie "base" correspond)
 func TestComponents_GET_FilterByCategory(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{
@@ -545,9 +522,9 @@ func TestComponents_GET_FilterByCategory(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que GET /api/components?tags= filtre les composants par tag
-/// @input  GET /api/components?tags=métal, mockSvc.list retourne 1 asset ["métal","impression"] et 1 ["bois"]
-/// @expect HTTP 200, total=1 (seul l'asset ayant le tag "métal" correspond)
+// / @brief  Vérifie que GET /api/components?tags= filtre les composants par tag
+// / @input  GET /api/components?tags=métal, mockSvc.list retourne 1 asset ["métal","impression"] et 1 ["bois"]
+// / @expect HTTP 200, total=1 (seul l'asset ayant le tag "métal" correspond)
 func TestComponents_GET_FilterByTag(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{
@@ -569,9 +546,9 @@ func TestComponents_GET_FilterByTag(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que GET /api/components retourne 500 quand le service échoue
-/// @input  GET /api/components, mockSvc.list retourne une erreur "db error"
-/// @expect HTTP 500
+// / @brief  Vérifie que GET /api/components retourne 500 quand le service échoue
+// / @input  GET /api/components, mockSvc.list retourne une erreur "db error"
+// / @expect HTTP 500
 func TestComponents_GET_ServiceError(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return nil, errors.New("db error")
@@ -582,12 +559,12 @@ func TestComponents_GET_ServiceError(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que GET /api/components retourne 503 (pas 500) quand la blockchain
-///         est configurée mais injoignable (panne de pairs Fabric), pour que le frontend
-///         affiche le message "blockchain indisponible" au lieu d'une erreur générique
-/// @input  GET /api/components, mockSvc.list retourne une erreur enveloppant
-///         model.ErrBlockchainUnreachable
-/// @expect HTTP 503
+// / @brief  Vérifie que GET /api/components retourne 503 (pas 500) quand la blockchain
+// /         est configurée mais injoignable (panne de pairs Fabric), pour que le frontend
+// /         affiche le message "blockchain indisponible" au lieu d'une erreur générique
+// / @input  GET /api/components, mockSvc.list retourne une erreur enveloppant
+// /         model.ErrBlockchainUnreachable
+// / @expect HTTP 503
 func TestComponents_GET_BlockchainUnreachable_Returns503(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return nil, fmt.Errorf("fabric ListModelRecords evaluate : %w", model.ErrBlockchainUnreachable)
@@ -598,14 +575,14 @@ func TestComponents_GET_BlockchainUnreachable_Returns503(t *testing.T) {
 	}
 }
 
-/// @brief  Mode dégradé : si des brouillons locaux existent malgré la panne blockchain,
-///         GET /api/components les renvoie avec HTTP 200 (pas 503) et signale explicitement
-///         le mode dégradé au client (degraded:true, warning) plutôt que de faire comme
-///         si la liste était complète
-/// @input  GET /api/components, mockSvc.list retourne (drafts non vides, err enveloppant
-///         model.ErrBlockchainUnreachable)
-/// @expect HTTP 200 ; body.degraded == true ; body.warning non vide ; body.components contient
-///         le brouillon local
+// / @brief  Mode dégradé : si des brouillons locaux existent malgré la panne blockchain,
+// /         GET /api/components les renvoie avec HTTP 200 (pas 503) et signale explicitement
+// /         le mode dégradé au client (degraded:true, warning) plutôt que de faire comme
+// /         si la liste était complète
+// / @input  GET /api/components, mockSvc.list retourne (drafts non vides, err enveloppant
+// /         model.ErrBlockchainUnreachable)
+// / @expect HTTP 200 ; body.degraded == true ; body.warning non vide ; body.components contient
+// /         le brouillon local
 func TestComponents_GET_BlockchainUnreachable_WithDrafts_Returns200Degraded(t *testing.T) {
 	draft := &model.Model3D{ID: "local1", Name: "Brouillon local", Category: model.CategoryBase}
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
@@ -632,9 +609,9 @@ func TestComponents_GET_BlockchainUnreachable_WithDrafts_Returns200Degraded(t *t
 	}
 }
 
-/// @brief  Vérifie que POST /api/components sans champ "name" retourne 400
-/// @input  POST /api/components, multipart avec owner_id uniquement (name absent)
-/// @expect HTTP 400
+// / @brief  Vérifie que POST /api/components sans champ "name" retourne 400
+// / @input  POST /api/components, multipart avec owner_id uniquement (name absent)
+// / @expect HTTP 400
 func TestComponents_POST_MissingName(t *testing.T) {
 	body := &bytes.Buffer{}
 	body.WriteString("--boundary\r\nContent-Disposition: form-data; name=\"owner_id\"\r\n\r\nuser1\r\n--boundary--\r\n")
@@ -649,10 +626,10 @@ func TestComponents_POST_MissingName(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que POST /api/components crée toujours un composant en brouillon
-///         (status="draft") et retourne 201 — aucune transaction blockchain à la création
-/// @input  POST /api/components, multipart avec name="Roulement", mockSvc.addFull retourne l'asset créé
-/// @expect HTTP 201, name="Roulement" et status="draft" dans la réponse, AddFull appelé
+// / @brief  Vérifie que POST /api/components crée toujours un composant en brouillon
+// /         (status="draft") et retourne 201 — aucune transaction blockchain à la création
+// / @input  POST /api/components, multipart avec name="Roulement", mockSvc.addFull retourne l'asset créé
+// / @expect HTTP 201, name="Roulement" et status="draft" dans la réponse, AddFull appelé
 func TestComponents_POST_Created(t *testing.T) {
 	called := false
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
@@ -692,10 +669,10 @@ func TestComponents_POST_Created(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que POST /api/components/{id}/submit engage le composant et
-///         renvoie le componentDTO à jour (status="submitted")
-/// @input  POST /api/components/comp1/submit, mockSvc.submit retourne l'asset soumis
-/// @expect HTTP 200, Submit appelé avec "comp1", status="submitted" dans la réponse
+// / @brief  Vérifie que POST /api/components/{id}/submit engage le composant et
+// /         renvoie le componentDTO à jour (status="submitted")
+// / @input  POST /api/components/comp1/submit, mockSvc.submit retourne l'asset soumis
+// / @expect HTTP 200, Submit appelé avec "comp1", status="submitted" dans la réponse
 func TestComponents_POST_Submit(t *testing.T) {
 	var gotID string
 	svc := &mockSvc{submit: func(assetID, note string) (*model.Model3D, error) {
@@ -718,10 +695,10 @@ func TestComponents_POST_Submit(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que POST /api/components/{id}/submit sur un brouillon inexistant
-///         renvoie une erreur (pas 200)
-/// @input  mockSvc.submit retourne une erreur générique
-/// @expect HTTP != 200
+// / @brief  Vérifie que POST /api/components/{id}/submit sur un brouillon inexistant
+// /         renvoie une erreur (pas 200)
+// / @input  mockSvc.submit retourne une erreur générique
+// / @expect HTTP != 200
 func TestComponents_POST_Submit_Error(t *testing.T) {
 	svc := &mockSvc{submit: func(assetID, note string) (*model.Model3D, error) {
 		return nil, errors.New("brouillon introuvable")
@@ -732,10 +709,10 @@ func TestComponents_POST_Submit_Error(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie qu'une erreur ErrBlockchainUnavailable est distinguée d'une erreur
-///         générique (503, pas 500) — Problème 2 signalé par le dépôt GUI
-/// @input  POST /api/components, mockSvc.addFull retourne model.ErrBlockchainUnavailable
-/// @expect HTTP 503 (pas 500, pas 400)
+// / @brief  Vérifie qu'une erreur ErrBlockchainUnavailable est distinguée d'une erreur
+// /         générique (503, pas 500) — Problème 2 signalé par le dépôt GUI
+// / @input  POST /api/components, mockSvc.addFull retourne model.ErrBlockchainUnavailable
+// / @expect HTTP 503 (pas 500, pas 400)
 func TestComponents_POST_BlockchainUnavailable_Returns503(t *testing.T) {
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
 		return nil, model.ErrBlockchainUnavailable
@@ -753,11 +730,11 @@ func TestComponents_POST_BlockchainUnavailable_Returns503(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie qu'une erreur de service générique (ni ErrBlockchainUnavailable, ni
-///         une 400 de validation pré-domaine) reste un 500 — la distinction 503 ne doit
-///         pas masquer les autres échecs
-/// @input  mockSvc.addFull retourne une erreur générique ("hashing file: ...")
-/// @expect HTTP 500
+// / @brief  Vérifie qu'une erreur de service générique (ni ErrBlockchainUnavailable, ni
+// /         une 400 de validation pré-domaine) reste un 500 — la distinction 503 ne doit
+// /         pas masquer les autres échecs
+// / @input  mockSvc.addFull retourne une erreur générique ("hashing file: ...")
+// / @expect HTTP 500
 func TestComponents_POST_GenericServiceError_Returns500(t *testing.T) {
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
 		return nil, errors.New("hashing file: corrupted")
@@ -775,9 +752,9 @@ func TestComponents_POST_GenericServiceError_Returns500(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que PUT /api/components retourne 405 (méthode non autorisée)
-/// @input  PUT /api/components
-/// @expect HTTP 405
+// / @brief  Vérifie que PUT /api/components retourne 405 (méthode non autorisée)
+// / @input  PUT /api/components
+// / @expect HTTP 405
 func TestComponents_MethodNotAllowed(t *testing.T) {
 	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPut, "/api/components", "")
 	if w.Code != http.StatusMethodNotAllowed {
@@ -787,9 +764,9 @@ func TestComponents_MethodNotAllowed(t *testing.T) {
 
 // ── /api/components POST — upload fichier 3D ─────────────────────────────────
 
-/// @brief  Vérifie que POST /api/components avec un fichier STL renseigne correctement FilePath
-/// @input  POST /api/components, multipart avec name="Engrenage", owner_id="user1", fichier STL sous le champ "stl"
-/// @expect HTTP 201, AddFull appelé avec FilePath non vide, Name="Engrenage", OwnerID = identité de la session ("test@TestMSP", owner_id du formulaire ignoré — ADR-12), id="c1" dans la réponse
+// / @brief  Vérifie que POST /api/components avec un fichier STL renseigne correctement FilePath
+// / @input  POST /api/components, multipart avec name="Engrenage", owner_id="user1", fichier STL sous le champ "stl"
+// / @expect HTTP 201, AddFull appelé avec FilePath non vide, Name="Engrenage", OwnerID = identité de la session ("test@TestMSP", owner_id du formulaire ignoré — ADR-12), id="c1" dans la réponse
 func TestComponents_POST_WithSTLFile(t *testing.T) {
 	var capturedReq model.AddRequest
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
@@ -830,9 +807,9 @@ func TestComponents_POST_WithSTLFile(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que POST /api/components accepte un fichier sous le champ générique "file"
-/// @input  POST /api/components, multipart avec name="Piece STEP", fichier STEP sous le champ "file"
-/// @expect HTTP 201, AddFull appelé avec FilePath non vide
+// / @brief  Vérifie que POST /api/components accepte un fichier sous le champ générique "file"
+// / @input  POST /api/components, multipart avec name="Piece STEP", fichier STEP sous le champ "file"
+// / @expect HTTP 201, AddFull appelé avec FilePath non vide
 func TestComponents_POST_WithFileField(t *testing.T) {
 	var capturedReq model.AddRequest
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
@@ -860,9 +837,9 @@ func TestComponents_POST_WithFileField(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que POST /api/components sans fichier 3D laisse FilePath vide et transmet les tags
-/// @input  POST /api/components, multipart avec name="Vis M3", description, tags="fixation,métal", sans fichier
-/// @expect HTTP 201, FilePath vide, Tags=["fixation","métal"]
+// / @brief  Vérifie que POST /api/components sans fichier 3D laisse FilePath vide et transmet les tags
+// / @input  POST /api/components, multipart avec name="Vis M3", description, tags="fixation,métal", sans fichier
+// / @expect HTTP 201, FilePath vide, Tags=["fixation","métal"]
 func TestComponents_POST_WithoutFile(t *testing.T) {
 	var capturedReq model.AddRequest
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
@@ -892,225 +869,9 @@ func TestComponents_POST_WithoutFile(t *testing.T) {
 	}
 }
 
-/// @brief  Sans miniature fournie, POST /api/components ne télécharge pas l'og:image des liens (FT-040)
-/// @input  POST /api/components avec un lien externe et sans miniature
-/// @expect HTTP 201 ; ni RegenerateThumbnail ni SaveThumbnail appelés
-func TestComponents_POST_NoThumbnail_NoImplicitDownload(t *testing.T) {
-	called := false
-	svc := &mockSvc{
-		addFull: func(req model.AddRequest) (*model.Model3D, error) {
-			return &model.Model3D{ID: "c5", Name: req.Name, Links: req.Links, CreatedAt: time.Now()}, nil
-		},
-		regenerateThumbnail: func(string) (string, error) { called = true; return "", nil },
-		saveThumbnail:       func(string, string) error { called = true; return nil },
-	}
-	body, ct := buildMultipartForm(t,
-		map[string]string{"name": "Rotor", "links": `["https://example.com/rotor"]`},
-		"stl", "rotor.stl", []byte("solid rotor\nendsolid rotor\n"))
-	req := httptest.NewRequest(http.MethodPost, "/api/components", body)
-	req.Header.Set("Content-Type", ct)
-	w := httptest.NewRecorder()
-	mux := newTestMux(t, svc)
-	req.Header.Set("X-Myr-Token", loginToken(t, mux))
-	mux.ServeHTTP(w, req)
-
-	if w.Code != http.StatusCreated {
-		t.Fatalf("got %d, want 201 (body: %s)", w.Code, w.Body.String())
-	}
-	if called {
-		t.Error("aucune miniature ne doit être produite par le serveur")
-	}
-}
-
-/// @brief  Vérifie que POST /api/components sauvegarde la miniature fournie en data-URL
-/// @input  POST /api/components, multipart avec name="Rotor", thumbnail (data-URL PNG), fichier STL
-/// @expect HTTP 201, SaveThumbnail appelé avec la data-URL exacte
-func TestComponents_POST_WithThumbnail(t *testing.T) {
-	thumbSaved := ""
-	svc := &mockSvc{
-		addFull: func(req model.AddRequest) (*model.Model3D, error) {
-			return &model.Model3D{ID: "c4", Name: req.Name, CreatedAt: time.Now()}, nil
-		},
-		saveThumbnail: func(assetID, dataURL string) error {
-			thumbSaved = dataURL
-			return nil
-		},
-	}
-
-	thumb := "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-	body, ct := buildMultipartForm(t,
-		map[string]string{"name": "Rotor", "thumbnail": thumb},
-		"stl", "rotor.stl", []byte("solid rotor\nendsolid rotor\n"))
-
-	req := httptest.NewRequest(http.MethodPost, "/api/components", body)
-	req.Header.Set("Content-Type", ct)
-	w := httptest.NewRecorder()
-	mux := newTestMux(t, svc)
-	req.Header.Set("X-Myr-Token", loginToken(t, mux))
-	mux.ServeHTTP(w, req)
-
-	if w.Code != http.StatusCreated {
-		t.Fatalf("got %d, want 201 (body: %s)", w.Code, w.Body.String())
-	}
-	if thumbSaved != thumb {
-		t.Errorf("thumbnail non sauvegardée: got %q", thumbSaved)
-	}
-}
-
-/// @brief  Vérifie que POST /api/components/{id}/thumbnail/regenerate délègue au service et renvoie la miniature régénérée
-/// @input  POST /api/components/c1/thumbnail/regenerate, RegenerateThumbnail simulé retournant une dataURL fixe
-/// @expect HTTP 200, corps {"thumbnail": dataURL}, RegenerateThumbnail appelé avec l'id du composant
-func TestComponents_RegenerateThumbnail_OK(t *testing.T) {
-	var gotID string
-	svc := &mockSvc{regenerateThumbnail: func(assetID string) (string, error) {
-		gotID = assetID
-		return "data:image/png;base64,regenerated", nil
-	}}
-
-	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/thumbnail/regenerate", "")
-
-	if w.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
-	}
-	if gotID != "c1" {
-		t.Errorf("RegenerateThumbnail appelé avec %q, want c1", gotID)
-	}
-	var resp map[string]string
-	decodeJSON(t, w, &resp)
-	if resp["thumbnail"] != "data:image/png;base64,regenerated" {
-		t.Errorf("thumbnail: got %q", resp["thumbnail"])
-	}
-}
-
-/// @brief  Vérifie que POST /api/components/{id}/thumbnail/regenerate propage l'échec (ex: aucun lien externe) en 500
-/// @input  POST /api/components/c1/thumbnail/regenerate, RegenerateThumbnail simulé retournant model.ErrNoThumbnailSource
-/// @expect HTTP 500
-func TestComponents_RegenerateThumbnail_NoSource_Rejected(t *testing.T) {
-	svc := &mockSvc{regenerateThumbnail: func(assetID string) (string, error) {
-		return "", model.ErrNoThumbnailSource
-	}}
-
-	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/thumbnail/regenerate", "")
-
-	if w.Code != http.StatusInternalServerError {
-		t.Fatalf("got %d, want 500 (body: %s)", w.Code, w.Body.String())
-	}
-}
-
-/// @brief  Vérifie que POST /api/modules/{id}/thumbnail/regenerate délègue au même service que les composants
-/// @input  POST /api/modules/m1/thumbnail/regenerate, RegenerateThumbnail simulé retournant une dataURL fixe
-/// @expect HTTP 200, corps {"thumbnail": dataURL}, RegenerateThumbnail appelé avec l'id du module
-func TestModules_RegenerateThumbnail_OK(t *testing.T) {
-	var gotID string
-	svc := &mockSvc{regenerateThumbnail: func(assetID string) (string, error) {
-		gotID = assetID
-		return "data:image/png;base64,regenerated", nil
-	}}
-
-	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/modules/m1/thumbnail/regenerate", "")
-
-	if w.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
-	}
-	if gotID != "m1" {
-		t.Errorf("RegenerateThumbnail appelé avec %q, want m1", gotID)
-	}
-}
-
-/// @brief  Vérifie que GET /api/components/{id}/thumbnail/regenerate est rejeté (action, pas une ressource lisible)
-/// @input  GET /api/components/c1/thumbnail/regenerate
-/// @expect HTTP 405
-func TestComponents_RegenerateThumbnail_WrongMethod_Rejected(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/components/c1/thumbnail/regenerate", "")
-
-	if w.Code != http.StatusMethodNotAllowed {
-		t.Fatalf("got %d, want 405 (body: %s)", w.Code, w.Body.String())
-	}
-}
-
-/// @brief  Vérifie que POST /api/components/{id}/thumbnail remplace la miniature via SaveThumbnail et répond 204
-/// @input  POST /api/components/c1/thumbnail, corps {"thumbnail": dataURL}
-/// @expect HTTP 204, SaveThumbnail appelé avec l'id du composant et la data-URL exacte
-func TestComponents_SaveThumbnail_OK(t *testing.T) {
-	var gotID, gotDataURL string
-	svc := &mockSvc{saveThumbnail: func(assetID, dataURL string) error {
-		gotID, gotDataURL = assetID, dataURL
-		return nil
-	}}
-
-	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/thumbnail", `{"thumbnail":"data:image/png;base64,xyz"}`)
-
-	if w.Code != http.StatusNoContent {
-		t.Fatalf("got %d, want 204 (body: %s)", w.Code, w.Body.String())
-	}
-	if gotID != "c1" {
-		t.Errorf("SaveThumbnail appelé avec assetID %q, want c1", gotID)
-	}
-	if gotDataURL != "data:image/png;base64,xyz" {
-		t.Errorf("SaveThumbnail appelé avec dataURL %q", gotDataURL)
-	}
-}
-
-/// @brief  Vérifie que POST /api/components/{id}/thumbnail sur un composant déjà soumis fonctionne (champ hors ledger, règle 7)
-/// @input  POST /api/components/c1/thumbnail, SaveThumbnail simulé sans erreur
-/// @expect HTTP 204 — aucune vérification de statut draft/submitted n'est faite pour ce champ
-func TestComponents_SaveThumbnail_AfterSubmit_OK(t *testing.T) {
-	svc := &mockSvc{saveThumbnail: func(assetID, dataURL string) error { return nil }}
-
-	w := do(t, newTestMux(t, svc), http.MethodPost, "/api/components/c1/thumbnail", `{"thumbnail":"data:image/png;base64,xyz"}`)
-
-	if w.Code != http.StatusNoContent {
-		t.Fatalf("got %d, want 204 (body: %s)", w.Code, w.Body.String())
-	}
-}
-
-/// @brief  Vérifie que POST /api/components/{id}/thumbnail avec un JSON invalide est rejeté
-/// @input  POST /api/components/c1/thumbnail, corps non-JSON
-/// @expect HTTP 400
-func TestComponents_SaveThumbnail_InvalidJSON_Rejected(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/components/c1/thumbnail", `not json`)
-
-	if w.Code != http.StatusBadRequest {
-		t.Fatalf("got %d, want 400 (body: %s)", w.Code, w.Body.String())
-	}
-}
-
-/// @brief  Vérifie que GET /api/components/{id}/thumbnail renvoie la miniature (ADR-11 —
-///         route désormais effectivement câblée, ex-#incoherence "route absente du routeur")
-/// @input  GET /api/components/c1/thumbnail, mockSvc.getThumbnail retourne une dataURL fixe
-/// @expect HTTP 200, {"thumbnail": "<dataURL>"}
-func TestComponents_GetThumbnail_OK(t *testing.T) {
-	svc := &mockSvc{getThumbnail: func(assetID string) (string, error) {
-		return "data:image/png;base64,xyz", nil
-	}}
-	w := do(t, newTestMux(t, svc), http.MethodGet, "/api/components/c1/thumbnail", "")
-
-	if w.Code != http.StatusOK {
-		t.Fatalf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
-	}
-	var resp struct {
-		Thumbnail string `json:"thumbnail"`
-	}
-	decodeJSON(t, w, &resp)
-	if resp.Thumbnail != "data:image/png;base64,xyz" {
-		t.Errorf("thumbnail: got %q", resp.Thumbnail)
-	}
-}
-
-/// @brief  Vérifie que PUT /api/components/{id}/thumbnail (méthode non gérée) est rejeté
-/// @input  PUT /api/components/c1/thumbnail
-/// @expect HTTP 405
-func TestComponents_Thumbnail_WrongMethod_Rejected(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPut, "/api/components/c1/thumbnail", "")
-
-	if w.Code != http.StatusMethodNotAllowed {
-		t.Fatalf("got %d, want 405 (body: %s)", w.Code, w.Body.String())
-	}
-}
-
-/// @brief  Vérifie que POST /api/components avec un nom de plus de 256 caractères retourne 400
-/// @input  POST /api/components, multipart avec name=257×"a"
-/// @expect HTTP 400
+// / @brief  Vérifie que POST /api/components avec un nom de plus de 256 caractères retourne 400
+// / @input  POST /api/components, multipart avec name=257×"a"
+// / @expect HTTP 400
 func TestComponents_POST_NameTooLong(t *testing.T) {
 	body, ct := buildMultipartForm(t,
 		map[string]string{"name": strings.Repeat("a", 257)},
@@ -1126,9 +887,9 @@ func TestComponents_POST_NameTooLong(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que POST /api/components avec un owner_id contenant des espaces retourne 400
-/// @input  POST /api/components, multipart avec name="Vis", owner_id="user with spaces"
-/// @expect HTTP 400
+// / @brief  Vérifie que POST /api/components avec un owner_id contenant des espaces retourne 400
+// / @input  POST /api/components, multipart avec name="Vis", owner_id="user with spaces"
+// / @expect HTTP 400
 func TestComponents_POST_InvalidOwnerID(t *testing.T) {
 	body, ct := buildMultipartForm(t,
 		map[string]string{"name": "Vis", "owner_id": "user with spaces"},
@@ -1144,9 +905,9 @@ func TestComponents_POST_InvalidOwnerID(t *testing.T) {
 	}
 }
 
-/// @brief  Vérifie que POST /api/components retourne 500 quand le service échoue
-/// @input  POST /api/components, multipart avec name="Vis", mockSvc.addFull retourne une erreur
-/// @expect HTTP 500
+// / @brief  Vérifie que POST /api/components retourne 500 quand le service échoue
+// / @input  POST /api/components, multipart avec name="Vis", mockSvc.addFull retourne une erreur
+// / @expect HTTP 500
 func TestComponents_POST_ServiceError(t *testing.T) {
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
 		return nil, errors.New("blockchain indisponible")
@@ -1163,9 +924,9 @@ func TestComponents_POST_ServiceError(t *testing.T) {
 	}
 }
 
-/// @brief  POST /api/components ne choisit ni la catégorie ni le canal à la place du client ; leur absence est refusée en 400 (RM02)
-/// @input  POST /api/components sans catégorie ni canal, puis avec la catégorie seule ; le service refuse
-/// @expect HTTP 400 ; AddFull reçoit la catégorie envoyée (ou vide) et un canal vide
+// / @brief  POST /api/components ne choisit ni la catégorie ni le canal à la place du client ; leur absence est refusée en 400 (RM02)
+// / @input  POST /api/components sans catégorie ni canal, puis avec la catégorie seule ; le service refuse
+// / @expect HTTP 400 ; AddFull reçoit la catégorie envoyée (ou vide) et un canal vide
 func TestComponents_POST_RM02_NoDefaultCategoryOrChannel(t *testing.T) {
 	var capturedReq model.AddRequest
 	svc := &mockSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
@@ -1195,9 +956,9 @@ func TestComponents_POST_RM02_NoDefaultCategoryOrChannel(t *testing.T) {
 
 // ── /api/components/:id ───────────────────────────────────────────────────────
 
-/// @brief  Vérifie que GET /api/components/:id retourne le composant correspondant
-/// @input  GET /api/components/abc, mockSvc.get retourne un asset avec ID="abc"
-/// @expect HTTP 200, id="abc" dans la réponse JSON
+// / @brief  Vérifie que GET /api/components/:id retourne le composant correspondant
+// / @input  GET /api/components/abc, mockSvc.get retourne un asset avec ID="abc"
+// / @expect HTTP 200, id="abc" dans la réponse JSON
 func TestComponent_GET_Found(t *testing.T) {
 	svc := &mockSvc{get: func(id string) (*model.Model3D, error) {
 		return &model.Model3D{ID: id, Name: "Vis"}, nil
@@ -1349,9 +1110,9 @@ func TestConnections_MethodNotAllowed(t *testing.T) {
 	}
 }
 
-/// @brief  GET /api/connections liste toutes les connexions : le client y retrouve une liaison existante au lieu de la recréer (RM50)
-/// @input  mockSvc.listConnections retourne une liaison directe et une liaison d'interfaces
-/// @expect 200, les deux connexions avec leurs champs
+// / @brief  GET /api/connections liste toutes les connexions : le client y retrouve une liaison existante au lieu de la recréer (RM50)
+// / @input  mockSvc.listConnections retourne une liaison directe et une liaison d'interfaces
+// / @expect 200, les deux connexions avec leurs champs
 func TestConnections_GET_RM50_ListsAll(t *testing.T) {
 	svc := &mockSvc{listConnections: func() ([]*model.Connection, error) {
 		return []*model.Connection{
@@ -1443,9 +1204,9 @@ func TestComponent_ListInstances_Empty(t *testing.T) {
 	}
 }
 
-/// @brief  GET /api/components/{id}/instances renvoie le tableau d'instances (pas le componentDTO entier)
-/// @input  mockSvc.get retourne un asset avec 1 WorkspaceInstance
-/// @expect HTTP 200, tableau JSON avec 1 élément
+// / @brief  GET /api/components/{id}/instances renvoie le tableau d'instances (pas le componentDTO entier)
+// / @input  mockSvc.get retourne un asset avec 1 WorkspaceInstance
+// / @expect HTTP 200, tableau JSON avec 1 élément
 func TestComponent_ListInstances_WithItems(t *testing.T) {
 	svc := &mockSvc{
 		get: func(id string) (*model.Model3D, error) {
@@ -1465,10 +1226,10 @@ func TestComponent_ListInstances_WithItems(t *testing.T) {
 	}
 }
 
-/// @brief  POST /api/components/{id}/instances s'applique à n'importe quel id (ADR-11) —
-///         plus besoin de créer un module séparé au préalable
-/// @input  POST /api/components/c1/instances {"asset_id":"a1"}
-/// @expect HTTP 200, AddAssetToWorkspace reçoit ("c1", "a1"), réponse contient "instances"
+// / @brief  POST /api/components/{id}/instances s'applique à n'importe quel id (ADR-11) —
+// /         plus besoin de créer un module séparé au préalable
+// / @input  POST /api/components/c1/instances {"asset_id":"a1"}
+// / @expect HTTP 200, AddAssetToWorkspace reçoit ("c1", "a1"), réponse contient "instances"
 func TestComponent_AddInstance(t *testing.T) {
 	var gotID, gotAsset string
 	svc := &mockSvc{addAssetToWorkspace: func(id, assetID string) (*model.Model3D, error) {
@@ -1530,9 +1291,9 @@ func TestComponent_RemoveInstance(t *testing.T) {
 	}
 }
 
-/// @brief  GET /api/components/{id}/assemblies liste les connexions internes (ex-GET /api/modules/{id}/connections)
-/// @input  mockSvc.get retourne un asset avec Assemblies=["c1"], listConnections retourne cette connexion
-/// @expect HTTP 200, tableau JSON avec 1 connexion
+// / @brief  GET /api/components/{id}/assemblies liste les connexions internes (ex-GET /api/modules/{id}/connections)
+// / @input  mockSvc.get retourne un asset avec Assemblies=["c1"], listConnections retourne cette connexion
+// / @expect HTTP 200, tableau JSON avec 1 connexion
 func TestComponent_ListAssemblies(t *testing.T) {
 	svc := &mockSvc{
 		get: func(id string) (*model.Model3D, error) {
@@ -1585,10 +1346,10 @@ func TestComponent_RemoveAssembly(t *testing.T) {
 	}
 }
 
-/// @brief  POST /api/components/{id}/submit transmet la note au service quel que soit
-///         le type d'asset — c'est ModelService.Submit qui dispatche en interne (ADR-11)
-/// @input  POST /api/components/m1/submit {"note":"v1.0 release"}
-/// @expect HTTP 200, Submit reçoit note="v1.0 release"
+// / @brief  POST /api/components/{id}/submit transmet la note au service quel que soit
+// /         le type d'asset — c'est ModelService.Submit qui dispatche en interne (ADR-11)
+// / @input  POST /api/components/m1/submit {"note":"v1.0 release"}
+// / @expect HTTP 200, Submit reçoit note="v1.0 release"
 func TestComponent_Submit_WithNote(t *testing.T) {
 	var gotNote string
 	svc := &mockSvc{submit: func(assetID, note string) (*model.Model3D, error) {
@@ -1606,10 +1367,10 @@ func TestComponent_Submit_WithNote(t *testing.T) {
 
 // ── /api/modules/* — alias déprécié (ADR-11) ────────────────────────────────────
 
-/// @brief  Les anciennes routes /api/modules/* restent servies pendant la fenêtre
-///         de transition, déléguées aux mêmes handlers que /api/components/*
-/// @input  GET /api/modules/m1
-/// @expect HTTP 200, en-tête Deprecation présent, corps résolu comme /api/components/m1
+// / @brief  Les anciennes routes /api/modules/* restent servies pendant la fenêtre
+// /         de transition, déléguées aux mêmes handlers que /api/components/*
+// / @input  GET /api/modules/m1
+// / @expect HTTP 200, en-tête Deprecation présent, corps résolu comme /api/components/m1
 func TestLegacyModulesAlias_GET_DelegatesToComponents(t *testing.T) {
 	svc := &mockSvc{get: func(id string) (*model.Model3D, error) {
 		return &model.Model3D{ID: id, Name: "Assemblage"}, nil
@@ -1707,9 +1468,9 @@ func TestRefUnits_POST_MissingFields(t *testing.T) {
 
 // ── Absence de token : toujours refusée, quel que soit le réseau actif ────────
 
-/// @brief  Vérifie que POST /api/refs/types sans en-tête X-Myr-Token est refusé
-/// @input  POST /api/refs/types, aucun token
-/// @expect HTTP 401
+// / @brief  Vérifie que POST /api/refs/types sans en-tête X-Myr-Token est refusé
+// / @input  POST /api/refs/types, aucun token
+// / @expect HTTP 401
 func TestRefTypes_NoToken_Unauthorized(t *testing.T) {
 	mux := newTestMux(t, &mockSvc{})
 	r := newRequest(http.MethodPost, "/api/refs/types", `{"category":"ELEC","name":"SMA"}`)
@@ -1829,9 +1590,9 @@ func TestLicense_CheckProduct(t *testing.T) {
 
 // ── /api/ping ─────────────────────────────────────────────────────────────────
 
-/// @brief  GET /api/ping retourne 200 avec ok=true
-/// @input  GET /api/ping
-/// @expect HTTP 200, {"ok":true}
+// / @brief  GET /api/ping retourne 200 avec ok=true
+// / @input  GET /api/ping
+// / @expect HTTP 200, {"ok":true}
 func TestPing_OK(t *testing.T) {
 	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/ping", "")
 	if w.Code != http.StatusOK {
@@ -1848,9 +1609,9 @@ func TestPing_OK(t *testing.T) {
 
 // ── /api/components?parent_id= ───────────────────────────────────────────────
 
-/// @brief  GET /api/components?parent_id= filtre les composants par ParentID
-/// @input  GET /api/components?parent_id=parent1, liste de 4 assets dont 2 enfants de parent1
-/// @expect HTTP 200, total=2
+// / @brief  GET /api/components?parent_id= filtre les composants par ParentID
+// / @input  GET /api/components?parent_id=parent1, liste de 4 assets dont 2 enfants de parent1
+// / @expect HTTP 200, total=2
 func TestListGraph_FilterByParentID(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{
@@ -1875,9 +1636,9 @@ func TestListGraph_FilterByParentID(t *testing.T) {
 
 // ── /api/components/:id/tree ──────────────────────────────────────────────────
 
-/// @brief  GET /api/components/:id/tree retourne les nœuds de l'arbre d'évolution
-/// @input  GET /api/components/root/tree, liste avec root + 1 enfant
-/// @expect HTTP 200, clé "components" présente, total≥1
+// / @brief  GET /api/components/:id/tree retourne les nœuds de l'arbre d'évolution
+// / @input  GET /api/components/root/tree, liste avec root + 1 enfant
+// / @expect HTTP 200, clé "components" présente, total≥1
 func TestComponentTree_GET(t *testing.T) {
 	svc := &mockSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{
@@ -1899,9 +1660,9 @@ func TestComponentTree_GET(t *testing.T) {
 	}
 }
 
-/// @brief  POST /api/components/:id/tree retourne 405
-/// @input  POST /api/components/abc/tree
-/// @expect HTTP 405
+// / @brief  POST /api/components/:id/tree retourne 405
+// / @input  POST /api/components/abc/tree
+// / @expect HTTP 405
 func TestComponentTree_MethodNotAllowed(t *testing.T) {
 	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPost, "/api/components/abc/tree", "")
 	if w.Code != http.StatusMethodNotAllowed {
@@ -1911,9 +1672,9 @@ func TestComponentTree_MethodNotAllowed(t *testing.T) {
 
 // ── /api/channels GET ─────────────────────────────────────────────────────────
 
-/// @brief  GET /api/channels retourne la liste des canaux et le canal actif
-/// @input  GET /api/channels, aucun canal configuré
-/// @expect HTTP 200, clés "channels" et "active" présentes
+// / @brief  GET /api/channels retourne la liste des canaux et le canal actif
+// / @input  GET /api/channels, aucun canal configuré
+// / @expect HTTP 200, clés "channels" et "active" présentes
 func TestChannels_GET(t *testing.T) {
 	w := do(t, newTestMux(t, &mockSvc{}), http.MethodGet, "/api/channels", "")
 	if w.Code != http.StatusOK {

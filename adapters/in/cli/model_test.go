@@ -10,10 +10,10 @@ import (
 	"myr-core/domain/model"
 )
 
-/// @brief  runModelAdd doit appeler AddFull avec la requête construite et afficher le
-///         statut brouillon et l'id créé (toute création est un brouillon)
-/// @input  AddRequest{Name: "Roue"}, service retournant un Model3D{ID: "abc", Name: "Roue", Status: draft}
-/// @expect Sortie contient l'id, le nom, "brouillon" et invite à "myr model submit"
+// / @brief  runModelAdd doit appeler AddFull avec la requête construite et afficher le
+// /         statut brouillon et l'id créé (toute création est un brouillon)
+// / @input  AddRequest{Name: "Roue"}, service retournant un Model3D{ID: "abc", Name: "Roue", Status: draft}
+// / @expect Sortie contient l'id, le nom, "brouillon" et invite à "myr model submit"
 func TestRunModelAdd_NominalCase(t *testing.T) {
 	var captured model.AddRequest
 	svc := &mockModelSvc{addFull: func(req model.AddRequest) (*model.Model3D, error) {
@@ -35,9 +35,9 @@ func TestRunModelAdd_NominalCase(t *testing.T) {
 	}
 }
 
-/// @brief  runModelAdd doit propager l'erreur du service (ex : incompatibilité de licence RM03)
-/// @input  service retournant une erreur
-/// @expect L'erreur est retournée telle quelle
+// / @brief  runModelAdd doit propager l'erreur du service (ex : incompatibilité de licence RM03)
+// / @input  service retournant une erreur
+// / @expect L'erreur est retournée telle quelle
 func TestRunModelAdd_ServiceError_Rejected(t *testing.T) {
 	wantErr := errors.New("incompatibilité de licence")
 	svc := &mockModelSvc{addFull: func(model.AddRequest) (*model.Model3D, error) { return nil, wantErr }}
@@ -48,9 +48,9 @@ func TestRunModelAdd_ServiceError_Rejected(t *testing.T) {
 	}
 }
 
-/// @brief  runModelSubmit doit appeler Submit et afficher le statut final
-/// @input  id="d1", service retournant Model3D{ID: "d1", Status: submitted}
-/// @expect Sortie contient l'id et "submitted", pas d'erreur
+// / @brief  runModelSubmit doit appeler Submit et afficher le statut final
+// / @input  id="d1", service retournant Model3D{ID: "d1", Status: submitted}
+// / @expect Sortie contient l'id et "submitted", pas d'erreur
 func TestRunModelSubmit_NominalCase(t *testing.T) {
 	var captured string
 	svc := &mockModelSvc{submit: func(assetID, note string) (*model.Model3D, error) {
@@ -69,9 +69,9 @@ func TestRunModelSubmit_NominalCase(t *testing.T) {
 	}
 }
 
-/// @brief  runModelSubmit doit propager l'erreur du service (ex : brouillon introuvable)
-/// @input  service retournant une erreur
-/// @expect L'erreur est retournée telle quelle
+// / @brief  runModelSubmit doit propager l'erreur du service (ex : brouillon introuvable)
+// / @input  service retournant une erreur
+// / @expect L'erreur est retournée telle quelle
 func TestRunModelSubmit_ServiceError_Rejected(t *testing.T) {
 	wantErr := errors.New("brouillon introuvable")
 	svc := &mockModelSvc{submit: func(string, string) (*model.Model3D, error) { return nil, wantErr }}
@@ -82,10 +82,10 @@ func TestRunModelSubmit_ServiceError_Rejected(t *testing.T) {
 	}
 }
 
-/// @brief  runModelSubmit transmet la note au service quel que soit le type d'asset —
-///         Submit dispatche en interne selon IsModule() (ADR-11)
-/// @input  id="d1", note="v1"
-/// @expect Submit reçoit id et note, sortie contient le statut "submitted"
+// / @brief  runModelSubmit transmet la note au service quel que soit le type d'asset —
+// /         Submit dispatche en interne selon IsModule() (ADR-11)
+// / @input  id="d1", note="v1"
+// / @expect Submit reçoit id et note, sortie contient le statut "submitted"
 func TestRunModelSubmit_WithNote(t *testing.T) {
 	var gotID, gotNote string
 	svc := &mockModelSvc{submit: func(assetID, note string) (*model.Model3D, error) {
@@ -101,9 +101,9 @@ func TestRunModelSubmit_WithNote(t *testing.T) {
 	}
 }
 
-/// @brief  runModelGet doit afficher les métadonnées d'un modèle
-/// @input  id="abc", service retournant Model3D{ID: "abc", Name: "Roue"}
-/// @expect Sortie contient l'id et le nom
+// / @brief  runModelGet doit afficher les métadonnées d'un modèle
+// / @input  id="abc", service retournant Model3D{ID: "abc", Name: "Roue"}
+// / @expect Sortie contient l'id et le nom
 func TestRunModelGet_NominalCase(t *testing.T) {
 	svc := &mockModelSvc{get: func(id, _ string) (*model.Model3D, error) {
 		return &model.Model3D{ID: id, Name: "Roue"}, nil
@@ -117,9 +117,9 @@ func TestRunModelGet_NominalCase(t *testing.T) {
 	}
 }
 
-/// @brief  runModelGet doit propager l'erreur "introuvable"
-/// @input  service retournant model.ErrNotFound
-/// @expect L'erreur est retournée
+// / @brief  runModelGet doit propager l'erreur "introuvable"
+// / @input  service retournant model.ErrNotFound
+// / @expect L'erreur est retournée
 func TestRunModelGet_NotFound_Rejected(t *testing.T) {
 	svc := &mockModelSvc{get: func(string, string) (*model.Model3D, error) { return nil, model.ErrNotFound }}
 	var buf bytes.Buffer
@@ -129,9 +129,9 @@ func TestRunModelGet_NotFound_Rejected(t *testing.T) {
 	}
 }
 
-/// @brief  runModelList doit afficher un tableau avec une ligne par modèle
-/// @input  service retournant 2 modèles
-/// @expect Les deux ID apparaissent dans la sortie
+// / @brief  runModelList doit afficher un tableau avec une ligne par modèle
+// / @input  service retournant 2 modèles
+// / @expect Les deux ID apparaissent dans la sortie
 func TestRunModelList_NominalCase(t *testing.T) {
 	svc := &mockModelSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{{ID: "a", Name: "A"}, {ID: "b", Name: "B"}}, nil
@@ -146,9 +146,9 @@ func TestRunModelList_NominalCase(t *testing.T) {
 	}
 }
 
-/// @brief  runModelList sur un canal vide ne doit pas planter et affiche seulement l'en-tête
-/// @input  service retournant une liste vide
-/// @expect Pas d'erreur, sortie non vide (en-tête tableau)
+// / @brief  runModelList sur un canal vide ne doit pas planter et affiche seulement l'en-tête
+// / @input  service retournant une liste vide
+// / @expect Pas d'erreur, sortie non vide (en-tête tableau)
 func TestRunModelList_Empty(t *testing.T) {
 	svc := &mockModelSvc{list: func(string) ([]*model.Model3D, error) { return nil, nil }}
 	var buf bytes.Buffer
@@ -160,13 +160,13 @@ func TestRunModelList_Empty(t *testing.T) {
 	}
 }
 
-/// @brief  Mode dégradé : quand le service retourne des brouillons locaux accompagnés
-///         d'une erreur ErrBlockchainUnreachable, runModelList affiche quand même le
-///         tableau, précédé d'un avertissement explicite — pas une erreur cobra silencieuse
-///         qui masquerait les brouillons disponibles
-/// @input  service retournant ([]*model.Model3D{{ID: "local1"}}, model.ErrBlockchainUnreachable)
-/// @expect Pas d'erreur retournée ; la sortie contient "Avertissement", le message de
-///         dégradation et l'ID du brouillon
+// / @brief  Mode dégradé : quand le service retourne des brouillons locaux accompagnés
+// /         d'une erreur ErrBlockchainUnreachable, runModelList affiche quand même le
+// /         tableau, précédé d'un avertissement explicite — pas une erreur cobra silencieuse
+// /         qui masquerait les brouillons disponibles
+// / @input  service retournant ([]*model.Model3D{{ID: "local1"}}, model.ErrBlockchainUnreachable)
+// / @expect Pas d'erreur retournée ; la sortie contient "Avertissement", le message de
+// /         dégradation et l'ID du brouillon
 func TestRunModelList_BlockchainUnreachable_WithDrafts_ShowsWarningAndTable(t *testing.T) {
 	svc := &mockModelSvc{list: func(string) ([]*model.Model3D, error) {
 		return []*model.Model3D{{ID: "local1", Name: "Brouillon local"}}, model.ErrBlockchainUnreachable
@@ -184,10 +184,10 @@ func TestRunModelList_BlockchainUnreachable_WithDrafts_ShowsWarningAndTable(t *t
 	}
 }
 
-/// @brief  Sans brouillon local disponible, runModelList propage l'erreur telle quelle
-///         (pas de faux mode dégradé sur une liste vraiment vide)
-/// @input  service retournant (nil, model.ErrBlockchainUnreachable)
-/// @expect L'erreur est retournée
+// / @brief  Sans brouillon local disponible, runModelList propage l'erreur telle quelle
+// /         (pas de faux mode dégradé sur une liste vraiment vide)
+// / @input  service retournant (nil, model.ErrBlockchainUnreachable)
+// / @expect L'erreur est retournée
 func TestRunModelList_BlockchainUnreachable_NoDrafts_Rejected(t *testing.T) {
 	svc := &mockModelSvc{list: func(string) ([]*model.Model3D, error) { return nil, model.ErrBlockchainUnreachable }}
 	var buf bytes.Buffer
@@ -197,9 +197,9 @@ func TestRunModelList_BlockchainUnreachable_NoDrafts_Rejected(t *testing.T) {
 	}
 }
 
-/// @brief  runModelUpdate transmet la requête de patch et affiche l'id mis à jour
-/// @input  UpdateRequest{ID: "abc", Description: "new"}
-/// @expect Requête transmise telle quelle, sortie contient l'id
+// / @brief  runModelUpdate transmet la requête de patch et affiche l'id mis à jour
+// / @input  UpdateRequest{ID: "abc", Description: "new"}
+// / @expect Requête transmise telle quelle, sortie contient l'id
 func TestRunModelUpdate_NominalCase(t *testing.T) {
 	var captured model.UpdateRequest
 	svc := &mockModelSvc{updateAsset: func(req model.UpdateRequest) (*model.Model3D, error) {
@@ -219,9 +219,9 @@ func TestRunModelUpdate_NominalCase(t *testing.T) {
 	}
 }
 
-/// @brief  runModelRemove supprime l'asset et confirme en sortie
-/// @input  id="abc"
-/// @expect Sortie confirme la suppression, pas d'erreur
+// / @brief  runModelRemove supprime l'asset et confirme en sortie
+// / @input  id="abc"
+// / @expect Sortie confirme la suppression, pas d'erreur
 func TestRunModelRemove_NominalCase(t *testing.T) {
 	removed := ""
 	svc := &mockModelSvc{remove: func(id string) error { removed = id; return nil }}
@@ -237,9 +237,9 @@ func TestRunModelRemove_NominalCase(t *testing.T) {
 	}
 }
 
-/// @brief  runModelRemove propage une erreur de suppression non supportée (Fabric, règle 9)
-/// @input  service retournant une erreur
-/// @expect L'erreur est retournée
+// / @brief  runModelRemove propage une erreur de suppression non supportée (Fabric, règle 9)
+// / @input  service retournant une erreur
+// / @expect L'erreur est retournée
 func TestRunModelRemove_NotSupported_Rejected(t *testing.T) {
 	wantErr := errors.New("suppression non supportée")
 	svc := &mockModelSvc{remove: func(string) error { return wantErr }}
@@ -250,9 +250,9 @@ func TestRunModelRemove_NotSupported_Rejected(t *testing.T) {
 	}
 }
 
-/// @brief  runModelChildren liste les dérivés d'un composant parent
-/// @input  service retournant 1 enfant
-/// @expect L'id de l'enfant apparaît dans la sortie
+// / @brief  runModelChildren liste les dérivés d'un composant parent
+// / @input  service retournant 1 enfant
+// / @expect L'id de l'enfant apparaît dans la sortie
 func TestRunModelChildren_NominalCase(t *testing.T) {
 	svc := &mockModelSvc{getChildren: func(parentID string) ([]*model.Model3D, error) {
 		return []*model.Model3D{{ID: "child-1", ParentID: parentID}}, nil
@@ -263,94 +263,5 @@ func TestRunModelChildren_NominalCase(t *testing.T) {
 	}
 	if !strings.Contains(buf.String(), "child-1") {
 		t.Fatalf("unexpected output: %q", buf.String())
-	}
-}
-
-/// @brief  runModelThumbnailSet encode le fichier en data URL et l'enregistre
-/// @input  fichier "preview.png", contenu binaire arbitraire
-/// @expect SaveThumbnail reçoit une data URL commençant par "data:image/png;base64,"
-func TestRunModelThumbnailSet_NominalCase(t *testing.T) {
-	var savedURL string
-	svc := &mockModelSvc{saveThumbnail: func(assetID, dataURL string) error {
-		savedURL = dataURL
-		return nil
-	}}
-	var buf bytes.Buffer
-	err := runModelThumbnailSet(&buf, svc, "abc", "preview.png", []byte{0x89, 0x50, 0x4e, 0x47})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !strings.HasPrefix(savedURL, "data:image/png;base64,") {
-		t.Fatalf("unexpected data URL: %q", savedURL)
-	}
-}
-
-/// @brief  runModelThumbnailGet imprime la data URL brute quand --out n'est pas fourni
-/// @input  out="", GetThumbnail retourne une data URL
-/// @expect La data URL est écrite sur la sortie
-func TestRunModelThumbnailGet_PrintsDataURL(t *testing.T) {
-	svc := &mockModelSvc{getThumbnail: func(string) (string, error) { return "data:image/png;base64,AAAA", nil }}
-	var buf bytes.Buffer
-	err := runModelThumbnailGet(&buf, svc, "abc", "", nil)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !strings.Contains(buf.String(), "data:image/png;base64,AAAA") {
-		t.Fatalf("unexpected output: %q", buf.String())
-	}
-}
-
-/// @brief  runModelThumbnailGet décode le base64 et écrit le fichier quand --out est fourni
-/// @input  out="preview.png", GetThumbnail retourne une data URL base64 valide
-/// @expect writeFile est appelé avec les octets décodés
-func TestRunModelThumbnailGet_WritesFile(t *testing.T) {
-	svc := &mockModelSvc{getThumbnail: func(string) (string, error) { return "data:image/png;base64,QUJD", nil }}
-	var writtenName string
-	var writtenData []byte
-	err := runModelThumbnailGet(&bytes.Buffer{}, svc, "abc", "preview.png", func(name string, data []byte) error {
-		writtenName = name
-		writtenData = data
-		return nil
-	})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if writtenName != "preview.png" || string(writtenData) != "ABC" {
-		t.Fatalf("unexpected write: name=%q data=%q", writtenName, writtenData)
-	}
-}
-
-/// @brief  runModelThumbnailRegenerate délègue à RegenerateThumbnail et confirme sur la sortie
-/// @input  id="abc", RegenerateThumbnail simulé retournant une data URL sans erreur
-/// @expect Pas d'erreur, message de confirmation contenant l'id sur la sortie
-func TestRunModelThumbnailRegenerate_NominalCase(t *testing.T) {
-	var gotID string
-	svc := &mockModelSvc{regenerateThumbnail: func(assetID string) (string, error) {
-		gotID = assetID
-		return "data:image/png;base64,AAAA", nil
-	}}
-	var buf bytes.Buffer
-	err := runModelThumbnailRegenerate(&buf, svc, "abc")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if gotID != "abc" {
-		t.Fatalf("RegenerateThumbnail appelé avec %q, want abc", gotID)
-	}
-	if !strings.Contains(buf.String(), "abc") {
-		t.Fatalf("message de confirmation attendu contenant l'id, got %q", buf.String())
-	}
-}
-
-/// @brief  runModelThumbnailRegenerate propage l'erreur du service (ex: aucun lien externe)
-/// @input  RegenerateThumbnail simulé retournant une erreur
-/// @expect L'erreur est propagée telle quelle
-func TestRunModelThumbnailRegenerate_PropagatesError(t *testing.T) {
-	svc := &mockModelSvc{regenerateThumbnail: func(assetID string) (string, error) {
-		return "", model.ErrNoThumbnailSource
-	}}
-	err := runModelThumbnailRegenerate(&bytes.Buffer{}, svc, "abc")
-	if !errors.Is(err, model.ErrNoThumbnailSource) {
-		t.Fatalf("erreur attendue ErrNoThumbnailSource, got %v", err)
 	}
 }

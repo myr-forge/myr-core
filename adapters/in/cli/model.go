@@ -2,11 +2,8 @@
 package cli
 
 import (
-	"encoding/base64"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 	"strings"
 	"text/tabwriter"
 
@@ -284,116 +281,6 @@ func printModelTable(w io.Writer, models []*model.Model3D) error {
 	return tw.Flush()
 }
 
-// ── thumbnail ─────────────────────────────────────────────────────────────────
-
-var modelThumbnailCmd = &cobra.Command{
-	Use:   "thumbnail",
-	Short: "Manage the thumbnail image associated with an asset",
-}
-
-var thumbnailMimeByExt = map[string]string{
-	".png":  "image/png",
-	".jpg":  "image/jpeg",
-	".jpeg": "image/jpeg",
-	".gif":  "image/gif",
-	".webp": "image/webp",
-}
-
-func runModelThumbnailSet(w io.Writer, svc model.ModelService, id string, fileName string, data []byte) error {
-	mime := thumbnailMimeByExt[strings.ToLower(filepath.Ext(fileName))]
-	if mime == "" {
-		mime = "application/octet-stream"
-	}
-	dataURL := fmt.Sprintf("data:%s;base64,%s", mime, base64.StdEncoding.EncodeToString(data))
-	if err := svc.SaveThumbnail(id, dataURL); err != nil {
-		return err
-	}
-	fmt.Fprintf(w, "Miniature enregistrée pour %s.\n", id)
-	return nil
-}
-
-var modelThumbnailSetCmd = &cobra.Command{
-	Use:   "set <id> <file>",
-	Short: "Attach an image file as an asset's thumbnail",
-	Long: `Read an image file, encode it as a base64 data URL and attach it to the
-asset as its thumbnail.
-
-Example:
-  myr model thumbnail set abc123def456 preview.png`,
-	Args: cobra.ExactArgs(2),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		data, err := os.ReadFile(args[1])
-		if err != nil {
-			return fmt.Errorf("lecture fichier : %w", err)
-		}
-		return runModelThumbnailSet(cmd.OutOrStdout(), modelSvc, args[0], args[1], data)
-	},
-}
-
-func runModelThumbnailGet(w io.Writer, svc model.ModelService, id string, out string, writeFile func(name string, data []byte) error) error {
-	dataURL, err := svc.GetThumbnail(id)
-	if err != nil {
-		return err
-	}
-	if out == "" {
-		fmt.Fprintln(w, dataURL)
-		return nil
-	}
-	_, b64, found := strings.Cut(dataURL, ",")
-	if !found {
-		return fmt.Errorf("miniature invalide : format data URL attendu")
-	}
-	data, err := base64.StdEncoding.DecodeString(b64)
-	if err != nil {
-		return fmt.Errorf("décodage miniature : %w", err)
-	}
-	if err := writeFile(out, data); err != nil {
-		return fmt.Errorf("écriture fichier : %w", err)
-	}
-	fmt.Fprintf(w, "Miniature écrite dans %s.\n", out)
-	return nil
-}
-
-var modelThumbnailGetCmd = &cobra.Command{
-	Use:   "get <id>",
-	Short: "Retrieve an asset's thumbnail",
-	Long: `Print the thumbnail as a base64 data URL, or decode it to a file with --out.
-
-Examples:
-  myr model thumbnail get abc123def456
-  myr model thumbnail get abc123def456 --out preview.png`,
-	Args: cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		out, _ := cmd.Flags().GetString("out")
-		return runModelThumbnailGet(cmd.OutOrStdout(), modelSvc, args[0], out, func(name string, data []byte) error {
-			return os.WriteFile(name, data, 0o644)
-		})
-	},
-}
-
-func runModelThumbnailRegenerate(w io.Writer, svc model.ModelService, id string) error {
-	if _, err := svc.RegenerateThumbnail(id); err != nil {
-		return err
-	}
-	fmt.Fprintf(w, "Miniature régénérée pour %s.\n", id)
-	return nil
-}
-
-var modelThumbnailRegenerateCmd = &cobra.Command{
-	Use:   "regenerate <id>",
-	Short: "Regenerate an asset's thumbnail from its source link",
-	Long: `Redérive la miniature depuis l'og:image du premier lien externe enregistré sur
-l'asset (Links). Un modèle 3D sans lien n'a pas de source régénérable côté serveur :
-sa miniature ne peut être fournie que via "myr model thumbnail set" (rendu client).
-
-Example:
-  myr model thumbnail regenerate abc123def456`,
-	Args: cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return runModelThumbnailRegenerate(cmd.OutOrStdout(), modelSvc, args[0])
-	},
-}
-
 func init() {
 	modelAddCmd.Flags().String("name", "", "Nom du modele (requis)")
 	modelAddCmd.Flags().String("description", "", "Description du modèle")
@@ -415,11 +302,8 @@ func init() {
 	modelUpdateCmd.Flags().String("tags", "", "Nouveaux tags séparés par des virgules (remplace l'existant)")
 	modelUpdateCmd.Flags().String("links", "", "Nouveaux liens séparés par des virgules (remplace l'existant)")
 
-	modelThumbnailGetCmd.Flags().String("out", "", "Fichier de sortie (décode le base64 au lieu d'imprimer la data URL)")
-	modelThumbnailCmd.AddCommand(modelThumbnailSetCmd, modelThumbnailGetCmd, modelThumbnailRegenerateCmd)
-
 	modelCmd.AddCommand(
 		modelAddCmd, modelSubmitCmd, modelGetCmd, modelListCmd,
-		modelUpdateCmd, modelRemoveCmd, modelChildrenCmd, modelThumbnailCmd,
+		modelUpdateCmd, modelRemoveCmd, modelChildrenCmd,
 	)
 }

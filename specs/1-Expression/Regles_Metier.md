@@ -256,7 +256,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 5 explicite(s) · 69 déduit(s)
+> [!check]- Tests — 5 explicite(s) · 59 déduit(s)
 > - ✅ [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — explicite (le test cite RM51)
 > - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM51)
 > - ✅ [TestAddAssemblyToModule_RM51_Component_StaysComponent](../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_Component_StaysComponent.md) — explicite (le test cite RM51)
@@ -272,7 +272,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - 🟡 [TestComponentInterfaces_POST_Created](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentTree_GET](../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components`
-> - … et 59 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 49 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### RM52 — Composition sans cycle
@@ -285,7 +285,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 3 explicite(s) · 70 déduit(s)
+> [!check]- Tests — 3 explicite(s) · 60 déduit(s)
 > - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM52)
 > - ✅ [TestAddAssetToWorkspace_RM52_Cycle_Rejected](../../docs/tests/domain-model/TestAddAssetToWorkspace_RM52_Cycle_Rejected.md) — explicite (le test cite RM52)
 > - ✅ [TestGetModuleInterfaces_RM52_LegacyCycle_Terminates](../../docs/tests/domain-model/TestGetModuleInterfaces_RM52_LegacyCycle_Terminates.md) — explicite (le test cite RM52)
@@ -301,7 +301,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - 🟡 [TestComponentTree_GET](../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddAssembly](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : teste route `/api/components`
-> - … et 58 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 48 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## 5. Modules et cycle de vie des assets
@@ -649,7 +649,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 3 explicite(s) · 83 déduit(s)
+> [!check]- Tests — 3 explicite(s) · 73 déduit(s)
 > - ✅ [TestPublicRead_RM49_Closed_SessionRequired](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_Closed_SessionRequired.md) — explicite (le test cite RM49)
 > - ✅ [TestPublicRead_RM49_Open_PublishedOnly](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_Open_PublishedOnly.md) — explicite (le test cite RM49)
 > - ✅ [TestPublicRead_RM49_WritesAndOtherRoutes_Refused](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_WritesAndOtherRoutes_Refused.md) — explicite (le test cite RM49)
@@ -665,7 +665,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - 🟡 [TestAPIIntegration_RefsCategoryPersists](../../docs/tests/adapters-in-rest/TestAPIIntegration_RefsCategoryPersists.md) — déduit : teste route `/api/refs`
 > - 🟡 [TestComponentInterfaces_GET](../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentInterfaces_POST_BadJSON](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_BadJSON.md) — déduit : teste route `/api/components`
-> - … et 71 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 61 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## 7. Propriété intellectuelle et commissions

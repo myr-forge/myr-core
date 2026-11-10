@@ -72,12 +72,12 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 3. Le handler `listGraph` interroge le service domaine via `svcFor(r).List(channel)`
 4. Le service appelle `blockchain.ListModelRecords(channelID)` — retourne tous les assets du canal
 5. Le handler filtre côté serveur (catégorie, texte, owner, parent, hash, tags) et exclut les modules
-6. Les DTOs `componentDTO` sont construits avec miniatures (thumbnails)
+6. Les DTOs `componentDTO` sont construits
 7. Les connexions entre assets chargés sont incluses dans la réponse
 8. Le client reçoit `{ components: [...], connections: [...], total: N }`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 75 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 65 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -93,7 +93,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 60 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 50 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Aucun résultat
@@ -112,7 +112,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 2. Une nouvelle requête `GET /api/components` est émise avec les critères mis à jour
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 69 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 59 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -128,7 +128,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 54 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 44 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Mode dégradé (blockchain injoignable, brouillons locaux disponibles)
@@ -169,7 +169,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 2. Le middleware `requireRole("contributor")` renvoie HTTP 401 `{ "error": "authentification requise" }`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 69 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 59 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -185,7 +185,7 @@ Le système interroge la blockchain via `GET /api/components` avec des paramètr
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 54 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 44 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## Post-conditions
@@ -227,11 +227,6 @@ end
 
 loop Pour chaque asset
     REST -> REST : filtrer (catégorie, texte, owner, tags…)\nexclure IsModule()
-end
-
-loop Pour chaque asset filtré
-    REST -> Local : GetThumbnail(assetID)
-    Local --> REST : dataURL (base64) ou ""
 end
 
 REST -> Service : ListConnections()
@@ -296,8 +291,6 @@ mux.HandleFunc("/api/components", func(w http.ResponseWriter, r *http.Request) {
 | `hash`       | string | Hash SHA-256 exact                               |
 | `tags`       | string | Tags séparés par virgule (match OR)              |
 | `limit`      | int    | Nombre max de résultats (défaut 200, max 1000)   |
-
-**Miniatures :** Récupérées depuis `ThumbnailStore` (SQLite ou local JSON). Si absente, `thumbnail` est une chaîne vide dans le DTO.
 
 **Connexions :** Seules les connexions dont `From` ET `To` font partie des assets filtrés sont incluses dans la réponse — évite les connexions orphelines côté client.
 

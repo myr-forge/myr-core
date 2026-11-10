@@ -37,7 +37,7 @@ func catalogueMux(t *testing.T, open bool) http.Handler {
 		return &network.NetworkProfile{Name: "net", AllowAutoGuest: open}, nil
 	}}
 	store := &mockStore{}
-	h := rest.NewHandler(svc, store, store).WithIdentityService(&mockIdentitySvc{}).WithNetworkService(netSvc)
+	h := rest.NewHandler(svc, store).WithIdentityService(&mockIdentitySvc{}).WithNetworkService(netSvc)
 	mux, err := rest.NewServer(h, "localhost:0").Handler()
 	if err != nil {
 		t.Fatalf("Handler(): %v", err)

@@ -419,12 +419,6 @@
                         "description": "fichier CAO 3D",
                         "name": "file",
                         "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "miniature en data URL base64",
-                        "name": "thumbnail",
-                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1200,119 +1194,6 @@
                     },
                     "503": {
                         "description": "blockchain indisponible",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/components/{id}/thumbnail": {
-            "post": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "Remplace la miniature d'un composant (brouillon ou déjà soumis) par la data URL fournie. Champ hors ledger — modifiable même après soumission, contrairement au contenu blockchain (règle 7).",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "components"
-                ],
-                "summary": "Remplacer la miniature d'un composant",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant du composant",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "champ thumbnail requis (data URL base64)",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "pas de contenu"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/components/{id}/thumbnail/regenerate": {
-            "post": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur. Répond { \"thumbnail\": \"\u003cdataURL\u003e\" } — jamais le componentDTO complet, qu'il faut requêter séparément si besoin d'autre chose que la miniature.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "components"
-                ],
-                "summary": "Régénérer la miniature d'un asset depuis son lien source",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant de l'asset",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "aucun lien externe, échec réseau/timeout ou og:image introuvable — un seul code pour ces trois cas",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "503": {
-                        "description": "blockchain indisponible (asset non local et non joignable)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2916,9 +2797,6 @@
                     "items": {
                         "type": "string"
                     }
-                },
-                "thumbnail": {
-                    "type": "string"
                 }
             }
         },

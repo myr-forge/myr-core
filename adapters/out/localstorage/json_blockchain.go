@@ -1,7 +1,7 @@
 // adapters/out/localstorage/json_blockchain.go
-// Implémente ConnectionStore + ThumbnailStore + InterfaceStore
-// via un fichier JSON local. Stocke les données GUI locales (connexions,
-// miniatures, interfaces) indépendamment de la blockchain Fabric.
+// Implémente ConnectionStore, InterfaceStore, DraftStore et RemovedAssetStore
+// via un fichier JSON local : connexions, interfaces et brouillons, hors
+// blockchain.
 package localstorage
 
 import (
@@ -11,7 +11,6 @@ import (
 )
 
 type dbFile struct {
-	Thumbnails  map[string]string    `json:"thumbnails"`
 	Connections []*model.Connection  `json:"connections"`
 	Interfaces  []*storedInterface   `json:"interfaces"`
 	Refs        *model.InterfaceRefs `json:"refs"`
@@ -30,8 +29,10 @@ type storedInterface struct {
 
 var _ model.RemovedAssetStore = (*JSONBlockchain)(nil)
 
-// JSONBlockchain persiste les données GUI locales (connexions, miniatures, interfaces, brouillons).
-// Il implémente ConnectionStore, ThumbnailStore, InterfaceStore, DraftStore et RemovedAssetStore.
+// JSONBlockchain persiste l'état local (connexions, interfaces, brouillons).
+// Il implémente ConnectionStore, InterfaceStore, DraftStore et RemovedAssetStore.
+// Les miniatures d'un fichier antérieur à leur retrait (FT-040) sont ignorées à
+// la lecture et disparaissent à l'écriture suivante.
 // Le fichier est partagé par le serveur et la CLI (jsonFile : verrou, écriture
 // atomique, fichier illisible jamais écrasé).
 type JSONBlockchain struct {
@@ -47,9 +48,6 @@ func NewJSONBlockchain(path string) *JSONBlockchain {
 // withDefaults initialise les champs absents du fichier, pour qu'aucun
 // appelant ne manipule une carte ou une liste nulle.
 func (db *dbFile) withDefaults() *dbFile {
-	if db.Thumbnails == nil {
-		db.Thumbnails = map[string]string{}
-	}
 	if db.Connections == nil {
 		db.Connections = []*model.Connection{}
 	}
@@ -136,23 +134,6 @@ func (j *JSONBlockchain) ListConnections() ([]*model.Connection, error) {
 		return nil, err
 	}
 	return db.Connections, nil
-}
-
-// ── model.ThumbnailStore ─────────────────────────────────────────────────────
-
-func (j *JSONBlockchain) SaveThumbnail(assetID, dataURL string) error {
-	return j.update(func(db *dbFile) error {
-		db.Thumbnails[assetID] = dataURL
-		return nil
-	})
-}
-
-func (j *JSONBlockchain) GetThumbnail(assetID string) (string, error) {
-	db, err := j.read()
-	if err != nil {
-		return "", err
-	}
-	return db.Thumbnails[assetID], nil
 }
 
 // ── model.InterfaceStore ─────────────────────────────────────────────────────

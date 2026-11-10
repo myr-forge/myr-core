@@ -66,7 +66,7 @@ Une interface générée par cette analyse porte un repère géométrique (posit
 
 ### Flux nominal — Proposition acceptée telle quelle
 
-1. Le fichier STEP du composant est analysé : chaque sous-produit de son arbre d'assemblage donne une sous-pièce proposée, avec un nom dérivé du nom de produit STEP (à défaut, `Part N`), un fichier CAO indépendant et une miniature
+1. Le fichier STEP du composant est analysé : chaque sous-produit de son arbre d'assemblage donne une sous-pièce proposée, avec un nom dérivé du nom de produit STEP (à défaut, `Part N`), un fichier CAO indépendant
 2. Les paires de sous-pièces en contact ou coaxiales sont détectées par comparaison géométrique ; chaque paire donne une connexion candidate, avec une interface géométrique générée de part et d'autre (catégorie par défaut `MECA`, repère géométrique renseigné) et un score de confiance
 3. La proposition (sous-pièces, connexions candidates, sous-pièces non appariées, avertissements) est retournée sous un identifiant `decomposition_id`, sans qu'aucune entité ne soit créée (RM40)
 4. Le Concepteur valide la proposition sans modification : `myr model decompose commit <assetID> --from <decomposition_id>`
@@ -124,7 +124,7 @@ if (Sous-produits détectés?) then (non)
   :Poursuivre en découpage manuel (UCAM05);
   stop
 else (oui)
-  :Extraire chaque sous-pièce (nom, fichier CAO, miniature);
+  :Extraire chaque sous-pièce (nom, fichier CAO);
   :Détecter les paires en contact ou coaxiales;
   :Générer une interface géométrique et un score de confiance par paire;
   :Retourner la proposition (decomposition_id) — aucune entité créée;

@@ -36,13 +36,6 @@ type ModelService interface {
 	ListConnections() ([]*Connection, error)
 	GetChildren(parentID string) ([]*Model3D, error)
 
-	// Miniatures STL
-	SaveThumbnail(assetID, dataURL string) error
-	GetThumbnail(assetID string) (string, error)
-	// RegenerateThumbnail redérive la miniature depuis la source durable de l'asset
-	// (og:image du premier lien externe) — voir Service.RegenerateThumbnail.
-	RegenerateThumbnail(assetID string) (string, error)
-
 	// Interfaces physiques (entrées/sorties d'un asset)
 	AddInterface(iface *AssetInterface) error
 	UpdateInterface(iface *AssetInterface) error

@@ -104,7 +104,6 @@ type blockchainRouter interface {
 
 type Handler struct {
 	modelSvc     model.ModelService
-	thumbStore   model.ThumbnailStore
 	ifaceStore   model.InterfaceStore
 	draftStore   model.DraftStore
 	removedStore model.RemovedAssetStore
@@ -122,7 +121,6 @@ type Handler struct {
 	// Phase 2 : multi-réseau
 	bcRouter         blockchainRouter      // nil en mode legacy (réseau unique)
 	connStore        model.ConnectionStore // pour svcFor
-	ogImageFetcher   model.OGImageFetcher  // pour svcFor
 	defaultNetworkID string                // réseau actif par défaut au démarrage
 
 	fabricConnected bool   // vrai si le gateway Fabric a démarré correctement
@@ -131,10 +129,9 @@ type Handler struct {
 	debugErrors     bool   // vrai : le détail des erreurs internes est renvoyé au client (serveurs de test)
 }
 
-func NewHandler(svc model.ModelService, ts model.ThumbnailStore, is model.InterfaceStore) *Handler {
+func NewHandler(svc model.ModelService, is model.InterfaceStore) *Handler {
 	return &Handler{
 		modelSvc:    svc,
-		thumbStore:  ts,
 		ifaceStore:  is,
 		sessions:    newSessionStore(),
 		authLimiter: newIPRateLimiter(10, time.Minute), // 10 tentatives / minute / IP
@@ -199,12 +196,6 @@ func (h *Handler) WithDraftStore(ds model.DraftStore) *Handler {
 // WithRemovedStore attache le registre de masquage local (RM08) pour svcFor.
 func (h *Handler) WithRemovedStore(rs model.RemovedAssetStore) *Handler {
 	h.removedStore = rs
-	return h
-}
-
-// WithOGImageFetcher attache la source de régénération de miniature (og:image) pour svcFor.
-func (h *Handler) WithOGImageFetcher(f model.OGImageFetcher) *Handler {
-	h.ogImageFetcher = f
 	return h
 }
 
@@ -288,10 +279,7 @@ func (h *Handler) svcFor(r *http.Request) model.ModelService {
 	if h.connStore != nil {
 		svc = svc.WithConnStore(h.connStore)
 	}
-	if h.ogImageFetcher != nil {
-		svc = svc.WithOGImageFetcher(h.ogImageFetcher)
-	}
-	return svc.WithThumbStore(h.thumbStore).WithIfaceStore(h.ifaceStore).WithDraftStore(h.draftStore).WithRemovedStore(h.removedStore).As(actor)
+	return svc.WithIfaceStore(h.ifaceStore).WithDraftStore(h.draftStore).WithRemovedStore(h.removedStore).As(actor)
 }
 
 // blockchainFor retourne l'accès au réseau networkID pour la requête : signé
@@ -423,7 +411,6 @@ type componentDTO struct {
 	LicenseID   string         `json:"license_id,omitempty"`
 	Tags        []string       `json:"tags"`
 	Links       []string       `json:"links,omitempty"`
-	Thumbnail   string         `json:"thumbnail,omitempty"`
 	// Status vaut "draft" (créé via draft:true, pas encore engagé sur la blockchain
 	// — voir POST /components/{id}/submit) ou "submitted" (comportement nominal,
 	// immédiat). Vide pour un composant créé avant l'introduction du brouillon.
@@ -476,7 +463,7 @@ type statusResponse struct {
 	Network   string `json:"network,omitempty"`
 }
 
-func toComponentDTO(m *model.Model3D, thumbnail string) componentDTO {
+func toComponentDTO(m *model.Model3D) componentDTO {
 	tags := m.Tags
 	if tags == nil {
 		tags = []string{}
@@ -505,7 +492,6 @@ func toComponentDTO(m *model.Model3D, thumbnail string) componentDTO {
 		LicenseID:      m.LicenseID,
 		Tags:           tags,
 		Links:          m.Links,
-		Thumbnail:      thumbnail,
 		Status:         m.Status,
 		Assemblies:     assemblies,
 		Instances:      instances,
@@ -628,8 +614,7 @@ func (h *Handler) listGraph(w http.ResponseWriter, r *http.Request) {
 	loadedIDs := make(map[string]bool, len(filtered))
 	dtos := make([]componentDTO, 0, len(filtered))
 	for _, m := range filtered {
-		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-		dtos = append(dtos, toComponentDTO(m, thumb))
+		dtos = append(dtos, toComponentDTO(m))
 		loadedIDs[m.ID] = true
 	}
 
@@ -695,7 +680,6 @@ func assetMatchesQuery(m *model.Model3D, q string) bool {
 //	@Param			tags		formData	string	false	"tags séparés par virgule"
 //	@Param			links		formData	string	false	"liens externes, tableau JSON encodé en chaîne"
 //	@Param			file		formData	file	false	"fichier CAO 3D"
-//	@Param			thumbnail	formData	string	false	"miniature en data URL base64"
 //	@Success		201	{object}	componentDTO
 //	@Failure		400	{object}	map[string]string
 //	@Security		MyrToken
@@ -763,15 +747,8 @@ func (h *Handler) createAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Miniature fournie par le client (rendu côté client) : le serveur n'en
-	// produit aucune de lui-même (FT-040).
-	if thumb := r.FormValue("thumbnail"); thumb != "" {
-		_ = h.svcFor(r).SaveThumbnail(m.ID, thumb)
-	}
-
-	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
 	w.WriteHeader(http.StatusCreated)
-	jsonOK(w, toComponentDTO(m, thumb))
+	jsonOK(w, toComponentDTO(m))
 }
 
 // createOneComponent crée un composant à partir d'un gabarit AddRequest (Name
@@ -838,26 +815,6 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 		h.handleComponentTree(w, r, id)
 		return
 	}
-	// Sous-route /:id/thumbnail/regenerate — redérive la miniature depuis le lien source
-	if strings.HasSuffix(rest, "/thumbnail/regenerate") {
-		id := strings.TrimSuffix(rest, "/thumbnail/regenerate")
-		h.regenerateThumbnail(w, r, id)
-		return
-	}
-	// Sous-route /:id/thumbnail — GET récupère, POST remplace la miniature
-	if strings.HasSuffix(rest, "/thumbnail") {
-		id := strings.TrimSuffix(rest, "/thumbnail")
-		switch r.Method {
-		case http.MethodGet:
-			thumb, _ := h.svcFor(r).GetThumbnail(id)
-			jsonOK(w, map[string]string{"thumbnail": thumb})
-		case http.MethodPost:
-			h.saveComponentThumbnail(w, r, id)
-		default:
-			http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-		}
-		return
-	}
 	// Sous-route /:id/assemblies — GET liste les connexions internes, POST rattache
 	// une connexion existante (ADR-11, ex-/api/modules/{id}/assemblies)
 	if strings.HasSuffix(rest, "/assemblies") {
@@ -908,69 +865,6 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// regenerateThumbnail redérive la miniature d'un asset depuis sa source
-// durable — l'og:image du premier lien externe enregistré (Links). Sans
-// lien externe, il n'existe pas de source régénérable côté serveur (le rendu d'un
-// modèle 3D est produit par le client GUI, pas par myr) — voir ModelService.RegenerateThumbnail.
-//
-//	@Summary		Régénérer la miniature d'un asset depuis son lien source
-//	@Description	Redérive la miniature depuis l'og:image du premier lien externe enregistré (Links). Échoue si l'asset n'a aucun lien externe — un modèle 3D sans lien n'a pas de source régénérable côté serveur. Répond { "thumbnail": "<dataURL>" } — jamais le componentDTO complet, qu'il faut requêter séparément si besoin d'autre chose que la miniature.
-//	@Tags			components
-//	@Produce		json
-//	@Param			id	path		string	true	"identifiant de l'asset"
-//	@Success		200	{object}	map[string]string
-//	@Failure		500	{object}	map[string]string	"aucun lien externe, échec réseau/timeout ou og:image introuvable — un seul code pour ces trois cas"
-//	@Failure		503	{object}	map[string]string	"blockchain indisponible (asset non local et non joignable)"
-//	@Security		MyrToken
-//	@Router			/components/{id}/thumbnail/regenerate [post]
-func (h *Handler) regenerateThumbnail(w http.ResponseWriter, r *http.Request, id string) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-		return
-	}
-	dataURL, err := h.svcFor(r).RegenerateThumbnail(id)
-	if err != nil {
-		h.internalErr(w, err)
-		return
-	}
-	jsonOK(w, map[string]string{"thumbnail": dataURL})
-}
-
-// saveComponentThumbnail remplace la miniature d'un composant, brouillon ou
-// déjà soumis — la miniature est un champ hors ledger (comme name/description,
-// voir patchComponent), modifiable même après soumission puisqu'elle ne touche
-// jamais le contenu blockchain déjà commité (règle 7).
-//
-//	@Summary		Remplacer la miniature d'un composant
-//	@Description	Remplace la miniature d'un composant (brouillon ou déjà soumis) par la data URL fournie. Champ hors ledger — modifiable même après soumission, contrairement au contenu blockchain (règle 7).
-//	@Tags			components
-//	@Accept			json
-//	@Param			id		path	string	true	"identifiant du composant"
-//	@Param			body	body	object	true	"champ thumbnail requis (data URL base64)"
-//	@Success		204	"pas de contenu"
-//	@Failure		400	{object}	map[string]string
-//	@Failure		500	{object}	map[string]string
-//	@Security		MyrToken
-//	@Router			/components/{id}/thumbnail [post]
-func (h *Handler) saveComponentThumbnail(w http.ResponseWriter, r *http.Request, id string) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-		return
-	}
-	var body struct {
-		Thumbnail string `json:"thumbnail"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		jsonError(w, "body JSON invalide", http.StatusBadRequest)
-		return
-	}
-	if err := h.svcFor(r).SaveThumbnail(id, body.Thumbnail); err != nil {
-		h.internalErr(w, err)
-		return
-	}
-	w.WriteHeader(http.StatusNoContent)
-}
-
 // submitComponent engage un asset créé en brouillon sur la blockchain — un
 // composant simple comme un asset décomposé (ADR-11, specs/3-Conception/Conception_intro.md) :
 // un seul point d'entrée, ModelService.Submit route en interne vers la
@@ -1004,8 +898,7 @@ func (h *Handler) submitComponent(w http.ResponseWriter, r *http.Request, id str
 		h.internalErr(w, err)
 		return
 	}
-	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-	jsonOK(w, toComponentDTO(m, thumb))
+	jsonOK(w, toComponentDTO(m))
 }
 
 // handleComponentAssemblies liste (GET) les connexions internes d'un asset
@@ -1063,8 +956,7 @@ func (h *Handler) handleComponentAssemblies(w http.ResponseWriter, r *http.Reque
 			h.internalErr(w, err)
 			return
 		}
-		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-		jsonOK(w, toComponentDTO(m, thumb))
+		jsonOK(w, toComponentDTO(m))
 	default:
 		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
 	}
@@ -1097,8 +989,7 @@ func (h *Handler) removeComponentAssembly(w http.ResponseWriter, r *http.Request
 		h.internalErr(w, err)
 		return
 	}
-	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-	jsonOK(w, toComponentDTO(m, thumb))
+	jsonOK(w, toComponentDTO(m))
 }
 
 // handleComponentInstances liste (GET) ou ajoute (POST) une instance d'un
@@ -1146,8 +1037,7 @@ func (h *Handler) handleComponentInstances(w http.ResponseWriter, r *http.Reques
 			h.internalErr(w, err)
 			return
 		}
-		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-		jsonOK(w, toComponentDTO(m, thumb))
+		jsonOK(w, toComponentDTO(m))
 	default:
 		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
 	}
@@ -1174,8 +1064,7 @@ func (h *Handler) handleComponentInstance(w http.ResponseWriter, r *http.Request
 			h.internalErr(w, err)
 			return
 		}
-		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-		jsonOK(w, toComponentDTO(m, thumb))
+		jsonOK(w, toComponentDTO(m))
 	default:
 		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
 	}
@@ -1207,8 +1096,7 @@ func (h *Handler) patchComponent(w http.ResponseWriter, r *http.Request, id stri
 		h.internalErr(w, err)
 		return
 	}
-	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-	jsonOK(w, toComponentDTO(m, thumb))
+	jsonOK(w, toComponentDTO(m))
 }
 
 // decodeUpdateRequest décode le corps JSON partagé par PATCH /components/{id}
@@ -1247,8 +1135,7 @@ func (h *Handler) getComponent(w http.ResponseWriter, r *http.Request, id string
 		jsonError(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-	jsonOK(w, toComponentDTO(m, thumb))
+	jsonOK(w, toComponentDTO(m))
 }
 
 // deleteComponent supprime un composant du stockage local.
@@ -1337,8 +1224,7 @@ func (h *Handler) handleComponentTree(w http.ResponseWriter, r *http.Request, id
 		if !ok {
 			continue
 		}
-		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-		dtos = append(dtos, toComponentDTO(m, thumb))
+		dtos = append(dtos, toComponentDTO(m))
 	}
 
 	// Connexions entre membres de l'arbre
@@ -1938,8 +1824,6 @@ func (h *Handler) internalErr(w http.ResponseWriter, err error) {
 		code, msg = http.StatusForbidden, err.Error()+" — reconnectez-vous avec votre identité (POST /api/identity/session)"
 	case errors.Is(err, model.ErrAssetSubmitted), errors.Is(err, model.ErrInterfaceInUse), errors.Is(err, model.ErrConnectionExists):
 		code, msg = http.StatusConflict, err.Error()
-	case errors.Is(err, model.ErrThumbnailTooLarge):
-		code, msg = http.StatusRequestEntityTooLarge, err.Error()
 	case errors.Is(err, model.ErrUnknownLicense), errors.Is(err, model.ErrLicenseIncompatible),
 		errors.Is(err, model.ErrIncompatibleInterfaces), errors.Is(err, model.ErrSelfLink),
 		errors.Is(err, model.ErrConnectionNotInModule), errors.Is(err, model.ErrCyclicComposition),

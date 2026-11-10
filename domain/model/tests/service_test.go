@@ -1,7 +1,6 @@
 package model_test
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -111,38 +110,6 @@ func (s *mockConnStore) ListConnections() ([]*model.Connection, error) {
 		list = append(list, c)
 	}
 	return list, nil
-}
-
-// ── ThumbnailStore ────────────────────────────────────────────────────────────
-
-type mockThumbStore struct {
-	thumbs map[string]string
-}
-
-func newMockThumbStore() *mockThumbStore {
-	return &mockThumbStore{thumbs: make(map[string]string)}
-}
-
-func (s *mockThumbStore) SaveThumbnail(assetID, dataURL string) error {
-	s.thumbs[assetID] = dataURL
-	return nil
-}
-
-func (s *mockThumbStore) GetThumbnail(assetID string) (string, error) {
-	return s.thumbs[assetID], nil
-}
-
-// ── OGImageFetcher ────────────────────────────────────────────────────────────
-
-type mockOGImageFetcher struct {
-	fetchFn func(pageURL string) (string, error)
-}
-
-func (f *mockOGImageFetcher) FetchOGImage(pageURL string) (string, error) {
-	if f.fetchFn != nil {
-		return f.fetchFn(pageURL)
-	}
-	return "data:image/png;base64,regenerated", nil
 }
 
 // ── InterfaceStore ────────────────────────────────────────────────────────────
@@ -290,7 +257,6 @@ func newFullSvc(t *testing.T, assets ...string) *model.Service {
 	t.Helper()
 	return model.NewService(newMockBC()).
 		WithConnStore(newMockConnStore()).
-		WithThumbStore(newMockThumbStore()).
 		WithIfaceStore(newMockIfaceStore()).
 		WithDraftStore(newMockDraftStore(assets...)).
 		WithRemovedStore(newMockRemovedStore())
@@ -844,161 +810,6 @@ func TestAddAssemblyLink_UnknownInterface(t *testing.T) {
 // ══════════════════════════════════════════════════════════════════════════════
 // Tests — miniatures
 // ══════════════════════════════════════════════════════════════════════════════
-
-// / @brief  SaveThumbnail refuse une image au-delà de MaxThumbnailBytes, et accepte la taille limite (R-07)
-// / @input  data URL d'une image de MaxThumbnailBytes octets, puis d'une image de MaxThumbnailBytes + 3 octets
-// / @expect la première est enregistrée ; la seconde est refusée (ErrThumbnailTooLarge) et la miniature reste la première
-func TestThumbnail_R07_TooLarge_Rejected(t *testing.T) {
-	svc := model.NewService(newMockBC()).WithThumbStore(newMockThumbStore())
-	encode := func(n int) string {
-		return "data:image/png;base64," + base64.StdEncoding.EncodeToString(make([]byte, n))
-	}
-	limit := encode(model.MaxThumbnailBytes)
-	if err := svc.SaveThumbnail("asset1", limit); err != nil {
-		t.Fatalf("taille limite : %v", err)
-	}
-	if err := svc.SaveThumbnail("asset1", encode(model.MaxThumbnailBytes+3)); !errors.Is(err, model.ErrThumbnailTooLarge) {
-		t.Errorf("ErrThumbnailTooLarge attendu, obtenu %v", err)
-	}
-	if got, _ := svc.GetThumbnail("asset1"); got != limit {
-		t.Error("la miniature enregistrée ne doit pas avoir changé")
-	}
-}
-
-// / @brief  Sauvegarde puis récupération d'une miniature (data URL)
-// / @input  Service avec mockThumbStore, dataURL "data:image/png;base64,abc123" pour "asset1"
-// / @expect GetThumbnail retourne exactement la même dataURL sans erreur
-func TestThumbnail_SaveGet(t *testing.T) {
-	svc := model.NewService(newMockBC()).
-		WithThumbStore(newMockThumbStore())
-
-	dataURL := "data:image/png;base64,abc123"
-	if err := svc.SaveThumbnail("asset1", dataURL); err != nil {
-		t.Fatalf("SaveThumbnail: %v", err)
-	}
-
-	got, err := svc.GetThumbnail("asset1")
-	if err != nil {
-		t.Fatalf("GetThumbnail: %v", err)
-	}
-	if got != dataURL {
-		t.Errorf("dataURL: got %q, want %q", got, dataURL)
-	}
-}
-
-func TestThumbnail_NilStore_ReturnsError(t *testing.T) {
-	svc := model.NewService(newMockBC()).WithDraftStore(newMockDraftStore())
-
-	if err := svc.SaveThumbnail("a", "data:..."); err == nil {
-		t.Error("SaveThumbnail sans thumbStore doit retourner une erreur")
-	}
-}
-
-func TestThumbnail_NilStore_GetReturnsEmpty(t *testing.T) {
-	svc := model.NewService(newMockBC()).WithDraftStore(newMockDraftStore())
-
-	got, err := svc.GetThumbnail("a")
-	if err != nil {
-		t.Fatalf("GetThumbnail sans thumbStore ne doit pas retourner d'erreur: %v", err)
-	}
-	if got != "" {
-		t.Errorf("attendu chaîne vide, got %q", got)
-	}
-}
-
-// / @brief  Régénère la miniature d'un asset depuis l'og:image de son premier lien externe
-// / @input  Asset "asset1" avec Links=["https://boutique.example/piece"], mockOGImageFetcher retournant une dataURL fixe
-// / @expect RegenerateThumbnail retourne la dataURL fetchée et la persiste dans le thumbStore
-func TestRegenerateThumbnail_OK(t *testing.T) {
-	bc := newMockBC()
-	bc.records["asset1"] = &model.Model3D{ID: "asset1", Links: []string{"https://boutique.example/piece"}}
-	thumbs := newMockThumbStore()
-
-	var gotURL string
-	svc := model.NewService(bc).
-		WithThumbStore(thumbs).
-		WithOGImageFetcher(&mockOGImageFetcher{
-			fetchFn: func(pageURL string) (string, error) {
-				gotURL = pageURL
-				return "data:image/png;base64,regenerated", nil
-			},
-		})
-
-	got, err := svc.RegenerateThumbnail("asset1")
-	if err != nil {
-		t.Fatalf("RegenerateThumbnail: %v", err)
-	}
-	if got != "data:image/png;base64,regenerated" {
-		t.Errorf("dataURL: got %q", got)
-	}
-	if gotURL != "https://boutique.example/piece" {
-		t.Errorf("lien passé au fetcher: got %q", gotURL)
-	}
-	if saved, _ := thumbs.GetThumbnail("asset1"); saved != got {
-		t.Errorf("miniature non persistée: got %q", saved)
-	}
-}
-
-// / @brief  RM — un asset sans lien externe n'a pas de source régénérable côté serveur
-// / @input  Asset "asset1" sans Links, thumbStore et ogImageFetcher configurés
-// / @expect RegenerateThumbnail retourne model.ErrNoThumbnailSource
-func TestRegenerateThumbnail_NoLinks_Rejected(t *testing.T) {
-	bc := newMockBC()
-	bc.records["asset1"] = &model.Model3D{ID: "asset1"}
-	svc := model.NewService(bc).
-		WithThumbStore(newMockThumbStore()).
-		WithOGImageFetcher(&mockOGImageFetcher{})
-
-	_, err := svc.RegenerateThumbnail("asset1")
-	if !errors.Is(err, model.ErrNoThumbnailSource) {
-		t.Fatalf("erreur attendue ErrNoThumbnailSource, got %v", err)
-	}
-}
-
-// / @brief  Sans thumbStore configuré, la régénération échoue proprement
-// / @input  Service sans WithThumbStore
-// / @expect RegenerateThumbnail retourne une erreur
-func TestRegenerateThumbnail_NilThumbStore_Rejected(t *testing.T) {
-	svc := model.NewService(newMockBC()).
-		WithOGImageFetcher(&mockOGImageFetcher{})
-
-	if _, err := svc.RegenerateThumbnail("asset1"); err == nil {
-		t.Error("RegenerateThumbnail sans thumbStore doit retourner une erreur")
-	}
-}
-
-// / @brief  Sans OGImageFetcher configuré, la régénération échoue proprement
-// / @input  Service sans WithOGImageFetcher
-// / @expect RegenerateThumbnail retourne une erreur
-func TestRegenerateThumbnail_NilFetcher_Rejected(t *testing.T) {
-	svc := model.NewService(newMockBC()).
-		WithThumbStore(newMockThumbStore())
-
-	if _, err := svc.RegenerateThumbnail("asset1"); err == nil {
-		t.Error("RegenerateThumbnail sans ogImageFetcher doit retourner une erreur")
-	}
-}
-
-// / @brief  Une erreur de récupération de l'og:image (page injoignable, balise absente...) est propagée
-// / @input  Asset avec un lien, mockOGImageFetcher retournant une erreur
-// / @expect RegenerateThumbnail retourne une erreur et ne persiste rien
-func TestRegenerateThumbnail_FetchError_Propagates(t *testing.T) {
-	bc := newMockBC()
-	bc.records["asset1"] = &model.Model3D{ID: "asset1", Links: []string{"https://boutique.example/piece"}}
-	thumbs := newMockThumbStore()
-	svc := model.NewService(bc).
-		WithThumbStore(thumbs).
-		WithOGImageFetcher(&mockOGImageFetcher{
-			fetchFn: func(string) (string, error) { return "", fmt.Errorf("og:image introuvable") },
-		})
-
-	if _, err := svc.RegenerateThumbnail("asset1"); err == nil {
-		t.Error("erreur de fetch attendue")
-	}
-	if saved, _ := thumbs.GetThumbnail("asset1"); saved != "" {
-		t.Errorf("aucune miniature ne doit être persistée en cas d'échec, got %q", saved)
-	}
-}
 
 // ══════════════════════════════════════════════════════════════════════════════
 // Tests — vocabulaire de référence (InterfaceRefs)

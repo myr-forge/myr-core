@@ -26,7 +26,6 @@ func newSubmittedFixture(t *testing.T) *submittedFixture {
 	f := &submittedFixture{bc: newMockBC(), conns: newMockConnStore()}
 	f.svc = model.NewService(f.bc).
 		WithConnStore(f.conns).
-		WithThumbStore(newMockThumbStore()).
 		WithIfaceStore(newMockIfaceStore()).
 		WithDraftStore(newMockDraftStore())
 

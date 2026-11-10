@@ -25,7 +25,7 @@ func failingRequestMux(t *testing.T, err error, debug bool) http.Handler {
 		return nil, "", err
 	}}
 	store := &mockStore{}
-	h := rest.NewHandler(&mockSvc{}, store, store).
+	h := rest.NewHandler(&mockSvc{}, store).
 		WithIdentityService(svc).
 		WithNetworkService(openNetwork(false, "")).
 		WithDebugErrors(debug)

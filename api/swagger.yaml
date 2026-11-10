@@ -88,8 +88,6 @@ definitions:
         items:
           type: string
         type: array
-      thumbnail:
-        type: string
     type: object
   adapters_in_rest.connectionDTO:
     properties:
@@ -651,10 +649,6 @@ paths:
         in: formData
         name: file
         type: file
-      - description: miniature en data URL base64
-        in: formData
-        name: thumbnail
-        type: string
       produces:
       - application/json
       responses:
@@ -1202,85 +1196,6 @@ paths:
       security:
       - MyrToken: []
       summary: Soumettre un composant en brouillon
-      tags:
-      - components
-  /components/{id}/thumbnail:
-    post:
-      consumes:
-      - application/json
-      description: Remplace la miniature d'un composant (brouillon ou déjà soumis)
-        par la data URL fournie. Champ hors ledger — modifiable même après soumission,
-        contrairement au contenu blockchain (règle 7).
-      parameters:
-      - description: identifiant du composant
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: champ thumbnail requis (data URL base64)
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      responses:
-        "204":
-          description: pas de contenu
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Remplacer la miniature d'un composant
-      tags:
-      - components
-  /components/{id}/thumbnail/regenerate:
-    post:
-      description: 'Redérive la miniature depuis l''og:image du premier lien externe
-        enregistré (Links). Échoue si l''asset n''a aucun lien externe — un modèle
-        3D sans lien n''a pas de source régénérable côté serveur. Répond { "thumbnail":
-        "<dataURL>" } — jamais le componentDTO complet, qu''il faut requêter séparément
-        si besoin d''autre chose que la miniature.'
-      parameters:
-      - description: identifiant de l'asset
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: aucun lien externe, échec réseau/timeout ou og:image introuvable
-            — un seul code pour ces trois cas
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "503":
-          description: blockchain indisponible (asset non local et non joignable)
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Régénérer la miniature d'un asset depuis son lien source
       tags:
       - components
   /components/{id}/tree:

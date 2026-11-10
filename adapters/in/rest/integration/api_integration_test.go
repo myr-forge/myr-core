@@ -227,7 +227,6 @@ func newIntegrationServer(t *testing.T) *httptest.Server {
 	// Même câblage que cmd/api/main.go (hors Fabric, remplacé par memBC).
 	svc := model.NewService(bc).
 		WithConnStore(db).
-		WithThumbStore(db).
 		WithIfaceStore(db).
 		WithDraftStore(db).
 		WithRemovedStore(db)
@@ -237,7 +236,7 @@ func newIntegrationServer(t *testing.T) *httptest.Server {
 		WithRequestStore(localstorage.NewJSONRequestStore(filepath.Join(dataDir, "account-requests.json"))).
 		WithRoles(roleSvc)
 
-	h := rest.NewHandler(svc, db, db).
+	h := rest.NewHandler(svc, db).
 		WithIdentityService(idSvc).
 		WithRoleService(roleSvc).
 		WithConnStore(db).
@@ -322,7 +321,7 @@ func multipartBody(name string) (string, string) {
 
 // ── Tests de base ─────────────────────────────────────────────────────────────
 
-/// @brief  GET /api/ping retourne 200 avec ok=true (serveur réel)
+// / @brief  GET /api/ping retourne 200 avec ok=true (serveur réel)
 func TestAPIIntegration_Ping(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()
@@ -335,14 +334,16 @@ func TestAPIIntegration_Ping(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("got %d, want 200", resp.StatusCode)
 	}
-	var result struct{ Ok bool `json:"ok"` }
+	var result struct {
+		Ok bool `json:"ok"`
+	}
 	json.NewDecoder(resp.Body).Decode(&result)
 	if !result.Ok {
 		t.Error("ok doit être true")
 	}
 }
 
-/// @brief  GET /api/status retourne le mode et le nombre d'assets
+// / @brief  GET /api/status retourne le mode et le nombre d'assets
 func TestAPIIntegration_Status(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()
@@ -361,7 +362,7 @@ func TestAPIIntegration_Status(t *testing.T) {
 	}
 }
 
-/// @brief  GET /api/licenses retourne le catalogue complet (MIT présent)
+// / @brief  GET /api/licenses retourne le catalogue complet (MIT présent)
 func TestAPIIntegration_LicenseCatalog(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()
@@ -370,7 +371,9 @@ func TestAPIIntegration_LicenseCatalog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GET /api/licenses: %v", err)
 	}
-	var licenses []struct{ ID string `json:"id"` }
+	var licenses []struct {
+		ID string `json:"id"`
+	}
 	decodeBody(t, resp, &licenses)
 	if len(licenses) == 0 {
 		t.Fatal("catalogue de licences vide")
@@ -388,9 +391,9 @@ func TestAPIIntegration_LicenseCatalog(t *testing.T) {
 
 // ── Cycle de vie d'un composant ───────────────────────────────────────────────
 
-/// @brief  Cycle complet : POST → GET → PATCH → DELETE /api/components avec vrais adapters
-/// @input  Domaine réel + LocalStorage réel + JSONBlockchain réel
-/// @expect Chaque étape retourne le code HTTP attendu ; le nom est bien mis à jour ; 404 après suppression
+// / @brief  Cycle complet : POST → GET → PATCH → DELETE /api/components avec vrais adapters
+// / @input  Domaine réel + LocalStorage réel + JSONBlockchain réel
+// / @expect Chaque étape retourne le code HTTP attendu ; le nom est bien mis à jour ; 404 après suppression
 func TestAPIIntegration_AssetLifecycle(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()
@@ -426,7 +429,9 @@ func TestAPIIntegration_AssetLifecycle(t *testing.T) {
 		resp2.Body.Close()
 		t.Fatalf("lecture: got %d, want 200", resp2.StatusCode)
 	}
-	var got struct{ Name string `json:"name"` }
+	var got struct {
+		Name string `json:"name"`
+	}
 	decodeBody(t, resp2, &got)
 	if got.Name != "Vis M3" {
 		t.Errorf("name lu: got %q, want Vis M3", got.Name)
@@ -434,7 +439,9 @@ func TestAPIIntegration_AssetLifecycle(t *testing.T) {
 
 	// Vérifier dans la liste
 	resp3 := apiDo(t, client, http.MethodGet, srv.URL+"/api/components", "")
-	var list struct{ Total int `json:"total"` }
+	var list struct {
+		Total int `json:"total"`
+	}
 	decodeBody(t, resp3, &list)
 	if list.Total < 1 {
 		t.Errorf("total: got %d, want ≥1", list.Total)
@@ -446,7 +453,9 @@ func TestAPIIntegration_AssetLifecycle(t *testing.T) {
 		resp4.Body.Close()
 		t.Errorf("PATCH: got %d, want 200", resp4.StatusCode)
 	} else {
-		var updated struct{ Name string `json:"name"` }
+		var updated struct {
+			Name string `json:"name"`
+		}
 		decodeBody(t, resp4, &updated)
 		if updated.Name != "Vis M4" {
 			t.Errorf("name après PATCH: got %q, want Vis M4", updated.Name)
@@ -470,9 +479,9 @@ func TestAPIIntegration_AssetLifecycle(t *testing.T) {
 
 // ── Connexions ────────────────────────────────────────────────────────────────
 
-/// @brief  Cycle complet : POST → DELETE /api/connections avec JSONBlockchain réel
-/// @input  Connexion from/to persistée en JSON
-/// @expect connexion créée avec ID ; supprimée en 204 ; persiste entre les requêtes
+// / @brief  Cycle complet : POST → DELETE /api/connections avec JSONBlockchain réel
+// / @input  Connexion from/to persistée en JSON
+// / @expect connexion créée avec ID ; supprimée en 204 ; persiste entre les requêtes
 func TestAPIIntegration_ConnectionLifecycle(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()
@@ -529,9 +538,9 @@ func createComponent(t *testing.T, srv *httptest.Server, name string) (id, statu
 	return c.ID, c.Status
 }
 
-/// @brief  Cycle complet d'un module (ADR-11) : composants brouillons → instances → liaison interne → assemblage → soumission (RM17, RM51)
-/// @input  Module et composant réels, connexion réelle, soumission blockchain simulée (memBC)
-/// @expect statut "draft" à la création, "submitted" après soumission
+// / @brief  Cycle complet d'un module (ADR-11) : composants brouillons → instances → liaison interne → assemblage → soumission (RM17, RM51)
+// / @input  Module et composant réels, connexion réelle, soumission blockchain simulée (memBC)
+// / @expect statut "draft" à la création, "submitted" après soumission
 func TestAPIIntegration_ModuleLifecycle(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()
@@ -558,7 +567,9 @@ func TestAPIIntegration_ModuleLifecycle(t *testing.T) {
 	// Relier les deux instances : seule une liaison interne au module s'y rattache (RM51)
 	resp2 := apiDo(t, client, http.MethodPost, srv.URL+"/api/connections",
 		`{"from":"`+partID+`","to":"`+propID+`","label":"lien"}`)
-	var conn struct{ ID string `json:"id"` }
+	var conn struct {
+		ID string `json:"id"`
+	}
 	decodeBody(t, resp2, &conn)
 
 	// Ajouter la connexion comme assemblage
@@ -577,7 +588,9 @@ func TestAPIIntegration_ModuleLifecycle(t *testing.T) {
 		resp4.Body.Close()
 		t.Fatalf("POST submit: got %d, want 200", resp4.StatusCode)
 	}
-	var submitted struct{ Status string `json:"status"` }
+	var submitted struct {
+		Status string `json:"status"`
+	}
 	decodeBody(t, resp4, &submitted)
 	if submitted.Status != string(model.ModuleSubmitted) {
 		t.Errorf("status après submit: got %q, want submitted", submitted.Status)
@@ -601,9 +614,9 @@ func physicalInterfaces(t *testing.T, srv *httptest.Server, assetID string) []st
 	return ids
 }
 
-/// @brief  Cycle complet : ajouter interface → lister → supprimer (JSONBlockchain réel)
-/// @input  Composant créé ; interface ELEC USB-C Out ajoutée et supprimée
-/// @expect interface physique présente dans la liste après ajout, absente après suppression
+// / @brief  Cycle complet : ajouter interface → lister → supprimer (JSONBlockchain réel)
+// / @input  Composant créé ; interface ELEC USB-C Out ajoutée et supprimée
+// / @expect interface physique présente dans la liste après ajout, absente après suppression
 func TestAPIIntegration_InterfaceLifecycle(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()
@@ -620,7 +633,9 @@ func TestAPIIntegration_InterfaceLifecycle(t *testing.T) {
 		resp2.Body.Close()
 		t.Fatalf("POST interface: got %d, want 201", resp2.StatusCode)
 	}
-	var iface struct{ ID string `json:"id"` }
+	var iface struct {
+		ID string `json:"id"`
+	}
 	decodeBody(t, resp2, &iface)
 	if iface.ID == "" {
 		t.Fatal("interface ID vide")
@@ -646,9 +661,9 @@ func TestAPIIntegration_InterfaceLifecycle(t *testing.T) {
 
 // ── Persistance JSON ──────────────────────────────────────────────────────────
 
-/// @brief  Les connexions persistent sur disque entre deux instances du service
-/// @input  Connexion créée via la 1re instance ; relue via une 2e instance pointant sur le même fichier
-/// @expect connexion retrouvée après rechargement du JSONBlockchain depuis disque
+// / @brief  Les connexions persistent sur disque entre deux instances du service
+// / @input  Connexion créée via la 1re instance ; relue via une 2e instance pointant sur le même fichier
+// / @expect connexion retrouvée après rechargement du JSONBlockchain depuis disque
 func TestAPIIntegration_ConnectionPersistsOnDisk(t *testing.T) {
 	dataDir := t.TempDir()
 	dbPath := filepath.Join(dataDir, "db.json")
@@ -679,9 +694,9 @@ func TestAPIIntegration_ConnectionPersistsOnDisk(t *testing.T) {
 
 // ── Requêtes concurrentes ─────────────────────────────────────────────────────
 
-/// @brief  N assets créés en parallèle — aucune course dans le handler HTTP
-/// @input  10 goroutines POST simultanées sur le serveur httptest
-/// @expect 10 codes 201 ; total=10 dans la liste finale
+// / @brief  N assets créés en parallèle — aucune course dans le handler HTTP
+// / @input  10 goroutines POST simultanées sur le serveur httptest
+// / @expect 10 codes 201 ; total=10 dans la liste finale
 func TestAPIIntegration_ConcurrentAssetCreation(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()
@@ -713,7 +728,9 @@ func TestAPIIntegration_ConcurrentAssetCreation(t *testing.T) {
 	}
 
 	resp := apiDo(t, client, http.MethodGet, srv.URL+"/api/components", "")
-	var list struct{ Total int `json:"total"` }
+	var list struct {
+		Total int `json:"total"`
+	}
 	decodeBody(t, resp, &list)
 	if list.Total != n {
 		t.Errorf("total après %d créations parallèles: got %d, want %d", n, list.Total, n)
@@ -722,9 +739,9 @@ func TestAPIIntegration_ConcurrentAssetCreation(t *testing.T) {
 
 // ── Vocabulaire de référence ──────────────────────────────────────────────────
 
-/// @brief  Ajout d'une catégorie de référence puis lecture via GET /api/refs
-/// @input  POST /api/refs/categories {"name":"PNEUM"} ; GET /api/refs
-/// @expect catégorie "PNEUM" présente dans refs.categories
+// / @brief  Ajout d'une catégorie de référence puis lecture via GET /api/refs
+// / @input  POST /api/refs/categories {"name":"PNEUM"} ; GET /api/refs
+// / @expect catégorie "PNEUM" présente dans refs.categories
 func TestAPIIntegration_RefsCategoryPersists(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()

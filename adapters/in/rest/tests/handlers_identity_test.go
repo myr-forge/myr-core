@@ -185,7 +185,7 @@ var _ network.NetworkService = (*mockNetworkSvc)(nil)
 func newIdentityMux(t *testing.T, idSvc identity.IdentityService) http.Handler {
 	t.Helper()
 	store := &mockStore{}
-	h := rest.NewHandler(&mockSvc{}, store, store)
+	h := rest.NewHandler(&mockSvc{}, store)
 	h.WithIdentityService(idSvc)
 	srv := rest.NewServer(h, "localhost:0")
 	mux, err := srv.Handler()
@@ -225,7 +225,7 @@ func (m *mockRoleSvc) HasPermission(roleName string, p rbac.Permission) bool {
 func newIdentityMuxWithRole(t *testing.T, idSvc identity.IdentityService, roleSvc rbac.RoleService) http.Handler {
 	t.Helper()
 	store := &mockStore{}
-	h := rest.NewHandler(&mockSvc{}, store, store)
+	h := rest.NewHandler(&mockSvc{}, store)
 	h.WithIdentityService(idSvc)
 	h.WithRoleService(roleSvc)
 	srv := rest.NewServer(h, "localhost:0")
@@ -240,7 +240,7 @@ func newIdentityMuxWithRole(t *testing.T, idSvc identity.IdentityService, roleSv
 func newBothMux(t *testing.T, idSvc identity.IdentityService, netSvc network.NetworkService) http.Handler {
 	t.Helper()
 	store := &mockStore{}
-	h := rest.NewHandler(&mockSvc{}, store, store)
+	h := rest.NewHandler(&mockSvc{}, store)
 	h.WithIdentityService(idSvc)
 	h.WithNetworkService(netSvc)
 	srv := rest.NewServer(h, "localhost:0")
@@ -334,7 +334,7 @@ func TestHandleIdentityWallets_NoService(t *testing.T) {
 	// handler — ce contrôle ne reste atteignable qu'avec une session déjà
 	// valide (créée avant que l'identitySvc devienne indisponible).
 	store := &mockStore{}
-	h := rest.NewHandler(&mockSvc{}, store, store)
+	h := rest.NewHandler(&mockSvc{}, store)
 	srv := rest.NewServer(h, "localhost:0")
 	mux, _ := srv.Handler()
 
@@ -451,7 +451,7 @@ func TestHandleIdentityEnroll_ServiceError(t *testing.T) {
 
 func TestHandleIdentityEnroll_NoService(t *testing.T) {
 	store := &mockStore{}
-	h := rest.NewHandler(&mockSvc{}, store, store)
+	h := rest.NewHandler(&mockSvc{}, store)
 	srv := rest.NewServer(h, "localhost:0")
 	mux, _ := srv.Handler()
 
@@ -519,7 +519,7 @@ func TestHandleIdentityStatus_NoService(t *testing.T) {
 	// la requête (401) avant même d'atteindre le contrôle "identitySvc nil" du
 	// handler — voir TestHandleIdentityWallets_NoService pour le même raisonnement.
 	store := &mockStore{}
-	h := rest.NewHandler(&mockSvc{}, store, store)
+	h := rest.NewHandler(&mockSvc{}, store)
 	srv := rest.NewServer(h, "localhost:0")
 	mux, _ := srv.Handler()
 
@@ -603,7 +603,7 @@ func TestRequireAuth_BlockchainWithValidToken(t *testing.T) {
 	// Obtenir un token via /api/identity/session puis l'utiliser pour /api/refs.
 	idSvc := &mockIdentitySvc{} // Enroll par défaut retourne succès
 	store := &mockStore{}
-	h := rest.NewHandler(&mockSvc{}, store, store)
+	h := rest.NewHandler(&mockSvc{}, store)
 	h.WithNetworkInfo(rest.NetworkInfo{Network: "peer0.example.com:7051", Channel: "mychannel"})
 	h.WithIdentityService(idSvc)
 	srv := rest.NewServer(h, "localhost:0")
@@ -1115,7 +1115,7 @@ func TestHandleIdentitySession_InvalidJSON(t *testing.T) {
 // / @expect HTTP 503
 func TestHandleIdentitySession_NoIdentityService(t *testing.T) {
 	store := &mockStore{}
-	h := rest.NewHandler(&mockSvc{}, store, store)
+	h := rest.NewHandler(&mockSvc{}, store)
 	srv := rest.NewServer(h, "localhost:0")
 	mux, _ := srv.Handler()
 

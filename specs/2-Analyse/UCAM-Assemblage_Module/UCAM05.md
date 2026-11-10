@@ -87,10 +87,9 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 8. Le module passe en état `submitted`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 33 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 32 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
-> - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
 > - 🟡 [TestAddAssemblyToModule_RM51_InstanceLink_OK](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_InstanceLink_OK.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
 > - 🟡 [TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate](../../../docs/tests/domain-model/TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
@@ -103,7 +102,8 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 > - 🟡 [TestCreate_ChannelRequired_Rejected](../../../docs/tests/domain-model/TestCreate_ChannelRequired_Rejected.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
 > - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
-> - … et 18 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed](../../../docs/tests/domain-model/TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
+> - … et 17 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Composant sans interfaces définies
