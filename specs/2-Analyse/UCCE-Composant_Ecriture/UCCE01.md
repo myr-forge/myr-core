@@ -87,7 +87,7 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 11. L'API retourne `201 Created` avec le `Model3D` JSON (ID, name, hash, blockID…).
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 62 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 64 déduit(s)
 > - 🟡 [TestFabricAdapter_ListModelRecords_EvaluateError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_ListModelRecords_EvaluateError.md) — déduit : teste `BlockchainPort.ListModelRecords`
 > - 🟡 [TestFabricAdapter_ListModelRecords_Success](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_ListModelRecords_Success.md) — déduit : teste `BlockchainPort.ListModelRecords`
 > - 🟡 [TestFabricAdapter_StoreModelRecord_SubmitError](../../../docs/tests/adapters-out-fabric/TestFabricAdapter_StoreModelRecord_SubmitError.md) — déduit : teste `BlockchainPort.StoreModelRecord`
@@ -103,7 +103,7 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 > - 🟡 [TestIntegration_OwnerNotSigner_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_OwnerNotSigner_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestIntegration_PendingOrReader_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_PendingOrReader_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
 > - 🟡 [TestIntegration_RM01_DuplicateHash_Rejected](../../../docs/tests/adapters-out-fabric/TestIntegration_RM01_DuplicateHash_Rejected.md) — déduit : teste `BlockchainPort.StoreModelRecord`
-> - … et 47 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 49 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Import depuis un format CAO non natif (STL, STEP, OBJ)
@@ -130,7 +130,7 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 > Ce flux est **optionnel** : le flux nominal (sans `draft: true`) reste inchangé — un composant est créé et soumis en une seule transaction, comme aujourd'hui. `draft` sert uniquement au cas où le Concepteur veut affiner les interfaces après création, sans les connaître entièrement à l'import du fichier.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 75 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 76 déduit(s)
 > - 🟡 [TestResolveOwner](../../../docs/tests/adapters-in-cli/TestResolveOwner.md) — déduit : teste commande `myr model add`
 > - 🟡 [TestRunModelAdd_NominalCase](../../../docs/tests/adapters-in-cli/TestRunModelAdd_NominalCase.md) — déduit : teste commande `myr model add`
 > - 🟡 [TestRunModelAdd_ServiceError_Rejected](../../../docs/tests/adapters-in-cli/TestRunModelAdd_ServiceError_Rejected.md) — déduit : teste commande `myr model add`
@@ -146,7 +146,7 @@ La catégorie `base` est la seule catégorie qui ne requiert pas de `ParentID`. 
 > - 🟡 [TestComponentInterfaces_POST_Created](../../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentTree_GET](../../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentTree_MethodNotAllowed](../../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components`
-> - … et 60 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 61 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Catégorie dérivée (non-`base`)

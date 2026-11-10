@@ -79,10 +79,12 @@ Cette opération est la généralisation à un module de UCCE02 (« Configurer u
 7. L'API retourne `200 OK` avec le `Model3D` mis à jour
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 9 déduit(s)
 > - 🟡 [TestFabricBlockchain_UpdateModelMetadata](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_UpdateModelMetadata.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
 > - 🟡 [TestIntegration_UpdateMetadata_OwnerOnly](../../../docs/tests/adapters-out-fabric/TestIntegration_UpdateMetadata_OwnerOnly.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
 > - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_CreatorIsOwner](../../../docs/tests/domain-model/TestOwnership_RM54_CreatorIsOwner.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected](../../../docs/tests/domain-model/TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM03_IncompatibleLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM03_IncompatibleLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM19_SubmittedLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM19_SubmittedLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
@@ -98,10 +100,12 @@ Cette opération est la généralisation à un module de UCCE02 (« Configurer u
 5. La réponse confirme — l'URL apparaît dans la liste des liens du Module
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 9 déduit(s)
 > - 🟡 [TestFabricBlockchain_UpdateModelMetadata](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_UpdateModelMetadata.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
 > - 🟡 [TestIntegration_UpdateMetadata_OwnerOnly](../../../docs/tests/adapters-out-fabric/TestIntegration_UpdateMetadata_OwnerOnly.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
 > - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_CreatorIsOwner](../../../docs/tests/domain-model/TestOwnership_RM54_CreatorIsOwner.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected](../../../docs/tests/domain-model/TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM03_IncompatibleLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM03_IncompatibleLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM19_SubmittedLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM19_SubmittedLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
@@ -115,8 +119,10 @@ Cette opération est la généralisation à un module de UCCE02 (« Configurer u
 3. Si `license_id` est fourni pour un module en brouillon : la licence doit exister dans le catalogue et, si le module a un `ParentID`, être compatible avec celle du parent (RM03)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
 > - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_CreatorIsOwner](../../../docs/tests/domain-model/TestOwnership_RM54_CreatorIsOwner.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected](../../../docs/tests/domain-model/TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM03_IncompatibleLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM03_IncompatibleLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM19_SubmittedLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM19_SubmittedLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
@@ -130,8 +136,10 @@ Cette opération est la généralisation à un module de UCCE02 (« Configurer u
 3. Aucune transaction Fabric n'est créée — la modification sera incluse dans la `ModuleVersion` lors de la soumission (UCMOD06)
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
 > - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_CreatorIsOwner](../../../docs/tests/domain-model/TestOwnership_RM54_CreatorIsOwner.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected](../../../docs/tests/domain-model/TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM03_IncompatibleLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM03_IncompatibleLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM19_SubmittedLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM19_SubmittedLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`

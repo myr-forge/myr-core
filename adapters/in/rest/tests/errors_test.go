@@ -180,3 +180,17 @@ func TestDomainErrors_InterfaceCarrierChange_BadRequest(t *testing.T) {
 		t.Errorf("400 attendu, obtenu %d — %s", w.Code, w.Body.String())
 	}
 }
+
+// / @brief  Le service agit pour l'identité de la session, et le refus d'un asset d'une autre identité renvoie 403 (RM54)
+// / @input  PATCH /api/components/c1 par la session de « test » ; le service refuse (ErrNotOwner)
+// / @expect le service a reçu l'identité de la session ; HTTP 403 avec le message du refus
+func TestDomainErrors_RM54_NotOwner_Forbidden(t *testing.T) {
+	svc := &mockSvc{updateAsset: func(model.UpdateRequest) (*model.Model3D, error) { return nil, model.ErrNotOwner }}
+	w := do(t, newTestMux(t, svc), http.MethodPatch, "/api/components/c1", `{"name":"x"}`)
+	if !strings.HasPrefix(svc.actor, "test") {
+		t.Errorf("identité de la session attendue, le service a reçu %q", svc.actor)
+	}
+	if w.Code != http.StatusForbidden || !strings.Contains(w.Body.String(), "propriétaire") {
+		t.Errorf("403 attendu, obtenu %d — %s", w.Code, w.Body.String())
+	}
+}

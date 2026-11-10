@@ -79,10 +79,12 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 7. L'API retourne `200 OK` avec le `Model3D` mis à jour.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 9 déduit(s)
 > - 🟡 [TestFabricBlockchain_UpdateModelMetadata](../../../docs/tests/adapters-out-fabric/TestFabricBlockchain_UpdateModelMetadata.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
 > - 🟡 [TestIntegration_UpdateMetadata_OwnerOnly](../../../docs/tests/adapters-out-fabric/TestIntegration_UpdateMetadata_OwnerOnly.md) — déduit : teste `BlockchainPort.UpdateModelMetadata`
 > - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_CreatorIsOwner](../../../docs/tests/domain-model/TestOwnership_RM54_CreatorIsOwner.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected](../../../docs/tests/domain-model/TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM03_IncompatibleLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM03_IncompatibleLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM19_SubmittedLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM19_SubmittedLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
@@ -96,8 +98,10 @@ Cette opération est généralisée à tout asset, y compris un module (voir UCM
 3. Une licence est vérifiée (catalogue, RM03) ; un lien d'asset soumis est enregistré par `UpdateMetadata`.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 5 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 7 déduit(s)
 > - 🟡 [TestLicense_UnknownLicense_Rejected](../../../docs/tests/domain-model/TestLicense_UnknownLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_CreatorIsOwner](../../../docs/tests/domain-model/TestOwnership_RM54_CreatorIsOwner.md) — déduit : teste `ModelService.UpdateAsset`
+> - 🟡 [TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected](../../../docs/tests/domain-model/TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_Draft_StaysLocal](../../../docs/tests/domain-model/TestUpdateAsset_Draft_StaysLocal.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM03_IncompatibleLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM03_IncompatibleLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`
 > - 🟡 [TestUpdateAsset_RM19_SubmittedLicense_Rejected](../../../docs/tests/domain-model/TestUpdateAsset_RM19_SubmittedLicense_Rejected.md) — déduit : teste `ModelService.UpdateAsset`

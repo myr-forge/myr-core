@@ -47,6 +47,8 @@ type mockModelSvc struct {
 	connectVirtualToPhysical        func(virtualIfaceID, physicalIfaceID string, popupValues model.AssetInterface, fromInstanceID, toInstanceID string) (*model.Connection, error)
 }
 
+func (m *mockModelSvc) As(string) model.ModelService { return m }
+
 func (m *mockModelSvc) Get(id, channelID string) (*model.Model3D, error) {
 	if m.get != nil {
 		return m.get(id, channelID)

@@ -4,6 +4,13 @@ package model
 // ModelService est le port d'entrée du domaine model.
 // Il est implémenté par Service et consommé par les adapters (GUI, CLI, TUI, API).
 type ModelService interface {
+	// As retourne le service agissant pour l'identité actor (pseudo@org) :
+	// elle devient le propriétaire de ce qu'elle crée, et seul le propriétaire
+	// d'un asset le modifie, le supprime ou le soumet (ErrNotOwner). Un actor
+	// vide n'est aucune identité : il ne crée ni ne modifie rien. Les adapters
+	// d'entrée appellent toujours As.
+	As(actor string) ModelService
+
 	// Compatibilité CLI / TUI
 	// Get récupère un modèle par son ID sur le canal indiqué.
 	// channelID="" utilise le canal actif de la session ou le canal par défaut.

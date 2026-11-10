@@ -130,5 +130,8 @@ func main() {
 	paymentSvc := payment.NewService(noopPaymentGateway{})
 
 	cli.Version = version
-	cli.Execute(modelSvc, channelSvc, paymentSvc, networkSvc, roleSvc, identitySvc, sessionSvc)
+	// La CLI agit pour l'identité du compte local (myr session) : seul le
+	// propriétaire d'un asset le modifie, administrateur compris (FT-001).
+	actor, _ := cli.SessionIdentity(sessionSvc)
+	cli.Execute(modelSvc.As(actor), channelSvc, paymentSvc, networkSvc, roleSvc, identitySvc, sessionSvc)
 }

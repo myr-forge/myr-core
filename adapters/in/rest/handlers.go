@@ -268,13 +268,20 @@ func (h *Handler) networkFor(r *http.Request) string {
 // En mode multi-réseau, crée une instance légère par requête avec le bon blockchain,
 // signé par le wallet de l'utilisateur de la session (voir blockchainFor).
 func (h *Handler) svcFor(r *http.Request) model.ModelService {
+	// Le service agit toujours pour l'identité de la session : seul le
+	// propriétaire d'un asset le modifie (FT-001). Sans session (visiteur),
+	// aucune identité : lecture seule.
+	actor := ""
+	if sess := sessionFromCtx(r); sess != nil {
+		actor = sess.Handle
+	}
 	if h.bcRouter == nil {
-		return h.modelSvc
+		return h.modelSvc.As(actor)
 	}
 	networkID := h.networkFor(r)
 	if networkID == "" {
 		// Pas de réseau configuré dans le pool — utilise le service wired au démarrage
-		return h.modelSvc
+		return h.modelSvc.As(actor)
 	}
 	bc := h.blockchainFor(r, networkID)
 	svc := model.NewService(bc)
@@ -284,7 +291,7 @@ func (h *Handler) svcFor(r *http.Request) model.ModelService {
 	if h.ogImageFetcher != nil {
 		svc = svc.WithOGImageFetcher(h.ogImageFetcher)
 	}
-	return svc.WithThumbStore(h.thumbStore).WithIfaceStore(h.ifaceStore).WithDraftStore(h.draftStore).WithRemovedStore(h.removedStore)
+	return svc.WithThumbStore(h.thumbStore).WithIfaceStore(h.ifaceStore).WithDraftStore(h.draftStore).WithRemovedStore(h.removedStore).As(actor)
 }
 
 // blockchainFor retourne l'accès au réseau networkID pour la requête : signé
@@ -1986,7 +1993,8 @@ func jsonError(w http.ResponseWriter, msg string, code int) {
 // l'indisponibilité de la blockchain — non configurée (ErrBlockchainUnavailable)
 // ou injoignable (ErrBlockchainUnreachable), toutes deux transitoires et non des
 // erreurs de données (503) —, l'écriture sur le ledger sans identité signataire
-// (ErrSignerRequired, ADR-12, 403), l'asset ou l'interface introuvable
+// (ErrSignerRequired, ADR-12, 403), un asset d'une autre identité (ErrNotOwner,
+// FT-001, 403), l'asset ou l'interface introuvable
 // (ErrNotFound, 404), la modification d'un asset soumis
 // (ErrAssetSubmitted, RM19, 409), l'interface déjà engagée (RM09) ou la liaison
 // déjà existante (409), la licence refusée (catalogue ou RM03, 400) et la
@@ -2005,6 +2013,8 @@ func (h *Handler) internalErr(w http.ResponseWriter, err error) {
 		code, msg = http.StatusServiceUnavailable, err.Error()
 	case errors.Is(err, model.ErrNotFound):
 		code, msg = http.StatusNotFound, err.Error()
+	case errors.Is(err, model.ErrNotOwner):
+		code, msg = http.StatusForbidden, err.Error()
 	case errors.Is(err, model.ErrSignerRequired):
 		code, msg = http.StatusForbidden, err.Error()+" — reconnectez-vous avec votre identité (POST /api/identity/session)"
 	case errors.Is(err, model.ErrAssetSubmitted), errors.Is(err, model.ErrInterfaceInUse), errors.Is(err, model.ErrConnectionExists):

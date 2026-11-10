@@ -93,3 +93,7 @@ var (
 	// ErrChannelRequired : canal cible non précisé.
 	ErrChannelRequired = errors.New("model: canal cible non précisé")
 )
+
+// ErrNotOwner : seule l'identité propriétaire d'un asset le modifie, le
+// supprime ou le soumet — administrateur compris (FT-001).
+var ErrNotOwner = errors.New("model: seul le propriétaire de l'asset peut le modifier")

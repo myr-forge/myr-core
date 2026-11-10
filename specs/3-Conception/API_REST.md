@@ -25,6 +25,7 @@ tags:
   - rm/RM50
   - rm/RM51
   - rm/RM52
+  - rm/RM54
   - enf/ENF18
   - enf/ENF25
   - relecture/incoherence
@@ -56,6 +57,8 @@ tags:
 | Admin | `requireRole(rbac.PermAdmin)` | Session valide + permission `admin` uniquement |
 
 > Pour les routes mixtes (lecture libre, écriture protégée), le middleware vérifie la permission uniquement sur `POST`, `PUT`, `PATCH`, `DELETE`.
+
+> **Propriété (RM54) :** au-delà de la permission `write`, une écriture sur un asset existant — métadonnées, licence, interfaces, instances, liaisons rattachées, suppression, soumission — n'est permise qu'à son propriétaire, l'identité de la session qui l'a créé ; sinon `403`, administrateur compris. Le propriétaire d'un asset créé est toujours l'identité de la session (`owner_id` envoyé ignoré).
 
 **Codes d'erreur identité/session :**
 

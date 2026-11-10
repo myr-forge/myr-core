@@ -20,6 +20,7 @@ import (
 // ── Mock ModelService ─────────────────────────────────────────────────────────
 
 type mockSvc struct {
+	actor                    string // identité reçue par As
 	addFull                  func(req model.AddRequest) (*model.Model3D, error)
 	submit                   func(assetID, note string) (*model.Model3D, error)
 	get                      func(id string) (*model.Model3D, error)
@@ -60,6 +61,11 @@ type mockSvc struct {
 	checkLicenseCompat       func(parentID, proposedID string) *model.LicenseCheck
 	checkModuleLicenseCompat func(componentIDs []string, proposedID string) *model.LicenseCheck
 	connectVirtualToPhysical func(virtualIfaceID, physicalIfaceID string, popupValues model.AssetInterface, fromInstanceID, toInstanceID string) (*model.Connection, error)
+}
+
+func (m *mockSvc) As(actor string) model.ModelService {
+	m.actor = actor
+	return m
 }
 
 func (m *mockSvc) AddFull(req model.AddRequest) (*model.Model3D, error) {

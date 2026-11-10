@@ -270,7 +270,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 5 explicite(s) · 69 déduit(s)
+> [!check]- Tests — 5 explicite(s) · 70 déduit(s)
 > - ✅ [TestAPIIntegration_ModuleLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_ModuleLifecycle.md) — explicite (le test cite RM51)
 > - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM51)
 > - ✅ [TestAddAssemblyToModule_RM51_Component_StaysComponent](../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_Component_StaysComponent.md) — explicite (le test cite RM51)
@@ -286,7 +286,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - 🟡 [TestComponentInterfaces_POST_Created](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_Created.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentTree_GET](../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components`
-> - … et 59 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 60 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### RM52 — Composition sans cycle
@@ -299,7 +299,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 3 explicite(s) · 70 déduit(s)
+> [!check]- Tests — 3 explicite(s) · 71 déduit(s)
 > - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM52)
 > - ✅ [TestAddAssetToWorkspace_RM52_Cycle_Rejected](../../docs/tests/domain-model/TestAddAssetToWorkspace_RM52_Cycle_Rejected.md) — explicite (le test cite RM52)
 > - ✅ [TestGetModuleInterfaces_RM52_LegacyCycle_Terminates](../../docs/tests/domain-model/TestGetModuleInterfaces_RM52_LegacyCycle_Terminates.md) — explicite (le test cite RM52)
@@ -315,7 +315,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - 🟡 [TestComponentTree_GET](../../docs/tests/adapters-in-rest/TestComponentTree_GET.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentTree_MethodNotAllowed](../../docs/tests/adapters-in-rest/TestComponentTree_MethodNotAllowed.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddAssembly](../../docs/tests/adapters-in-rest/TestComponent_AddAssembly.md) — déduit : teste route `/api/components`
-> - … et 58 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 59 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## 5. Modules et cycle de vie des assets
@@ -391,6 +391,22 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - ✅ [TestSubmitModule_RM19_AlreadySubmitted_Rejected](../../docs/tests/domain-model/TestSubmitModule_RM19_AlreadySubmitted_Rejected.md) — explicite (le test cite RM19)
 > - ✅ [TestSubmit_RM19_AlreadySubmitted_Rejected](../../docs/tests/domain-model/TestSubmit_RM19_AlreadySubmitted_Rejected.md) — explicite (le test cite RM19)
 > - ✅ [TestUpdateAsset_RM19_SubmittedLicense_Rejected](../../docs/tests/domain-model/TestUpdateAsset_RM19_SubmittedLicense_Rejected.md) — explicite (le test cite RM19)
+<!-- tests-obsidian:end -->
+
+### RM54 — Seul le propriétaire modifie son asset
+
+- **Déclencheur** : Modification, suppression ou soumission d'un asset — métadonnées, licence, interfaces, instances, liaisons rattachées
+- **Condition** : L'identité qui agit n'est pas le propriétaire de l'asset, ou aucune identité n'agit
+- **Conséquence** : L'opération est refusée, administrateur compris. Le propriétaire d'un asset est l'identité qui le crée (`pseudo@org`), et non celle que la demande désignerait ; sans identité, rien n'est créé ni modifié
+- **Use cases** : UCCE02, UCCE06, UCCE07, UCMOD02, UCMOD03
+
+<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
+> [!check]- Tests — 5 explicite(s) · 0 déduit(s)
+> - ✅ [TestDomainErrors_RM54_NotOwner_Forbidden](../../docs/tests/adapters-in-rest/TestDomainErrors_RM54_NotOwner_Forbidden.md) — explicite (le test cite RM54)
+> - ✅ [TestOwnership_RM54_CreatorIsOwner](../../docs/tests/domain-model/TestOwnership_RM54_CreatorIsOwner.md) — explicite (le test cite RM54)
+> - ✅ [TestOwnership_RM54_NoIdentity_Rejected](../../docs/tests/domain-model/TestOwnership_RM54_NoIdentity_Rejected.md) — explicite (le test cite RM54)
+> - ✅ [TestOwnership_RM54_OtherIdentity_Rejected](../../docs/tests/domain-model/TestOwnership_RM54_OtherIdentity_Rejected.md) — explicite (le test cite RM54)
+> - ✅ [TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected](../../docs/tests/domain-model/TestOwnership_RM54_SubmittedMetadata_OtherIdentity_Rejected.md) — explicite (le test cite RM54)
 <!-- tests-obsidian:end -->
 
 ### RM39 — Filiation d'un découpage
@@ -648,7 +664,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 ---
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 3 explicite(s) · 83 déduit(s)
+> [!check]- Tests — 3 explicite(s) · 84 déduit(s)
 > - ✅ [TestPublicRead_RM49_Closed_SessionRequired](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_Closed_SessionRequired.md) — explicite (le test cite RM49)
 > - ✅ [TestPublicRead_RM49_Open_PublishedOnly](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_Open_PublishedOnly.md) — explicite (le test cite RM49)
 > - ✅ [TestPublicRead_RM49_WritesAndOtherRoutes_Refused](../../docs/tests/adapters-in-rest/TestPublicRead_RM49_WritesAndOtherRoutes_Refused.md) — explicite (le test cite RM49)
@@ -664,7 +680,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - 🟡 [TestAPIIntegration_RefsCategoryPersists](../../docs/tests/adapters-in-rest/TestAPIIntegration_RefsCategoryPersists.md) — déduit : teste route `/api/refs`
 > - 🟡 [TestComponentInterfaces_GET](../../docs/tests/adapters-in-rest/TestComponentInterfaces_GET.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponentInterfaces_POST_BadJSON](../../docs/tests/adapters-in-rest/TestComponentInterfaces_POST_BadJSON.md) — déduit : teste route `/api/components`
-> - … et 71 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 72 autre(s) : voir la [matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## 7. Propriété intellectuelle et commissions
@@ -890,6 +906,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | [RM17](#RM17%20—%20Assemblage%20requis%20pour%20soumission%20%28module%20uniquement%29) | Au moins un assemblage requis pour soumettre (module uniquement) | Modules |
 | [RM18](#RM18%20—%20ModuleVersion%20immuable%20%28module%20uniquement%29) | ModuleVersion immuable horodatée à la soumission (module uniquement) | Modules |
 | [RM19](#RM19%20—%20Fork%20d'un%20asset%20soumis) | Asset soumis immuable (jamais re-soumis, licence, interfaces et composition figées) ; seules ses métadonnées descriptives changent, par son propriétaire ; toute autre évolution crée un fork | Modules |
+| [RM54](#RM54%20—%20Seul%20le%20propriétaire%20modifie%20son%20asset) | Seul le propriétaire (identité créatrice) modifie, supprime ou soumet son asset, administrateur compris | Modules |
 | [RM39](#RM39%20—%20Filiation%20d'un%20découpage) | Filiation par `ParentID` du composant d'origine pour tous les éléments d'un découpage (manuel ou assisté) | Modules |
 | [RM40](#RM40%20—%20Proposition%20de%20découpage%20non%20engageante) | Une proposition de découpage automatique ne crée aucune entité tant qu'elle n'est pas validée | Modules |
 | [RM41](#RM41%20—%20Compatibilité%20toujours%20vérifiée%20pour%20une%20connexion%20suggérée) | Connexion suggérée soumise au même contrôle de compatibilité qu'une liaison manuelle, sans dérogation | Modules |

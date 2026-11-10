@@ -22,6 +22,46 @@ type Service struct {
 	draftStore     DraftStore        // optionnel — requis uniquement pour AddRequest.Draft / Submit
 	ogImageFetcher OGImageFetcher    // optionnel — nil si non câblé (pas d'accès réseau depuis les tests domaine)
 	removedStore   RemovedAssetStore // optionnel — masquage local d'un asset déjà soumis (RM08)
+	// actor est l'identité pour laquelle le service agit (As) ; acting indique
+	// qu'As a été appelé.
+	actor  string
+	acting bool
+}
+
+// As retourne une copie du service agissant pour actor (voir ModelService.As).
+func (s *Service) As(actor string) ModelService {
+	cp := *s
+	cp.actor, cp.acting = actor, true
+	return &cp
+}
+
+// checkOwner refuse qu'une autre identité que le propriétaire modifie,
+// supprime ou soumette m (FT-001). Un service utilisé sans As n'agit pour
+// personne en particulier et ne contrôle rien : les adapters d'entrée
+// appellent toujours As.
+func (s *Service) checkOwner(m *Model3D) error {
+	if !s.acting {
+		return nil
+	}
+	if s.actor == "" {
+		return fmt.Errorf("%w : aucune identité (connectez-vous ou créez un compte local)", ErrNotOwner)
+	}
+	if m.OwnerID != s.actor {
+		return fmt.Errorf("%w : %s", ErrNotOwner, m.ID)
+	}
+	return nil
+}
+
+// creator retourne le propriétaire d'un asset créé : l'identité pour laquelle
+// le service agit, sinon owner tel que fourni.
+func (s *Service) creator(owner string) (string, error) {
+	if !s.acting {
+		return owner, nil
+	}
+	if s.actor == "" {
+		return "", fmt.Errorf("%w : aucune identité (connectez-vous ou créez un compte local)", ErrNotOwner)
+	}
+	return s.actor, nil
 }
 
 func NewService(bc BlockchainPort) *Service {
@@ -81,6 +121,11 @@ func (s *Service) AddFull(req AddRequest) (*Model3D, error) {
 	if req.ChannelID == "" {
 		return nil, ErrChannelRequired
 	}
+	owner, err := s.creator(req.OwnerID)
+	if err != nil {
+		return nil, err
+	}
+	req.OwnerID = owner
 	// Licence : présente au catalogue, compatible avec celle du parent s'il est
 	// connu de ce nœud (RM03) — le parent peut lui-même être encore un brouillon.
 	var parent *Model3D
@@ -218,6 +263,9 @@ func (s *Service) draftAsset(id string) (*Model3D, error) {
 	}
 	if !isDraft {
 		return nil, fmt.Errorf("%w : %s", ErrAssetSubmitted, id)
+	}
+	if err := s.checkOwner(m); err != nil {
+		return nil, err
 	}
 	return m, nil
 }
@@ -643,10 +691,14 @@ func (s *Service) RegenerateThumbnail(assetID string) (string, error) {
 // elles ont été enregistrées sur le ledger avec lui (règle 27, RM19). Un asset
 // que ce nœud ne connaît pas n'est pas contrôlé.
 func (s *Service) requireDraftCarrier(assetID string) error {
-	if _, isDraft, err := s.getAsset(assetID, ""); err == nil && !isDraft {
+	m, isDraft, err := s.getAsset(assetID, "")
+	if err != nil {
+		return nil
+	}
+	if !isDraft {
 		return fmt.Errorf("%w : %s", ErrAssetSubmitted, assetID)
 	}
-	return nil
+	return s.checkOwner(m)
 }
 
 // AddInterface ajoute une interface à un asset en brouillon, qui doit exister
@@ -796,8 +848,11 @@ func (s *Service) removeConnectionsFor(id string) {
 // disparaît de List()/ListModules() mais reste résolvable par Get()/GetModule().
 func (s *Service) Remove(id string) error {
 	if s.draftStore != nil {
-		_, err := s.draftStore.GetDraft(id)
+		d, err := s.draftStore.GetDraft(id)
 		if err == nil {
+			if err := s.checkOwner(d); err != nil {
+				return err
+			}
 			s.removeConnectionsFor(id)
 			return s.draftStore.RemoveDraft(id)
 		}
@@ -870,6 +925,9 @@ func (s *Service) UpdateAsset(req UpdateRequest) (*Model3D, error) {
 // d'un asset soumis (nom, description, tags, liens) ; tout autre changement
 // exige un asset dérivé.
 func (s *Service) updateSubmittedMetadata(m *Model3D, req UpdateRequest) (*Model3D, error) {
+	if err := s.checkOwner(m); err != nil {
+		return nil, err
+	}
 	if req.LicenseID != "" && req.LicenseID != m.LicenseID {
 		return nil, fmt.Errorf("%w : la licence de %s ne change plus après soumission", ErrAssetSubmitted, m.ID)
 	}
@@ -896,6 +954,11 @@ func (s *Service) CreateModule(req ModuleRequest) (*Model3D, error) {
 	if req.ChannelID == "" {
 		return nil, ErrChannelRequired
 	}
+	owner, err := s.creator(req.OwnerID)
+	if err != nil {
+		return nil, err
+	}
+	req.OwnerID = owner
 
 	var parent *Model3D
 	if req.ParentID != "" {
