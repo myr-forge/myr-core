@@ -203,10 +203,8 @@ type ModuleVersion struct {
 // WorkspaceInstance représente une instance d'un composant dans un module.
 // Le même composant peut apparaître plusieurs fois via des instances indépendantes.
 type WorkspaceInstance struct {
-	ID      string  `json:"id"`
-	AssetID string  `json:"asset_id"` // ID du composant ou module référencé
-	X       float64 `json:"x"`
-	Y       float64 `json:"y"`
+	ID      string `json:"id"`
+	AssetID string `json:"asset_id"` // ID du composant ou module référencé
 }
 
 // ModuleRequest regroupe les paramètres de création d'un module (composant-assemblage).

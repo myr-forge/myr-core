@@ -917,17 +917,14 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "DELETE retire l'instance et ses connexions en cascade (RM14). PATCH met à jour sa position (x, y).",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Retire l'instance et ses connexions en cascade (RM14).",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "components"
                 ],
-                "summary": "Retirer ou repositionner une instance",
+                "summary": "Retirer une instance",
                 "parameters": [
                     {
                         "type": "string",
@@ -942,73 +939,6 @@
                         "name": "instanceId",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "x, y — PATCH uniquement",
-                        "name": "body",
-                        "in": "body",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.componentDTO"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "description": "DELETE retire l'instance et ses connexions en cascade (RM14). PATCH met à jour sa position (x, y).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "components"
-                ],
-                "summary": "Retirer ou repositionner une instance",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "identifiant de l'asset",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "identifiant de l'instance",
-                        "name": "instanceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "x, y — PATCH uniquement",
-                        "name": "body",
-                        "in": "body",
-                        "schema": {
-                            "type": "object"
-                        }
                     }
                 ],
                 "responses": {
@@ -2176,7 +2106,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "DELETE maintient l'invariant qu'un asset possède toujours au moins un slot virtuel (règle 13) : un nouveau slot virtuel est recréé si l'interface supprimée était physique et la dernière restante. PATCH ne change jamais l'asset porteur : un asset_id différent est refusé (400).",
+                "description": "PATCH ne change jamais l'asset porteur : un asset_id différent est refusé (400).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2240,7 +2170,7 @@
                         "MyrToken": []
                     }
                 ],
-                "description": "DELETE maintient l'invariant qu'un asset possède toujours au moins un slot virtuel (règle 13) : un nouveau slot virtuel est recréé si l'interface supprimée était physique et la dernière restante. PATCH ne change jamais l'asset porteur : un asset_id différent est refusé (400).",
+                "description": "PATCH ne change jamais l'asset porteur : un asset_id différent est refusé (400).",
                 "consumes": [
                     "application/json"
                 ],
@@ -3378,12 +3308,6 @@
                 },
                 "id": {
                     "type": "string"
-                },
-                "x": {
-                    "type": "number"
-                },
-                "y": {
-                    "type": "number"
                 }
             }
         }

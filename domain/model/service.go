@@ -1011,7 +1011,7 @@ func (s *Service) copyModuleComposition(parent, dst *Model3D) error {
 		newID := generateID()
 		instanceIDMap[inst.ID] = newID
 		dst.WorkspaceInstances = append(dst.WorkspaceInstances, WorkspaceInstance{
-			ID: newID, AssetID: inst.AssetID, X: inst.X, Y: inst.Y,
+			ID: newID, AssetID: inst.AssetID,
 		})
 	}
 	if len(parent.Assemblies) == 0 {
@@ -1284,20 +1284,6 @@ func (s *Service) removeInstance(m *Model3D, instanceID string) {
 		}
 	}
 	m.WorkspaceInstances = filtered
-}
-
-// UpdateInstancePosition met à jour la position persistée d'une instance d'un module.
-func (s *Service) UpdateInstancePosition(moduleID, instanceID string, x, y float64) (*Model3D, error) {
-	return s.editDraft(moduleID, func(m *Model3D) error {
-		for i, inst := range m.WorkspaceInstances {
-			if inst.ID == instanceID {
-				m.WorkspaceInstances[i].X = x
-				m.WorkspaceInstances[i].Y = y
-				return nil
-			}
-		}
-		return fmt.Errorf("instance %s introuvable dans le module %s", instanceID, moduleID)
-	})
 }
 
 // RemoveModule supprime un module — délègue à Remove, qui gère brouillon local,

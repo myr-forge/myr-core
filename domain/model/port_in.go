@@ -75,7 +75,6 @@ type ModelService interface {
 	// Composition — gestion des instances d'un module
 	AddAssetToWorkspace(moduleID, assetID string) (*Model3D, error)
 	RemoveAssetFromWorkspace(moduleID, instanceID string) (*Model3D, error)
-	UpdateInstancePosition(moduleID, instanceID string, x, y float64) (*Model3D, error)
 
 	// Licences — catalogue statique + règles de compatibilité
 	ListLicenses() []*License

@@ -55,7 +55,6 @@ type mockSvc struct {
 	getModuleInterfaces      func(moduleID string) ([]*model.AssetInterface, error)
 	addAssetToWorkspace      func(moduleID, assetID string) (*model.Model3D, error)
 	removeAssetFromWorkspace func(moduleID, instanceID string) (*model.Model3D, error)
-	updateInstancePosition   func(moduleID, instanceID string, x, y float64) (*model.Model3D, error)
 	listLicenses             func() []*model.License
 	getLicense               func(id string) (*model.License, error)
 	checkLicenseCompat       func(parentID, proposedID string) *model.LicenseCheck
@@ -263,12 +262,6 @@ func (m *mockSvc) AddAssetToWorkspace(moduleID, assetID string) (*model.Model3D,
 func (m *mockSvc) RemoveAssetFromWorkspace(moduleID, instanceID string) (*model.Model3D, error) {
 	if m.removeAssetFromWorkspace != nil {
 		return m.removeAssetFromWorkspace(moduleID, instanceID)
-	}
-	return &model.Model3D{ID: moduleID, Status: model.ModuleDraft}, nil
-}
-func (m *mockSvc) UpdateInstancePosition(moduleID, instanceID string, x, y float64) (*model.Model3D, error) {
-	if m.updateInstancePosition != nil {
-		return m.updateInstancePosition(moduleID, instanceID, x, y)
 	}
 	return &model.Model3D{ID: moduleID, Status: model.ModuleDraft}, nil
 }
@@ -1532,14 +1525,6 @@ func TestComponent_AddInstance_MissingAssetID(t *testing.T) {
 
 func TestComponent_RemoveInstance(t *testing.T) {
 	w := do(t, newTestMux(t, &mockSvc{}), http.MethodDelete, "/api/components/c1/instances/inst1", "")
-	if w.Code != http.StatusOK {
-		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
-	}
-}
-
-func TestComponent_UpdateInstancePosition(t *testing.T) {
-	w := do(t, newTestMux(t, &mockSvc{}), http.MethodPatch, "/api/components/c1/instances/inst1",
-		`{"x":10.5,"y":20.0}`)
 	if w.Code != http.StatusOK {
 		t.Errorf("got %d, want 200 (body: %s)", w.Code, w.Body.String())
 	}

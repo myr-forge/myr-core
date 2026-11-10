@@ -38,7 +38,6 @@ type mockModelSvc struct {
 	getModuleInterfaces             func(moduleID string) ([]*model.AssetInterface, error)
 	addAssetToWorkspace             func(moduleID, assetID string) (*model.Model3D, error)
 	removeAssetFromWorkspace        func(moduleID, instanceID string) (*model.Model3D, error)
-	updateInstancePosition          func(moduleID, instanceID string, x, y float64) (*model.Model3D, error)
 	listLicenses                    func() []*model.License
 	getLicense                      func(id string) (*model.License, error)
 	checkLicenseCompatibility       func(parentLicenseID, proposedLicenseID string) *model.LicenseCheck
@@ -243,12 +242,6 @@ func (m *mockModelSvc) AddAssetToWorkspace(moduleID, assetID string) (*model.Mod
 func (m *mockModelSvc) RemoveAssetFromWorkspace(moduleID, instanceID string) (*model.Model3D, error) {
 	if m.removeAssetFromWorkspace != nil {
 		return m.removeAssetFromWorkspace(moduleID, instanceID)
-	}
-	return &model.Model3D{ID: moduleID}, nil
-}
-func (m *mockModelSvc) UpdateInstancePosition(moduleID, instanceID string, x, y float64) (*model.Model3D, error) {
-	if m.updateInstancePosition != nil {
-		return m.updateInstancePosition(moduleID, instanceID, x, y)
 	}
 	return &model.Model3D{ID: moduleID}, nil
 }

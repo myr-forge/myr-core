@@ -195,8 +195,6 @@ package "Agrégat Asset (D3-D6)" {
   }
   class WorkspaceInstance <<JSON>> {
     id : uuid
-    x : float
-    y : float
   }
   class ModuleVersion <<embedded>> {
     number : int

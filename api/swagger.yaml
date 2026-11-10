@@ -368,10 +368,6 @@ definitions:
         type: string
       id:
         type: string
-      x:
-        type: number
-      "y":
-        type: number
     type: object
 info:
   contact: {}
@@ -999,10 +995,7 @@ paths:
       - components
   /components/{id}/instances/{instanceId}:
     delete:
-      consumes:
-      - application/json
-      description: DELETE retire l'instance et ses connexions en cascade (RM14). PATCH
-        met à jour sa position (x, y).
+      description: Retire l'instance et ses connexions en cascade (RM14).
       parameters:
       - description: identifiant de l'asset
         in: path
@@ -1014,11 +1007,6 @@ paths:
         name: instanceId
         required: true
         type: string
-      - description: x, y — PATCH uniquement
-        in: body
-        name: body
-        schema:
-          type: object
       produces:
       - application/json
       responses:
@@ -1034,46 +1022,7 @@ paths:
             type: object
       security:
       - MyrToken: []
-      summary: Retirer ou repositionner une instance
-      tags:
-      - components
-    patch:
-      consumes:
-      - application/json
-      description: DELETE retire l'instance et ses connexions en cascade (RM14). PATCH
-        met à jour sa position (x, y).
-      parameters:
-      - description: identifiant de l'asset
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: identifiant de l'instance
-        in: path
-        name: instanceId
-        required: true
-        type: string
-      - description: x, y — PATCH uniquement
-        in: body
-        name: body
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/adapters_in_rest.componentDTO'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Retirer ou repositionner une instance
+      summary: Retirer une instance
       tags:
       - components
   /components/{id}/interfaces:
@@ -1836,10 +1785,8 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 'DELETE maintient l''invariant qu''un asset possède toujours au
-        moins un slot virtuel (règle 13) : un nouveau slot virtuel est recréé si l''interface
-        supprimée était physique et la dernière restante. PATCH ne change jamais l''asset
-        porteur : un asset_id différent est refusé (400).'
+      description: 'PATCH ne change jamais l''asset porteur : un asset_id différent
+        est refusé (400).'
       parameters:
       - description: identifiant de l'interface
         in: path
@@ -1880,10 +1827,8 @@ paths:
     patch:
       consumes:
       - application/json
-      description: 'DELETE maintient l''invariant qu''un asset possède toujours au
-        moins un slot virtuel (règle 13) : un nouveau slot virtuel est recréé si l''interface
-        supprimée était physique et la dernière restante. PATCH ne change jamais l''asset
-        porteur : un asset_id différent est refusé (400).'
+      description: 'PATCH ne change jamais l''asset porteur : un asset_id différent
+        est refusé (400).'
       parameters:
       - description: identifiant de l'interface
         in: path

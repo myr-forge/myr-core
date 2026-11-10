@@ -142,7 +142,7 @@ func TestUpdateAsset_SubmittedMetadata_UpdatedOnLedger(t *testing.T) {
 }
 
 // / @brief  La composition d'un module soumis ne change plus (RM19, FT-012)
-// / @input  module soumis : ajout et retrait d'assemblage, ajout et retrait d'instance, déplacement d'instance
+// / @input  module soumis : ajout et retrait d'assemblage, ajout et retrait d'instance
 // / @expect ErrAssetSubmitted pour chaque mutation ; ni brouillon créé, ni connexion supprimée
 func TestModuleComposition_RM19_Submitted_Rejected(t *testing.T) {
 	f := newSubmittedFixture(t)
@@ -153,7 +153,6 @@ func TestModuleComposition_RM19_Submitted_Rejected(t *testing.T) {
 	}
 	_, checks["AddAssetToWorkspace"] = f.svc.AddAssetToWorkspace(id, f.component.ID)
 	_, checks["RemoveAssetFromWorkspace"] = f.svc.RemoveAssetFromWorkspace(id, f.instance)
-	_, checks["UpdateInstancePosition"] = f.svc.UpdateInstancePosition(id, f.instance, 10, 20)
 	for name, err := range checks {
 		if !errors.Is(err, model.ErrAssetSubmitted) {
 			t.Errorf("%s : ErrAssetSubmitted attendu, obtenu %v", name, err)

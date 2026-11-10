@@ -880,7 +880,7 @@ func (h *Handler) handleComponent(w http.ResponseWriter, r *http.Request) {
 		h.handleComponentInstances(w, r, id)
 		return
 	}
-	// Sous-route /:id/instances/:instanceID — retire ou repositionne une instance
+	// Sous-route /:id/instances/:instanceID — retire une instance
 	if idx := strings.Index(rest, "/instances/"); idx != -1 {
 		id := rest[:idx]
 		instanceID := rest[idx+len("/instances/"):]
@@ -1153,42 +1153,23 @@ func (h *Handler) handleComponentInstances(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-// handleComponentInstance retire (DELETE) ou repositionne (PATCH) une
-// instance d'un asset — ex-/api/modules/{id}/instances/{instanceId} (ADR-11).
+// handleComponentInstance retire (DELETE) une instance d'un asset —
+// ex-/api/modules/{id}/instances/{instanceId} (ADR-11).
 //
-//	@Summary		Retirer ou repositionner une instance
-//	@Description	DELETE retire l'instance et ses connexions en cascade (RM14). PATCH met à jour sa position (x, y).
+//	@Summary		Retirer une instance
+//	@Description	Retire l'instance et ses connexions en cascade (RM14).
 //	@Tags			components
-//	@Accept			json
 //	@Produce		json
 //	@Param			id			path		string	true	"identifiant de l'asset"
 //	@Param			instanceId	path		string	true	"identifiant de l'instance"
-//	@Param			body		body		object	false	"x, y — PATCH uniquement"
 //	@Success		200	{object}	componentDTO
 //	@Failure		400	{object}	map[string]string
 //	@Security		MyrToken
 //	@Router			/components/{id}/instances/{instanceId} [delete]
-//	@Router			/components/{id}/instances/{instanceId} [patch]
 func (h *Handler) handleComponentInstance(w http.ResponseWriter, r *http.Request, id, instanceID string) {
 	switch r.Method {
 	case http.MethodDelete:
 		m, err := h.svcFor(r).RemoveAssetFromWorkspace(id, instanceID)
-		if err != nil {
-			h.internalErr(w, err)
-			return
-		}
-		thumb, _ := h.svcFor(r).GetThumbnail(m.ID)
-		jsonOK(w, toComponentDTO(m, thumb))
-	case http.MethodPatch:
-		var body struct {
-			X float64 `json:"x"`
-			Y float64 `json:"y"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			jsonError(w, "body JSON invalide", http.StatusBadRequest)
-			return
-		}
-		m, err := h.svcFor(r).UpdateInstancePosition(id, instanceID, body.X, body.Y)
 		if err != nil {
 			h.internalErr(w, err)
 			return
@@ -1735,7 +1716,7 @@ func (h *Handler) handleComponentInterfaces(w http.ResponseWriter, r *http.Reque
 // handleInterface modifie ou supprime une interface existante.
 //
 //	@Summary		Modifier ou supprimer une interface
-//	@Description	DELETE maintient l'invariant qu'un asset possède toujours au moins un slot virtuel (règle 13) : un nouveau slot virtuel est recréé si l'interface supprimée était physique et la dernière restante. PATCH ne change jamais l'asset porteur : un asset_id différent est refusé (400).
+//	@Description	PATCH ne change jamais l'asset porteur : un asset_id différent est refusé (400).
 //	@Tags			components
 //	@Accept			json
 //	@Produce		json
