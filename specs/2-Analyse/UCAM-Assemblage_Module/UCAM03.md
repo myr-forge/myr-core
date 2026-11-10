@@ -11,10 +11,9 @@ tags:
   - famille/UCAM
   - domaine/model
   - uc/UCAM03
-  - rm/RM09
-  - rm/RM10
-  - rm/RM13
   - rm/RM19
+  - rm/RM53
+  - rm/RM54
   - enf/ENF12
   - enf/ENF18
 ---
@@ -30,89 +29,33 @@ left to right direction
 actor "Concepteur" as C
 
 rectangle "Application MYR" {
-    usecase "Créer une interface\n(connexion virtuelle)" as UC1
-    usecase "Créer une interface\n(attributs explicites)" as UC2
-    usecase "Définir les attributs\nde l'interface" as UC3
-    usecase "Matérialiser le slot virtuel\net créer la liaison" as UC4
-    usecase "Recréer le slot virtuel" as UC5
+    usecase "Créer une interface" as UC1
+    usecase "Définir les attributs\nde l'interface" as UC2
 }
 
 C --> UC1
-C --> UC2
-UC1 ..> UC3 : <<include>>
-UC2 ..> UC3 : <<include>>
-UC1 ..> UC4 : <<include>>
-UC4 ..> UC5 : <<include>>
+UC1 ..> UC2 : <<include>>
 
 @enduml
 ```
 
 ## Contexte
 
-Chaque composant possède toujours au moins un slot virtuel (`AssetInterface.Virtual = true`), point d'entrée pour créer une nouvelle interface physique.
-
-Une interface peut être créée de deux façons :
-
-- **Flux A — Connexion virtuelle** : relier le slot virtuel d'un composant à une interface physique d'un autre composant. Le système appelle `ConnectVirtualToPhysical()` qui matérialise le slot virtuel en interface complémentaire ET crée la liaison en une seule opération.
-- **Flux B — Attributs explicites** : transmettre manuellement tous les attributs de la nouvelle interface via `POST /api/components/:id/interfaces`. La liaison n'est pas créée automatiquement dans ce flux.
-
-**Invariant RM13 :** Dès qu'un slot virtuel est matérialisé (Flux A), un nouveau slot virtuel est immédiatement recréé sur le même asset (`EnsureVirtualSlot`). Un asset a toujours au moins un slot virtuel disponible.
+Une interface est créée explicitement, avec tous ses attributs, par `POST /api/components/:id/interfaces` ou `myr model interface add`. Le système ne déduit aucun attribut d'une autre interface et ne crée aucune liaison à cette occasion : relier l'interface à une autre est une demande distincte (UCAM01).
 
 ## Pré-conditions
 
 - L'identité agit avec le rôle **Concepteur** (`contributor`)
-- Au moins un composant existe avec un slot virtuel (`Virtual: true`)
-- Pour le Flux A : un autre composant avec au moins une interface physique est identifié
-- Pour le Flux B : le composant cible est identifié
+- Le composant cible existe, est en brouillon et appartient à l'identité qui agit (RM54)
 
 ## Scénario
 
-### Flux A — Connexion virtuelle (déduction automatique)
+### Flux nominal — Attributs explicites
 
-**Étape initiale :** `POST /api/virtual-connect` est appelée (ou l'équivalent CLI `myr model link connect-virtual`) avec l'identifiant du slot virtuel et celui de l'interface physique cible
+**Étape initiale :** `POST /api/components/:id/interfaces` est appelée (ou l'équivalent CLI `myr model interface add`) avec les attributs de l'interface
 
-1. Le service vérifie que la catégorie de la cible est compatible
-2. Le service déduit les propriétés de la nouvelle interface à partir de la cible :
-   - **Catégorie** : identique à la cible
-   - **Sens (Direction)** : inversé (`out` → `in` ; `in` → `out` ; `bidir` → `bidir`)
-   - **Type** : identique à la cible
-   - **Valeur/Unité** : inférée depuis la cible
-3. Le client transmet `{ virtual_iface_id, physical_iface_id, name, value_min, value_max, is_range, unit, from_instance_id, to_instance_id }`
-5. Le service `ConnectVirtualToPhysical()` :
-   a. Récupère les deux interfaces (`GetInterface`) — brouillon local tant que les composants concernés ne sont pas soumis (ADR-02)
-   b. Vérifie que `virtualIfaceID` est bien `Virtual: true`
-   c. Matérialise l'interface virtuelle : applique catégorie, type, direction inversée de la physique ; affecte les valeurs transmises
-   d. Sauvegarde l'interface matérialisée (`ifaceStore.SaveInterface`) — reste en brouillon, aucune transaction Fabric ici
-   e. Crée la liaison `AddAssemblyLink(physicalIfaceID, virtualIfaceID, ...)`
-   f. Recrée un slot virtuel sur l'asset source (`EnsureVirtualSlot`) — RM13, également en brouillon local
-6. La réponse `201 Created` retourne le DTO de la connexion créée
-
-<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 34 déduit(s)
-> - 🟡 [TestRunModelLinkConnectVirtual_MissingVirtual_Rejected](../../../docs/tests/adapters-in-cli/TestRunModelLinkConnectVirtual_MissingVirtual_Rejected.md) — déduit : teste commande `myr model link connect-virtual`
-> - 🟡 [TestRunModelLinkConnectVirtual_NominalCase](../../../docs/tests/adapters-in-cli/TestRunModelLinkConnectVirtual_NominalCase.md) — déduit : teste commande `myr model link connect-virtual`
-> - 🟡 [TestDomainErrors_AssemblyRules_MappedToHTTP](../../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — déduit : teste route `/api/virtual-connect`
-> - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_MissingStore](../../../docs/tests/domain-model/TestAddAssemblyLink_MissingStore.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_RM09_InterfaceUsedOnce](../../../docs/tests/domain-model/TestAddAssemblyLink_RM09_InterfaceUsedOnce.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_RM09_NoInstance_InterfaceUsedOnce](../../../docs/tests/domain-model/TestAddAssemblyLink_RM09_NoInstance_InterfaceUsedOnce.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_RM09_SameInterfaceOtherInstance_OK](../../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SameInterfaceOtherInstance_OK.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_RM09_SameInterfaceTwoInstances_OK](../../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SameInterfaceTwoInstances_OK.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_RM09_SelfLink_Rejected](../../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SelfLink_Rejected.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected](../../../docs/tests/domain-model/TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_RM11_ValueRanges](../../../docs/tests/domain-model/TestAddAssemblyLink_RM11_ValueRanges.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyLink_UnknownInterface](../../../docs/tests/domain-model/TestAddAssemblyLink_UnknownInterface.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestAddAssemblyToModule_RM51_InstanceLink_OK](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_InstanceLink_OK.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - … et 19 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
-<!-- tests-obsidian:end -->
-
-### Flux B — Attributs explicites
-
-**Étape initiale :** `POST /api/components/:id/interfaces` est appelée (ou l'équivalent CLI `myr model interface add`) avec tous les attributs de l'interface
-
-1. Le client transmet catégorie, sens, type, valeur/plage, unité
-2. Le handler appelle `service.AddInterface(&iface)` — génère un ID si absent
+1. Le client transmet catégorie, sens, type et contraintes de valeur (RM53)
+2. Le handler appelle `service.AddInterface(&iface)` — l'identifiant est toujours attribué par le service
 3. L'interface est persistée en brouillon local dans `ifaceStore.SaveInterface()` (ADR-02) — aucune transaction Fabric tant que le composant n'est pas soumis
 4. La réponse `201 Created` retourne l'interface créée
 
@@ -136,117 +79,31 @@ Une interface peut être créée de deux façons :
 > - … et 77 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
-### Flux alternatif A2 — Ajustement des valeurs déduites
+### Flux erreur — Composant introuvable, soumis ou d'une autre identité
 
-1. Une ou plusieurs valeurs déduites (Flux A) sont surchargées par des valeurs explicites avant validation (ex : affiner la plage de valeur)
-2. La validation se poursuit avec les valeurs ajustées
-3. Résultat identique au Flux A nominal
-
-<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!warning] Tests — aucun test ne couvre cette exigence
-> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
-<!-- tests-obsidian:end -->
-
-### Flux erreur — Connexion sur interface incompatible (catégorie différente)
-
-1. Le service détecte une catégorie différente entre le slot virtuel et l'interface cible
-2. La requête est refusée
-3. Aucune interface n'est créée
+1. Le composant n'existe pas (`404`), est déjà soumis (`409`, RM19) ou appartient à une autre identité (`403`, RM54)
+2. Aucune interface n'est créée
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!warning] Tests — aucun test ne couvre cette exigence
 > [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
-### Flux erreur — Interface virtuelle introuvable
+### Flux erreur — Unité inconnue
 
-1. `ConnectVirtualToPhysical()` appelle `GetInterface(virtualIfaceID)` → erreur
-2. Le handler retourne HTTP 500 avec le message d'erreur
-
-<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
-> - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilConnStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilConnStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_VirtualIsClickable](../../../docs/tests/domain-model/TestWorkspace_VirtualIsClickable.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
-<!-- tests-obsidian:end -->
-
-### Flux erreur — Interface non virtuelle passée comme slot virtuel
-
-1. `ConnectVirtualToPhysical()` détecte que `virtual.Virtual == false`
-2. Retourne `fmt.Errorf("l'interface %s n'est pas virtuelle", virtualIfaceID)`
-3. Le handler retourne HTTP 500
+1. Une contrainte porte une unité inconnue, même après lecture d'un préfixe SI usuel (RM53)
+2. La requête est refusée (`400`) ; aucune interface n'est créée
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
-> - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilConnStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilConnStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_VirtualIsClickable](../../../docs/tests/domain-model/TestWorkspace_VirtualIsClickable.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
-<!-- tests-obsidian:end -->
-
-### Flux erreur — Slot virtuel d'un asset soumis (RM19)
-
-1. Le slot virtuel appartient à un asset déjà soumis (composant ou module)
-2. `ConnectVirtualToPhysical()` refuse de le matérialiser (`ErrAssetSubmitted`) : ce serait ajouter une interface physique à un asset figé (RM19)
-3. L'API retourne `409 Conflict` ; le slot reste virtuel et aucune liaison n'est créée
-4. Relier cet asset passe par ses interfaces physiques existantes (UCAM01), ou par un asset dérivé auquel ajouter l'interface
-
-<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
-> - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilConnStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilConnStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_VirtualIsClickable](../../../docs/tests/domain-model/TestWorkspace_VirtualIsClickable.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> [!warning] Tests — aucun test ne couvre cette exigence
+> [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ## Post-conditions
 
-**Flux A :**
-- L'interface virtuelle est matérialisée en interface physique (attributs renseignés, `Virtual: false`)
-- Une `Connection` est créée entre l'interface physique cible et l'interface nouvellement créée
-- Un nouveau slot virtuel (`Virtual: true`) est recréé sur le composant source (RM13)
-
-**Flux B :**
-- Une nouvelle interface physique est enregistrée en brouillon local sur le composant (état `draft` — ADR-02)
-- Aucune liaison n'est créée automatiquement
-- Aucune transaction blockchain n'est émise — l'interface rejoindra Fabric à la soumission du composant
+- Une nouvelle interface est enregistrée en brouillon local sur le composant (ADR-02)
+- Aucune liaison n'est créée
+- Aucune transaction blockchain n'est émise — l'interface rejoindra le ledger à la soumission du composant
 
 ## Diagramme de séquence
 
@@ -257,82 +114,38 @@ participant "REST Handler\n(adapters/in/rest/)" as REST
 participant "Model Service\n(domain/model/)" as Service
 database "LocalStorage\n(adapters/out/localstorage/)" as Local
 
-alt Flux A — Connexion virtuelle
-
-    Client -> REST : POST /api/virtual-connect\n{ virtual_iface_id, physical_iface_id,\n  name, value_min, value_max,\n  is_range, unit,\n  from_instance_id, to_instance_id }
-
-    REST -> Service : ConnectVirtualToPhysical(\n  virtualIfaceID, physicalIfaceID,\n  values, fromInstID, toInstID)
-
-    Service -> Local : GetInterface(physicalIfaceID)
-    Local --> Service : physical *AssetInterface
-
-    Service -> Local : GetInterface(virtualIfaceID)
-    Local --> Service : virtual *AssetInterface
-
-    Service -> Service : vérifier virtual.Virtual == true
-
-    Service -> Service : matérialiser :\nvirtual.Virtual = false\nvirtual.Category = physical.Category\nvirtual.Type = physical.Type\nvirtual.Direction = oppositeDir(physical.Direction)\nappliquer les valeurs transmises (name, value, unit, tag)
-
-    Service -> Local : ifaceStore.SaveInterface(virtual)
-
-    Service -> Service : AddAssemblyLink(\n  physicalIfaceID, virtualIfaceID, ...)
-    Service -> Local : connStore.SaveConnection(conn)
-
-    Service -> Service : EnsureVirtualSlot(virtual.AssetID) [RM13]
-    Service -> Local : ifaceStore.SaveInterface({Virtual:true})
-
-    Service --> REST : *Connection
-    REST --> Client : 201 { connection DTO }
-
-else Flux B — Attributs explicites
-
-    Client -> REST : POST /api/components/:id/interfaces\n{ category, type, direction,\n  value_min, value_max, is_range, unit }
-
-    REST -> REST : iface.AssetID = assetID
-
-    REST -> Service : AddInterface(&iface)
-    Service -> Service : générer ID si vide
-    Service -> Local : ifaceStore.SaveInterface(&iface)
-    Local --> Service : nil
-
-    Service --> REST : nil (succès)
-    REST --> Client : 201 { AssetInterface }
-
-end
+Client -> REST : POST /api/components/:id/interfaces\n{ category, type, direction, constraints }
+REST -> REST : iface.AssetID = assetID
+REST -> Service : AddInterface(&iface)
+Service -> Service : composant en brouillon, du demandeur (RM19, RM54)
+Service -> Service : identifiant attribué par le service
+Service -> Local : ifaceStore.SaveInterface(&iface)
+Local --> Service : nil
+Service --> REST : nil (succès)
+REST --> Client : 201 { AssetInterface }
 
 @enduml
 ```
 
 ## Règles métier déclenchées
 
-| Règle | Description | État code |
-|-------|-------------|-----------|
-| **RM13** | Slot virtuel garanti : après matérialisation (Flux A), `EnsureVirtualSlot` recrée immédiatement un slot | Implémenté dans `ConnectVirtualToPhysical` |
-| **RM19** | Un asset soumis est figé : son slot virtuel ne se matérialise pas en interface physique | `ConnectVirtualToPhysical()` → `requireDraftCarrier` (`ErrAssetSubmitted`, 409) |
-| **RM10** | La liaison créée par Flux A passe par `AddAssemblyLink` qui vérifie `ifacesCompatible` | Implémenté |
-| **RM09** | L'interface nouvellement créée (Flux A) ne peut pas être réutilisée dans une autre liaison sur la même instance ; la liaison est vérifiée avant la matérialisation du slot | `checkLinkable` dans `ConnectVirtualToPhysical` |
+| Règle | Description |
+|-------|-------------|
+| **RM19** | Un asset soumis est figé : aucune interface ne s'y ajoute |
+| **RM53** | Unité de chaque contrainte lue dans le vocabulaire, sinon préfixe SI usuel + unité connue, sinon refusée |
+| **RM54** | Seul le propriétaire du composant y ajoute une interface |
 
 ## Exigences non-fonctionnelles
 
 - **ENF12** — Création d'interface réservée au rôle `contributor` côté serveur
 - **ENF18** — `domain/model/service.go` ne doit pas importer Fabric ou SQLite
-- Temps de réponse `POST /api/virtual-connect` : `< 300 ms` (opérations locales enchaînées, tant que les composants concernés sont en brouillon)
+- Temps de réponse `POST /api/components/:id/interfaces` : `< 200 ms` (opération locale tant que le composant est en brouillon)
 
 ## Notes d'implémentation
 
-**`ConnectVirtualToPhysical` dans `service.go` :** La logique complète est implémentée (lignes 772–847). Le service :
-1. Vérifie que `virtualIfaceID` est virtuel
-2. Matérialise l'interface en lui appliquant catégorie/type/direction opposée de la physique
-3. Applique les valeurs transmises (avec fallback sur les valeurs du physique)
-4. Sauvegarde l'interface matérialisée en brouillon local (`ifaceStore.SaveInterface()`)
-5. Crée la liaison (`AddAssemblyLink` avec from=physique, to=virtuel — ordre inversé intentionnel)
-6. Appelle `EnsureVirtualSlot` pour maintenir RM13
+**Route :** `POST /api/components/:id/interfaces` → `handleComponentInterfaces()` case `MethodPost`. Le handler extrait `assetID` du path et appelle `service.AddInterface()`. Aucune vérification de compatibilité n'est faite ici (l'interface est ajoutée sans liaison).
 
-**Flux B — route :** `POST /api/components/:id/interfaces` → `handleComponentInterfaces()` case `MethodPost`. Le handler extrait `assetID` du path et appelle `service.AddInterface()`. Aucune vérification de compatibilité n'est faite dans ce flux (l'interface est ajoutée sans liaison).
-
-**EnsureVirtualSlot — idempotence :** La fonction vérifie d'abord si un slot `Virtual: true` existe déjà sur l'asset avant d'en créer un nouveau. Elle est donc idempotente et peut être appelée à tout moment sans risque de duplication.
-
-**Commande CLI équivalente :** Le Flux B (attributs explicites) correspond à `myr model interface add <assetID> --category --type --direction [--value-min --value-max --unit] [--name <label>]` (voir `DC_CLI_Model.md` § 3.2), qui appelle `ModelService.AddInterface(&iface)` — la même méthode que le handler `POST /api/components/:id/interfaces`. Le Flux A (connexion virtuelle / matérialisation + liaison en une opération) correspond à `myr model link connect-virtual --virtual <id> --physical <id>`, appelant `ModelService.ConnectVirtualToPhysical()` — la même méthode que le handler `POST /api/virtual-connect`, avec le même maintien du slot virtuel (RM13). Le comportement (règles métier, erreurs) est strictement identique quel que soit le canal ; seul le format de sortie change (texte terminal vs JSON HTTP).
+**Commande CLI équivalente :** `myr model interface add <assetID> --category --type --direction [--value-min --value-max --unit] [--name <label>]` (voir `DC_CLI_Model.md` § 3.2), qui appelle `ModelService.AddInterface(&iface)` — la même méthode que le handler REST.
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens

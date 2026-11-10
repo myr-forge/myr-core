@@ -15,7 +15,6 @@ tags:
   - rm/RM04
   - rm/RM10
   - rm/RM11
-  - rm/RM13
   - rm/RM16
   - rm/RM19
   - enf/ENF12
@@ -69,13 +68,13 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 ### Flux nominal — Module créé en état draft
 
 1. Le système appelle `POST /api/modules` → `service.CreateModule()` → initialise `Model3D` avec `Status=draft`, `Assemblies=[]`, `WorkspaceInstances=[]`
-2. Des Composants sont ajoutés comme instances (`POST /api/modules/:id/instances`) — chaque ajout crée une `WorkspaceInstance` indépendante et garantit au moins un slot virtuel (RM13)
+2. Des Composants sont ajoutés comme instances (`POST /api/modules/:id/instances`) — chaque ajout crée une `WorkspaceInstance` indépendante
 3. Des Liaisons sont créées entre Interfaces compatibles — le service vérifie la compatibilité (RM10/RM11 : catégorie + type + sens + plages de valeurs) et refuse toute liaison incompatible
 4. Le module est nommé et configuré (nom, description, licence) via `PUT /api/modules/:id`
 5. Le module est enregistré localement en état **draft**
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 34 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 28 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
@@ -91,7 +90,7 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 > - 🟡 [TestCreate_ChannelRequired_Rejected](../../../docs/tests/domain-model/TestCreate_ChannelRequired_Rejected.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.CreateModule`
-> - … et 19 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 13 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Dérivation d'un Module existant (reprise sans reconstruction)
@@ -134,33 +133,6 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 > [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
-### Flux alternatif — Liaison via interface virtuelle
-
-1. Une connexion est demandée depuis un slot virtuel vers une Interface physique (`POST /api/virtual-connect`)
-2. Le système appelle `ConnectVirtualToPhysical()` — matérialise l'interface virtuelle avec les attributs de l'interface physique cible (direction opposée)
-3. Un nouveau slot virtuel est automatiquement recréé pour l'asset (invariant RM13)
-4. La Liaison est créée et le module reste en état `draft`
-
-<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 17 déduit(s)
-> - 🟡 [TestDomainErrors_AssemblyRules_MappedToHTTP](../../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — déduit : teste route `/api/virtual-connect`
-> - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilConnStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilConnStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - … et 2 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
-<!-- tests-obsidian:end -->
-
 ### Flux erreur — Aucune liaison créée (sauvegarde bloquée)
 
 1. Une tentative de finalisation du module est effectuée sans qu'aucune Liaison n'ait été créée
@@ -189,7 +161,6 @@ Un Module peut aussi être créé à partir d'un Module déjà soumis, pour repr
 - Le module possède un ID unique (UUID généré côté serveur — RM04)
 - Les `WorkspaceInstances` ajoutées sont persistées
 - Le module n'est pas visible sur le réseau (soumission requise — UCMOD06)
-- Chaque asset instancié dispose d'au moins un slot virtuel (RM13)
 - En cas de dérivation (`ParentID` renseigné) : le nouveau module référence son Module parent, et sa composition initiale (instances + liaisons internes) est une copie indépendante de celle du parent — modifier le nouveau brouillon n'affecte jamais le Module parent déjà soumis
 
 ## Diagramme de séquence
@@ -216,7 +187,6 @@ Service -> Fabric : GetModelRecord(moduleID)
 Fabric --> Service : *Model3D
 Service -> Service : Créer WorkspaceInstance
 Service -> Fabric : StoreModelRecord(m)
-Service -> Service : EnsureVirtualSlot(assetID) — RM13
 REST --> Client : 200 moduleDTO (instances mises à jour)
 
 Client -> REST : POST /api/connections\n{fromIfaceID, toIfaceID, ...}
@@ -284,7 +254,6 @@ end
 | **RM04** | UUID généré par le système, jamais par le client | `generateID()` dans `CreateModule()` |
 | **RM10** | Vérification de compatibilité à chaque création de Liaison | `ifacesCompatible()` dans `AddAssemblyLink()` |
 | **RM11** | 4 critères : catégorie + type + sens + valeurs | `ifacesCompatible()` |
-| **RM13** | Au moins un slot virtuel garanti par asset instancié | `EnsureVirtualSlot()` dans `AddAssetToWorkspace()` |
 | **RM16** | Module initialisé en état `draft` obligatoirement | `Status: ModuleDraft` dans `CreateModule()` |
 
 ## Exigences non-fonctionnelles
@@ -301,7 +270,7 @@ end
 - `POST /api/modules/:id/assemblies` → associe une Liaison au module (handlers.go:~1078)
 - `PATCH /api/modules/:id` → met à jour nom/description/licence (voir UCMOD03)
 
-**Commande CLI équivalente :** `myr module create --name <nom> --channel <id> [--owner-id <id>] [--description <texte>] [--license <id>] [--parent-id <id>]` appelle le même `CreateModule(ModuleRequest)` que `POST /api/modules`. L'ajout de composants comme instances et la création de liaisons se poursuivent avec `myr model instance add <moduleID> <assetID>` et `myr model link add` (mêmes méthodes `AddAssetToWorkspace` / `AddAssemblyLink`, mêmes vérifications RM10/RM11/RM13 côté service, quel que soit le canal). Voir `specs/3-Conception/DC_CLI_Model.md` § 3.6 et § 5. Ces commandes sont exécutées par l'administrateur du serveur via SSH, pour le compte du Concepteur (principe d'exécution distante).
+**Commande CLI équivalente :** `myr module create --name <nom> --channel <id> [--owner-id <id>] [--description <texte>] [--license <id>] [--parent-id <id>]` appelle le même `CreateModule(ModuleRequest)` que `POST /api/modules`. L'ajout de composants comme instances et la création de liaisons se poursuivent avec `myr model instance add <moduleID> <assetID>` et `myr model link add` (mêmes méthodes `AddAssetToWorkspace` / `AddAssemblyLink`, mêmes vérifications RM10/RM11 côté service, quel que soit le canal). Voir `specs/3-Conception/DC_CLI_Model.md` § 3.6 et § 5. Ces commandes sont exécutées par l'administrateur du serveur via SSH, pour le compte du Concepteur (principe d'exécution distante).
 
 **Dérivation (`parent_id`) — pourquoi une copie de composition et pas seulement une référence :** un simple lien de filiation (`ParentID` renseigné sans copie) documenterait la provenance mais laisserait le Concepteur reconstruire manuellement chaque instance et chaque Liaison — ce qui ne répond pas au besoin de reprendre un travail existant. `AddFull()` clone donc, quand le parent est décomposé, ses `WorkspaceInstances` (nouveaux identifiants d'instance, pour ne jamais entrer en collision avec ceux du parent) et les Liaisons internes du parent (nouvelles `Connection`, mêmes attributs, instances remappées) dans le nouveau brouillon. Le Module parent, déjà soumis, n'est jamais modifié par cette opération — seule sa composition est lue.
 

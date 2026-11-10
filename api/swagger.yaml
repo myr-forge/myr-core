@@ -188,27 +188,6 @@ definitions:
       peer:
         type: string
     type: object
-  adapters_in_rest.virtualConnectRequest:
-    properties:
-      from_instance_id:
-        type: string
-      is_range:
-        type: boolean
-      name:
-        type: string
-      physical_iface_id:
-        type: string
-      to_instance_id:
-        type: string
-      unit:
-        type: string
-      value_max:
-        type: number
-      value_min:
-        type: number
-      virtual_iface_id:
-        type: string
-    type: object
   adapters_in_rest.walletDTO:
     properties:
       guest:
@@ -289,9 +268,6 @@ definitions:
       value_min:
         description: valeur unique ou borne basse
         type: number
-      virtual:
-        description: true = point de connexion non encore matérialisé
-        type: boolean
     type: object
   myr-core_domain_model.Category:
     enum:
@@ -2306,42 +2282,6 @@ paths:
       summary: Statut du serveur
       tags:
       - infra
-  /virtual-connect:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: virtual_iface_id et physical_iface_id requis
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/adapters_in_rest.virtualConnectRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adapters_in_rest.connectionDTO'
-        "400":
-          description: interfaces incompatibles (RM10)
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "409":
-          description: porteur du slot virtuel déjà soumis (RM19), ou interface déjà
-            engagée (RM09)
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - MyrToken: []
-      summary: Relier une interface virtuelle à une interface physique
-      tags:
-      - connections
 schemes:
 - http
 - https

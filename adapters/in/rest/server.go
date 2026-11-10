@@ -153,7 +153,6 @@ func (s *Server) buildMux() (http.Handler, error) {
 	mux.HandleFunc("/api/connections", contrib(s.handler.handleConnections))
 	mux.HandleFunc("/api/connections/", contrib(s.handler.handleConnection))
 	mux.HandleFunc("/api/assembly-links", contrib(s.handler.handleAssemblyLinks))
-	mux.HandleFunc("/api/virtual-connect", contrib(s.handler.handleVirtualConnect))
 	// /api/modules/* — alias déprécié, ADR-11 : Model3D est désormais une
 	// ressource REST unique (component), retirer ces deux lignes clôt la
 	// fenêtre de transition une fois myr-web basculé.

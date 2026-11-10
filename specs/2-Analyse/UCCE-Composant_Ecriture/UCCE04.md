@@ -79,7 +79,7 @@ Ce use case crée un nouvel asset `Model3D` avec `ParentID` renseigné — il ne
 8. L'API retourne `201 Created` avec le nouvel asset.
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 40 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 38 déduit(s)
 > - 🟡 [TestAddAssemblyToModule_RM51_Component_StaysComponent](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_Component_StaysComponent.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_AllFields](../../../docs/tests/domain-model/TestAddFull_AllFields.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_AlwaysDraft_NoBlockchainWrite](../../../docs/tests/domain-model/TestAddFull_AlwaysDraft_NoBlockchainWrite.md) — déduit : teste `ModelService.AddFull`
@@ -92,10 +92,10 @@ Ce use case crée un nouvel asset `Model3D` avec `ParentID` renseigné — il ne
 > - 🟡 [TestAddFull_STLAndSTEP_BothAccepted](../../../docs/tests/domain-model/TestAddFull_STLAndSTEP_BothAccepted.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_WithFile_HashAndVersionCreated](../../../docs/tests/domain-model/TestAddFull_WithFile_HashAndVersionCreated.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestAddFull_WithParent](../../../docs/tests/domain-model/TestAddFull_WithParent.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.AddFull`
-> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.AddFull`
 > - 🟡 [TestCreate_ChannelRequired_Rejected](../../../docs/tests/domain-model/TestCreate_ChannelRequired_Rejected.md) — déduit : teste `ModelService.AddFull`
-> - … et 25 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestGetChildren_Empty](../../../docs/tests/domain-model/TestGetChildren_Empty.md) — déduit : teste `ModelService.AddFull`
+> - 🟡 [TestGetChildren_Success](../../../docs/tests/domain-model/TestGetChildren_Success.md) — déduit : teste `ModelService.AddFull`
+> - … et 23 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Amélioration avec ajout d'interfaces (reclassification DERIVATION)

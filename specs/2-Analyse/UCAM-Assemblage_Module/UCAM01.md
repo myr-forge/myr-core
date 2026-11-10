@@ -15,7 +15,6 @@ tags:
   - rm/RM10
   - rm/RM11
   - rm/RM12
-  - rm/RM13
   - enf/ENF12
   - enf/ENF18
 ---
@@ -74,7 +73,7 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 6. La réponse `201 Created` retourne le DTO de la connexion créée
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
 > - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyLink_MissingStore](../../../docs/tests/domain-model/TestAddAssemblyLink_MissingStore.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyLink_RM09_InterfaceUsedOnce](../../../docs/tests/domain-model/TestAddAssemblyLink_RM09_InterfaceUsedOnce.md) — déduit : teste `ModelService.AddAssemblyLink`
@@ -87,10 +86,9 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 > - 🟡 [TestAddAssemblyLink_UnknownInterface](../../../docs/tests/domain-model/TestAddAssemblyLink_UnknownInterface.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyToModule_RM51_InstanceLink_OK](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_InstanceLink_OK.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddAssemblyLink`
 <!-- tests-obsidian:end -->
 
 ### Flux nominal B — Liaison via asset d'accroche
@@ -103,32 +101,6 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!warning] Tests — aucun test ne couvre cette exigence
 > [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
-<!-- tests-obsidian:end -->
-
-### Flux alternatif — Liaison via slot virtuel (UCAM03)
-
-1. Le client appelle `POST /api/virtual-connect` avec `{ virtual_iface_id, physical_iface_id, ... }`
-2. Le service appelle `ConnectVirtualToPhysical()` : matérialise le slot virtuel en interface physique complémentaire, puis crée la liaison
-3. Un nouveau slot virtuel est recréé sur l'asset source (RM13 — `EnsureVirtualSlot`)
-
-<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 17 déduit(s)
-> - 🟡 [TestDomainErrors_AssemblyRules_MappedToHTTP](../../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — déduit : teste route `/api/virtual-connect`
-> - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilConnStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilConnStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`, `ModelService.EnsureVirtualSlot`
-> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`, `ModelService.EnsureVirtualSlot`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - … et 2 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux — Liaison devenue incompatible après modification
@@ -159,7 +131,7 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 3. Message d'erreur attendu : `"Cette interface est déjà utilisée dans une liaison"`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 15 déduit(s)
 > - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyLink_MissingStore](../../../docs/tests/domain-model/TestAddAssemblyLink_MissingStore.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyLink_RM09_InterfaceUsedOnce](../../../docs/tests/domain-model/TestAddAssemblyLink_RM09_InterfaceUsedOnce.md) — déduit : teste `ModelService.AddAssemblyLink`
@@ -172,10 +144,9 @@ Une liaison peut être **directe** (`FastenerAssetID` vide) ou **via un asset d'
 > - 🟡 [TestAddAssemblyLink_UnknownInterface](../../../docs/tests/domain-model/TestAddAssemblyLink_UnknownInterface.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_ConnectionNotInModule_Rejected.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestAddAssemblyToModule_RM51_InstanceLink_OK](../../../docs/tests/domain-model/TestAddAssemblyToModule_RM51_InstanceLink_OK.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddAssemblyLink`
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddAssemblyLink`
-> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddAssemblyLink`
 <!-- tests-obsidian:end -->
 
 ### Flux erreur — Interfaces incompatibles
@@ -259,11 +230,10 @@ end
 
 | Règle | Description | État code |
 |-------|-------------|-----------|
-| **RM09** | Interface à usage unique par instance — (interface, instance) déjà engagée → liaison refusée ; liaison réflexive refusée | `checkLinkable` (appelé par `AddAssemblyLink` et `ConnectVirtualToPhysical`) |
+| **RM09** | Interface à usage unique par instance — (interface, instance) déjà engagée → liaison refusée ; liaison réflexive refusée | `checkLinkable` (appelé par `AddAssemblyLink`) |
 | **RM10** | Vérification de compatibilité automatique à toute création de liaison | Implémenté (`ifacesCompatible`) |
 | **RM11** | 4 critères : catégorie + type + sens complémentaires + valeurs chevauchantes | `ifacesCompatible` |
 | **RM12** | Liaison incompatible → `Incompatible: true`, jamais supprimée auto | Implémenté (`UpdateInterface`) |
-| **RM13** | Slot virtuel garanti après matérialisation (flux UCAM03) | Implémenté (`EnsureVirtualSlot`) |
 
 ## Exigences non-fonctionnelles
 
@@ -277,9 +247,7 @@ end
 
 **Route REST concernée :** `POST /api/assembly-links` → `handleAssemblyLinks()` dans `handlers.go`
 
-**Route virtuel→physique :** `POST /api/virtual-connect` → `handleVirtualConnect()` dans `handlers.go`
-
-**Commande CLI équivalente :** `myr model link add --from <ifaceID> --to <ifaceID> [--fastener <assetID>] [--label <texte>] [--from-instance <id>] [--to-instance <id>]` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.4). Elle appelle la même méthode de service, `ModelService.AddAssemblyLink(fromIfaceID, toIfaceID, label, fromInstanceID, toInstanceID, fastenerAssetID)`, que le handler `POST /api/assembly-links` — même vérification de compatibilité (RM10/RM11), même unicité d'interface (RM09), mêmes messages d'erreur métier, quel que soit le canal. Le flux via slot virtuel (`POST /api/virtual-connect`) a pour équivalent `myr model link connect-virtual --virtual <id> --physical <id>`, appelant `ModelService.ConnectVirtualToPhysical()`. Seul le format de sortie change (texte terminal vs JSON HTTP) : la vérification est faite dans le service et non dans le handler.
+**Commande CLI équivalente :** `myr model link add --from <ifaceID> --to <ifaceID> [--fastener <assetID>] [--label <texte>] [--from-instance <id>] [--to-instance <id>]` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.4). Elle appelle la même méthode de service, `ModelService.AddAssemblyLink(fromIfaceID, toIfaceID, label, fromInstanceID, toInstanceID, fastenerAssetID)`, que le handler `POST /api/assembly-links` — même vérification de compatibilité (RM10/RM11), même unicité d'interface (RM09), mêmes messages d'erreur métier, quel que soit le canal. Seul le format de sortie change (texte terminal vs JSON HTTP) : la vérification est faite dans le service et non dans le handler.
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens

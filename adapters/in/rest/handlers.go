@@ -1514,62 +1514,6 @@ func (h *Handler) handleAssemblyLinks(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, toConnectionDTO(conn))
 }
 
-// ── /api/virtual-connect ─────────────────────────────────────────────────────
-
-type virtualConnectRequest struct {
-	VirtualIfaceID  string  `json:"virtual_iface_id"`
-	PhysicalIfaceID string  `json:"physical_iface_id"`
-	Name            string  `json:"name,omitempty"`
-	ValueMin        float64 `json:"value_min"`
-	ValueMax        float64 `json:"value_max"`
-	IsRange         bool    `json:"is_range"`
-	Unit            string  `json:"unit,omitempty"`
-	FromInstanceID  string  `json:"from_instance_id,omitempty"`
-	ToInstanceID    string  `json:"to_instance_id,omitempty"`
-}
-
-// handleVirtualConnect relie une interface virtuelle à une interface physique.
-//
-//	@Summary	Relier une interface virtuelle à une interface physique
-//	@Tags		connections
-//	@Accept		json
-//	@Produce	json
-//	@Param		body	body		virtualConnectRequest	true	"virtual_iface_id et physical_iface_id requis"
-//	@Success	201	{object}	connectionDTO
-//	@Failure	400	{object}	map[string]string	"interfaces incompatibles (RM10)"
-//	@Failure	409	{object}	map[string]string	"porteur du slot virtuel déjà soumis (RM19), ou interface déjà engagée (RM09)"
-//	@Security	MyrToken
-//	@Router		/virtual-connect [post]
-func (h *Handler) handleVirtualConnect(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "méthode non autorisée", http.StatusMethodNotAllowed)
-		return
-	}
-	var body virtualConnectRequest
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		jsonError(w, "JSON invalide: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-	if body.VirtualIfaceID == "" || body.PhysicalIfaceID == "" {
-		jsonError(w, "les champs 'virtual_iface_id' et 'physical_iface_id' sont requis", http.StatusBadRequest)
-		return
-	}
-	popup := model.AssetInterface{
-		Name:     body.Name,
-		ValueMin: body.ValueMin,
-		ValueMax: body.ValueMax,
-		IsRange:  body.IsRange,
-		Unit:     body.Unit,
-	}
-	conn, err := h.svcFor(r).ConnectVirtualToPhysical(body.VirtualIfaceID, body.PhysicalIfaceID, popup, body.FromInstanceID, body.ToInstanceID)
-	if err != nil {
-		h.internalErr(w, err)
-		return
-	}
-	w.WriteHeader(http.StatusCreated)
-	jsonOK(w, toConnectionDTO(conn))
-}
-
 // ── /api/channels ────────────────────────────────────────────────────────────
 
 // handleChannels lit ou change le canal Fabric actif de la session.
@@ -1812,15 +1756,9 @@ func (h *Handler) handleInterface(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case http.MethodDelete:
-		// Récupérer l'interface avant suppression pour connaître l'assetID
-		existing, _ := h.svcFor(r).GetInterface(id)
 		if err := h.svcFor(r).RemoveInterface(id); err != nil {
 			h.internalErr(w, err)
 			return
-		}
-		// Maintenir l'invariant : au moins un slot virtuel par asset
-		if existing != nil && !existing.Virtual {
-			h.svcFor(r).EnsureVirtualSlot(existing.AssetID)
 		}
 		w.WriteHeader(http.StatusNoContent)
 	case http.MethodPatch:

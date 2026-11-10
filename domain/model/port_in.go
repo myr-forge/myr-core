@@ -49,7 +49,6 @@ type ModelService interface {
 	RemoveInterface(id string) error
 	ListInterfacesForAsset(assetID string) ([]*AssetInterface, error)
 	GetInterface(id string) (*AssetInterface, error)
-	EnsureVirtualSlot(assetID string)
 
 	// Vocabulaire de référence (catégories, types, unités)
 	GetRefs() (*InterfaceRefs, error)
@@ -84,7 +83,4 @@ type ModelService interface {
 	CheckLicenseCompatibility(parentLicenseID, proposedLicenseID string) *LicenseCheck
 	CheckModuleLicenseCompatibility(componentLicenseIDs []string, proposedProductLicenseID string) *LicenseCheck
 
-	// Liaison interface virtuelle → interface physique
-	// popupValues porte les champs saisis par le client (CLI/API).
-	ConnectVirtualToPhysical(virtualIfaceID, physicalIfaceID string, popupValues AssetInterface, fromInstanceID, toInstanceID string) (*Connection, error)
 }

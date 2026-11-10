@@ -5,6 +5,7 @@ import (
 	"myr-core/adapters/out/localstorage"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"myr-core/domain/model"
@@ -739,3 +740,31 @@ func TestThumbnail_Persistence(t *testing.T) {
 	}
 }
 
+
+// / @brief  Les slots virtuels d'un fichier antérieur à leur retrait (FT-040) sont écartés à la lecture et disparaissent à l'écriture suivante
+// / @input  assets.json avec une interface physique et un slot marqué "virtual" ; lecture, puis enregistrement d'une autre interface
+// / @expect seule l'interface physique est lue ; après l'écriture, le fichier ne contient plus de slot
+func TestJSONStore_LegacyVirtualSlots_Dropped(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "assets.json")
+	legacy := `{"interfaces": [
+		{"id": "phys", "asset_id": "a", "category": "ELEC", "type": "USB-C", "direction": "out"},
+		{"id": "slot", "asset_id": "a", "direction": "bidir", "virtual": true}
+	]}`
+	if err := os.WriteFile(path, []byte(legacy), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	db := localstorage.NewJSONBlockchain(path)
+	ifaces, err := db.ListInterfacesForAsset("a")
+	if err != nil || len(ifaces) != 1 || ifaces[0].ID != "phys" {
+		t.Fatalf("seule l'interface physique attendue : %+v, %v", ifaces, err)
+	}
+	if _, err := db.GetInterface("slot"); !errors.Is(err, model.ErrNotFound) {
+		t.Errorf("le slot ne doit plus être lu : %v", err)
+	}
+	if err := db.SaveInterface(&model.AssetInterface{ID: "autre", AssetID: "a", Category: "MECA"}); err != nil {
+		t.Fatalf("SaveInterface : %v", err)
+	}
+	if raw, _ := os.ReadFile(path); strings.Contains(string(raw), `"slot"`) || strings.Contains(string(raw), "virtual") {
+		t.Errorf("le slot doit avoir disparu du fichier : %s", raw)
+	}
+}

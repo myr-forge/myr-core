@@ -12,7 +12,6 @@ tags:
   - domaine/model
   - uc/UCAM02
   - rm/RM11
-  - rm/RM13
   - enf/ENF12
 ---
 
@@ -45,7 +44,6 @@ Les interfaces sont persistées dans l'`InterfaceStore` local tant que l'asset q
 
 Pour un module, les interfaces exposées sont calculées dynamiquement : seules les interfaces des sous-composants **non reliées en interne** sont exposées (`GetModuleInterfaces` — calcul récursif avec cache). Chaque instance du module contribue ses propres interfaces non reliées en interne, y compris lorsque plusieurs instances partagent le même asset sous-jacent : le cache de résolution récursive par asset ne doit jamais faire disparaître une instance de la liste exposée.
 
-Un slot virtuel (`Virtual: true`) est toujours présent sur chaque asset (RM13), permettant au client de proposer la création d'une nouvelle interface (voir UCAM03).
 
 > La représentation visuelle (icônes, grisage, tooltip) relève du dépôt GUI externe — hors périmètre de ce document. Le contrat REST ci-dessous ainsi que son équivalent CLI (`myr model interface list`, voir Notes d'implémentation) font partie de `myr`.
 
@@ -61,11 +59,10 @@ Un slot virtuel (`Virtual: true`) est toujours présent sur chaque asset (RM13),
 
 1. Le client appelle `GET /api/components/:id/interfaces`
 2. Le handler appelle `service.ListInterfacesForAsset(assetID)`, qui lit le brouillon local (`InterfaceStore`) si l'asset n'est pas encore soumis, sinon `Model3D.Interfaces` via `blockchain.GetModelRecord()`
-3. Si aucune interface n'existe encore, `EnsureVirtualSlot(assetID)` crée un slot virtuel (RM13) et le persiste localement (brouillon)
-4. La liste des interfaces est retournée : chaque interface contient `{ id, asset_id, name, category, type, direction, value_min, value_max, is_range, unit, virtual }`
+3. La liste des interfaces est retournée : chaque interface contient `{ id, asset_id, name, category, type, direction, constraints }`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 84 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 82 déduit(s)
 > - 🟡 [TestAPIIntegration_AssetLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_AssetLifecycle.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_ConcurrentAssetCreation](../../../docs/tests/adapters-in-rest/TestAPIIntegration_ConcurrentAssetCreation.md) — déduit : teste route `/api/components`
 > - 🟡 [TestAPIIntegration_InterfaceLifecycle](../../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — déduit : teste route `/api/components`
@@ -81,7 +78,7 @@ Un slot virtuel (`Virtual: true`) est toujours présent sur chaque asset (RM13),
 > - 🟡 [TestComponent_AddInstance_MissingAssetID](../../../docs/tests/adapters-in-rest/TestComponent_AddInstance_MissingAssetID.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_AddTwoInstancesSequentially](../../../docs/tests/adapters-in-rest/TestComponent_AddTwoInstancesSequentially.md) — déduit : teste route `/api/components`
 > - 🟡 [TestComponent_DELETE_NoContent](../../../docs/tests/adapters-in-rest/TestComponent_DELETE_NoContent.md) — déduit : teste route `/api/components`
-> - … et 69 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - … et 67 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux nominal — Interfaces d'un module
@@ -90,7 +87,6 @@ Un slot virtuel (`Virtual: true`) est toujours présent sur chaque asset (RM13),
 2. Le handler appelle `service.GetModuleInterfaces(id)` — calcul récursif
 3. Le service parcourt les `WorkspaceInstances` du module et collecte les interfaces de chaque sous-composant — une instance dont l'asset est partagé avec une autre instance du même module contribue quand même ses propres interfaces, séparément
 4. Seules les interfaces non présentes dans une connexion interne au module sont retournées (interfaces "exposées")
-5. Un slot virtuel propre au module est garanti si aucune interface directe n'existe
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 0 explicite(s) · 9 déduit(s)
@@ -142,7 +138,6 @@ Un slot virtuel (`Virtual: true`) est toujours présent sur chaque asset (RM13),
 ## Post-conditions
 
 - Les interfaces physiques du composant ou module sont retournées au client
-- Le slot virtuel (`Virtual: true`) est toujours présent (RM13)
 - L'état du système est inchangé (lecture seule)
 
 ## Diagramme de séquence
@@ -160,15 +155,8 @@ alt Composant simple
     Service -> Local : ifaceStore.ListInterfacesForAsset(assetID)
     Local --> Service : []*AssetInterface
 
-    alt Aucune interface (première ouverture)
-        Service -> Service : EnsureVirtualSlot(assetID) [RM13]
-        Service -> Local : ifaceStore.SaveInterface({Virtual: true})
-        Service -> Local : ifaceStore.ListInterfacesForAsset(assetID)
-        Local --> Service : [*AssetInterface{Virtual:true}]
-    end
-
     Service --> REST : []*AssetInterface
-    REST --> Client : 200 [{ id, category, type,\n  direction, value_min, value_max,\n  is_range, unit, virtual }]
+    REST --> Client : 200 [{ id, category, type,\n  direction, constraints }]
 
 else Module (interfaces exposées)
     Client -> REST : GET /api/modules/:id/interfaces
@@ -190,7 +178,6 @@ end
 
 | Règle | Description | État code |
 |-------|-------------|-----------|
-| **RM13** | Slot virtuel garanti : si aucune interface définie, un slot `Virtual: true` est créé automatiquement | Implémenté (`EnsureVirtualSlot`) |
 | **RM11** | Les 5 attributs d'interface (`Category`, `Type`, `Direction`, `ValueMin/Max`, `Unit`) doivent être affichés | `AssetInterface` |
 
 ## Exigences non-fonctionnelles
@@ -210,7 +197,7 @@ end
 
 **Vocabulaire de référence :** Les catégories, types et unités disponibles sont chargés via `GET /api/refs` — `handleRefs()` → `GetRefs()`. Ce vocabulaire est extensible par l'administrateur.
 
-**Commande CLI équivalente :** `myr model interface list <assetID>` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.3). Elle appelle `ModelService.ListInterfacesForAsset(assetID)` — ou `ModelService.GetModuleInterfaces(id)` si l'ID désigne un module, la commande détectant le type via `Get`/`GetModule` — soit les mêmes méthodes de service que respectivement `GET /api/components/:id/interfaces` et `GET /api/modules/:id/interfaces`. Le comportement (slot virtuel garanti RM13, calcul récursif des interfaces exposées d'un module) est strictement identique ; seul le canal de sortie change : une ligne par interface (`id`, `category`, `type`, `direction`, valeur/plage, `unit`, `virtual`) en texte terminal plutôt qu'un tableau JSON.
+**Commande CLI équivalente :** `myr model interface list <assetID>` (voir `specs/3-Conception/DC_CLI_Model.md` § 3.3). Elle appelle `ModelService.ListInterfacesForAsset(assetID)` — ou `ModelService.GetModuleInterfaces(id)` si l'ID désigne un module, la commande détectant le type via `Get`/`GetModule` — soit les mêmes méthodes de service que respectivement `GET /api/components/:id/interfaces` et `GET /api/modules/:id/interfaces`. Le comportement (calcul récursif des interfaces exposées d'un module) est strictement identique ; seul le canal de sortie change : une ligne par interface (`id`, `category`, `type`, `direction`, contraintes de valeur) en texte terminal plutôt qu'un tableau JSON.
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens

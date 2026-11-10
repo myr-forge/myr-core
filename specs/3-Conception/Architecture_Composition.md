@@ -28,7 +28,6 @@ tags:
   - rm/RM10
   - rm/RM11
   - rm/RM12
-  - rm/RM13
   - rm/RM14
   - rm/RM15
   - rm/RM16
@@ -150,7 +149,6 @@ package "domain/model" {
     + ValueMax : float64
     + IsRange : bool
     + Unit : string <<V, mm, bar>>
-    + Virtual : bool
   }
 
   note right of AssetInterface
@@ -236,7 +234,7 @@ state "Composant en brouillon (draft: true explicite)" {
 
   state draft_asset : Status = draft\nInterfaces éditables localement\n(InterfaceStore) sans coût blockchain
 
-  draft_asset --> draft_asset : AddInterface / UpdateInterface\n/ EnsureVirtualSlot (UCCE06, UCAM03)
+  draft_asset --> draft_asset : AddInterface / UpdateInterface\n(UCCE06, UCAM03)
 
   draft_asset --> asset_submitted : Submit()\ncible E8 — généralise SubmitModule\nembarque Interfaces, 1 seule tx Fabric
 
@@ -282,10 +280,9 @@ note "Un composant peut devenir\nun module via Category=decoupage\n(UCAM05 — b
 
 ### AssetInterface
 
-- **Rôle :** Décrit un point de connexion physique ou un slot virtuel d'un composant. Deux interfaces sont compatibles si les 4 critères de RM11 sont satisfaits (§5).
+- **Rôle :** Décrit un point de connexion d'un composant. Deux interfaces sont compatibles si les 4 critères de RM11 sont satisfaits (§5).
 - **Invariants :**
   - Une interface d'une instance donnée, engagée dans une `Connection`, ne peut plus être utilisée dans une autre ; elle reste libre dans les autres instances du composant (RM09).
-  - `Virtual: true` = slot non encore matérialisé — tout asset possède toujours au moins un slot virtuel (RM13, `EnsureVirtualSlot`).
   - Éditée localement (`InterfaceStore`) tant que l'asset porteur est en `draft` ; embarquée dans `Model3D.Interfaces` à la soumission (ADR-02).
 
 ### Connection
@@ -383,7 +380,6 @@ Seuil d'application : `score > 0.50` → rejet de la soumission (RM01), avant to
 | RM10 | Vérification automatique de compatibilité | ✅ `ifacesCompatible()` appelée |
 | RM11 | 4 critères de compatibilité | ✅ `ifacesCompatible()` |
 | RM12 | Liaison incompatible → `Incompatible: true` sans suppression | ✅ Champ présent, géré |
-| RM13 | Slot virtuel toujours présent | ✅ `EnsureVirtualSlot()` |
 | RM14 | Suppression instance → cascade connexions | ✅ `RemoveAssetFromWorkspace()` |
 | RM15 | Instances indépendantes du même asset | ✅ `WorkspaceInstance` par instance |
 | RM16 | Module créé en `draft` | ✅ `CreateModule()` |
@@ -414,7 +410,6 @@ interface ModelService {
   ' D5 — Connexions (composition d'un module)
   + AddConnection(from, to, label string) : (*Connection, error)
   + AddAssemblyLink(fromIfaceID, toIfaceID, label, fromInstanceID, toInstanceID, fastenerAssetID string) : (*Connection, error)
-  + ConnectVirtualToPhysical(virtualIfaceID, physicalIfaceID string, popupValues AssetInterface, ...) : (*Connection, error)
   + RemoveConnection(id string) : error
   + ListConnections() : ([]*Connection, error)
   ' D5 — Interfaces physiques
@@ -423,7 +418,6 @@ interface ModelService {
   + RemoveInterface(id string) : error
   + ListInterfacesForAsset(assetID string) : ([]*AssetInterface, error)
   + GetInterface(id string) : (*AssetInterface, error)
-  + EnsureVirtualSlot(assetID string)
   + GetRefs() : (*InterfaceRefs, error)
   + AddRefCategory(cat string) : error
   + AddRefType(cat, typeName string) : error
@@ -546,11 +540,10 @@ Le détail des écarts E1, E2, E4, E6, E8, E9 est centralisé dans `specs/2-Anal
 **Étape suivante — code, par section**
 - [§ 3. Diagramme d'états — Model3D](Architecture_Composition.md#3.%20Diagramme%20d'états%20—%20Model3D) → [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
 - [§ Model3D](Architecture_Composition.md#Model3D) → [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
-- [§ AssetInterface](Architecture_Composition.md#AssetInterface) → [ModelService.EnsureVirtualSlot](../../docs/code/fonctions/model.ModelService.EnsureVirtualSlot.md)
 - [§ WorkspaceInstance](Architecture_Composition.md#WorkspaceInstance) → [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md)
 - [§ 6. Contrat anti-plagiat (RM01)](Architecture_Composition.md#6.%20Contrat%20anti-plagiat%20%28RM01%29) → [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md)
-- [§ 7. Règles de composition (RM09–RM19)](Architecture_Composition.md#7.%20Règles%20de%20composition%20%28RM09–RM19%29) → [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.EnsureVirtualSlot](../../docs/code/fonctions/model.ModelService.EnsureVirtualSlot.md) · [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
-- [§ Port entrant — ModelService (vue d'ensemble)](Architecture_Composition.md#Port%20entrant%20—%20ModelService%20%28vue%20d'ensemble%29) → [ModelService.AddAssemblyLink](../../docs/code/fonctions/model.ModelService.AddAssemblyLink.md) · [ModelService.AddAssemblyToModule](../../docs/code/fonctions/model.ModelService.AddAssemblyToModule.md) · [ModelService.AddAssetToWorkspace](../../docs/code/fonctions/model.ModelService.AddAssetToWorkspace.md) · [ModelService.AddConnection](../../docs/code/fonctions/model.ModelService.AddConnection.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.AddInterface](../../docs/code/fonctions/model.ModelService.AddInterface.md) · [ModelService.CheckLicenseCompatibility](../../docs/code/fonctions/model.ModelService.CheckLicenseCompatibility.md) · [ModelService.CheckModuleLicenseCompatibility](../../docs/code/fonctions/model.ModelService.CheckModuleLicenseCompatibility.md) · [ModelService.ConnectVirtualToPhysical](../../docs/code/fonctions/model.ModelService.ConnectVirtualToPhysical.md) · [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.EnsureVirtualSlot](../../docs/code/fonctions/model.ModelService.EnsureVirtualSlot.md) · [ModelService.GetChildren](../../docs/code/fonctions/model.ModelService.GetChildren.md) · [ModelService.GetLicense](../../docs/code/fonctions/model.ModelService.GetLicense.md) · [ModelService.GetModule](../../docs/code/fonctions/model.ModelService.GetModule.md) · [ModelService.GetModuleInterfaces](../../docs/code/fonctions/model.ModelService.GetModuleInterfaces.md) · [ModelService.ListLicenses](../../docs/code/fonctions/model.ModelService.ListLicenses.md) · [ModelService.ListModules](../../docs/code/fonctions/model.ModelService.ListModules.md) · [ModelService.RegenerateThumbnail](../../docs/code/fonctions/model.ModelService.RegenerateThumbnail.md) · [ModelService.RemoveAssemblyFromModule](../../docs/code/fonctions/model.ModelService.RemoveAssemblyFromModule.md) · [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md) · [ModelService.RemoveModule](../../docs/code/fonctions/model.ModelService.RemoveModule.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md) · [ModelService.UpdateAsset](../../docs/code/fonctions/model.ModelService.UpdateAsset.md) · [ModelService.UpdateInstancePosition](../../docs/code/fonctions/model.ModelService.UpdateInstancePosition.md) · [ModelService.UpdateInterface](../../docs/code/fonctions/model.ModelService.UpdateInterface.md)
+- [§ 7. Règles de composition (RM09–RM19)](Architecture_Composition.md#7.%20Règles%20de%20composition%20%28RM09–RM19%29) → [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
+- [§ Port entrant — ModelService (vue d'ensemble)](Architecture_Composition.md#Port%20entrant%20—%20ModelService%20%28vue%20d'ensemble%29) → [ModelService.AddAssemblyLink](../../docs/code/fonctions/model.ModelService.AddAssemblyLink.md) · [ModelService.AddAssemblyToModule](../../docs/code/fonctions/model.ModelService.AddAssemblyToModule.md) · [ModelService.AddAssetToWorkspace](../../docs/code/fonctions/model.ModelService.AddAssetToWorkspace.md) · [ModelService.AddConnection](../../docs/code/fonctions/model.ModelService.AddConnection.md) · [ModelService.AddFull](../../docs/code/fonctions/model.ModelService.AddFull.md) · [ModelService.AddInterface](../../docs/code/fonctions/model.ModelService.AddInterface.md) · [ModelService.CheckLicenseCompatibility](../../docs/code/fonctions/model.ModelService.CheckLicenseCompatibility.md) · [ModelService.CheckModuleLicenseCompatibility](../../docs/code/fonctions/model.ModelService.CheckModuleLicenseCompatibility.md) · [ModelService.CreateModule](../../docs/code/fonctions/model.ModelService.CreateModule.md) · [ModelService.GetChildren](../../docs/code/fonctions/model.ModelService.GetChildren.md) · [ModelService.GetLicense](../../docs/code/fonctions/model.ModelService.GetLicense.md) · [ModelService.GetModule](../../docs/code/fonctions/model.ModelService.GetModule.md) · [ModelService.GetModuleInterfaces](../../docs/code/fonctions/model.ModelService.GetModuleInterfaces.md) · [ModelService.ListLicenses](../../docs/code/fonctions/model.ModelService.ListLicenses.md) · [ModelService.ListModules](../../docs/code/fonctions/model.ModelService.ListModules.md) · [ModelService.RegenerateThumbnail](../../docs/code/fonctions/model.ModelService.RegenerateThumbnail.md) · [ModelService.RemoveAssemblyFromModule](../../docs/code/fonctions/model.ModelService.RemoveAssemblyFromModule.md) · [ModelService.RemoveAssetFromWorkspace](../../docs/code/fonctions/model.ModelService.RemoveAssetFromWorkspace.md) · [ModelService.RemoveModule](../../docs/code/fonctions/model.ModelService.RemoveModule.md) · [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md) · [ModelService.UpdateAsset](../../docs/code/fonctions/model.ModelService.UpdateAsset.md) · [ModelService.UpdateInstancePosition](../../docs/code/fonctions/model.ModelService.UpdateInstancePosition.md) · [ModelService.UpdateInterface](../../docs/code/fonctions/model.ModelService.UpdateInterface.md)
 - [§ Ports sortants](Architecture_Composition.md#Ports%20sortants) → [BlockchainPort.GetModelRecord](../../docs/code/fonctions/model.BlockchainPort.GetModelRecord.md) · [BlockchainPort.ListModelRecords](../../docs/code/fonctions/model.BlockchainPort.ListModelRecords.md) · [BlockchainPort.StoreModelRecord](../../docs/code/fonctions/model.BlockchainPort.StoreModelRecord.md) · [ConnectionStore.SaveConnection](../../docs/code/fonctions/model.ConnectionStore.SaveConnection.md) · [ConnectionStore.UpdateConnection](../../docs/code/fonctions/model.ConnectionStore.UpdateConnection.md) · [InterfaceStore.SaveInterface](../../docs/code/fonctions/model.InterfaceStore.SaveInterface.md) · [OGImageFetcher.FetchOGImage](../../docs/code/fonctions/model.OGImageFetcher.FetchOGImage.md)
 - [§ 11. Informations manquantes](Architecture_Composition.md#11.%20Informations%20manquantes) → [ModelService.SubmitModule](../../docs/code/fonctions/model.ModelService.SubmitModule.md)
 

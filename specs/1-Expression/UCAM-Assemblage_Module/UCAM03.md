@@ -1,7 +1,8 @@
 ---
 tags:
-  - rm/RM13
+  - rm/RM19
   - rm/RM53
+  - rm/RM54
 ---
 ﻿---
 categorie: Assemblage Module
@@ -16,7 +17,6 @@ tags:
   - famille/UCAM
   - domaine/model
   - uc/UCAM03
-  - rm/RM13
 ---
 # Créer une interface sur un composant
 
@@ -29,73 +29,51 @@ left to right direction
 actor "Concepteur" as C
 
 rectangle "Application MYR" {
-    usecase "Créer une interface (connexion virtuelle)" as UC1
-    usecase "Créer une interface (attributs explicites)" as UC2
-    usecase "Définir les attributs de l'interface" as UC3
-    usecase "Enregistrer l'interface (draft)" as UC4
+    usecase "Créer une interface" as UC1
+    usecase "Définir les attributs de l'interface" as UC2
+    usecase "Enregistrer l'interface (draft)" as UC3
 }
 
 C --> UC1
-C --> UC2
-UC1 ..> UC3 : <<include>>
+UC1 ..> UC2 : <<include>>
 UC2 ..> UC3 : <<include>>
-UC3 ..> UC4 : <<include>>
 
 @enduml
 ```
 
 ## Contexte
 
-Chaque composant possède toujours un **slot d'interface virtuel** (`Virtual=true`) : dès qu'un slot virtuel est matérialisé (relié à une interface physique existante), un nouveau slot virtuel est recréé automatiquement sur le composant (RM13).
-
-Une interface peut être créée de deux façons :
-
-- **Connexion depuis un slot virtuel** : le slot virtuel d'un composant est relié à une interface physique existante d'un autre composant. Le service déduit automatiquement la plupart des propriétés de la nouvelle interface à partir de la cible — seul le tag doit être renseigné explicitement.
-- **Création manuelle** : tous les attributs de la nouvelle interface (catégorie, sens, type, contraintes de valeur — RM53) sont renseignés explicitement.
+Une interface est un point de connexion d'un composant. Elle est toujours créée explicitement, avec ses attributs : catégorie, sens, type et contraintes de valeur (RM53). Le système ne déduit aucun attribut d'une autre interface : un outil client peut proposer des valeurs à son utilisateur, mais c'est la demande qui les porte.
 
 ## Pré-conditions
 
 - Être connecté au réseau
-- Avoir au moins un composant existant
+- Avoir un composant en brouillon dont on est le propriétaire (RM54)
 - Avoir les droits de création ou d'édition sur le composant (défini dans le rôle)
 
 ## Scénario
 
-### Flux nominal A — Connexion depuis un slot virtuel (déduction automatique)
+**Étape initiale :** `myr model interface add <assetID> --category <cat> --type <type> --direction <in|out|bidir> [--value-min <v> --value-max <v> --unit <u>] [--name <label>]` est exécutée (ou `POST /api/components/{id}/interfaces`)
 
-**Étape initiale :** `myr model link connect-virtual --virtual-iface <id> --physical-iface <id>` est exécutée (ou l'appel API équivalent)
+### Flux nominal — Interface créée
 
-1. Le service déduit les propriétés de la nouvelle interface à partir de la cible :
-   - **catégorie** : identique à la cible
-   - **sens** : inversé (sortie → entrée ; entrée → sortie ; bidirectionnel → bidirectionnel)
-   - **type** : identique à la cible
-   - **valeur/unité** : inférée depuis la cible (ex : cible sortie 3–6 V → nouvelle interface entrée 3,3 V)
-2. Le tag doit être renseigné explicitement (`--tag <tag>`) — jamais déduit
-3. La nouvelle interface est créée sur le composant source (état draft)
-4. La liaison est enregistrée
-5. Le slot virtuel est automatiquement recréé sur le composant (RM13)
+1. Les attributs de l'interface sont transmis
+2. L'interface est enregistrée sur le composant, à l'état brouillon
+3. Elle peut ensuite être reliée à une interface compatible d'un autre composant (UCAM01)
 
-### Flux nominal B — Création manuelle avec attributs explicites
+### Flux erreur — Unité inconnue
 
-**Étape initiale :** `myr model interface add <assetID> --category <cat> --type <type> --direction <in|out|bidir> [--value-min --value-max --unit] --tag <tag> [--name <label>]` est exécutée
+1. Une contrainte porte une unité inconnue, même après lecture d'un préfixe SI usuel (RM53)
+2. L'interface est refusée (API : 400)
 
-1. L'interface est créée et enregistrée dans l'état draft
+### Flux erreur — Composant soumis ou d'une autre identité
 
-### Flux alternatif A2 — Ajustement des valeurs déduites
-
-1. Les valeurs déduites (flux A) sont surchargées par des flags explicites avant validation (ex : affiner la plage de valeur)
-2. L'interface est créée avec les valeurs ajustées
-
-### Flux erreur — Incompatibilité de connexion virtuelle
-
-1. Le service détecte une incompatibilité entre le slot virtuel et l'interface physique ciblée (catégories différentes)
-2. La connexion est refusée
+1. Le composant est déjà soumis (RM19, API : 409) ou appartient à une autre identité (RM54, API : 403)
+2. L'interface est refusée ; une interface s'ajoute à un nouvel asset dérivé du composant soumis
 
 ## Post-conditions
 
-- La nouvelle interface est enregistrée sur le composant
-- Le slot d'interface virtuel reste disponible sur le composant (`Virtual=true` recréé)
-- La liaison est enregistrée (si flux A)
+- La nouvelle interface est enregistrée sur le composant, à l'état brouillon
 
 ## Diagramme d'activités
 
@@ -104,22 +82,17 @@ Une interface peut être créée de deux façons :
 skin rose
 title Créer une interface sur un composant
 start
-if (Méthode de création?) then (connexion virtuelle)
-  :Transmettre virtual-iface et physical-iface cible;
-  if (Catégorie compatible?) then (oui)
-    :Déduire catégorie, sens inversé, type, valeur/unité;
-    :Renseigner le tag explicitement (jamais déduit);
-    :Créer l'interface sur le composant source (draft);
-    :Enregistrer la liaison;
-    :Recréer automatiquement le slot virtuel;
+:Transmettre les attributs (catégorie, sens, type, contraintes de valeur);
+if (Composant en brouillon, du demandeur ?) then (oui)
+  if (Unités reconnues ? (RM53)) then (oui)
+    :Enregistrer l'interface (draft);
     stop
   else (non)
-    :Refuser la connexion;
+    :Refuser (400);
     stop
   endif
-else (attributs explicites)
-  :Transmettre les attributs (catégorie, sens, type, valeur, unité);
-  :Enregistrer l'interface (draft);
+else (non)
+  :Refuser (409 ou 403);
   stop
 endif
 @enduml

@@ -195,8 +195,6 @@ Entité membre d'un réseau (entreprise, association, individu). Chaque utilisat
 
 Un module rassemble des composants et modules existants sous forme d'instances constituant sa composition, avant toute soumission à la blockchain. Une instance est ajoutée ou retirée par une action directe et brute sur le module (`AddAssetToWorkspace` / `RemoveAssetFromWorkspace` au niveau du domaine, `myr model instance add` / `remove` côté CLI, appel API équivalent).
 
-Une instance dispose toujours d'au moins un slot virtuel permettant de l'ancrer dans la composition (RM13).
-
 ## État draft
 
 État intermédiaire d'un module dont la composition n'est pas encore ancrée sur la blockchain. Un module en état draft n'est pas visible sur le réseau. La soumission à la blockchain est une étape distincte et explicite (nécessite au moins une liaison).

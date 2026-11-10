@@ -11,7 +11,6 @@ tags:
   - rm/RM10
   - rm/RM11
   - rm/RM12
-  - rm/RM13
   - rm/RM14
   - rm/RM15
   - rm/RM16
@@ -185,7 +184,6 @@ package "Agrégat Asset (D3-D6)" {
     value_max : float
     is_range : bool
     unit : string
-    virtual : bool
     anchor_position : vec3 <<à ajouter — E9>>
     anchor_orientation : quat <<à ajouter — E9>>
     anchor_source_ref : string <<à ajouter — E9,\nréf. entité STEP\nface/axe d'origine>>
@@ -215,7 +213,7 @@ package "Agrégat Asset (D3-D6)" {
   }
 
   Model3D *-- "0..*" Version : "historique"
-  Model3D *-- "1..*" AssetInterface : "interfaces\n(≥1 virtuelle, RM13 ;\nbrouillon local, puis Fabric\nà la soumission)"
+  Model3D *-- "1..*" AssetInterface : "interfaces\n(brouillon local, puis Fabric\nà la soumission)"
   Model3D *-- "0..*" WorkspaceInstance : "instances (module)"
   Model3D *-- "0..*" ModuleVersion : "versions module"
   Model3D "1" *-- "0..*" Connection : "assemblages (module)"
@@ -319,7 +317,6 @@ Entité `Payment` implémentée (paiement manuel).
 | RM09 | `AssetInterface` | un `id` ne peut apparaître qu'une seule fois dans `Connection.FromIfaceID` ou `ToIfaceID` |
 | RM11 | `Connection` | `FromIface` et `ToIface` doivent satisfaire les 4 critères de compatibilité |
 | RM12 | `Connection` | jamais supprimée automatiquement — `Incompatible: true` si interfaces évoluent |
-| RM13 | `AssetInterface` | tout asset possède toujours au moins un `Virtual: true` |
 | RM14 | `WorkspaceInstance` | suppression → cascade sur toutes les `Connection` liées |
 | RM15 | `WorkspaceInstance` | plusieurs instances du même `AssetID` dans un module sont indépendantes |
 | RM16 | `Model3D` (module) | `CreateModule` → `Status = draft` obligatoire |

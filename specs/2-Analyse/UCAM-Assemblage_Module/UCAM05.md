@@ -15,7 +15,6 @@ tags:
   - rm/RM05
   - rm/RM07
   - rm/RM08
-  - rm/RM13
   - rm/RM17
   - rm/RM18
   - rm/RM19
@@ -81,7 +80,6 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 2. Les sous-composants constitutifs sont ajoutés comme instances via `POST /api/modules/:id/instances`
 3. Pour chaque sous-composant ajouté, `AddAssetToWorkspace()` :
    - Crée une `WorkspaceInstance` dans le module
-   - Appelle `EnsureVirtualSlot(assetID)` pour garantir le slot virtuel (RM13)
 4. Les liaisons internes entre les sous-composants sont créées (UCAM01)
 5. `POST /api/modules/:id/submit` est appelée
 6. `SubmitModule()` vérifie qu'au moins une liaison est présente (`len(Assemblies) > 0` — RM17)
@@ -89,7 +87,7 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 8. Le module passe en état `submitted`
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 41 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 33 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
@@ -98,14 +96,14 @@ Le résultat est un `Model3D` avec `Status: ModuleDraft`, `WorkspaceInstances` p
 > - 🟡 [TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate](../../../docs/tests/domain-model/TestAddAssetToWorkspace_R21_Concurrent_NoLostUpdate.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
 > - 🟡 [TestAddAssetToWorkspace_RM52_Cycle_Rejected](../../../docs/tests/domain-model/TestAddAssetToWorkspace_RM52_Cycle_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
 > - 🟡 [TestAssembly_UnknownAsset_Rejected](../../../docs/tests/domain-model/TestAssembly_UnknownAsset_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.EnsureVirtualSlot`
-> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.EnsureVirtualSlot`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`, `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_ParentID_NotFound_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_NotFound_Rejected.md) — déduit : teste `ModelService.CreateModule`
 > - 🟡 [TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected](../../../docs/tests/domain-model/TestCreateModule_ParentID_RM03_LicenseIncompatible_Rejected.md) — déduit : teste `ModelService.CreateModule`, `ModelService.SubmitModule`
 > - 🟡 [TestCreateModule_RM19_ForkOfSubmitted_Submittable](../../../docs/tests/domain-model/TestCreateModule_RM19_ForkOfSubmitted_Submittable.md) — déduit : teste `ModelService.CreateModule`, `ModelService.SubmitModule`
 > - 🟡 [TestCreate_ChannelRequired_Rejected](../../../docs/tests/domain-model/TestCreate_ChannelRequired_Rejected.md) — déduit : teste `ModelService.CreateModule`
-> - … et 26 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
+> - 🟡 [TestGetModuleInterfaces_InternalConnectionsConsumed](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnectionsConsumed.md) — déduit : teste `ModelService.AddAssetToWorkspace`, `ModelService.CreateModule`
+> - … et 18 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Composant sans interfaces définies
@@ -211,8 +209,6 @@ loop Pour chaque sous-composant
     Fabric --> Service : module
     Service -> Service : créer WorkspaceInstance
     Service -> Fabric : StoreModelRecord(module)
-    Service -> Service : EnsureVirtualSlot(assetID) [RM13]
-    Service -> Local : ifaceStore.SaveInterface({Virtual:true})
     Service --> REST : *Model3D
     REST --> Client : 200 { moduleDTO mis à jour }
 
@@ -257,7 +253,6 @@ end
 | **RM05** | `ParentID` obligatoire pour tout asset non-`base` | Implémenté dans `AddFull` (vérification licence) — à étendre pour `decoupage` |
 | **RM07** | Validation complète avant soumission blockchain | Implémenté (`SubmitModule` vérifie `len(Assemblies)`) |
 | **RM08** | Fabric ne supporte pas la suppression — le composant source reste, masquable localement sans jamais toucher au ledger (voir UCCE07) | Le composant source n'est de toute façon jamais supprimé par cette transformation — aucun appel à `Remove()` n'a lieu ici |
-| **RM13** | Slot virtuel garanti pour chaque sous-composant ajouté | Implémenté (`EnsureVirtualSlot` dans `AddAssetToWorkspace`) |
 | **RM17** | Au moins une liaison requise pour soumettre | Implémenté (`SubmitModule` vérifie `len(Assemblies) > 0`) |
 | **RM18** | `ModuleVersion` immuable créée à la soumission | Implémenté (hash SHA-256 + horodatage) |
 

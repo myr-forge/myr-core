@@ -52,50 +52,6 @@ Examples:
 	},
 }
 
-// ── connect-virtual ───────────────────────────────────────────────────────────
-
-func runModelLinkConnectVirtual(w io.Writer, svc model.ModelService, virtual, physical string, popup model.AssetInterface, fromInstance, toInstance string) error {
-	if virtual == "" || physical == "" {
-		return fmt.Errorf("--virtual et --physical sont requis")
-	}
-	conn, err := svc.ConnectVirtualToPhysical(virtual, physical, popup, fromInstance, toInstance)
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(w, "Liaison créée : id=%s\n", conn.ID)
-	return nil
-}
-
-var modelLinkConnectVirtualCmd = &cobra.Command{
-	Use:   "connect-virtual",
-	Short: "Materialize a virtual interface slot against a physical interface",
-	Long: `Bind a virtual interface slot (EnsureVirtualSlot placeholder) to a
-concrete physical interface, adopting its category/type and the opposite
-direction.
-
-Example:
-  myr model link connect-virtual --virtual iface-virtual --physical iface-3`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		virtual, _ := cmd.Flags().GetString("virtual")
-		physical, _ := cmd.Flags().GetString("physical")
-		name, _ := cmd.Flags().GetString("name")
-		unit, _ := cmd.Flags().GetString("unit")
-		valueMin, _ := cmd.Flags().GetFloat64("value-min")
-		valueMax, _ := cmd.Flags().GetFloat64("value-max")
-		fromInstance, _ := cmd.Flags().GetString("from-instance")
-		toInstance, _ := cmd.Flags().GetString("to-instance")
-
-		popup := model.AssetInterface{
-			Name:     name,
-			Unit:     unit,
-			ValueMin: valueMin,
-			ValueMax: valueMax,
-			IsRange:  cmd.Flags().Changed("value-max"),
-		}
-		return runModelLinkConnectVirtual(cmd.OutOrStdout(), modelSvc, virtual, physical, popup, fromInstance, toInstance)
-	},
-}
-
 // ── remove ────────────────────────────────────────────────────────────────────
 
 func runModelLinkRemove(w io.Writer, svc model.ModelService, id string) error {
@@ -150,15 +106,7 @@ func init() {
 	modelLinkAddCmd.Flags().String("from-instance", "", "ID instance de module pour l'interface source (optionnel)")
 	modelLinkAddCmd.Flags().String("to-instance", "", "ID instance de module pour l'interface cible (optionnel)")
 
-	modelLinkConnectVirtualCmd.Flags().String("virtual", "", "ID de l'interface virtuelle (requis)")
-	modelLinkConnectVirtualCmd.Flags().String("physical", "", "ID de l'interface physique (requis)")
-	modelLinkConnectVirtualCmd.Flags().String("name", "", "Label (sinon reprend celui du physique)")
-	modelLinkConnectVirtualCmd.Flags().String("unit", "", "Unité (sinon reprend celle du physique)")
-	modelLinkConnectVirtualCmd.Flags().Float64("value-min", 0, "Valeur unique ou borne basse")
-	modelLinkConnectVirtualCmd.Flags().Float64("value-max", 0, "Borne haute (implique une plage)")
-	modelLinkConnectVirtualCmd.Flags().String("from-instance", "", "ID instance portant le slot virtuel (optionnel)")
-	modelLinkConnectVirtualCmd.Flags().String("to-instance", "", "ID instance portant l'interface physique (optionnel)")
 
-	modelLinkCmd.AddCommand(modelLinkAddCmd, modelLinkConnectVirtualCmd, modelLinkRemoveCmd, modelLinkListCmd)
+	modelLinkCmd.AddCommand(modelLinkAddCmd, modelLinkRemoveCmd, modelLinkListCmd)
 	modelCmd.AddCommand(modelLinkCmd)
 }

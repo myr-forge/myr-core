@@ -23,7 +23,6 @@ type mockModelSvc struct {
 	removeInterface                 func(id string) error
 	listInterfacesForAsset          func(assetID string) ([]*model.AssetInterface, error)
 	getInterface                    func(id string) (*model.AssetInterface, error)
-	ensureVirtualSlot               func(assetID string)
 	getRefs                         func() (*model.InterfaceRefs, error)
 	addRefCategory                  func(cat string) error
 	addRefType                      func(cat, typeName string) error
@@ -44,7 +43,6 @@ type mockModelSvc struct {
 	getLicense                      func(id string) (*model.License, error)
 	checkLicenseCompatibility       func(parentLicenseID, proposedLicenseID string) *model.LicenseCheck
 	checkModuleLicenseCompatibility func(componentLicenseIDs []string, proposedProductLicenseID string) *model.LicenseCheck
-	connectVirtualToPhysical        func(virtualIfaceID, physicalIfaceID string, popupValues model.AssetInterface, fromInstanceID, toInstanceID string) (*model.Connection, error)
 }
 
 func (m *mockModelSvc) As(string) model.ModelService { return m }
@@ -157,11 +155,6 @@ func (m *mockModelSvc) GetInterface(id string) (*model.AssetInterface, error) {
 		return m.getInterface(id)
 	}
 	return &model.AssetInterface{ID: id}, nil
-}
-func (m *mockModelSvc) EnsureVirtualSlot(assetID string) {
-	if m.ensureVirtualSlot != nil {
-		m.ensureVirtualSlot(assetID)
-	}
 }
 func (m *mockModelSvc) GetRefs() (*model.InterfaceRefs, error) {
 	if m.getRefs != nil {
@@ -282,10 +275,4 @@ func (m *mockModelSvc) CheckModuleLicenseCompatibility(componentLicenseIDs []str
 		return m.checkModuleLicenseCompatibility(componentLicenseIDs, proposedProductLicenseID)
 	}
 	return &model.LicenseCheck{Compatible: true}
-}
-func (m *mockModelSvc) ConnectVirtualToPhysical(virtualIfaceID, physicalIfaceID string, popupValues model.AssetInterface, fromInstanceID, toInstanceID string) (*model.Connection, error) {
-	if m.connectVirtualToPhysical != nil {
-		return m.connectVirtualToPhysical(virtualIfaceID, physicalIfaceID, popupValues, fromInstanceID, toInstanceID)
-	}
-	return &model.Connection{ID: "c-test"}, nil
 }

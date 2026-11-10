@@ -13,10 +13,19 @@ import (
 type dbFile struct {
 	Thumbnails  map[string]string       `json:"thumbnails"`
 	Connections []*model.Connection     `json:"connections"`
-	Interfaces  []*model.AssetInterface `json:"interfaces"`
+	Interfaces  []*storedInterface      `json:"interfaces"`
 	Refs        *model.InterfaceRefs    `json:"refs"`
 	Drafts      []*model.Model3D        `json:"drafts"`
 	HiddenIDs   map[string]bool         `json:"hidden_ids"`
+}
+
+// storedInterface est une interface telle qu'enregistrée. Les fichiers
+// antérieurs au retrait des slots virtuels (FT-040) en contiennent, marqués
+// "virtual" : ils sont écartés à la lecture et disparaissent à l'écriture
+// suivante.
+type storedInterface struct {
+	model.AssetInterface
+	Virtual bool `json:"virtual,omitempty"`
 }
 
 var _ model.RemovedAssetStore = (*JSONBlockchain)(nil)
@@ -44,9 +53,13 @@ func (db *dbFile) withDefaults() *dbFile {
 	if db.Connections == nil {
 		db.Connections = []*model.Connection{}
 	}
-	if db.Interfaces == nil {
-		db.Interfaces = []*model.AssetInterface{}
+	kept := []*storedInterface{}
+	for _, i := range db.Interfaces {
+		if !i.Virtual {
+			kept = append(kept, i)
+		}
 	}
+	db.Interfaces = kept
 	if db.Drafts == nil {
 		db.Drafts = []*model.Model3D{}
 	}
@@ -146,13 +159,14 @@ func (j *JSONBlockchain) GetThumbnail(assetID string) (string, error) {
 
 func (j *JSONBlockchain) SaveInterface(iface *model.AssetInterface) error {
 	return j.update(func(db *dbFile) error {
+		stored := &storedInterface{AssetInterface: *iface}
 		for i, existing := range db.Interfaces {
 			if existing.ID == iface.ID {
-				db.Interfaces[i] = iface
+				db.Interfaces[i] = stored
 				return nil
 			}
 		}
-		db.Interfaces = append(db.Interfaces, iface)
+		db.Interfaces = append(db.Interfaces, stored)
 		return nil
 	})
 }
@@ -178,7 +192,7 @@ func (j *JSONBlockchain) ListInterfacesForAsset(assetID string) ([]*model.AssetI
 	var result []*model.AssetInterface
 	for _, iface := range db.Interfaces {
 		if iface.AssetID == assetID {
-			result = append(result, iface)
+			result = append(result, &iface.AssetInterface)
 		}
 	}
 	return result, nil
@@ -191,7 +205,7 @@ func (j *JSONBlockchain) GetInterface(id string) (*model.AssetInterface, error) 
 	}
 	for _, iface := range db.Interfaces {
 		if iface.ID == id {
-			return iface, nil
+			return &iface.AssetInterface, nil
 		}
 	}
 	return nil, fmt.Errorf("%w : interface %q", model.ErrNotFound, id)

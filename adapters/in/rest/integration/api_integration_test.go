@@ -586,28 +586,24 @@ func TestAPIIntegration_ModuleLifecycle(t *testing.T) {
 
 // ── Interfaces physiques ──────────────────────────────────────────────────────
 
-// physicalInterfaces liste les interfaces non virtuelles d'un composant — le
-// slot virtuel est toujours présent (RM13).
+// physicalInterfaces liste les identifiants des interfaces d'un composant.
 func physicalInterfaces(t *testing.T, srv *httptest.Server, assetID string) []string {
 	t.Helper()
 	resp := apiDo(t, srv.Client(), http.MethodGet, srv.URL+"/api/components/"+assetID+"/interfaces", "")
 	var ifaces []struct {
-		ID      string `json:"id"`
-		Virtual bool   `json:"virtual"`
+		ID string `json:"id"`
 	}
 	decodeBody(t, resp, &ifaces)
 	var ids []string
 	for _, i := range ifaces {
-		if !i.Virtual {
-			ids = append(ids, i.ID)
-		}
+		ids = append(ids, i.ID)
 	}
 	return ids
 }
 
 /// @brief  Cycle complet : ajouter interface → lister → supprimer (JSONBlockchain réel)
 /// @input  Composant créé ; interface ELEC USB-C Out ajoutée et supprimée
-/// @expect interface physique présente dans la liste après ajout, absente après suppression ; le slot virtuel reste (RM13)
+/// @expect interface physique présente dans la liste après ajout, absente après suppression
 func TestAPIIntegration_InterfaceLifecycle(t *testing.T) {
 	srv := newIntegrationServer(t)
 	defer srv.Close()

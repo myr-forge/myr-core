@@ -60,7 +60,6 @@ type mockSvc struct {
 	getLicense               func(id string) (*model.License, error)
 	checkLicenseCompat       func(parentID, proposedID string) *model.LicenseCheck
 	checkModuleLicenseCompat func(componentIDs []string, proposedID string) *model.LicenseCheck
-	connectVirtualToPhysical func(virtualIfaceID, physicalIfaceID string, popupValues model.AssetInterface, fromInstanceID, toInstanceID string) (*model.Connection, error)
 }
 
 func (m *mockSvc) As(actor string) model.ModelService {
@@ -297,14 +296,6 @@ func (m *mockSvc) CheckModuleLicenseCompatibility(componentIDs []string, propose
 	}
 	return &model.LicenseCheck{Compatible: true}
 }
-func (m *mockSvc) ConnectVirtualToPhysical(virtualIfaceID, physicalIfaceID string, popupValues model.AssetInterface, fromInstanceID, toInstanceID string) (*model.Connection, error) {
-	if m.connectVirtualToPhysical != nil {
-		return m.connectVirtualToPhysical(virtualIfaceID, physicalIfaceID, popupValues, fromInstanceID, toInstanceID)
-	}
-	return &model.Connection{ID: "conn1", From: physicalIfaceID, To: virtualIfaceID}, nil
-}
-
-func (m *mockSvc) EnsureVirtualSlot(assetID string) {}
 
 // ── Mock ThumbnailStore / InterfaceStore ──────────────────────────────────────
 

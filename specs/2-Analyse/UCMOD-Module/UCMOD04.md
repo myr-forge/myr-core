@@ -11,7 +11,6 @@ tags:
   - famille/UCMOD
   - domaine/model
   - uc/UCMOD04
-  - rm/RM13
   - enf/ENF12
 ---
 
@@ -172,7 +171,6 @@ REST --> Client : 200 [Connection ...]
 
 | Règle | Description | Point d'application |
 |-------|-------------|---------------------|
-| **RM13** | Slot virtuel garanti — affiché comme point de connexion libre | `GetModuleInterfaces()` inclut les slots virtuels |
 
 ## Exigences non-fonctionnelles
 

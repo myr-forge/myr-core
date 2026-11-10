@@ -14,7 +14,6 @@ tags:
   - rm/RM02
   - rm/RM11
   - rm/RM12
-  - rm/RM13
   - rm/RM16
   - rm/RM19
   - rm/RM53
@@ -67,7 +66,6 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 | `Type` | string | Standard précis : `USB-C`, `Vis M3`, `BSP 1/4"` |
 | `Direction` | string | `in`, `out`, `bidir` |
 | `Constraints` | liste | Contraintes de valeur, chacune `{ValueMin, ValueMax, IsRange, Unit}` : valeur unique ou plage, unité lue selon RM53 (`V`, `mA`, `mm`, `bar`…) |
-| `Virtual` | bool | `true` = slot non encore matérialisé |
 
 ## Pré-conditions
 
@@ -94,6 +92,7 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!check]- Tests — 0 explicite(s) · 20 déduit(s)
 > - 🟡 [TestInterface_Persistence](../../../docs/tests/adapters-out-localstorage/TestInterface_Persistence.md) — déduit : teste `InterfaceStore.SaveInterface`
+> - 🟡 [TestJSONStore_LegacyVirtualSlots_Dropped](../../../docs/tests/adapters-out-localstorage/TestJSONStore_LegacyVirtualSlots_Dropped.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestListInterfacesForAsset](../../../docs/tests/adapters-out-localstorage/TestListInterfacesForAsset.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestRemoveInterface](../../../docs/tests/adapters-out-localstorage/TestRemoveInterface.md) — déduit : teste `InterfaceStore.SaveInterface`
 > - 🟡 [TestSaveInterface_And_GetInterface](../../../docs/tests/adapters-out-localstorage/TestSaveInterface_And_GetInterface.md) — déduit : teste `InterfaceStore.SaveInterface`
@@ -101,7 +100,6 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 > - 🟡 [TestAddAssemblyLink](../../../docs/tests/domain-model/TestAddAssemblyLink.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestAddInterface_ClientID_NoOverwrite](../../../docs/tests/domain-model/TestAddInterface_ClientID_NoOverwrite.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestAssembly_UnknownAsset_Rejected](../../../docs/tests/domain-model/TestAssembly_UnknownAsset_Rejected.md) — déduit : teste `ModelService.AddInterface`
-> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestCreateModule_ParentID_CopiesComposition](../../../docs/tests/domain-model/TestCreateModule_ParentID_CopiesComposition.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestGetAsset_UnreadableDraftStore_NotMasked](../../../docs/tests/domain-model/TestGetAsset_UnreadableDraftStore_NotMasked.md) — déduit : teste `ModelService.AddInterface`
 > - 🟡 [TestGetModuleInterfaces_InternalConnection_ScopedToInstance](../../../docs/tests/domain-model/TestGetModuleInterfaces_InternalConnection_ScopedToInstance.md) — déduit : teste `ModelService.AddInterface`
@@ -122,32 +120,6 @@ Les interfaces sont détectées automatiquement à l'import du fichier 3D lorsqu
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!warning] Tests — aucun test ne couvre cette exigence
 > [Matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
-<!-- tests-obsidian:end -->
-
-### Flux alternatif — Interface virtuelle (slot de connexion non encore typé)
-
-1. Une interface est créée sans préciser la catégorie, le type ou le sens
-2. L'interface est créée avec `Virtual: true` — elle représente un point de connexion disponible sur le composant
-3. Lors d'une liaison (UCAM01/UCAM03), le slot virtuel sera matérialisé en interface physique via `ConnectVirtualToPhysical()`.
-
-<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 16 déduit(s)
-> - 🟡 [TestConnectVirtualToPhysical_AssemblyLinkCreated](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_AssemblyLinkCreated.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_BidirStaysBidir](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_BidirStaysBidir.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InBecomesOut](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InBecomesOut.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_InheritsPhysicalValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_InheritsPhysicalValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilConnStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilConnStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NilIfaceStore_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NilIfaceStore_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_NotVirtual_Error](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_NotVirtual_Error.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_OutBecomesIn](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_OutBecomesIn.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesName](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesName.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestConnectVirtualToPhysical_UserOverridesValues](../../../docs/tests/domain-model/TestConnectVirtualToPhysical_UserOverridesValues.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterConnect](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterConnect.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - 🟡 [TestWorkspace_VirtualIsClickable](../../../docs/tests/domain-model/TestWorkspace_VirtualIsClickable.md) — déduit : teste `ModelService.ConnectVirtualToPhysical`
-> - … et 1 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Mise à jour d'une interface existante (UpdateInterface)
@@ -280,7 +252,6 @@ REST --> Browser : 200 OK { interface }
 |-------|-------------|
 | **RM11** | Une interface est définie par 5 attributs : Catégorie + Type + Sens + ValeurMin/Max + Unité |
 | **RM12** | Lors de la mise à jour d'une interface : les connexions devenues incompatibles reçoivent `Incompatible: true` sans suppression automatique |
-| **RM13** | Chaque asset dispose toujours d'au moins un slot virtuel (`EnsureVirtualSlot`) |
 
 ## Exigences non-fonctionnelles
 
@@ -297,9 +268,7 @@ REST --> Browser : 200 OK { interface }
 
 **Référentiel des catégories, types et unités :** `service.GetRefs()` retourne un `InterfaceRefs` avec les listes prédéfinies, consultable par tout client avant de transmettre une interface. L'ajout de nouvelles catégories/types/unités est possible via `AddRefCategory()`, `AddRefType()`, `AddRefUnit()`.
 
-**Slot virtuel :** Chaque asset possède automatiquement au moins un slot virtuel (`Virtual: true`) créé par `EnsureVirtualSlot()`. Ce slot devient une interface physique lors de la première liaison via `ConnectVirtualToPhysical()`.
-
-**Synchronisation Fabric :** Les interfaces restent en brouillon local tant que le composant n'est pas soumis — aucune écriture Fabric par action individuelle (ajout, mise à jour, matérialisation de slot virtuel). La synchronisation vers `Model3D.Interfaces` a lieu **une seule fois**, à la soumission du composant (sa création finale, ou celle d'un fork si le composant d'origine était déjà soumis) — jamais de façon facultative après coup.
+**Synchronisation Fabric :** Les interfaces restent en brouillon local tant que le composant n'est pas soumis — aucune écriture Fabric par action individuelle (ajout, mise à jour, suppression). La synchronisation vers `Model3D.Interfaces` a lieu **une seule fois**, à la soumission du composant (sa création finale, ou celle d'un fork si le composant d'origine était déjà soumis) — jamais de façon facultative après coup.
 
 <!-- liens-obsidian:begin — section de traçabilité générée à partir des références du document : ne pas l'éditer à la main -->
 ## Liens

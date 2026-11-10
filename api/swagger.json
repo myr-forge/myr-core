@@ -2853,62 +2853,6 @@
                     }
                 }
             }
-        },
-        "/virtual-connect": {
-            "post": {
-                "security": [
-                    {
-                        "MyrToken": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "connections"
-                ],
-                "summary": "Relier une interface virtuelle à une interface physique",
-                "parameters": [
-                    {
-                        "description": "virtual_iface_id et physical_iface_id requis",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.virtualConnectRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adapters_in_rest.connectionDTO"
-                        }
-                    },
-                    "400": {
-                        "description": "interfaces incompatibles (RM10)",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "porteur du slot virtuel déjà soumis (RM19), ou interface déjà engagée (RM09)",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -3187,38 +3131,6 @@
                 }
             }
         },
-        "adapters_in_rest.virtualConnectRequest": {
-            "type": "object",
-            "properties": {
-                "from_instance_id": {
-                    "type": "string"
-                },
-                "is_range": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "physical_iface_id": {
-                    "type": "string"
-                },
-                "to_instance_id": {
-                    "type": "string"
-                },
-                "unit": {
-                    "type": "string"
-                },
-                "value_max": {
-                    "type": "number"
-                },
-                "value_min": {
-                    "type": "number"
-                },
-                "virtual_iface_id": {
-                    "type": "string"
-                }
-            }
-        },
         "adapters_in_rest.walletDTO": {
             "type": "object",
             "properties": {
@@ -3331,10 +3243,6 @@
                 "value_min": {
                     "description": "valeur unique ou borne basse",
                     "type": "number"
-                },
-                "virtual": {
-                    "description": "true = point de connexion non encore matérialisé",
-                    "type": "boolean"
                 }
             }
         },

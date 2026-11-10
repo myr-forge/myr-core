@@ -102,7 +102,7 @@ In --> C : interface ajoutée (locale)
 note over C, IS
   Répétable librement (UCCE06, UCAM03) :
   AddInterface / UpdateInterface / RemoveInterface
-  / EnsureVirtualSlot — sans transaction Fabric
+  — sans transaction Fabric
   tant que Status == draft (ADR-02)
 end note
 

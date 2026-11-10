@@ -68,39 +68,6 @@ func TestRunModelLinkAdd_RM10_Refused_ErrorReturned(t *testing.T) {
 	}
 }
 
-/// @brief  runModelLinkConnectVirtual matérialise le slot virtuel et affiche l'id de la liaison
-/// @input  virtual="iface-v", physical="iface-p"
-/// @expect ConnectVirtualToPhysical reçoit les deux ids, sortie contient l'id créé
-func TestRunModelLinkConnectVirtual_NominalCase(t *testing.T) {
-	var gotVirtual, gotPhysical string
-	svc := &mockModelSvc{connectVirtualToPhysical: func(virtualIfaceID, physicalIfaceID string, popupValues model.AssetInterface, fromInstanceID, toInstanceID string) (*model.Connection, error) {
-		gotVirtual, gotPhysical = virtualIfaceID, physicalIfaceID
-		return &model.Connection{ID: "conn-2"}, nil
-	}}
-	var buf bytes.Buffer
-	err := runModelLinkConnectVirtual(&buf, svc, "iface-v", "iface-p", model.AssetInterface{}, "", "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if gotVirtual != "iface-v" || gotPhysical != "iface-p" {
-		t.Fatalf("unexpected forwarded args: virtual=%q physical=%q", gotVirtual, gotPhysical)
-	}
-	if !strings.Contains(buf.String(), "conn-2") {
-		t.Fatalf("unexpected output: %q", buf.String())
-	}
-}
-
-/// @brief  runModelLinkConnectVirtual rejette l'absence de --virtual ou --physical
-/// @input  virtual="", physical="iface-p"
-/// @expect Erreur retournée
-func TestRunModelLinkConnectVirtual_MissingVirtual_Rejected(t *testing.T) {
-	svc := &mockModelSvc{}
-	var buf bytes.Buffer
-	if err := runModelLinkConnectVirtual(&buf, svc, "", "iface-p", model.AssetInterface{}, "", ""); err == nil {
-		t.Fatalf("expected error when --virtual is missing")
-	}
-}
-
 /// @brief  runModelLinkRemove supprime la liaison et confirme en sortie
 /// @input  id="conn-1"
 /// @expect RemoveConnection reçoit l'id, sortie confirme la suppression

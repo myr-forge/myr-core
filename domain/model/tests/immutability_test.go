@@ -176,12 +176,7 @@ func TestInterfaces_RM19_SubmittedCarrier_Rejected(t *testing.T) {
 	if err != nil || len(ifaces) == 0 {
 		t.Fatalf("interfaces du composant : %v, %v", ifaces, err)
 	}
-	var physical *model.AssetInterface
-	for _, i := range ifaces {
-		if !i.Virtual {
-			physical = i
-		}
-	}
+	physical := ifaces[0]
 	if err := f.svc.AddInterface(&model.AssetInterface{AssetID: f.component.ID, Category: "ELEC"}); !errors.Is(err, model.ErrAssetSubmitted) {
 		t.Errorf("AddInterface : ErrAssetSubmitted attendu, obtenu %v", err)
 	}
@@ -251,43 +246,6 @@ func TestUpdateAsset_RM03_IncompatibleLicense_Rejected(t *testing.T) {
 	}
 	if got, _ := svc.Get(child.ID, ""); got.LicenseID != "" {
 		t.Errorf("licence du brouillon modifiée : %q", got.LicenseID)
-	}
-}
-
-// / @brief  Le slot virtuel d'un asset soumis ne se matérialise pas : ce serait ajouter une interface à un asset figé (règle 27, RM19)
-// / @input  composant soumis et son slot virtuel ; ConnectVirtualToPhysical vers l'interface physique d'un brouillon
-// / @expect ErrAssetSubmitted ; le slot reste virtuel, aucune liaison n'est créée
-func TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected(t *testing.T) {
-	f := newSubmittedFixture(t)
-	f.svc.EnsureVirtualSlot(f.component.ID)
-	var slot *model.AssetInterface
-	ifaces, _ := f.svc.ListInterfacesForAsset(f.component.ID)
-	for _, i := range ifaces {
-		if i.Virtual {
-			slot = i
-		}
-	}
-	if slot == nil {
-		t.Fatal("slot virtuel absent")
-	}
-	other, err := f.svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "écrou", ChannelID: "ch1", LicenseID: "cc-by-4"})
-	if err != nil {
-		t.Fatalf("AddFull: %v", err)
-	}
-	phys := &model.AssetInterface{AssetID: other.ID, Category: "MECA", Type: "filetage", Direction: model.IfaceIn}
-	if err := f.svc.AddInterface(phys); err != nil {
-		t.Fatalf("AddInterface: %v", err)
-	}
-	before, _ := f.svc.ListConnections()
-
-	if _, err := f.svc.ConnectVirtualToPhysical(slot.ID, phys.ID, model.AssetInterface{}, "", ""); !errors.Is(err, model.ErrAssetSubmitted) {
-		t.Fatalf("ErrAssetSubmitted attendu, obtenu %v", err)
-	}
-	if got, _ := f.svc.GetInterface(slot.ID); got == nil || !got.Virtual {
-		t.Errorf("le slot virtuel ne doit pas être matérialisé : %+v", got)
-	}
-	if after, _ := f.svc.ListConnections(); len(after) != len(before) {
-		t.Errorf("aucune liaison ne doit être créée (%d → %d)", len(before), len(after))
 	}
 }
 

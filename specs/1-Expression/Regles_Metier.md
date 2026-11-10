@@ -143,7 +143,7 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCAM01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 8 explicite(s) · 0 déduit(s)
+> [!check]- Tests — 7 explicite(s) · 0 déduit(s)
 > - ✅ [TestRunModelLinkAdd_RM10_Refused_ErrorReturned](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_RM10_Refused_ErrorReturned.md) — explicite (le test cite RM09)
 > - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM09)
 > - ✅ [TestAddAssemblyLink_RM09_InterfaceUsedOnce](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_InterfaceUsedOnce.md) — explicite (le test cite RM09)
@@ -151,7 +151,6 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 > - ✅ [TestAddAssemblyLink_RM09_SameInterfaceOtherInstance_OK](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SameInterfaceOtherInstance_OK.md) — explicite (le test cite RM09)
 > - ✅ [TestAddAssemblyLink_RM09_SameInterfaceTwoInstances_OK](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SameInterfaceTwoInstances_OK.md) — explicite (le test cite RM09)
 > - ✅ [TestAddAssemblyLink_RM09_SelfLink_Rejected](../../docs/tests/domain-model/TestAddAssemblyLink_RM09_SelfLink_Rejected.md) — explicite (le test cite RM09)
-> - ✅ [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — explicite (le test cite RM09)
 <!-- tests-obsidian:end -->
 
 ### RM10 — Vérification de compatibilité automatique
@@ -162,11 +161,10 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCAM01
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 4 explicite(s) · 0 déduit(s)
+> [!check]- Tests — 3 explicite(s) · 0 déduit(s)
 > - ✅ [TestRunModelLinkAdd_RM10_Refused_ErrorReturned](../../docs/tests/adapters-in-cli/TestRunModelLinkAdd_RM10_Refused_ErrorReturned.md) — explicite (le test cite RM10)
 > - ✅ [TestDomainErrors_AssemblyRules_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_AssemblyRules_MappedToHTTP.md) — explicite (le test cite RM10)
 > - ✅ [TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected](../../docs/tests/domain-model/TestAddAssemblyLink_RM10_IncompatibleInterfaces_Rejected.md) — explicite (le test cite RM10)
-> - ✅ [TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized](../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized.md) — explicite (le test cite RM10)
 <!-- tests-obsidian:end -->
 
 ### RM11 — Critères de compatibilité d'interfaces
@@ -192,18 +190,6 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
 > [!warning] Tests — aucun test ne couvre cette exigence
 > [Matrice de couverture](../../docs/tests/Matrice_Couverture_Tests.md)
-<!-- tests-obsidian:end -->
-
-### RM13 — Slot virtuel garanti
-
-- **Déclencheur** : Ajout d'un asset à un module
-- **Condition** : Toujours
-- **Conséquence** : Chaque asset dispose en permanence d'au moins un slot virtuel (`Virtual: true`). Dès qu'un slot virtuel est matérialisé en interface, un nouveau slot virtuel est recréé automatiquement. Le slot n'est matérialisé que si la liaison demandée est permise (RM09, RM10) : un refus le laisse virtuel
-- **Use cases** : UCAM02, UCAM03
-
-<!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 1 explicite(s) · 0 déduit(s)
-> - ✅ [TestAPIIntegration_InterfaceLifecycle](../../docs/tests/adapters-in-rest/TestAPIIntegration_InterfaceLifecycle.md) — explicite (le test cite RM13)
 <!-- tests-obsidian:end -->
 
 ### RM50 — Liaison directe unique
@@ -378,14 +364,13 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 - **Use cases** : UCMOD06, UCCE06, UCCE02, UCMOD03
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 12 explicite(s) · 0 déduit(s)
+> [!check]- Tests — 11 explicite(s) · 0 déduit(s)
 > - ✅ [TestDomainErrors_SubmittedAndLicense_MappedToHTTP](../../docs/tests/adapters-in-rest/TestDomainErrors_SubmittedAndLicense_MappedToHTTP.md) — explicite (le test cite RM19)
 > - ✅ [TestIntegration_ModelService_SubmittedAsset](../../docs/tests/adapters-out-fabric/TestIntegration_ModelService_SubmittedAsset.md) — explicite (le test cite RM19)
 > - ✅ [TestIntegration_RM06_WriteOnce](../../docs/tests/adapters-out-fabric/TestIntegration_RM06_WriteOnce.md) — explicite (le test cite RM19)
 > - ✅ [TestIntegration_RM19_DraftRejected](../../docs/tests/adapters-out-fabric/TestIntegration_RM19_DraftRejected.md) — explicite (le test cite RM19)
 > - ✅ [TestIntegration_UpdateMetadata_OwnerOnly](../../docs/tests/adapters-out-fabric/TestIntegration_UpdateMetadata_OwnerOnly.md) — explicite (le test cite RM19)
 > - ✅ [TestAddFull_RM19_DerivedFromSubmittedModule_CopiesComposition](../../docs/tests/domain-model/TestAddFull_RM19_DerivedFromSubmittedModule_CopiesComposition.md) — explicite (le test cite RM19)
-> - ✅ [TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected](../../docs/tests/domain-model/TestConnectVirtualToPhysical_RM19_SubmittedCarrier_Rejected.md) — explicite (le test cite RM19)
 > - ✅ [TestCreateModule_RM19_ForkOfSubmitted_Submittable](../../docs/tests/domain-model/TestCreateModule_RM19_ForkOfSubmitted_Submittable.md) — explicite (le test cite RM19)
 > - ✅ [TestModuleComposition_RM19_Submitted_Rejected](../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — explicite (le test cite RM19)
 > - ✅ [TestSubmitModule_RM19_AlreadySubmitted_Rejected](../../docs/tests/domain-model/TestSubmitModule_RM19_AlreadySubmitted_Rejected.md) — explicite (le test cite RM19)
@@ -895,7 +880,6 @@ Ces règles complètent les use cases : elles régissent ce que le système DOIT
 | [RM10](#RM10%20—%20Vérification%20de%20compatibilité%20automatique) | Vérification de compatibilité automatique à la création | Interfaces |
 | [RM11](#RM11%20—%20Critères%20de%20compatibilité%20d'interfaces) | Critères de compatibilité : catégorie + type + sens + contraintes de valeur (unités de base communes chevauchantes, aucune en commun = incompatible) | Interfaces |
 | [RM12](#RM12%20—%20Persistance%20des%20liaisons%20incompatibles) | Liaison incompatible persistante (`Incompatible:true`, non supprimée automatiquement) | Interfaces |
-| [RM13](#RM13%20—%20Slot%20virtuel%20garanti) | Slot virtuel garanti et recréé automatiquement à chaque matérialisation | Interfaces |
 | [RM50](#RM50%20—%20Liaison%20directe%20unique) | Liaison directe en double refusée, jamais renvoyée ni dupliquée | Interfaces |
 | [RM53](#RM53%20—%20Unité%20d'une%20contrainte%20de%20valeur) | Unité lue dans le vocabulaire, sinon préfixe SI usuel + unité connue, sinon refusée ; comparaison sur la même unité de base | Interfaces |
 | [RM14](#RM14%20—%20Suppression%20en%20cascade%20des%20connexions) | Suppression en cascade des connexions au retrait d'une instance | Composition (instances) |

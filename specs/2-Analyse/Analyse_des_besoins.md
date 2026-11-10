@@ -306,7 +306,6 @@ Domaines mobilisés : `domain/identity/`, `domain/role/`, `adapters/out/localsto
 **Service attendu :**
 - Ajout/retrait d'instances de composants sur un module : action brute et directe (`AddAssetToWorkspace`/`RemoveAssetFromWorkspace`), locale au serveur, hors blockchain, modifiable librement
 - Gestion d'instances indépendantes lors de l'ajout d'un module déjà instancié (RM15)
-- Chaque asset possède toujours au moins un slot virtuel (RM13)
 - Création de liaisons entre interfaces : vérification de compatibilité automatique (RM10) selon 4 critères (RM11)
 - Interface à usage unique par liaison (RM09)
 - Liaison devenant incompatible → `Incompatible: true` sans suppression automatique (RM12)
@@ -318,7 +317,7 @@ Domaines mobilisés : `domain/identity/`, `domain/role/`, `adapters/out/localsto
 - La vérification RM11 porte sur 4 critères : catégorie + type + sens complémentaires + valeurs
 - Le CLI/API n'expose aucun espace navigable : chaque action (ajout/retrait d'instance, création de liaison) s'exécute directement sur un module identifié. Les méthodes Go historiques (`AddAssetToWorkspace`) portent encore le nom « Workspace » en interne, mais ce nom ne doit apparaître ni dans les use cases ni dans le nommage des commandes CLI
 
-**Code existant :** `domain/model/service.go` — liaisons, slots virtuels, cascade opérationnels. `ifacesCompatible()` implémentée (critère tag manquant). `adapters/in/rest/handlers.go` — endpoints d'instance/liaison exposés.
+**Code existant :** `domain/model/service.go` — liaisons et cascade opérationnelles. `ifacesCompatible()` implémentée. `adapters/in/rest/handlers.go` — endpoints d'instance/liaison exposés.
 
 ---
 
@@ -582,7 +581,6 @@ Chaque use case doit contenir :
 À vérifier dans tout use case de **composition de module** (UCAM) :
 
 - [ ] La vérification de compatibilité RM11 est-elle appelée ? (4 critères)
-- [ ] Un slot virtuel est-il garanti après toute matérialisation ? (RM13)
 - [ ] La cascade de suppression est-elle décrite pour le retrait d'asset ? (RM14)
 
 ### 9.4 Ordre de rédaction recommandé

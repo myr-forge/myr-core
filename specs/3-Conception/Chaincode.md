@@ -73,13 +73,13 @@ type Model3D struct {
     Links       []string  `json:"links,omitempty"`
     BlockID     string    `json:"block_id,omitempty"`    // renseigné par le chaincode
     CreatedAt   time.Time `json:"created_at"`
-    Interfaces  []AssetInterface `json:"interfaces,omitempty"` // ADR-02 : interfaces physiques/virtuelles embarquées
+    Interfaces  []AssetInterface `json:"interfaces,omitempty"` // ADR-02 : interfaces embarquées à la soumission
     // Champs module
     Status      string    `json:"status,omitempty"`      // draft|submitted
     ModuleVersions []ModuleVersion `json:"module_versions,omitempty"`
 }
 
-// AssetInterface — point de connexion physique ou virtuel d'un Model3D (ADR-02 : enregistrée sur la blockchain,
+// AssetInterface — point de connexion d'un Model3D (ADR-02 : enregistrée sur la blockchain,
 // jamais dans un store local séparé). Voir domain/model/entity.go pour la struct domaine de référence.
 type AssetInterface struct {
     ID        string  `json:"id"`
@@ -92,7 +92,7 @@ type AssetInterface struct {
     ValueMax  float64 `json:"value_max,omitempty"`
     IsRange   bool    `json:"is_range"`
     Unit      string  `json:"unit,omitempty"`
-    Virtual   bool    `json:"virtual"`
+    Virtual   bool    `json:"virtual"` // hérité : les slots virtuels sont retirés du cœur (FT-040), le champ reste lisible sur les enregistrements antérieurs
     Removed   bool    `json:"removed,omitempty"` // Fabric ne supporte pas la suppression (règle 9) — marquage logique
 }
 

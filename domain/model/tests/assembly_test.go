@@ -156,42 +156,6 @@ func TestAddAssemblyLink_RM11_ValueRanges(t *testing.T) {
 	}
 }
 
-// / @brief  Le slot virtuel n'est matérialisé que si la liaison est permise (RM09, RM10)
-// / @input  interface physique déjà engagée sur l'instance inst-p ; ConnectVirtualToPhysical depuis le slot d'un brouillon vers cette interface et cette instance
-// / @expect ErrInterfaceInUse ; le slot reste virtuel ; aucune nouvelle liaison
-func TestConnectVirtualToPhysical_RM09_InterfaceInUse_NotMaterialized(t *testing.T) {
-	svc := newFullSvc(t, "asset1", "asset2")
-	carrier, err := svc.AddFull(model.AddRequest{Category: model.CategoryBase, Name: "boîtier", ChannelID: "ch1"})
-	if err != nil {
-		t.Fatalf("AddFull : %v", err)
-	}
-	out, in := usbPair(t, svc)
-	if _, err := svc.AddAssemblyLink(out, in, "", "inst-p", "inst-b", ""); err != nil {
-		t.Fatalf("liaison initiale : %v", err)
-	}
-	svc.EnsureVirtualSlot(carrier.ID)
-	var slot string
-	ifaces, _ := svc.ListInterfacesForAsset(carrier.ID)
-	for _, i := range ifaces {
-		if i.Virtual {
-			slot = i.ID
-		}
-	}
-	if slot == "" {
-		t.Fatal("slot virtuel absent")
-	}
-
-	if _, err := svc.ConnectVirtualToPhysical(slot, out, model.AssetInterface{}, "inst-c", "inst-p"); !errors.Is(err, model.ErrInterfaceInUse) {
-		t.Fatalf("ErrInterfaceInUse attendu, obtenu %v", err)
-	}
-	if got, _ := svc.GetInterface(slot); got == nil || !got.Virtual {
-		t.Errorf("le slot doit rester virtuel : %+v", got)
-	}
-	if n := connCount(t, svc); n != 1 {
-		t.Errorf("aucune nouvelle liaison attendue, obtenu %d", n)
-	}
-}
-
 // / @brief  Une liaison directe identique est refusée : le client la retrouve dans la liste, le serveur ne devine rien (RM50)
 // / @input  AddConnection(a, b) deux fois, puis AddConnection(b, a)
 // / @expect ErrConnectionExists pour le doublon ; le sens inverse est une autre liaison ; deux liaisons enregistrées

@@ -11,7 +11,6 @@ tags:
   - famille/UCMOD
   - domaine/model
   - uc/UCMOD02
-  - rm/RM13
   - rm/RM15
   - enf/ENF12
   - enf/ENF28
@@ -65,11 +64,10 @@ La clé de cette opération est la gestion des **instances indépendantes** (RM1
 1. Le Module source est récupéré depuis la blockchain (`GET /api/modules/:id`)
 2. `POST /api/modules/:hostModuleID/instances` est appelée avec `{asset_id: moduleSource.ID}`
 3. Service : `AddAssetToWorkspace(hostModuleID, assetID)` crée une `WorkspaceInstance` indépendante
-4. Le slot virtuel est garanti automatiquement (RM13)
 5. Le Module source est instancié dans le module hôte, avec ses interfaces exposées
 
 <!-- tests-obsidian:begin — tests rattachés à cette exigence, section générée : ne pas l'éditer à la main -->
-> [!check]- Tests — 0 explicite(s) · 23 déduit(s)
+> [!check]- Tests — 0 explicite(s) · 17 déduit(s)
 > - 🟡 [TestLegacyModulesAlias_GET_DelegatesToComponents](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_GET_DelegatesToComponents.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestLegacyModulesAlias_ListRoute](../../../docs/tests/adapters-in-rest/TestLegacyModulesAlias_ListRoute.md) — déduit : teste route `/api/modules`
 > - 🟡 [TestModules_RegenerateThumbnail_OK](../../../docs/tests/adapters-in-rest/TestModules_RegenerateThumbnail_OK.md) — déduit : teste route `/api/modules`
@@ -84,8 +82,8 @@ La clé de cette opération est la gestion des **instances indépendantes** (RM1
 > - 🟡 [TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed](../../../docs/tests/domain-model/TestGetModuleInterfaces_MultipleInstancesSameAsset_AllExposed.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestModuleComposition_RM19_Submitted_Rejected](../../../docs/tests/domain-model/TestModuleComposition_RM19_Submitted_Rejected.md) — déduit : teste `ModelService.AddAssetToWorkspace`
 > - 🟡 [TestWorkspace_AddRemoveInstance](../../../docs/tests/domain-model/TestWorkspace_AddRemoveInstance.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - 🟡 [TestWorkspace_AlwaysHasVirtualInterface_AfterAdd](../../../docs/tests/domain-model/TestWorkspace_AlwaysHasVirtualInterface_AfterAdd.md) — déduit : teste `ModelService.AddAssetToWorkspace`
-> - … et 8 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
+> - 🟡 [TestWorkspace_NilStore_ReturnsError](../../../docs/tests/domain-model/TestWorkspace_NilStore_ReturnsError.md) — déduit : teste `ModelService.AddAssetToWorkspace`
+> - … et 2 autre(s) : voir la [matrice de couverture](../../../docs/tests/Matrice_Couverture_Tests.md)
 <!-- tests-obsidian:end -->
 
 ### Flux alternatif — Module déjà instancié dans le module hôte (RM15)
@@ -129,7 +127,6 @@ La clé de cette opération est la gestion des **instances indépendantes** (RM1
 - Une nouvelle `WorkspaceInstance` est créée dans le module hôte avec un ID unique
 - L'instance référence `AssetID` du Module source (pas une copie)
 - Le module hôte reste en état `draft`
-- Chaque instance dispose d'au moins un slot virtuel (RM13)
 - Les Liaisons entre instances restent indépendantes (RM15)
 
 ## Diagramme de séquence
@@ -164,7 +161,6 @@ end
 Service -> Service : Créer WorkspaceInstance{ID: newUUID, AssetID: sourceID}
 Service -> Fabric : StoreModelRecord(hostModule)
 Fabric --> Service : OK
-Service -> Service : EnsureVirtualSlot(sourceID) — RM13
 Service --> REST : *Model3D (draft mis à jour)
 REST --> Client : 200 moduleDTO
 @enduml
@@ -174,7 +170,6 @@ REST --> Client : 200 moduleDTO
 
 | Règle | Description | Point d'application |
 |-------|-------------|---------------------|
-| **RM13** | Slot virtuel garanti pour chaque asset instancié | `EnsureVirtualSlot()` dans `AddAssetToWorkspace()` |
 | **RM15** | Seconde instance indépendante si le Module est déjà instancié dans le module hôte | Détection dans `AddAssetToWorkspace()` |
 
 ## Exigences non-fonctionnelles

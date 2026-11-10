@@ -330,7 +330,7 @@ func (m *model) renderCarte() string {
 	w("| `couche/expression` · `couche/analyse` · `couche/conception` · `couche/code` | les documents d'une couche (les notes de code vivent dans `docs/code/`) |")
 	w("| `famille/UCMOD` … | les use cases d'une famille |")
 	w("| `uc/UCMOD04` … | tout ce qui concerne un use case : ses deux couches, la conception qui le déclare dans son périmètre, le code qui le réalise |")
-	w("| `rm/RM13` · `enf/ENF12` … | les documents et les tests qui citent une règle métier ou une exigence non fonctionnelle |")
+	w("| `rm/RM09` · `enf/ENF12` … | les documents et les tests qui citent une règle métier ou une exigence non fonctionnelle |")
 	w("| `domaine/model` … | specs et code d'un domaine Go (`domain/<domaine>/`) |")
 	w("| `hexa/domaine` · `hexa/adapter-in` · `hexa/adapter-out` · `hexa/point-entree` | les packages Go d'une couche de l'architecture hexagonale |")
 	w("| `relecture/question` · `relecture/remarque` · `relecture/incoherence` · `relecture/ecart` | les documents qui portent une annotation de relecture ouverte |\n")

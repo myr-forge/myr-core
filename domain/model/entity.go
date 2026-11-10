@@ -153,7 +153,6 @@ type AssetInterface struct {
 	ValueMax  float64        `json:"value_max"`         // borne haute (si IsRange)
 	IsRange   bool           `json:"is_range"`          // true si plage de valeurs
 	Unit      string         `json:"unit,omitempty"`    // ex: "V", "mm", "bar"
-	Virtual   bool           `json:"virtual,omitempty"` // true = point de connexion non encore matérialisé
 }
 
 // InterfaceRefs contient le vocabulaire extensible des catégories, types et unités.
@@ -201,7 +200,7 @@ type ModuleVersion struct {
 	BlockID    string    `json:"block_id,omitempty"`
 }
 
-// WorkspaceInstance représente un slot de référence d'un composant dans un module.
+// WorkspaceInstance représente une instance d'un composant dans un module.
 // Le même composant peut apparaître plusieurs fois via des instances indépendantes.
 type WorkspaceInstance struct {
 	ID      string  `json:"id"`

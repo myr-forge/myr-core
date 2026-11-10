@@ -53,7 +53,7 @@ La compatibilité est déterminée par l'algorithme `ifacesCompatible()` (RM11) 
 
 - Identité authentifiée (rôle `Concepteur` ou `Consommateur`)
 - Un Composant identifié (ID connu du client)
-- Le Composant possède au moins une Interface définie (non virtuelle)
+- Le Composant possède au moins une Interface définie
 - La blockchain est accessible
 
 ## Scénario
@@ -62,7 +62,7 @@ La compatibilité est déterminée par l'algorithme `ifacesCompatible()` (RM11) 
 
 ### Flux nominal — Composants compatibles trouvés
 
-1. Le service récupère les Interfaces du Composant source via `ListInterfacesForAsset(sourceID)` — filtre les virtuelles
+1. Le service récupère les Interfaces du Composant source via `ListInterfacesForAsset(sourceID)`
 2. Le service récupère tous les Composants du réseau via `List(channelID)` — exclut les modules
 3. Pour chaque Composant candidat, il récupère ses Interfaces et applique `ifacesCompatible()` entre chaque paire (source libre ↔ candidat libre)
 4. La liste des Composants ayant au moins une Interface compatible est retournée, avec pour chacun : nom, catégorie, type d'interface compatible
@@ -95,7 +95,7 @@ La compatibilité est déterminée par l'algorithme `ifacesCompatible()` (RM11) 
 
 ### Flux erreur — Composant sans interface définie
 
-1. Le Composant source n'a aucune Interface définie (seulement un slot virtuel)
+1. Le Composant source n'a aucune Interface définie
 2. Aucune interface réelle à comparer — la recherche retourne une liste vide
 3. Message informatif : "Ce composant n'a pas encore d'interface physique définie — ajoutez des interfaces pour trouver des composants compatibles"
 
@@ -140,7 +140,6 @@ REST -> REST : Vérifier session (ENF12)
 REST -> Service : ListInterfacesForAsset(sourceID)
 Service -> Local : GetInterface(sourceID)
 Local --> Service : []*AssetInterface
-Service -> Service : Filtrer Virtual==false\n(interfaces réelles uniquement)
 
 REST -> Service : List(channelID)
 Service -> Fabric : ListModelRecords(channelID)

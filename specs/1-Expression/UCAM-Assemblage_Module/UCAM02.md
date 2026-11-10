@@ -49,7 +49,7 @@ Un client peut lister les interfaces physiques (mécaniques, électriques, hydra
 ### Flux nominal — Affichage des interfaces physiques
 
 1. Les interfaces physiques du composant ou du module sont listées
-2. Chaque ligne du résultat détaille : identifiant, catégorie, type, sens, contraintes de valeur (valeur ou plage, unité), et statut (virtuelle/utilisée)
+2. Chaque ligne du résultat détaille : identifiant, catégorie, type, sens, contraintes de valeur (valeur ou plage, unité), et statut (libre/utilisée)
 
 ## Post-conditions
 

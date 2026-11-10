@@ -239,7 +239,7 @@ end
 
 **Routes exposées** dans `adapters/in/rest/server.go` :
 - Identité : `/api/identity/policy`, `/api/identity/enroll`, `/api/identity/session`, `/api/identity/request`, `/api/identity/requests`, `/api/identity/wallets`, `/api/identity/status`
-- Données : `/api/components`, `/api/components/`, `/api/connections`, `/api/connections/`, `/api/assembly-links`, `/api/virtual-connect`, `/api/modules`, `/api/modules/`, `/api/interfaces/`
+- Données : `/api/components`, `/api/components/`, `/api/connections`, `/api/connections/`, `/api/assembly-links`, `/api/modules`, `/api/modules/`, `/api/interfaces/`
 - Référentiel : `/api/refs`, `/api/refs/categories`, `/api/refs/types`, `/api/refs/units`
 - Réseau : `/api/channels`, `/api/networks`, `/api/networks/active`
 - Utilitaire : `/api/ping`, `/api/status`, `/api/health`, `/metrics`
@@ -281,7 +281,6 @@ end
 - REST `/api/refs/types`
 - REST `/api/refs/units`
 - REST `/api/status`
-- REST `/api/virtual-connect`
 - REST `/metrics`
 
 <!-- liens-obsidian:end -->

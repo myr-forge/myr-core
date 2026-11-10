@@ -12,7 +12,7 @@ import (
 
 var modelInterfaceCmd = &cobra.Command{
 	Use:   "interface",
-	Short: "Manage the physical/virtual interfaces of an asset",
+	Short: "Manage the interfaces of an asset",
 }
 
 // ── add ───────────────────────────────────────────────────────────────────────
@@ -97,17 +97,13 @@ func runModelInterfaceList(w io.Writer, svc model.ModelService, assetID string) 
 		return err
 	}
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "ID\tCATÉGORIE\tTYPE\tDIRECTION\tVALEUR\tUNITÉ\tVIRTUELLE")
+	fmt.Fprintln(tw, "ID\tCATÉGORIE\tTYPE\tDIRECTION\tVALEUR\tUNITÉ")
 	for _, i := range ifaces {
 		value := fmt.Sprintf("%g", i.ValueMin)
 		if i.IsRange {
 			value = fmt.Sprintf("%g..%g", i.ValueMin, i.ValueMax)
 		}
-		virtual := ""
-		if i.Virtual {
-			virtual = "*"
-		}
-		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n", i.ID, i.Category, i.Type, i.Direction, value, i.Unit, virtual)
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\n", i.ID, i.Category, i.Type, i.Direction, value, i.Unit)
 	}
 	return tw.Flush()
 }
@@ -136,7 +132,6 @@ func runModelInterfaceGet(w io.Writer, svc model.ModelService, id string) error 
 	fmt.Fprintf(w, "Direction : %s\n", i.Direction)
 	fmt.Fprintf(w, "Valeur    : %g..%g (plage=%v)\n", i.ValueMin, i.ValueMax, i.IsRange)
 	fmt.Fprintf(w, "Unité     : %s\n", i.Unit)
-	fmt.Fprintf(w, "Virtuelle : %v\n", i.Virtual)
 	return nil
 }
 

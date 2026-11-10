@@ -1193,9 +1193,6 @@ func (s *Service) SubmitModule(moduleID, note string) (*Model3D, error) {
 }
 
 // AddAssetToWorkspace ajoute une nouvelle instance de l'asset au module.
-// Invariant : chaque asset dispose toujours d'au moins une interface virtuelle
-// (slot utilisable pour créer une liaison). Un slot est créé automatiquement
-// si aucune interface virtuelle n'existe encore pour cet asset.
 // L'asset ajouté doit exister (ErrNotFound) ; s'il est le module ou le
 // contient, même indirectement, il est refusé (ErrCyclicComposition, RM52).
 func (s *Service) AddAssetToWorkspace(moduleID, assetID string) (*Model3D, error) {
@@ -1213,7 +1210,6 @@ func (s *Service) AddAssetToWorkspace(moduleID, assetID string) (*Model3D, error
 	if err != nil {
 		return nil, err
 	}
-	s.ensureVirtualSlot(assetID)
 	return m, nil
 }
 
@@ -1243,31 +1239,6 @@ func (s *Service) checkNotContaining(added *Model3D, moduleID string) error {
 	}
 	return nil
 }
-
-// EnsureVirtualSlot garantit qu'au moins une interface virtuelle existe pour cet asset.
-// Idempotent. Sans effet si le store n'est pas configuré ou si un slot existe déjà.
-func (s *Service) EnsureVirtualSlot(assetID string) {
-	if s.ifaceStore == nil {
-		return
-	}
-	ifaces, err := s.ifaceStore.ListInterfacesForAsset(assetID)
-	if err != nil {
-		return
-	}
-	for _, iface := range ifaces {
-		if iface.Virtual {
-			return // slot déjà présent
-		}
-	}
-	_ = s.ifaceStore.SaveInterface(&AssetInterface{
-		ID:      generateID(),
-		AssetID: assetID,
-		Virtual: true,
-	})
-}
-
-// ensureVirtualSlot est l'alias interne non-exporté.
-func (s *Service) ensureVirtualSlot(assetID string) { s.EnsureVirtualSlot(assetID) }
 
 // RemoveAssetFromWorkspace retire une instance spécifique (par instanceID) du module.
 // Supprime en cascade les connexions de cette instance dans le module.
@@ -1359,40 +1330,22 @@ func (s *Service) getModuleInterfacesInto(moduleID string, cache map[string][]*A
 	if err != nil {
 		// L'enregistrement est introuvable (brouillon comme blockchain absents,
 		// ou Fabric indisponible). On suppose un composant simple : on retourne
-		// les interfaces locales directes, et on crée un slot virtuel seulement si
-		// l'asset n'a encore aucune interface définie.
-		// Cela permet d'afficher les points d'interface même sans connexion Fabric.
+		// les interfaces locales directes.
 		ifaces, err2 := s.ifaceStore.ListInterfacesForAsset(moduleID)
 		if err2 != nil {
 			return nil, err // retourner l'erreur blockchain originale
-		}
-		if len(ifaces) == 0 {
-			s.ensureVirtualSlot(moduleID)
-			ifaces, _ = s.ifaceStore.ListInterfacesForAsset(moduleID)
 		}
 		cache[moduleID] = ifaces
 		return ifaces, nil
 	}
 	// Composant simple : retourner ses interfaces directes.
-	// Un slot virtuel est créé uniquement si l'asset n'a encore aucune interface
-	// (permet de commencer à créer des liaisons).
 	if !mod.IsModule() {
 		ifaces, err := s.ifaceStore.ListInterfacesForAsset(moduleID)
 		if err != nil {
 			return nil, err
 		}
-		if len(ifaces) == 0 {
-			s.ensureVirtualSlot(moduleID)
-			ifaces, _ = s.ifaceStore.ListInterfacesForAsset(moduleID)
-		}
 		cache[moduleID] = ifaces
 		return ifaces, err
-	}
-	// Module : garantir un slot virtuel propre au module (pour les connexions externes)
-	// uniquement si le module lui-même n'a pas encore d'interfaces directes.
-	ownIfacesCheck, _ := s.ifaceStore.ListInterfacesForAsset(moduleID)
-	if len(ownIfacesCheck) == 0 {
-		s.ensureVirtualSlot(moduleID)
 	}
 	cache[moduleID] = nil // en cours de calcul
 	// Calculer les interfaces exposées (non connectées en interne).
@@ -1444,7 +1397,7 @@ func (s *Service) getModuleInterfacesInto(moduleID string, cache map[string][]*A
 			}
 		}
 	}
-	// Inclure les interfaces directes du module lui-même (son slot virtuel propre)
+	// Inclure les interfaces directes du module lui-même
 	ownIfaces, _ := s.ifaceStore.ListInterfacesForAsset(moduleID)
 	for _, iface := range ownIfaces {
 		if !isInternal(iface.ID, "") {
@@ -1490,100 +1443,6 @@ func (s *Service) CheckModuleLicenseCompatibility(componentLicenseIDs []string, 
 	return CheckModuleLicenseCompatibility(componentLicenseIDs, proposedProductLicenseID)
 }
 
-// ── Liaison interface virtuelle → interface physique ─────────────────────────
-
-// ConnectVirtualToPhysical matérialise une interface virtuelle en lui appliquant
-// la catégorie, le type et la direction opposée de l'interface physique cible,
-// puis crée la liaison d'assemblage correspondante.
-// popupValues porte les champs saisis par le client (CLI/API)
-// (Name, ValueMin, ValueMax, IsRange, Unit) ; les champs à zéro héritent des valeurs physiques.
-func (s *Service) ConnectVirtualToPhysical(
-	virtualIfaceID, physicalIfaceID string,
-	popupValues AssetInterface,
-	fromInstanceID, toInstanceID string,
-) (*Connection, error) {
-	if s.ifaceStore == nil {
-		return nil, fmt.Errorf("interface store non configuré")
-	}
-	if s.connStore == nil {
-		return nil, fmt.Errorf("connection store non configuré")
-	}
-
-	physical, err := s.ifaceStore.GetInterface(physicalIfaceID)
-	if err != nil {
-		return nil, fmt.Errorf("interface physique introuvable : %w", err)
-	}
-	stored, err := s.ifaceStore.GetInterface(virtualIfaceID)
-	if err != nil {
-		return nil, fmt.Errorf("interface virtuelle introuvable : %w", err)
-	}
-	virtual := *stored // matérialisé sur une copie : rien ne change si la liaison est refusée
-	if !virtual.Virtual {
-		return nil, fmt.Errorf("l'interface %s n'est pas virtuelle", virtualIfaceID)
-	}
-	// Matérialiser le slot ajoute une interface physique à son porteur : refusé
-	// si celui-ci est soumis, comme toute mutation d'interface (règle 27, RM19).
-	if err := s.requireDraftCarrier(virtual.AssetID); err != nil {
-		return nil, err
-	}
-
-	oppositeDir := func(d IfaceDirection) IfaceDirection {
-		switch d {
-		case IfaceOut:
-			return IfaceIn
-		case IfaceIn:
-			return IfaceOut
-		default:
-			return IfaceBidi
-		}
-	}
-
-	// Matérialisation : la virtuelle adopte catégorie+type du physique, direction opposée
-	virtual.Virtual = false
-	virtual.Category = physical.Category
-	virtual.Type = physical.Type
-	virtual.Direction = oppositeDir(physical.Direction)
-
-	// Valeurs issues de la popup, avec fallback sur les valeurs du physique
-	if popupValues.Name != "" {
-		virtual.Name = popupValues.Name
-	} else {
-		virtual.Name = physical.Name
-	}
-	if popupValues.ValueMin != 0 || popupValues.ValueMax != 0 {
-		virtual.ValueMin = popupValues.ValueMin
-		virtual.ValueMax = popupValues.ValueMax
-		virtual.IsRange = popupValues.IsRange
-	} else {
-		virtual.ValueMin = physical.ValueMin
-		virtual.ValueMax = physical.ValueMax
-		virtual.IsRange = physical.IsRange
-	}
-	if popupValues.Unit != "" {
-		virtual.Unit = popupValues.Unit
-	} else {
-		virtual.Unit = physical.Unit
-	}
-
-	// La liaison doit être permise avant de matérialiser le slot (RM09, RM10) :
-	// un refus ne doit pas laisser une interface matérialisée sans liaison.
-	if err := s.checkLinkable(physical, &virtual, toInstanceID, fromInstanceID, false); err != nil {
-		return nil, err
-	}
-	if err := s.ifaceStore.SaveInterface(&virtual); err != nil {
-		return nil, fmt.Errorf("sauvegarde interface matérialisée : %w", err)
-	}
-
-	// fromInstanceID porte l'instance du VIRTUEL, toInstanceID celle du PHYSIQUE.
-	// AddAssemblyLink attend (from=physique, to=virtuel) → on inverse les instance IDs.
-	conn, err := s.AddAssemblyLink(physicalIfaceID, virtualIfaceID, virtual.Name, toInstanceID, fromInstanceID, "")
-	if err != nil {
-		return nil, fmt.Errorf("création liaison : %w", err)
-	}
-	// Maintenir l'invariant : recréer un slot virtuel pour que l'asset reste connectable
-	s.ensureVirtualSlot(virtual.AssetID)
-	return conn, nil
-}
 
 // ── interne ──────────────────────────────────────────────────────────────────
 
