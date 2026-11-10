@@ -15,7 +15,7 @@ import (
 )
 
 type Service struct {
-	blockchain     BlockchainPort // nullable — nil si Fabric indisponible (voir ErrBlockchainUnavailable)
+	blockchain     BlockchainPort    // nullable — nil si Fabric indisponible (voir ErrBlockchainUnavailable)
 	connStore      ConnectionStore   // optionnel — nil hors mode GUI
 	thumbStore     ThumbnailStore    // optionnel — nil hors mode GUI
 	ifaceStore     InterfaceStore    // optionnel — nil hors mode GUI
