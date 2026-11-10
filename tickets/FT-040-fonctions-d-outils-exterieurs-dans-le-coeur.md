@@ -2,7 +2,7 @@
 id: FT-040
 titre: "Fonctions propres aux outils extérieurs implémentées dans myr-core"
 type: dette
-statut: a-trancher
+statut: en-cours
 severite: majeure
 detecte: 2026-11-08
 maj: 2026-11-10
@@ -13,7 +13,7 @@ enf: []
 tags:
   - ticket
   - ticket/dette
-  - statut/a-trancher
+  - statut/en-cours
   - severite/majeure
   - domaine/model
   - uc/UCAM01
@@ -30,7 +30,7 @@ tags:
 ---
 # FT-040 — Fonctions propres aux outils extérieurs implémentées dans myr-core
 
-> **Dette technique** · sévérité **majeure** · statut **À trancher (PO)** · détecté le 2026-11-08
+> **Dette technique** · sévérité **majeure** · statut **En cours** · détecté le 2026-11-08
 > Source : décision du PO pendant R-03 étape 3 (immuabilité d'un asset soumis)
 
 ## Constat
@@ -127,3 +127,4 @@ B et C aggravent FT-001 (propriété non contrôlée côté serveur).
 - 2026-11-09 — Point 12 fait (commit `89fa3ca`) : `POST /api/identity/guest` retiré, sur décision du PO, sans attendre myr-web. `FileStoragePort` retiré (commit `e5e6b10`)
 - 2026-11-09 — Déployé en production : API et CLI `5503f80` (points 4, 5, 6, 7, 11 et 12, retrait de `FileStoragePort`), sur décision du PO sans attendre l'adaptation de myr-web ; répétition sur myr-test 48 OK, 0 NOK, 19 tests d'intégration Fabric OK ; sauvegarde `~/.Myr/server-data.bak-20261109-204305`, binaires `b5ed57f` conservés en `.prev`
 - 2026-11-09 — Décisions du PO : les brouillons **restent dans le cœur** (parité CLI/REST, assemblage pas à pas ; pas de R-20 ni de format d'asset complet à ce stade) ; les slots virtuels, les positions x/y et les miniatures sont **retirés maintenant**, déploiement sur accord du PO
+- 2026-11-10 — Slots virtuels (commit `6654361`), positions x/y (`3a5b08e`) et miniatures (`f4593dd`) retirés sur `feature/ledger-invariants`, avec RM13 et l'adapter `webimage` ; les slots et miniatures déjà enregistrés localement disparaissent à l'écriture suivante, ceux du ledger restent inertes. Les brouillons restent dans le cœur (décision du PO). Non déployé
